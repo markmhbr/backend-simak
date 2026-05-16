@@ -1,6 +1,6 @@
 1. Jalankan PostgreSQL dan Redis
 
-docker-compose up -d
+sudo docker-compose up -d
 
 2. Jalankan Aplikasi Anda
 
