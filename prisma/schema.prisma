@@ -4,4 +4,152 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  schemas  = ["dapodik", "simak"]
+}
+
+model Tanah {
+  id_tanah               String    @id @default(uuid()) @db.Uuid
+  jenis_prasarana_id     Int
+  sekolah_id             String    @db.Uuid
+  id_hapus_buku          String?
+  kepemilikan_sarpras_id String?
+  kd_kl                  String?
+  kd_satker              String?
+  kd_brg                 String?
+  nup                    String?
+  kode_eselon1           String?
+  nama_eselon1           String?
+  kode_sub_satker        String?
+  nama_sub_satker        String?
+  nama                   String
+  panjang                Float?
+  lebar                  Float?
+  nilai_perolehan_aset   Decimal?
+  kode_wilayah           String
+  alamat_jalan           String
+  rt                     String?
+  rw                     String?
+  nama_dusun             String?
+  desa_kelurahan         String?
+  kode_pos               String?
+  lintang                Decimal?
+  bujur                  Decimal?
+  tgl_mutasi_keluar      DateTime?
+  batas                  String?
+  ket_tanah              String?
+  luas                   Decimal?
+  luas_lahan_tersedia    Decimal?
+  no_sertifikat_tanah    String?
+  asal_data              String?
+  create_date            DateTime  @default(now())
+  last_update            DateTime  @updatedAt
+  soft_delete            String?
+  last_sync              DateTime?
+  updater_id             String?   @db.Uuid
+  jenis_prasarana_id_str String?
+  kode_wilayah_str       String?
+  sekolah_id_str         String?
+  vld_count              Int       @default(0)
+
+  @@map("tanah")
+  @@schema("dapodik")
+}
+
+model Bangunan {
+  id_bangunan              String    @id @default(uuid()) @db.Uuid
+  jenis_prasarana_id       Int
+  sekolah_id               String    @db.Uuid
+  id_tanah                 String    @db.Uuid
+  ptk_id                   String?   @db.Uuid
+  id_hapus_buku            String?
+  kepemilikan_sarpras_id   String?
+  kd_kl                    String?
+  kd_satker                String?
+  kd_brg                   String?
+  nup                      Int?
+  kode_eselon1             String?
+  nama_eselon1             String?
+  kode_sub_satker          String?
+  nama_sub_satker          String?
+  nama                     String
+  panjang                  Float?
+  lebar                    Float?
+  nilai_perolehan_aset     Decimal?
+  jml_lantai               String?
+  thn_dibangun             String?
+  luas_tapak_bangunan      Decimal?
+  vol_pondasi_m3           Decimal?
+  vol_sloop_kolom_balok_m3 Decimal?
+  panj_kudakuda_m          Decimal?
+  vol_kudakuda_m3          Decimal?
+  panj_kaso_m              Decimal?
+  panj_reng_m              Decimal?
+  luas_tutup_atap_m2       Decimal?
+  kd_satker_tanah          String?
+  nm_satker_tanah          String?
+  kd_brg_tanah             String?
+  nm_brg_tanah             String?
+  nup_brg_tanah            String?
+  tgl_sk_pemakai           DateTime? @db.Date
+  tgl_hapus_buku           DateTime? @db.Date
+  ket_bangunan             String?
+  asal_data                String?
+  create_date              DateTime  @default(now())
+  last_update              DateTime  @updatedAt
+  soft_delete              String?
+  last_sync                DateTime?
+  updater_id               String?   @db.Uuid
+  jenis_prasarana_id_str   String?
+  id_tanah_str             String?
+  sekolah_id_str           String?
+  vld_count                Int       @default(0)
+  nilai_kerusakan          Decimal?
+  kriteria_kerusakan       String?
+
+  @@map("bangunan")
+  @@schema("dapodik")
+}
+
+model Ruang {
+  id_ruang                String    @id @default(uuid()) @db.Uuid
+  jenis_prasarana_id      Int
+  sekolah_id              String    @db.Uuid
+  parent_id_ruang         String?   @db.Uuid
+  id_bangunan             String    @db.Uuid
+  asal_data               String?
+  kd_ruang                String?
+  nm_ruang                String
+  lantai                  String?
+  panjang                 Float?
+  lebar                   Float?
+  reg_pras                String?
+  kapasitas               String?
+  luas_ruang              Float?
+  luas_plester_m2         Decimal?
+  luas_plafon_m2          Decimal?
+  luas_dinding_m2         Decimal?
+  luas_daun_jendela_m2    Decimal?
+  luas_daun_pintu_m2      Decimal?
+  panj_kusen_m            Decimal?
+  luas_tutup_lantai_m2    Decimal?
+  panj_inst_listrik_m     Decimal?
+  jml_inst_listrik        String?
+  panj_inst_air_m         Decimal?
+  jml_inst_air            String?
+  panj_drainase_m         Decimal?
+  luas_finish_struktur_m2 Decimal?
+  luas_finish_plafon_m2   Decimal?
+  luas_finish_dinding_m2  Decimal?
+  luas_finish_kpj_m2      Decimal?
+  create_date             DateTime  @default(now())
+  last_update             DateTime  @updatedAt
+  soft_delete             String?
+  last_sync               DateTime?
+  updater_id              String?   @db.Uuid
+  jenis_prasarana_id_str  String?
+  id_bangunan_str         String?
+  sekolah_id_str          String?
+
+  @@map("ruang")
+  @@schema("dapodik")
 }

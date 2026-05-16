@@ -1,7 +1,76 @@
-1. Jalankan PostgreSQL dan Redis
+# PANDUAN DAN LANGKAH-LANGKAH SETUP BACKEND SIMAK
 
+---
+
+## A. Penjelasan Kasus: Menghapus Folder Migrasi Lama & Membuat Migrasi Baru
+
+Ketika Anda menghapus folder `prisma/migrations/` yang lama, database PostgreSQL di dalam Docker masih menyimpan riwayat migrasi tersebut di tabel internal `_prisma_migrations`.
+Akibatnya, ketika Anda menjalankan `npx prisma migrate dev`, Prisma mendeteksi ketidakcocokan (riwayat di database ada, tetapi file lokal hilang) dan meminta reset database.
+
+**Solusi yang telah dilakukan untuk membuat migrasi baru:**
+1. Me-reset/membersihkan seluruh skema database (`public`, `dapodik`, `simak`).
+2. Menjalankan perintah migrasi awal dari nol: `npx prisma migrate dev --name init_dapodik`.
+3. Prisma berhasil membuat ulang folder baru `prisma/migrations/<timestamp>_init_dapodik`.
+
+Mulai sekarang, **jangan hapus folder `prisma/migrations`** secara manual. Jika ada perubahan skema di `schema.prisma`, cukup jalankan kembali perintah `npx prisma migrate dev --name nama_perubahan` dan Prisma akan otomatis membuat file migrasi baru tanpa merusak migrasi sebelumnya.
+
+---
+
+## B. Langkah-Langkah Lengkap Setelah `git clone` (Setup Awal Project)
+
+Jika Anda atau tim baru saja melakukan `git clone` project ini di komputer baru, ikuti urutan langkah berikut:
+
+### 1. Konfigurasi File Environment
+Pastikan file `.env` sudah ada dan terisi dengan benar (sesuai port dan kredensial database).
+```bash
+# Contoh isi .env untuk koneksi Prisma:
+DATABASE_URL="postgresql://postgres:simak@localhost:5433/simak_db?schema=public"
+```
+
+### 2. Install Dependensi Node.js
+Install seluruh paket dan pustaka yang dibutuhkan:
+```bash
+npm install
+```
+
+### 3. Nyalakan Service PostgreSQL & Redis (Docker)
+Jalankan container database dan cache di latar belakang menggunakan Docker Compose:
+```bash
 sudo docker-compose up -d
+```
+*(Pastikan port 5433 untuk Postgres dan port 6379 untuk Redis tidak bertabrakan dengan service lain).*
 
-2. Jalankan Aplikasi Anda
+### 4. Sinkronisasi Database (Prisma Migration & Client)
+Karena file migrasi di dalam `prisma/migrations/` sudah tersimpan di repository git, jalankan perintah berikut untuk menerapkan struktur tabel ke database dan men-generate Prisma Client:
+```bash
+# Terapkan migrasi ke database dev
+npx prisma migrate dev
 
+# Generate ulang Prisma Client (TypeScript)
+npx prisma generate
+```
+
+> **Tips Reset Database (Hanya untuk Development):**
+> Jika struktur database dev berantakan atau Anda ingin mengulang dari awal (data akan hilang), jalankan perintah reset:
+> ```bash
+> npx prisma migrate reset --force
+> ```
+
+### 5. Kompilasi & Build Project (Verifikasi)
+Pastikan kode TypeScript dapat di-build dengan lancar tanpa error:
+```bash
+npm run build
+```
+
+### 6. Jalankan Server Aplikasi NestJS
+Untuk menjalankan server dalam mode pengembangan dengan fitur auto-reload ketika ada perubahan file:
+```bash
 npm run start:dev
+```
+Server NestJS akan berjalan (secara default di `http://localhost:3000`).
+
+### 7. Membuka GUI Database Visual (Opsional)
+Untuk melihat, mengedit, atau menginspeksi tabel database secara langsung melalui web browser:
+```bash
+npx prisma studio
+```
