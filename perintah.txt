@@ -36,7 +36,7 @@ npm install
 ### 3. Nyalakan Service PostgreSQL & Redis (Docker)
 Jalankan container database dan cache di latar belakang menggunakan Docker Compose:
 ```bash
-sudo docker-compose up -d
+sudo docker compose up -d
 ```
 *(Pastikan port 5433 untuk Postgres dan port 6379 untuk Redis tidak bertabrakan dengan service lain).*
 

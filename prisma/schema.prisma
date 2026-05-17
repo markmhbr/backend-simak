@@ -7,6 +7,407 @@ datasource db {
   schemas  = ["dapodik", "simak"]
 }
 
+// 1. Sekolah
+model Sekolah {
+  sekolah_id               String   @id @default(uuid()) @db.Uuid
+  nama                     String
+  nss                      String?
+  npsn                     String?  @unique
+  bentuk_pendidikan_id     Int?
+  bentuk_pendidikan_id_str String?
+  status_sekolah           String?
+  status_sekolah_str       String?
+  alamat_jalan             String?
+  rt                       String?
+  rw                       String?
+  kode_wilayah             String?
+  kode_pos                 String?
+  nomor_telepon            String?
+  nomor_fax                String?
+  email                    String?
+  website                  String?
+  is_sks                   Boolean? @default(false)
+  lintang                  Decimal?
+  bujur                    Decimal?
+  dusun                    String?
+  desa_kelurahan           String?
+  kecamatan                String?
+  kabupaten_kota           String?
+  provinsi                 String?
+
+  cadisdik_id                   String? @db.Uuid
+  cadisdik_edit_count           Int     @default(0)
+  spmb                          String?
+  logo                          String?
+  background_kartu_gtk          String?
+  background_kartu_pesertadidik String?
+  peta                          String?
+  social_media                  Json?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("sekolah")
+  @@schema("dapodik")
+}
+
+// 2. RombonganBelajar & Anak (AnggotaRombel, Pembelajaran)
+model RombonganBelajar {
+  rombongan_belajar_id      String  @id @default(uuid()) @db.Uuid
+  sekolah_id                String? @db.Uuid
+  nama                      String
+  tingkat_pendidikan_id     String?
+  tingkat_pendidikan_id_str String?
+  semester_id               String?
+  jenis_rombel              String?
+  jenis_rombel_str          String?
+  kurikulum_id              Int?
+  kurikulum_id_str          String?
+  id_ruang                  String? @db.Uuid
+  id_ruang_str              String?
+  moving_class              String?
+  ptk_id                    String? @db.Uuid
+  ptk_id_str                String?
+  jurusan_id                String?
+  jurusan_id_str            String?
+
+  anggota_rombel AnggotaRombel[]
+  pembelajaran   Pembelajaran[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("rombongan_belajar")
+  @@schema("dapodik")
+}
+
+model AnggotaRombel {
+  anggota_rombel_id        String  @id @default(uuid()) @db.Uuid
+  sekolah_id               String? @db.Uuid
+  rombongan_belajar_id     String  @db.Uuid
+  peserta_didik_id         String  @db.Uuid
+  jenis_pendaftaran_id     String?
+  jenis_pendaftaran_id_str String?
+
+  rombongan_belajar RombonganBelajar @relation(fields: [rombongan_belajar_id], references: [rombongan_belajar_id], onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("anggota_rombel")
+  @@schema("dapodik")
+}
+
+model Pembelajaran {
+  pembelajaran_id         String  @id @default(uuid()) @db.Uuid
+  sekolah_id              String? @db.Uuid
+  rombongan_belajar_id    String  @db.Uuid
+  mata_pelajaran_id       String?
+  mata_pelajaran_id_str   String?
+  ptk_terdaftar_id        String? @db.Uuid
+  ptk_id                  String? @db.Uuid
+  nama_mata_pelajaran     String?
+  induk_pembelajaran_id   String? @db.Uuid
+  jam_mengajar_per_minggu String?
+  status_di_kurikulum     String?
+  status_di_kurikulum_str String?
+
+  rombongan_belajar RombonganBelajar @relation(fields: [rombongan_belajar_id], references: [rombongan_belajar_id], onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("pembelajaran")
+  @@schema("dapodik")
+}
+
+// 3. PesertaDidik
+model PesertaDidik {
+  peserta_didik_id     String  @id @default(uuid()) @db.Uuid
+  sekolah_id           String? @db.Uuid
+  registrasi_id        String? @db.Uuid
+  anggota_rombel_id    String? @db.Uuid
+  rombongan_belajar_id String? @db.Uuid
+
+  qr_token         String?
+  status           String  @default("Aktif")
+  foto             String?
+  telegram_chat_id String?
+  telegram_token   String?
+
+  nama                String
+  jenis_kelamin       String?
+  nisn                String?
+  nik                 String?
+  no_kk               String?
+  tempat_lahir        String?
+  tanggal_lahir       DateTime? @db.Date
+  agama_id            String?
+  agama_id_str        String?
+  kewarganegaraan     String?   @default("Indonesia")
+  kebutuhan_khusus_id Int?
+  kebutuhan_khusus    String?
+
+  alamat_jalan              String?
+  rt                        String?
+  rw                        String?
+  dusun                     String?
+  nama_dusun                String?
+  desa_kelurahan            String?
+  kecamatan                 String?
+  kabupaten_kota            String?
+  provinsi                  String?
+  kode_wilayah              String?
+  kode_pos                  String?
+  lintang                   Decimal?
+  bujur                     Decimal?
+  jenis_tinggal_id          String?
+  jenis_tinggal_id_str      String?
+  alat_transportasi_id      String?
+  alat_transportasi_id_str  String?
+  jarak_rumah_ke_sekolah_km String?
+  waktu_tempuh_menit        String?
+
+  nomor_telepon_rumah   String?
+  nomor_telepon_seluler String?
+  no_wa                 String?
+  email                 String?
+
+  tinggi_badan           String?
+  berat_badan            String?
+  lingkar_kepala         Int?
+  anak_keberapa          String?
+  jumlah_saudara_kandung Int?
+  yatim_piatu            Int?
+
+  paud_formal     String?
+  paud_non_formal String?
+  hobi            String?
+  cita_cita       String?
+
+  // Ayah
+  nik_ayah                 String?
+  nama_ayah                String?
+  tahun_lahir_ayah         String?
+  jenjang_pendidikan_ayah  String?
+  pendidikan_ayah_id_str   String?
+  pekerjaan_id_ayah        Int?
+  pekerjaan_ayah_id        String?
+  pekerjaan_ayah_id_str    String?
+  penghasilan_id_ayah      String?
+  penghasilan_ayah_id_str  String?
+  kebutuhan_khusus_id_ayah Int?
+  kebutuhan_khusus_ayah    String?
+  no_wa_ayah               String?
+
+  // Ibu
+  nik_ibu                 String?
+  nama_ibu_kandung        String?
+  nama_ibu                String?
+  tahun_lahir_ibu         String?
+  jenjang_pendidikan_ibu  String?
+  pendidikan_ibu_id_str   String?
+  pekerjaan_id_ibu        Int?
+  pekerjaan_ibu_id        String?
+  pekerjaan_ibu_id_str    String?
+  penghasilan_id_ibu      String?
+  penghasilan_ibu_id_str  String?
+  kebutuhan_khusus_id_ibu Int?
+  kebutuhan_khusus_ibu    String?
+  no_wa_ibu               String?
+
+  // Wali
+  nik_wali                String?
+  nama_wali               String?
+  status_wali             String  @default("Tidak")
+  tahun_lahir_wali        String?
+  jenjang_pendidikan_wali String?
+  pendidikan_wali_id_str  String?
+  pekerjaan_id_wali       Int?
+  pekerjaan_wali_id       String?
+  pekerjaan_wali_id_str   String?
+  penghasilan_id_wali     String?
+  penghasilan_wali_id_str String?
+  no_wa_wali              String?
+
+  // Kesejahteraan / PIP / KPS / Bank
+  penerima_kps             String?
+  no_kps                   String?
+  layak_pip                String?
+  id_layak_pip             String?
+  alasan_layak_pip         String?
+  penerima_kip             String?
+  no_kip                   String?
+  nm_kip                   String?
+  nama_di_kip              String?
+  alasan_menolak_kip       String?
+  no_kks                   String?
+  reg_akta_lahir           String?
+  no_registrasi_akta_lahir String?
+  id_bank                  String?
+  rekening_bank            String?
+  nama_kcp                 String?
+  rekening_atas_nama       String?
+
+  // Registrasi & Sekolah
+  nipd                     String?
+  nomor_induk_pd           String?
+  jenis_pendaftaran_id     String?
+  jenis_pendaftaran_id_str String?
+  tanggal_masuk_sekolah    DateTime? @db.Date
+  sekolah_asal             String?
+  npsn_sekolah_asal        String?
+  jurusan_sp_id            String?
+  semester_id              String?
+  tingkat_pendidikan_id    String?
+  nama_rombel              String?
+  kurikulum_id             String?
+  kurikulum_id_str         String?
+
+  jenis_keluar_id   String?
+  ket_keluar        String?
+  tanggal_keluar    DateTime? @db.Date
+  keterangan        String?
+  no_skhun          String?
+  no_seri_skhun     String?
+  no_peserta_ujian  String?
+  no_ujian_nasional String?
+  no_seri_ijazah    String?
+  a_pernah_paud     String?
+  a_pernah_tk       String?
+  id_hobby          String?
+  id_cita           String?
+
+  // System Metadata
+  pekerjaan_id      Int?
+  status_data       Int?
+  konfirmasi_mutasi Int?
+  vld_count         Int       @default(0)
+  asal_data         String?
+  create_date       DateTime  @default(now())
+  last_update       DateTime  @updatedAt
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+  soft_delete       String?
+  last_sync         DateTime?
+  updater_id        String?   @db.Uuid
+
+  @@map("peserta_didik")
+  @@schema("dapodik")
+}
+
+// 4. Gtk
+model Gtk {
+  ptk_id           String  @id @default(uuid()) @db.Uuid
+  ptk_terdaftar_id String? @db.Uuid
+  tahun_ajaran_id  String?
+  sekolah_id       String? @db.Uuid
+  ptk_induk        String?
+  kode             String?
+  status           String  @default("Aktif")
+  sk_mengajar      String?
+  qr_token         String?
+
+  nama                  String
+  jenis_kelamin         String?
+  tempat_lahir          String?
+  tanggal_lahir         DateTime? @db.Date
+  nama_ibu_kandung      String?
+  agama_id              String?
+  agama_id_str          String?
+  nuptk                 String?
+  nik                   String?
+  no_kk                 String?
+  npwp                  String?
+  nama_wajib_pajak      String?
+  kewarganegaraan       String?   @default("ID")
+  status_perkawinan     String?
+  nama_suami_istri      String?
+  pekerjaan_suami_istri String?
+
+  jenis_ptk_id              String?
+  jenis_ptk_id_str          String?
+  jabatan_ptk_id            String?
+  jabatan_ptk_id_str        String?
+  status_kepegawaian_id     String?
+  status_kepegawaian_id_str String?
+  nip                       String?
+  niy_nigk                  String?
+  nrg                       String?
+  sk_pengangkatan           String?
+  tanggal_surat_tugas       DateTime? @db.Date
+  tmt_pengangkatan          DateTime? @db.Date
+  lembaga_pengangkat        String?
+  sk_cpns                   String?
+  tmt_cpns                  DateTime? @db.Date
+  tmt_pns                   DateTime? @db.Date
+  sumber_gaji               String?
+  lisensi_kepsek            Boolean   @default(false)
+  nuks                      String?
+
+  keahlian_laboratorium            String?
+  mampu_menangani_kebutuhan_khusus String?
+  keahlian_braille                 Boolean @default(false)
+  keahlian_bahasa_isyarat          Boolean @default(false)
+
+  pendidikan_terakhir       String?
+  bidang_studi_terakhir     String?
+  pangkat_golongan_terakhir String?
+  rwy_pend_formal           Json?
+  rwy_kepangkatan           Json?
+
+  alamat_jalan     String?
+  rt               String?
+  rw               String?
+  dusun            String?
+  desa_kelurahan   String?
+  kecamatan        String?
+  kode_pos         String?
+  lintang          Decimal?
+  bujur            Decimal?
+  no_telepon_rumah String?
+  no_hp            String?
+  no_wa            String?
+  email            String?
+
+  foto        String?
+  tandatangan String?
+
+  rwy_sertifikasi RwySertifikasi[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("gtks")
+  @@schema("dapodik")
+}
+
+// 5. Pengguna
+model Pengguna {
+  pengguna_id      String  @id @default(uuid()) @db.Uuid
+  sekolah_id       String? @db.Uuid
+  username         String  @unique
+  password         String
+  nama             String
+  email            String? @unique
+  peran_id_str     String?
+  alamat           String?
+  no_telepon       String?
+  no_hp            String?
+  ptk_id           String? @db.Uuid
+  peserta_didik_id String? @db.Uuid
+
+  google2fa_secret String?
+  remember_token   String?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("pengguna")
+  @@schema("dapodik")
+}
+
+// 6. Tanah
 model Tanah {
   id_tanah               String    @id @default(uuid()) @db.Uuid
   jenis_prasarana_id     Int
@@ -55,6 +456,7 @@ model Tanah {
   @@schema("dapodik")
 }
 
+// 7. Bangunan
 model Bangunan {
   id_bangunan              String    @id @default(uuid()) @db.Uuid
   jenis_prasarana_id       Int
@@ -110,6 +512,7 @@ model Bangunan {
   @@schema("dapodik")
 }
 
+// 8. Ruang
 model Ruang {
   id_ruang                String    @id @default(uuid()) @db.Uuid
   jenis_prasarana_id      Int
@@ -154,6 +557,7 @@ model Ruang {
   @@schema("dapodik")
 }
 
+// 9. AppKey
 model AppKey {
   id             String   @id @default(uuid()) @db.Uuid
   sekolah_id     String   @unique @db.Uuid
@@ -169,3 +573,102 @@ model AppKey {
   @@schema("simak")
 }
 
+// 10. BidangStudi
+model BidangStudi {
+  bidang_studi_id          Int       @id
+  sekolah_id               String?   @db.Uuid
+  kelompok_bidang_studi_id Int?
+  kode                     String?
+  bidang_studi             String
+  kelompok                 String?
+  jenjang_paud             String?
+  jenjang_tk               String?
+  jenjang_sd               String?
+  jenjang_smp              String?
+  jenjang_sma              String?
+  jenjang_tinggi           String?
+  a_sert_komp              String?
+  a_sert_profesi           String?
+  create_date              DateTime?
+  last_update              DateTime?
+  expired_date             DateTime?
+  last_sync                DateTime?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  rwy_sertifikasi RwySertifikasi[]
+
+  @@map("bidang_studi")
+  @@schema("dapodik")
+}
+
+// 11. LembSertifikasi
+model LembSertifikasi {
+  kode_lemb_sert String    @id
+  sekolah_id     String?   @db.Uuid
+  nm_lemb_sert   String
+  tmt_lemb_sert  DateTime? @db.Date
+  ket_lemb_sert  String?
+  alamat_jalan   String?
+  rt             String?
+  rw             String?
+  nama_dusun     String?
+  desa_kelurahan String?
+  kode_wilayah   String?
+  kode_pos       String?
+  lintang        Decimal?
+  bujur          Decimal?
+  nama           String?
+  nomor_telepon  String?
+  nomor_fax      String?
+  email          String?
+  website        String?
+  create_date    DateTime?
+  last_update    DateTime?
+  expired_date   DateTime?
+  last_sync      DateTime?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  rwy_sertifikasi RwySertifikasi[]
+
+  @@map("lemb_sertifikasi")
+  @@schema("dapodik")
+}
+
+// 12. RwySertifikasi
+model RwySertifikasi {
+  riwayat_sertifikasi_id String    @id @default(uuid()) @db.Uuid
+  sekolah_id             String?   @db.Uuid
+  kode_lemb_sert         String?
+  ptk_id                 String?   @db.Uuid
+  bidang_studi_id        Int?
+  id_jenis_sertifikasi   String?
+  tgl_sert               DateTime? @db.Date
+  tgl_exp_sert           DateTime? @db.Date
+  nomor_sertifikat       String?
+  nomer_registrasi       String?
+  nomor_peserta          String?
+  kualifikasi            String?
+  asal_data              String?
+  create_date            DateTime?
+  last_update            DateTime?
+  soft_delete            String?
+  last_sync              DateTime?
+  updater_id             String?   @db.Uuid
+  ptk_id_str             String?
+  bidang_studi_id_str    String?
+  vld_count              Int       @default(0)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  gtk              Gtk?             @relation(fields: [ptk_id], references: [ptk_id], onDelete: Cascade)
+  bidang_studi     BidangStudi?     @relation(fields: [bidang_studi_id], references: [bidang_studi_id], onDelete: SetNull)
+  lemb_sertifikasi LembSertifikasi? @relation(fields: [kode_lemb_sert], references: [kode_lemb_sert], onDelete: SetNull)
+
+  @@map("rwy_sertifikasi")
+  @@schema("dapodik")
+}

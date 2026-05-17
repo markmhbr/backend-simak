@@ -9,8 +9,8 @@ export class ApiKeyGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
     
-    // 1. Cek dari header 'x-api-key'
-    let apiKey = request.headers['x-api-key'] as string;
+    // 1. Cek dari header 'x-api-key' atau 'x-sync-token'
+    let apiKey = (request.headers['x-api-key'] || request.headers['x-sync-token']) as string;
 
     // 2. Jika tidak ada di header, cek dari query parameter '?key_api=...'
     if (!apiKey && request.query.key_api) {
