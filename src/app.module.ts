@@ -8,6 +8,7 @@ import { validate } from './config/env.validation';
 import { PrismaModule } from './core/prisma/prisma.module';
 import { AppKeyModule } from './core/app-key/app-key.module';
 import { DapodikModule } from './modules/dapodik/dapodik.module';
+import { SyncModule } from './modules/sync/sync.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { DapodikModule } from './modules/dapodik/dapodik.module';
     PrismaModule,
     AppKeyModule,
     DapodikModule,
+    SyncModule,
   ],
 
 

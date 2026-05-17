@@ -20,8 +20,13 @@ export class AppKeyService {
    */
   async validateApiKey(keyApi: string) {
     if (!keyApi) return null;
-    const appKey = await this.prisma.appKey.findUnique({
-      where: { key_api: keyApi },
+    const appKey = await this.prisma.appKey.findFirst({
+      where: {
+        OR: [
+          { key_api: keyApi },
+          { key_webService: keyApi },
+        ],
+      },
     });
     if (appKey && appKey.is_active) {
       return appKey;
