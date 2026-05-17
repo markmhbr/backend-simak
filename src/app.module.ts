@@ -6,6 +6,8 @@ import { AppService } from './app.service';
 import { PrismaClientExceptionFilter } from './common/filters/prisma-client-exception.filter';
 import { validate } from './config/env.validation';
 import { PrismaModule } from './core/prisma/prisma.module';
+import { AppKeyModule } from './core/app-key/app-key.module';
+import { DapodikModule } from './modules/dapodik/dapodik.module';
 
 @Module({
   imports: [
@@ -14,7 +16,11 @@ import { PrismaModule } from './core/prisma/prisma.module';
       validate,
     }),
     PrismaModule,
+    AppKeyModule,
+    DapodikModule,
   ],
+
+
   controllers: [AppController],
   providers: [
     AppService,

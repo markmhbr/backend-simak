@@ -153,3 +153,19 @@ model Ruang {
   @@map("ruang")
   @@schema("dapodik")
 }
+
+model AppKey {
+  id             String   @id @default(uuid()) @db.Uuid
+  sekolah_id     String   @unique @db.Uuid
+  nama_app       String
+  key_api        String   @unique
+  key_webService String?  @unique
+  key_adminPanel String?
+  is_active      Boolean  @default(true)
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  @@map("app_keys")
+  @@schema("simak")
+}
+

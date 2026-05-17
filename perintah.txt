@@ -74,3 +74,6 @@ Untuk melihat, mengedit, atau menginspeksi tabel database secara langsung melalu
 ```bash
 npx prisma studio
 ```
+
+
+npm run key:manage
