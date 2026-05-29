@@ -19,8 +19,26 @@ export class SyncService {
     return isNaN(n) ? null : n;
   }
 
-  async syncSekolah(sekolahId: string, dataRows: any[]) {
+  async syncSekolah(sekolahId: string, dataRows: any[], rawApiKey?: string) {
     let successCount = 0;
+    
+    // Auto-Register AppKey jika belum ada
+    if (sekolahId && rawApiKey) {
+      const existingKey = await this.prisma.appKey.findUnique({ where: { sekolah_id: sekolahId } });
+      if (!existingKey) {
+        this.logger.log(`Auto-registering new AppKey for Sekolah ID: ${sekolahId}`);
+        await this.prisma.appKey.create({
+          data: {
+            sekolah_id: sekolahId,
+            nama_app: 'DAPODIK_AUTO_SYNC',
+            key_api: `simak_api_${Math.random().toString(36).substring(2, 15)}`,
+            key_webService: rawApiKey,
+            is_active: true,
+          }
+        });
+      }
+    }
+
     for (const row of dataRows) {
       if (!row.sekolah_id && !row.id && !row.npsn) continue;
       const targetId = row.sekolah_id || row.id || row.npsn;
@@ -102,9 +120,10 @@ export class SyncService {
           update: { ...payload, updated_at: new Date() },
         });
 
-        // Sync nested anggota_rombel
-        if (Array.isArray(r.anggota_rombel)) {
-          for (const a of r.anggota_rombel) {
+        // Sync nested anggota_rombel (Cek berbagai variasi nama field)
+        const anggotaRows = r.anggota_rombel || r.AnggotaRombel || r.anggota_rombels || [];
+        if (Array.isArray(anggotaRows) && anggotaRows.length > 0) {
+          for (const a of anggotaRows) {
             if (!a.anggota_rombel_id) continue;
             const aPayload = {
               anggota_rombel_id: a.anggota_rombel_id,
@@ -122,9 +141,10 @@ export class SyncService {
           }
         }
 
-        // Sync nested pembelajaran
-        if (Array.isArray(r.pembelajaran)) {
-          for (const p of r.pembelajaran) {
+        // Sync nested pembelajaran (Cek berbagai variasi nama field)
+        const pembelajaranRows = r.pembelajaran || r.Pembelajaran || r.pembelajarans || [];
+        if (Array.isArray(pembelajaranRows) && pembelajaranRows.length > 0) {
+          for (const p of pembelajaranRows) {
             if (!p.pembelajaran_id) continue;
             const pPayload = {
               pembelajaran_id: p.pembelajaran_id,
@@ -263,7 +283,6 @@ export class SyncService {
         rekening_bank: p.rekening_bank || null,
         rekening_atas_nama: p.rekening_atas_nama || null,
         nipd: p.nipd || null,
-        nisn_sekolah_asal: p.nisn_sekolah_asal || p.npsn_sekolah_asal || null,
         npsn_sekolah_asal: p.npsn_sekolah_asal || null,
         sekolah_asal: p.sekolah_asal || null,
         tanggal_masuk_sekolah: this.parseDate(p.tanggal_masuk_sekolah),
@@ -276,6 +295,17 @@ export class SyncService {
       };
 
       try {
+        // Logika Prioritas: Jangan biarkan status 'Aktif' ditimpa oleh status 'Keluar/Lulus'
+        const existing = await this.prisma.pesertaDidik.findUnique({
+          where: { peserta_didik_id: p.peserta_didik_id },
+          select: { status: true }
+        });
+
+        if (existing && existing.status === 'Aktif' && payload.status !== 'Aktif') {
+          // Jika sudah Aktif, dan data baru adalah Keluar/Lulus, tetap pertahankan status Aktif
+          payload.status = 'Aktif';
+        }
+
         await this.prisma.pesertaDidik.upsert({
           where: { peserta_didik_id: p.peserta_didik_id },
           create: { ...payload, peserta_didik_id: p.peserta_didik_id },

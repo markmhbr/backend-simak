@@ -27,12 +27,19 @@ export class ApiKeyGuard implements CanActivate {
     }
 
     const validKey = await this.appKeyService.validateApiKey(apiKey);
-    if (!validKey) {
+    
+    // AUTO-REGISTRATION LOGIC:
+    // Jika key tidak ditemukan, tapi ini adalah request sinkronisasi Sekolah, 
+    // kita izinkan lewat agar bisa dibuatkan Key-nya secara otomatis di Service.
+    const isSyncSekolah = request.method === 'POST' && request.url.includes('/api/sync/sekolah');
+    
+    if (!validKey && !isSyncSekolah) {
       throw new UnauthorizedException('API Key tidak valid atau tidak aktif');
     }
 
-    // Simpan informasi key ke dalam request agar bisa digunakan di controller/service
+    // Simpan informasi key ke dalam request (bisa null jika isSyncSekolah)
     request['appKey'] = validKey;
+    request['rawApiKey'] = apiKey; // Simpan token asli untuk keperluan registrasi otomatis
 
     return true;
   }

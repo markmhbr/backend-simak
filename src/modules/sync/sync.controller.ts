@@ -10,15 +10,22 @@ export class SyncController {
 
   private getSekolahId(req: Request): string {
     const appKey = req['appKey'];
-    return appKey.sekolah_id;
+    return appKey?.sekolah_id;
   }
 
   @Post('sekolah')
   @HttpCode(HttpStatus.OK)
   async syncSekolah(@Req() req: Request, @Body() data: any[]) {
-    const sekolahId = this.getSekolahId(req);
     const rows = Array.isArray(data) ? data : [data];
-    const result = await this.syncService.syncSekolah(sekolahId, rows);
+    let sekolahId = this.getSekolahId(req);
+    const rawApiKey = req['rawApiKey'];
+
+    // Jika sekolahId kosong (belum terdaftar di AppKey), ambil dari data yang dikirim
+    if (!sekolahId && rows.length > 0) {
+      sekolahId = rows[0].sekolah_id || rows[0].id || rows[0].npsn;
+    }
+
+    const result = await this.syncService.syncSekolah(sekolahId, rows, rawApiKey);
     return { status: 'success', count: result.successCount };
   }
 
