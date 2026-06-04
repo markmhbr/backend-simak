@@ -133,10 +133,10 @@ async function regenerateKey(service: AppKeyService, question: (q: string) => Pr
 
   console.log('⏳ Sedang me-reset key...');
   const updated = await service.regenerateKeys(idInput.trim());
-  console.log('\n✅ KEY BARU BERHASIL DI-GENERATE!');
+  console.log('\n✅ KEY API BERHASIL DI-REGENERATE!');
   console.log(`Key API Baru     : ${updated.key_api}`);
-  console.log(`Key WebSvc Baru  : ${updated.key_webService}`);
-  console.log(`Key AdmPanel Baru: ${updated.key_adminPanel}`);
+  console.log(`Key WebSvc       : (Tidak Berubah)`);
+  console.log(`Key AdmPanel     : (Tidak Berubah)`);
 }
 
 async function toggleKey(service: AppKeyService, question: (q: string) => Promise<string>) {

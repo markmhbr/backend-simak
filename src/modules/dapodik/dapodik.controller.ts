@@ -1,6 +1,7 @@
-import { Controller, Get, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, UseGuards, Req, Query, Patch, Body, Post, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { DapodikService } from './dapodik.service';
 import { ApiKeyGuard } from '../../core/app-key/api-key.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
 import type { Request } from 'express';
 
 @Controller('api/dapodik')
@@ -27,6 +28,40 @@ export class DapodikController {
     };
   }
 
+  @Get('sekolah')
+  async getSekolahInfoDetail(@Req() req: Request) {
+    const { sekolahId, namaApp } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.getSekolah(sekolahId);
+    return {
+      status: 'success',
+      klien: namaApp,
+      data,
+    };
+  }
+
+  @Patch('sekolah')
+  async updateSekolahInfoDetail(@Req() req: Request, @Body() body: any) {
+    const { sekolahId, namaApp } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.updateSekolah(sekolahId, body);
+    return {
+      status: 'success',
+      klien: namaApp,
+      data,
+    };
+  }
+
+  @Post('sekolah/logo')
+  @UseInterceptors(FileInterceptor('logo'))
+  async uploadSekolahLogo(@Req() req: Request, @UploadedFile() file: Express.Multer.File) {
+    const { sekolahId, namaApp } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.uploadLogo(sekolahId, file);
+    return {
+      status: 'success',
+      klien: namaApp,
+      data,
+    };
+  }
+
   @Get('tanah')
   async getTanahList(@Req() req: Request) {
     const { sekolahId, namaApp } = this.getSekolahInfo(req);
@@ -35,6 +70,17 @@ export class DapodikController {
       status: 'success',
       klien: namaApp,
       count: data.length,
+      data,
+    };
+  }
+
+  @Get('tahun-pelajaran')
+  async getTahunPelajaranList(@Req() req: Request) {
+    const { sekolahId, namaApp } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.getTahunPelajaran(sekolahId);
+    return {
+      status: 'success',
+      klien: namaApp,
       data,
     };
   }
@@ -60,6 +106,107 @@ export class DapodikController {
       klien: namaApp,
       count: data.length,
       data,
+    };
+  }
+
+  @Get('peserta-didik')
+  async getPesertaDidikList(
+    @Req() req: Request, 
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+    @Query('page') page?: string,
+    @Query('rombelName') rombelName?: string
+  ) {
+    const { sekolahId, namaApp } = this.getSekolahInfo(req);
+    const take = limit ? parseInt(limit, 10) : 10;
+    const skipPage = page ? parseInt(page, 10) : 1;
+    
+    const { data, total } = await this.dapodikService.getPesertaDidik(sekolahId, take, search, skipPage, rombelName);
+    
+    return {
+      status: 'success',
+      klien: namaApp,
+      data,
+      meta: {
+        total,
+        page: skipPage,
+        limit: take,
+        total_pages: Math.ceil(total / take)
+      }
+    };
+  }
+
+  @Get('rombongan-belajar')
+  async getRombonganBelajarList(@Req() req: Request) {
+    const { sekolahId, namaApp } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.getRombonganBelajar(sekolahId);
+    return {
+      status: 'success',
+      klien: namaApp,
+      data,
+    };
+  }
+
+  @Get('jurusan')
+  async getJurusanList(@Req() req: Request) {
+    const { sekolahId, namaApp } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.getJurusan(sekolahId);
+    return {
+      status: 'success',
+      klien: namaApp,
+      data,
+    };
+  }
+
+  @Get('mata-pelajaran')
+  async getMataPelajaranList(
+    @Req() req: Request,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+    @Query('page') page?: string
+  ) {
+    const { sekolahId, namaApp } = this.getSekolahInfo(req);
+    const take = limit ? parseInt(limit, 10) : 10;
+    const skipPage = page ? parseInt(page, 10) : 1;
+
+    const { data, total } = await this.dapodikService.getMataPelajaran(sekolahId, take, search, skipPage);
+    return {
+      status: 'success',
+      klien: namaApp,
+      data,
+      meta: {
+        total,
+        page: skipPage,
+        limit: take,
+        total_pages: Math.ceil(total / take)
+      }
+    };
+  }
+
+  @Get('gtk')
+  async getGtkList(
+    @Req() req: Request, 
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+    @Query('page') page?: string,
+    @Query('type') type?: 'guru' | 'tendik'
+  ) {
+    const { sekolahId, namaApp } = this.getSekolahInfo(req);
+    const take = limit ? parseInt(limit, 10) : 10;
+    const skipPage = page ? parseInt(page, 10) : 1;
+    
+    const { data, total } = await this.dapodikService.getGtk(sekolahId, take, search, skipPage, type);
+    
+    return {
+      status: 'success',
+      klien: namaApp,
+      data,
+      meta: {
+        total,
+        page: skipPage,
+        limit: take,
+        total_pages: Math.ceil(total / take)
+      }
     };
   }
 }

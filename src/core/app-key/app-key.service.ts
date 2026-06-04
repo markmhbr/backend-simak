@@ -89,7 +89,7 @@ export class AppKeyService {
   }
 
   /**
-   * Mengganti/me-reset key untuk ID tertentu
+   * Mengganti/me-reset key_api untuk ID tertentu (Hanya Key API)
    */
   async regenerateKeys(id: string) {
     const existing = await this.prisma.appKey.findUnique({ where: { id } });
@@ -98,15 +98,12 @@ export class AppKeyService {
     }
 
     const keyApi = this.generateSecureToken('api');
-    const keyWs = this.generateSecureToken('ws');
-    const keyAdm = this.generateSecureToken('adm');
 
     return await this.prisma.appKey.update({
       where: { id },
       data: {
         key_api: keyApi,
-        key_webService: keyWs,
-        key_adminPanel: keyAdm,
+        // key_webService dan key_adminPanel tetap menggunakan yang lama
       },
     });
   }
