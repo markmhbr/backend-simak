@@ -19,7 +19,7 @@ export class ApiKeyGuard implements CanActivate {
 
     // 3. Jika tidak ada, cek dari route parameter ':key_api' jika ada
     if (!apiKey && request.params && request.params.key_api) {
-      apiKey = request.params.key_api;
+      apiKey = request.params.key_api as string;
     }
 
     if (!apiKey) {

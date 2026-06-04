@@ -202,25 +202,24 @@ export class DapodikService {
       orderBy: { nama: 'asc' },
     });
   }
-async getJurusan(sekolahId: string | null) {
-  const filter = this.getSekolahFilter(sekolahId);
+  async getJurusan(sekolahId: string | null) {
+    const filter = this.getSekolahFilter(sekolahId);
 
-  const rombels = await this.prisma.rombonganBelajar.findMany({
-    where: {
-      AND: [
-        { sekolah_id: filter.sekolah_id },
-        { jurusan_id_str: { not: null } },
-      ],
-    },
-    select: {
-...
+    const rombels = await this.prisma.rombonganBelajar.findMany({
+      where: {
+        AND: [
+          { sekolah_id: filter.sekolah_id },
+          { jurusan_id_str: { not: null } },
+        ],
+      },
+      select: {
         nama: true,
         jurusan_id_str: true,
       },
     });
 
     const jurusanMap = new Map();
-    rombels.forEach(r => {
+    rombels.forEach((r: any) => {
       const parts = r.nama.split(' ');
       let kode = parts.length > 1 ? parts[1] : parts[0];
       if (!jurusanMap.has(kode)) {
