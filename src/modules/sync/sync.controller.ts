@@ -3,7 +3,7 @@ import { SyncService } from './sync.service';
 import { ApiKeyGuard } from '../../core/app-key/api-key.guard';
 import type { Request } from 'express';
 
-@Controller('api/sync')
+@Controller('sync')
 @UseGuards(ApiKeyGuard)
 export class SyncController {
   constructor(private readonly syncService: SyncService) {}

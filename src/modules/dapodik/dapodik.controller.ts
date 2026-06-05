@@ -4,7 +4,7 @@ import { ApiKeyGuard } from '../../core/app-key/api-key.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Request } from 'express';
 
-@Controller('api/dapodik')
+@Controller('dapodik')
 @UseGuards(ApiKeyGuard)
 export class DapodikController {
   constructor(private readonly dapodikService: DapodikService) {}

@@ -1,9 +1,16 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as express from 'express';
+import { ConfigService } from '@nestjs/config';
+import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
+  const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
+  
+  // Best practice: Add API prefix
+  app.setGlobalPrefix('api');
   
   app.enableCors();
 
@@ -11,8 +18,12 @@ async function bootstrap() {
   app.use(express.json({ limit: '50mb' }));
   app.use(express.urlencoded({ limit: '50mb', extended: true }));
   
-  const port = process.env.PORT || 0;
+  const port = configService.get<number>('PORT') || 3000;
+  const appUrl = configService.get<string>('APP_URL');
+
   await app.listen(port);
-  console.log(`Application is running on: http://localhost:${port}`);
+  
+  logger.log(`Application is running on: ${appUrl}`);
+  logger.log(`API endpoints available at: ${appUrl}/api`);
 }
 bootstrap();
