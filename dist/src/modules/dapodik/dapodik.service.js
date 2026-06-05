@@ -1,0 +1,278 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DapodikService = void 0;
+const common_1 = require("@nestjs/common");
+const prisma_service_1 = require("../../core/prisma/prisma.service");
+let DapodikService = class DapodikService {
+    prisma;
+    constructor(prisma) {
+        this.prisma = prisma;
+    }
+    getSekolahFilter(sekolahId) {
+        if (!sekolahId) {
+            throw new Error('Akses ditolak: Sekolah ID tidak ditemukan dalam kredensial API.');
+        }
+        return { sekolah_id: sekolahId };
+    }
+    async getLatestSemesterId(sekolahId) {
+        const filter = this.getSekolahFilter(sekolahId);
+        const latestRombel = await this.prisma.rombonganBelajar.findFirst({
+            where: filter,
+            select: { semester_id: true },
+            orderBy: { semester_id: 'desc' },
+        });
+        return latestRombel?.semester_id || null;
+    }
+    async getSummary(sekolahId) {
+        const filter = this.getSekolahFilter(sekolahId);
+        const [totalTanah, totalBangunan, totalRuang, totalSiswa, totalGtk] = await Promise.all([
+            this.prisma.tanah.count({ where: filter }),
+            this.prisma.bangunan.count({ where: filter }),
+            this.prisma.ruang.count({ where: filter }),
+            this.prisma.pesertaDidik.count({ where: filter }),
+            this.prisma.gtk.count({ where: filter }),
+        ]);
+        return {
+            sekolah_id: sekolahId,
+            total_tanah: totalTanah,
+            total_bangunan: totalBangunan,
+            total_ruang: totalRuang,
+            total_siswa: totalSiswa,
+            total_gtk: totalGtk,
+        };
+    }
+    async getSekolah(sekolahId) {
+        const filter = this.getSekolahFilter(sekolahId);
+        return await this.prisma.sekolah.findUnique({
+            where: { sekolah_id: filter.sekolah_id },
+        });
+    }
+    async updateSekolah(sekolahId, data) {
+        return await this.prisma.sekolah.update({
+            where: { sekolah_id: sekolahId },
+            data: {
+                nama: data.nama,
+                npsn: data.npsn,
+                spmb: data.spmb,
+                peta: data.peta,
+                social_media: data.social_media,
+                cadisdik_id: data.cadisdik_id,
+            },
+        });
+    }
+    async uploadLogo(sekolahId, file) {
+        const fs = require('fs');
+        const path = require('path');
+        const frontendPublicDir = path.join(process.cwd(), '../frontend-simak/public/uploads');
+        if (!fs.existsSync(frontendPublicDir)) {
+            fs.mkdirSync(frontendPublicDir, { recursive: true });
+        }
+        const fileExt = path.extname(file.originalname);
+        const fileName = `logo_${sekolahId}${fileExt}`;
+        const filePath = path.join(frontendPublicDir, fileName);
+        fs.writeFileSync(filePath, file.buffer);
+        const relativePath = `/uploads/${fileName}`;
+        return await this.prisma.sekolah.update({
+            where: { sekolah_id: sekolahId },
+            data: { logo: relativePath },
+        });
+    }
+    async getTanah(sekolahId) {
+        const filter = this.getSekolahFilter(sekolahId);
+        return await this.prisma.tanah.findMany({
+            where: filter,
+            orderBy: { nama: 'asc' },
+        });
+    }
+    async getTahunPelajaran(sekolahId) {
+        const filter = this.getSekolahFilter(sekolahId);
+        const semesters = await this.prisma.rombonganBelajar.findMany({
+            where: filter,
+            select: { semester_id: true },
+            distinct: ['semester_id'],
+            orderBy: { semester_id: 'desc' },
+        });
+        if (semesters.length === 0)
+            return [];
+        const latestSemesterId = semesters[0].semester_id;
+        return semesters.map((s) => {
+            const sId = s.semester_id || '';
+            const yearPrefix = sId.substring(0, 4);
+            const semesterCode = sId.substring(4, 5);
+            const yearStart = parseInt(yearPrefix, 10);
+            const yearEnd = yearStart + 1;
+            return {
+                semester_id: sId,
+                tahun_pelajaran: `${yearStart}/${yearEnd}`,
+                semester: semesterCode === '1' ? 'Ganjil' : 'Genap',
+                status: sId === latestSemesterId ? 'Aktif' : 'Non-Aktif',
+            };
+        });
+    }
+    async getBangunan(sekolahId) {
+        const filter = this.getSekolahFilter(sekolahId);
+        return await this.prisma.bangunan.findMany({
+            where: filter,
+            orderBy: { nama: 'asc' },
+        });
+    }
+    async getRuang(sekolahId) {
+        const filter = this.getSekolahFilter(sekolahId);
+        return await this.prisma.ruang.findMany({
+            where: filter,
+            orderBy: { nm_ruang: 'asc' },
+        });
+    }
+    async getPesertaDidik(sekolahId, limit = 10, search, page = 1, rombelName) {
+        const filter = this.getSekolahFilter(sekolahId);
+        let whereClause = {
+            AND: [
+                { sekolah_id: filter.sekolah_id },
+            ],
+        };
+        if (rombelName) {
+            whereClause.AND.push({ nama_rombel: rombelName });
+        }
+        if (search) {
+            whereClause.AND.push({
+                OR: [
+                    { nama: { contains: search, mode: 'insensitive' } },
+                    { nisn: { contains: search, mode: 'insensitive' } },
+                ],
+            });
+        }
+        const skip = (page - 1) * limit;
+        const [total, data] = await Promise.all([
+            this.prisma.pesertaDidik.count({ where: whereClause }),
+            this.prisma.pesertaDidik.findMany({
+                where: whereClause,
+                take: limit,
+                skip: skip,
+                orderBy: { nama: 'asc' },
+            }),
+        ]);
+        return { total, data };
+    }
+    async getRombonganBelajar(sekolahId) {
+        const filter = this.getSekolahFilter(sekolahId);
+        const whereClause = {
+            AND: [
+                { sekolah_id: filter.sekolah_id },
+            ],
+        };
+        return await this.prisma.rombonganBelajar.findMany({
+            where: whereClause,
+            select: { nama: true },
+            distinct: ['nama'],
+            orderBy: { nama: 'asc' },
+        });
+    }
+    async getJurusan(sekolahId) {
+        const filter = this.getSekolahFilter(sekolahId);
+        const rombels = await this.prisma.rombonganBelajar.findMany({
+            where: {
+                AND: [
+                    { sekolah_id: filter.sekolah_id },
+                    { jurusan_id_str: { not: null } },
+                ],
+            },
+            select: {
+                nama: true,
+                jurusan_id_str: true,
+            },
+        });
+        const jurusanMap = new Map();
+        rombels.forEach((r) => {
+            const parts = r.nama.split(' ');
+            let kode = parts.length > 1 ? parts[1] : parts[0];
+            if (!jurusanMap.has(kode)) {
+                jurusanMap.set(kode, r.jurusan_id_str);
+            }
+        });
+        return Array.from(jurusanMap.entries()).map(([kode, nama]) => ({
+            kode,
+            nama_jurusan: nama,
+        }));
+    }
+    async getMataPelajaran(sekolahId, limit = 10, search, page = 1) {
+        const filter = this.getSekolahFilter(sekolahId);
+        const whereClause = {
+            AND: [
+                { sekolah_id: filter.sekolah_id },
+            ],
+        };
+        if (search) {
+            whereClause.AND.push({
+                nama_mata_pelajaran: { contains: search, mode: 'insensitive' },
+            });
+        }
+        const skip = (page - 1) * limit;
+        const [total, data] = await Promise.all([
+            this.prisma.pembelajaran.groupBy({
+                by: ['mata_pelajaran_id', 'nama_mata_pelajaran'],
+                where: whereClause,
+            }).then(res => res.length),
+            this.prisma.pembelajaran.findMany({
+                where: whereClause,
+                select: {
+                    mata_pelajaran_id: true,
+                    nama_mata_pelajaran: true,
+                },
+                distinct: ['mata_pelajaran_id', 'nama_mata_pelajaran'],
+                take: limit,
+                skip: skip,
+                orderBy: { nama_mata_pelajaran: 'asc' },
+            }),
+        ]);
+        return { total, data };
+    }
+    async getGtk(sekolahId, limit = 10, search, page = 1, type) {
+        const filter = this.getSekolahFilter(sekolahId);
+        let whereClause = {
+            AND: [{ sekolah_id: filter.sekolah_id }],
+        };
+        if (search) {
+            whereClause.AND.push({
+                OR: [
+                    { nama: { contains: search, mode: 'insensitive' } },
+                    { nuptk: { contains: search, mode: 'insensitive' } },
+                    { nip: { contains: search, mode: 'insensitive' } },
+                ],
+            });
+        }
+        if (type === 'guru') {
+            whereClause.AND.push({ jenis_ptk_id_str: { contains: 'Guru', mode: 'insensitive' } });
+        }
+        else if (type === 'tendik') {
+            whereClause.AND.push({
+                NOT: { jenis_ptk_id_str: { contains: 'Guru', mode: 'insensitive' } },
+            });
+        }
+        const skip = (page - 1) * limit;
+        const [total, data] = await Promise.all([
+            this.prisma.gtk.count({ where: whereClause }),
+            this.prisma.gtk.findMany({
+                where: whereClause,
+                take: limit,
+                skip: skip,
+                orderBy: { nama: 'asc' },
+            }),
+        ]);
+        return { total, data };
+    }
+};
+exports.DapodikService = DapodikService;
+exports.DapodikService = DapodikService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+], DapodikService);
+//# sourceMappingURL=dapodik.service.js.map
