@@ -115,13 +115,14 @@ export class DapodikController {
     @Query('limit') limit?: string,
     @Query('search') search?: string,
     @Query('page') page?: string,
-    @Query('rombelName') rombelName?: string
+    @Query('rombelName') rombelName?: string,
+    @Query('status') status?: 'aktif' | 'non-aktif'
   ) {
     const { sekolahId, namaApp } = this.getSekolahInfo(req);
     const take = limit ? parseInt(limit, 10) : 10;
     const skipPage = page ? parseInt(page, 10) : 1;
     
-    const { data, total } = await this.dapodikService.getPesertaDidik(sekolahId, take, search, skipPage, rombelName);
+    const { data, total } = await this.dapodikService.getPesertaDidik(sekolahId, take, search, skipPage, rombelName, status);
     
     return {
       status: 'success',
@@ -216,13 +217,14 @@ export class DapodikController {
     @Query('limit') limit?: string,
     @Query('search') search?: string,
     @Query('page') page?: string,
-    @Query('type') type?: 'guru' | 'tendik'
+    @Query('type') type?: 'guru' | 'tendik',
+    @Query('status') status?: 'aktif' | 'non-aktif'
   ) {
     const { sekolahId, namaApp } = this.getSekolahInfo(req);
     const take = limit ? parseInt(limit, 10) : 10;
     const skipPage = page ? parseInt(page, 10) : 1;
     
-    const { data, total } = await this.dapodikService.getGtk(sekolahId, take, search, skipPage, type);
+    const { data, total } = await this.dapodikService.getGtk(sekolahId, take, search, skipPage, type, status);
     
     return {
       status: 'success',

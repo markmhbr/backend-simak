@@ -132,7 +132,7 @@ let DapodikService = class DapodikService {
             orderBy: { nm_ruang: 'asc' },
         });
     }
-    async getPesertaDidik(sekolahId, limit = 10, search, page = 1, rombelName) {
+    async getPesertaDidik(sekolahId, limit = 10, search, page = 1, rombelName, status) {
         const filter = this.getSekolahFilter(sekolahId);
         let whereClause = {
             AND: [
@@ -142,6 +142,12 @@ let DapodikService = class DapodikService {
         };
         if (rombelName) {
             whereClause.AND[1] = { nama_rombel: rombelName };
+        }
+        if (status === 'aktif') {
+            whereClause.AND.push({ status: 'Aktif' });
+        }
+        else if (status === 'non-aktif') {
+            whereClause.AND.push({ NOT: { status: 'Aktif' } });
         }
         if (search) {
             whereClause.AND.push({
@@ -289,7 +295,7 @@ let DapodikService = class DapodikService {
         ]);
         return { total, data };
     }
-    async getGtk(sekolahId, limit = 10, search, page = 1, type) {
+    async getGtk(sekolahId, limit = 10, search, page = 1, type, status) {
         const filter = this.getSekolahFilter(sekolahId);
         let whereClause = {
             AND: [{ sekolah_id: filter.sekolah_id }],
@@ -310,6 +316,12 @@ let DapodikService = class DapodikService {
             whereClause.AND.push({
                 NOT: { jenis_ptk_id_str: { contains: 'Guru', mode: 'insensitive' } },
             });
+        }
+        if (status === 'aktif') {
+            whereClause.AND.push({ status: 'Aktif' });
+        }
+        else if (status === 'non-aktif') {
+            whereClause.AND.push({ NOT: { status: 'Aktif' } });
         }
         const skip = (page - 1) * limit;
         const [total, data] = await Promise.all([

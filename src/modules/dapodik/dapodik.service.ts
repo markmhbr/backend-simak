@@ -149,7 +149,7 @@ export class DapodikService {
     });
   }
 
-  async getPesertaDidik(sekolahId: string | null, limit: number = 10, search?: string, page: number = 1, rombelName?: string) {
+  async getPesertaDidik(sekolahId: string | null, limit: number = 10, search?: string, page: number = 1, rombelName?: string, status?: 'aktif' | 'non-aktif') {
     const filter = this.getSekolahFilter(sekolahId);
     
     let whereClause: any = {
@@ -160,9 +160,13 @@ export class DapodikService {
     };
 
     if (rombelName) {
-      // Jika rombelName spesifik diberikan (misal dari filter dropdown), 
-      // kita gunakan rombel tersebut (baik itu reguler maupun ekskul)
       whereClause.AND[1] = { nama_rombel: rombelName };
+    }
+
+    if (status === 'aktif') {
+      whereClause.AND.push({ status: 'Aktif' });
+    } else if (status === 'non-aktif') {
+      whereClause.AND.push({ NOT: { status: 'Aktif' } });
     }
 
     if (search) {
@@ -331,7 +335,7 @@ export class DapodikService {
     return { total, data };
   }
 
-  async getGtk(sekolahId: string | null, limit: number = 10, search?: string, page: number = 1, type?: 'guru' | 'tendik') {
+  async getGtk(sekolahId: string | null, limit: number = 10, search?: string, page: number = 1, type?: 'guru' | 'tendik', status?: 'aktif' | 'non-aktif') {
     const filter = this.getSekolahFilter(sekolahId);
     let whereClause: any = {
       AND: [{ sekolah_id: filter.sekolah_id }],
@@ -353,6 +357,12 @@ export class DapodikService {
       whereClause.AND.push({
         NOT: { jenis_ptk_id_str: { contains: 'Guru', mode: 'insensitive' } },
       });
+    }
+
+    if (status === 'aktif') {
+      whereClause.AND.push({ status: 'Aktif' });
+    } else if (status === 'non-aktif') {
+      whereClause.AND.push({ NOT: { status: 'Aktif' } });
     }
 
     const skip = (page - 1) * limit;
