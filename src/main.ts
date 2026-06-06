@@ -1,8 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as express from 'express';
+import cookieParser from 'cookie-parser';
 import { ConfigService } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -12,7 +13,18 @@ async function bootstrap() {
   // Best practice: Add API prefix
   app.setGlobalPrefix('api');
   
-  app.enableCors();
+  app.enableCors({
+    origin: true, // Sesuaikan dengan URL frontend di produksi
+    credentials: true, // Izinkan pengiriman cookie
+  });
+
+  app.use(cookieParser());
+
+  // Tambahkan ValidationPipe global
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
+    transform: true,
+  }));
 
   // Tambahkan limit payload agar tidak kena error 413 (Payload Too Large)
   app.use(express.json({ limit: '50mb' }));

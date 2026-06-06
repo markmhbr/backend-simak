@@ -27,6 +27,7 @@ class EnvironmentVariables {
     JWT_EXPIRATION;
     JWT_REFRESH_SECRET;
     JWT_REFRESH_EXPIRATION;
+    ENCRYPTION_KEY;
     REDIS_HOST;
     REDIS_PORT;
 }
@@ -62,6 +63,10 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], EnvironmentVariables.prototype, "JWT_REFRESH_EXPIRATION", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], EnvironmentVariables.prototype, "ENCRYPTION_KEY", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)

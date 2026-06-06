@@ -33,6 +33,9 @@ class EnvironmentVariables {
   JWT_REFRESH_EXPIRATION: string;
 
   @IsString()
+  ENCRYPTION_KEY: string;
+
+  @IsString()
   REDIS_HOST: string;
 
   @IsNumber()

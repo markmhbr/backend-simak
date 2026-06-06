@@ -121,12 +121,30 @@ let DapodikController = class DapodikController {
             }
         };
     }
-    async getRombonganBelajarList(req) {
+    async getRombonganBelajarList(req, type, limit, page) {
         const { sekolahId, namaApp } = this.getSekolahInfo(req);
-        const data = await this.dapodikService.getRombonganBelajar(sekolahId);
+        const take = limit ? parseInt(limit, 10) : 10;
+        const skipPage = page ? parseInt(page, 10) : 1;
+        const { total, data } = await this.dapodikService.getRombonganBelajar(sekolahId, type, take, skipPage);
         return {
             status: 'success',
             klien: namaApp,
+            data,
+            meta: {
+                total,
+                page: skipPage,
+                limit: take,
+                total_pages: Math.ceil(total / take)
+            }
+        };
+    }
+    async getEkstrakurikulerList(req) {
+        const { sekolahId, namaApp } = this.getSekolahInfo(req);
+        const data = await this.dapodikService.getEkstrakurikuler(sekolahId);
+        return {
+            status: 'success',
+            klien: namaApp,
+            count: data.length,
             data,
         };
     }
@@ -248,10 +266,20 @@ __decorate([
 __decorate([
     (0, common_1.Get)('rombongan-belajar'),
     __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('type')),
+    __param(2, (0, common_1.Query)('limit')),
+    __param(3, (0, common_1.Query)('page')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String, String]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "getRombonganBelajarList", null);
+__decorate([
+    (0, common_1.Get)('ekstrakurikuler'),
+    __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
-], DapodikController.prototype, "getRombonganBelajarList", null);
+], DapodikController.prototype, "getEkstrakurikulerList", null);
 __decorate([
     (0, common_1.Get)('jurusan'),
     __param(0, (0, common_1.Req)()),

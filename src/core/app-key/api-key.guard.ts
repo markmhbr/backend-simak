@@ -23,7 +23,20 @@ export class ApiKeyGuard implements CanActivate {
     }
 
     if (!apiKey) {
-      throw new UnauthorizedException('API Key tidak ditemukan dalam request (Header X-API-Key atau param key_api)');
+      // Jika tidak ada API Key di header, coba cari berdasarkan domain (Domain-Based Identification)
+      const domain = request.headers.host || request.hostname;
+      const keyByDomain = await this.appKeyService.findByDomain(domain);
+      
+      if (keyByDomain) {
+        request['appKey'] = keyByDomain;
+        return true;
+      }
+
+      // Izinkan lewat tanpa API Key HANYA untuk route login/auth (pengecekan dilakukan di service)
+      if (request.url.includes('/api/auth/')) {
+        return true;
+      }
+      throw new UnauthorizedException('Sistem belum terhubung. API Key tidak ditemukan dan domain tidak terdaftar.');
     }
 
     const validKey = await this.appKeyService.validateApiKey(apiKey);
@@ -34,6 +47,10 @@ export class ApiKeyGuard implements CanActivate {
     const isSyncSekolah = request.method === 'POST' && request.url.includes('/api/sync/sekolah');
     
     if (!validKey && !isSyncSekolah) {
+      // Jika di route auth tapi key salah, kita tetap tolak demi keamanan
+      if (request.url.includes('/api/auth/')) {
+        throw new UnauthorizedException('API Key tidak valid');
+      }
       throw new UnauthorizedException('API Key tidak valid atau tidak aktif');
     }
 

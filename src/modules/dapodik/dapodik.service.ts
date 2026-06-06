@@ -155,11 +155,14 @@ export class DapodikService {
     let whereClause: any = {
       AND: [
         { sekolah_id: filter.sekolah_id },
+        { NOT: { nama_rombel: { contains: 'Ekstrakurikuler', mode: 'insensitive' } } },
       ],
     };
 
     if (rombelName) {
-      whereClause.AND.push({ nama_rombel: rombelName });
+      // Jika rombelName spesifik diberikan (misal dari filter dropdown), 
+      // kita gunakan rombel tersebut (baik itu reguler maupun ekskul)
+      whereClause.AND[1] = { nama_rombel: rombelName };
     }
 
     if (search) {
@@ -186,22 +189,77 @@ export class DapodikService {
     return { total, data };
   }
 
-  async getRombonganBelajar(sekolahId: string | null) {
+  async getRombonganBelajar(sekolahId: string | null, type?: 'reguler' | 'pilihan', limit: number = 10, page: number = 1) {
     const filter = this.getSekolahFilter(sekolahId);
     
-    const whereClause: any = {
+    let whereClause: any = {
       AND: [
         { sekolah_id: filter.sekolah_id },
       ],
     };
 
+    if (type === 'reguler') {
+      whereClause.AND.push({ jenis_rombel_str: 'Kelas' });
+    } else if (type === 'pilihan') {
+      whereClause.AND.push({ jenis_rombel_str: 'Matapelajaran Pilihan' });
+    } else {
+      whereClause.AND.push({ jenis_rombel_str: { not: 'Ekstrakurikuler' } });
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [total, data] = await Promise.all([
+      this.prisma.rombonganBelajar.count({ where: whereClause }),
+      this.prisma.rombonganBelajar.findMany({
+        where: whereClause,
+        take: limit,
+        skip: skip,
+        select: {
+          rombongan_belajar_id: true,
+          nama: true,
+          tingkat_pendidikan_id_str: true,
+          jurusan_id_str: true,
+          kurikulum_id_str: true,
+          ptk_id_str: true,
+          id_ruang_str: true,
+          jenis_rombel_str: true,
+          _count: {
+            select: { anggota_rombel: true }
+          }
+        },
+        orderBy: { nama: 'asc' },
+      })
+    ]);
+
+    return {
+      total,
+      data: data.map(item => ({
+        ...item,
+        jumlah_siswa: item._count.anggota_rombel
+      }))
+    };
+  }
+
+  async getEkstrakurikuler(sekolahId: string | null) {
+    const filter = this.getSekolahFilter(sekolahId);
     return await this.prisma.rombonganBelajar.findMany({
-      where: whereClause,
-      select: { nama: true },
-      distinct: ['nama'],
+      where: {
+        AND: [
+          { sekolah_id: filter.sekolah_id },
+          { jenis_rombel_str: 'Ekstrakurikuler' },
+        ],
+      },
+      select: {
+        rombongan_belajar_id: true,
+        nm_ekskul: true,
+        nama: true,
+        ptk_id_str: true,
+        id_ruang_str: true,
+      },
       orderBy: { nama: 'asc' },
     });
   }
+
   async getJurusan(sekolahId: string | null) {
     const filter = this.getSekolahFilter(sekolahId);
 
@@ -210,6 +268,7 @@ export class DapodikService {
         AND: [
           { sekolah_id: filter.sekolah_id },
           { jurusan_id_str: { not: null } },
+          { jenis_rombel_str: { not: 'Ekstrakurikuler' } },
         ],
       },
       select: {

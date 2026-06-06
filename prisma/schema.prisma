@@ -71,6 +71,11 @@ model RombonganBelajar {
   jurusan_id                String?
   jurusan_id_str            String?
 
+  id_kelas_ekskul String?
+  id_ekskul       String?
+  nm_ekskul       String?
+  sk_ekskul       String?
+
   anggota_rombel AnggotaRombel[]
   pembelajaran   Pembelajaran[]
 
@@ -565,6 +570,7 @@ model AppKey {
   key_api        String   @unique
   key_webService String?  @unique
   key_adminPanel String?
+  domain         String?  // Untuk verifikasi domain instalasi
   is_active      Boolean  @default(true)
   created_at     DateTime @default(now())
   updated_at     DateTime @updatedAt

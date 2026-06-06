@@ -72,6 +72,15 @@ let AppKeyService = class AppKeyService {
         }
         return null;
     }
+    async findByDomain(domain) {
+        const appKey = await this.prisma.appKey.findFirst({
+            where: {
+                domain: domain,
+                is_active: true
+            },
+        });
+        return appKey;
+    }
     async createKey(namaApp, sekolahId) {
         const existing = await this.prisma.appKey.findUnique({
             where: { sekolah_id: sekolahId },

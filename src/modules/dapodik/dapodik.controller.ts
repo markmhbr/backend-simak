@@ -137,12 +137,39 @@ export class DapodikController {
   }
 
   @Get('rombongan-belajar')
-  async getRombonganBelajarList(@Req() req: Request) {
+  async getRombonganBelajarList(
+    @Req() req: Request, 
+    @Query('type') type?: 'reguler' | 'pilihan',
+    @Query('limit') limit?: string,
+    @Query('page') page?: string
+  ) {
     const { sekolahId, namaApp } = this.getSekolahInfo(req);
-    const data = await this.dapodikService.getRombonganBelajar(sekolahId);
+    const take = limit ? parseInt(limit, 10) : 10;
+    const skipPage = page ? parseInt(page, 10) : 1;
+
+    const { total, data } = await this.dapodikService.getRombonganBelajar(sekolahId, type, take, skipPage);
+    
     return {
       status: 'success',
       klien: namaApp,
+      data,
+      meta: {
+        total,
+        page: skipPage,
+        limit: take,
+        total_pages: Math.ceil(total / take)
+      }
+    };
+  }
+
+  @Get('ekstrakurikuler')
+  async getEkstrakurikulerList(@Req() req: Request) {
+    const { sekolahId, namaApp } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.getEkstrakurikuler(sekolahId);
+    return {
+      status: 'success',
+      klien: namaApp,
+      count: data.length,
       data,
     };
   }

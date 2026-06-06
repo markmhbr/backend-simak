@@ -12,6 +12,7 @@ declare class EnvironmentVariables {
     JWT_EXPIRATION: string;
     JWT_REFRESH_SECRET: string;
     JWT_REFRESH_EXPIRATION: string;
+    ENCRYPTION_KEY: string;
     REDIS_HOST: string;
     REDIS_PORT: number;
 }

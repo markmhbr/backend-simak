@@ -10,6 +10,19 @@ export declare class AppKeyService {
         key_api: string;
         key_webService: string | null;
         key_adminPanel: string | null;
+        domain: string | null;
+        is_active: boolean;
+        created_at: Date;
+        updated_at: Date;
+    }>;
+    findByDomain(domain: string): Promise<{
+        id: string;
+        sekolah_id: string;
+        nama_app: string;
+        key_api: string;
+        key_webService: string | null;
+        key_adminPanel: string | null;
+        domain: string | null;
         is_active: boolean;
         created_at: Date;
         updated_at: Date;
@@ -21,6 +34,7 @@ export declare class AppKeyService {
         key_api: string;
         key_webService: string | null;
         key_adminPanel: string | null;
+        domain: string | null;
         is_active: boolean;
         created_at: Date;
         updated_at: Date;
@@ -32,6 +46,7 @@ export declare class AppKeyService {
         key_api: string;
         key_webService: string | null;
         key_adminPanel: string | null;
+        domain: string | null;
         is_active: boolean;
         created_at: Date;
         updated_at: Date;
@@ -43,6 +58,7 @@ export declare class AppKeyService {
         key_api: string;
         key_webService: string | null;
         key_adminPanel: string | null;
+        domain: string | null;
         is_active: boolean;
         created_at: Date;
         updated_at: Date;
@@ -54,6 +70,7 @@ export declare class AppKeyService {
         key_api: string;
         key_webService: string | null;
         key_adminPanel: string | null;
+        domain: string | null;
         is_active: boolean;
         created_at: Date;
         updated_at: Date;
@@ -65,6 +82,7 @@ export declare class AppKeyService {
         key_api: string;
         key_webService: string | null;
         key_adminPanel: string | null;
+        domain: string | null;
         is_active: boolean;
         created_at: Date;
         updated_at: Date;
@@ -76,6 +94,7 @@ export declare class AppKeyService {
         key_api: string;
         key_webService: string | null;
         key_adminPanel: string | null;
+        domain: string | null;
         is_active: boolean;
         created_at: Date;
         updated_at: Date;

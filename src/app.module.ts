@@ -7,6 +7,8 @@ import { PrismaClientExceptionFilter } from './common/filters/prisma-client-exce
 import { validate } from './config/env.validation';
 import { PrismaModule } from './core/prisma/prisma.module';
 import { AppKeyModule } from './core/app-key/app-key.module';
+import { CryptoModule } from './core/crypto/crypto.module';
+import { AuthModule } from './modules/auth/auth.module';
 import { DapodikModule } from './modules/dapodik/dapodik.module';
 import { SyncModule } from './modules/sync/sync.module';
 
@@ -18,6 +20,8 @@ import { SyncModule } from './modules/sync/sync.module';
     }),
     PrismaModule,
     AppKeyModule,
+    CryptoModule,
+    AuthModule,
     DapodikModule,
     SyncModule,
   ],

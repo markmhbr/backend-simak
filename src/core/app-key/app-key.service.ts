@@ -34,6 +34,16 @@ export class AppKeyService {
     return null;
   }
 
+  async findByDomain(domain: string) {
+    const appKey = await this.prisma.appKey.findFirst({
+      where: {
+        domain: domain,
+        is_active: true
+      },
+    });
+    return appKey;
+  }
+
   /**
    * Membuat entitas AppKey baru di database
    */

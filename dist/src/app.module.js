@@ -16,6 +16,8 @@ const prisma_client_exception_filter_1 = require("./common/filters/prisma-client
 const env_validation_1 = require("./config/env.validation");
 const prisma_module_1 = require("./core/prisma/prisma.module");
 const app_key_module_1 = require("./core/app-key/app-key.module");
+const crypto_module_1 = require("./core/crypto/crypto.module");
+const auth_module_1 = require("./modules/auth/auth.module");
 const dapodik_module_1 = require("./modules/dapodik/dapodik.module");
 const sync_module_1 = require("./modules/sync/sync.module");
 let AppModule = class AppModule {
@@ -30,6 +32,8 @@ exports.AppModule = AppModule = __decorate([
             }),
             prisma_module_1.PrismaModule,
             app_key_module_1.AppKeyModule,
+            crypto_module_1.CryptoModule,
+            auth_module_1.AuthModule,
             dapodik_module_1.DapodikModule,
             sync_module_1.SyncModule,
         ],

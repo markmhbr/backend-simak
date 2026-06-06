@@ -111,6 +111,10 @@ export class SyncService {
         ptk_id_str: r.ptk_id_str || null,
         jurusan_id: String(r.jurusan_id || ''),
         jurusan_id_str: r.jurusan_id_str || null,
+        id_kelas_ekskul: r.id_kelas_ekskul || null,
+        id_ekskul: r.id_ekskul || null,
+        nm_ekskul: r.nm_ekskul || null,
+        sk_ekskul: r.sk_ekskul || null,
       };
 
       try {

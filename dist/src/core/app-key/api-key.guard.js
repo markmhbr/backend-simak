@@ -27,11 +27,23 @@ let ApiKeyGuard = class ApiKeyGuard {
             apiKey = request.params.key_api;
         }
         if (!apiKey) {
-            throw new common_1.UnauthorizedException('API Key tidak ditemukan dalam request (Header X-API-Key atau param key_api)');
+            const domain = request.headers.host || request.hostname;
+            const keyByDomain = await this.appKeyService.findByDomain(domain);
+            if (keyByDomain) {
+                request['appKey'] = keyByDomain;
+                return true;
+            }
+            if (request.url.includes('/api/auth/')) {
+                return true;
+            }
+            throw new common_1.UnauthorizedException('Sistem belum terhubung. API Key tidak ditemukan dan domain tidak terdaftar.');
         }
         const validKey = await this.appKeyService.validateApiKey(apiKey);
         const isSyncSekolah = request.method === 'POST' && request.url.includes('/api/sync/sekolah');
         if (!validKey && !isSyncSekolah) {
+            if (request.url.includes('/api/auth/')) {
+                throw new common_1.UnauthorizedException('API Key tidak valid');
+            }
             throw new common_1.UnauthorizedException('API Key tidak valid atau tidak aktif');
         }
         request['appKey'] = validKey;
