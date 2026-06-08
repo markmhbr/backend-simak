@@ -3,6 +3,10 @@ export declare class SyncService {
     private readonly prisma;
     private readonly logger;
     constructor(prisma: PrismaService);
+    validateAndRegisterDomain(key: string, domain: string): Promise<{
+        nama_app: string;
+        sekolah_id: string;
+    }>;
     private parseDate;
     private parseNumber;
     syncSekolah(sekolahId: string, dataRows: any[], rawApiKey?: string): Promise<{

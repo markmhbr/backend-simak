@@ -116,14 +116,14 @@ export class DapodikController {
     @Query('search') search?: string,
     @Query('page') page?: string,
     @Query('rombelName') rombelName?: string,
-    @Query('status') status?: 'aktif' | 'non-aktif'
-  ) {
+    @Query('status') status?: 'aktif' | 'non-aktif',
+    @Query('tingkat') tingkat?: string
+    ) {
     const { sekolahId, namaApp } = this.getSekolahInfo(req);
     const take = limit ? parseInt(limit, 10) : 10;
     const skipPage = page ? parseInt(page, 10) : 1;
-    
-    const { data, total } = await this.dapodikService.getPesertaDidik(sekolahId, take, search, skipPage, rombelName, status);
-    
+
+    const { data, total } = await this.dapodikService.getPesertaDidik(sekolahId, take, search, skipPage, rombelName, status, tingkat);
     return {
       status: 'success',
       klien: namaApp,

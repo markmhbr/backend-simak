@@ -19,6 +19,27 @@ let SyncService = SyncService_1 = class SyncService {
     constructor(prisma) {
         this.prisma = prisma;
     }
+    async validateAndRegisterDomain(key, domain) {
+        const appKey = await this.prisma.appKey.findFirst({
+            where: {
+                OR: [{ key_api: key }, { key_webService: key }],
+            },
+        });
+        if (!appKey) {
+            throw new Error("API Key tidak valid.");
+        }
+        if (!appKey.is_active) {
+            throw new Error("API Key dinonaktifkan.");
+        }
+        await this.prisma.appKey.update({
+            where: { id: appKey.id },
+            data: { domain: domain },
+        });
+        return {
+            nama_app: appKey.nama_app,
+            sekolah_id: appKey.sekolah_id,
+        };
+    }
     parseDate(d) {
         if (!d || d === '1901-01-01' || d.startsWith('1900') || d.startsWith('1901'))
             return null;

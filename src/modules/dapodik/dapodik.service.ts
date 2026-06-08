@@ -149,7 +149,7 @@ export class DapodikService {
     });
   }
 
-  async getPesertaDidik(sekolahId: string | null, limit: number = 10, search?: string, page: number = 1, rombelName?: string, status?: 'aktif' | 'non-aktif') {
+  async getPesertaDidik(sekolahId: string | null, limit: number = 10, search?: string, page: number = 1, rombelName?: string, status?: 'aktif' | 'non-aktif', tingkat?: string) {
     const filter = this.getSekolahFilter(sekolahId);
     
     let whereClause: any = {
@@ -161,6 +161,38 @@ export class DapodikService {
 
     if (rombelName) {
       whereClause.AND[1] = { nama_rombel: rombelName };
+    }
+
+    if (tingkat && tingkat !== 'all') {
+      let rombelPrefix = '';
+      if (tingkat === '10') rombelPrefix = 'X';
+      else if (tingkat === '11') rombelPrefix = 'XI';
+      else if (tingkat === '12') rombelPrefix = 'XII';
+
+      if (rombelPrefix) {
+        if (rombelPrefix === 'X') {
+          // Khusus X: harus X tapi bukan XI (dan otomatis bukan XII)
+          whereClause.AND.push({
+            nama_rombel: { startsWith: 'X', mode: 'insensitive' },
+          });
+          whereClause.AND.push({
+            NOT: { nama_rombel: { startsWith: 'XI', mode: 'insensitive' } },
+          });
+        } else if (rombelPrefix === 'XI') {
+          // Khusus XI: harus XI tapi bukan XII
+          whereClause.AND.push({
+            nama_rombel: { startsWith: 'XI', mode: 'insensitive' },
+          });
+          whereClause.AND.push({
+            NOT: { nama_rombel: { startsWith: 'XII', mode: 'insensitive' } },
+          });
+        } else {
+          // Khusus XII
+          whereClause.AND.push({
+            nama_rombel: { startsWith: 'XII', mode: 'insensitive' },
+          });
+        }
+      }
     }
 
     if (status === 'aktif') {

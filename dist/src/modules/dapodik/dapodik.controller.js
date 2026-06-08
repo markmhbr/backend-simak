@@ -104,11 +104,11 @@ let DapodikController = class DapodikController {
             data,
         };
     }
-    async getPesertaDidikList(req, limit, search, page, rombelName, status) {
+    async getPesertaDidikList(req, limit, search, page, rombelName, status, tingkat) {
         const { sekolahId, namaApp } = this.getSekolahInfo(req);
         const take = limit ? parseInt(limit, 10) : 10;
         const skipPage = page ? parseInt(page, 10) : 1;
-        const { data, total } = await this.dapodikService.getPesertaDidik(sekolahId, take, search, skipPage, rombelName, status);
+        const { data, total } = await this.dapodikService.getPesertaDidik(sekolahId, take, search, skipPage, rombelName, status, tingkat);
         return {
             status: 'success',
             klien: namaApp,
@@ -260,8 +260,9 @@ __decorate([
     __param(3, (0, common_1.Query)('page')),
     __param(4, (0, common_1.Query)('rombelName')),
     __param(5, (0, common_1.Query)('status')),
+    __param(6, (0, common_1.Query)('tingkat')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, String, String, String, String]),
+    __metadata("design:paramtypes", [Object, String, String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], DapodikController.prototype, "getPesertaDidikList", null);
 __decorate([

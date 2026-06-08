@@ -1,10 +1,9 @@
-import { Controller, Post, Body, UseGuards, Req, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, HttpCode, HttpStatus, NotFoundException } from '@nestjs/common';
 import { SyncService } from './sync.service';
 import { ApiKeyGuard } from '../../core/app-key/api-key.guard';
 import type { Request } from 'express';
 
 @Controller('sync')
-@UseGuards(ApiKeyGuard)
 export class SyncController {
   constructor(private readonly syncService: SyncService) {}
 
@@ -13,7 +12,19 @@ export class SyncController {
     return appKey?.sekolah_id;
   }
 
+  @Post('validate')
+  @HttpCode(HttpStatus.OK)
+  async validateSyncKey(@Body() body: { key: string; domain: string }) {
+    const result = await this.syncService.validateAndRegisterDomain(body.key, body.domain);
+    return {
+      status: 'success',
+      message: 'Domain berhasil disinkronkan',
+      data: result
+    };
+  }
+
   @Post('sekolah')
+  @UseGuards(ApiKeyGuard)
   @HttpCode(HttpStatus.OK)
   async syncSekolah(@Req() req: Request, @Body() data: any[]) {
     const rows = Array.isArray(data) ? data : [data];
@@ -30,6 +41,7 @@ export class SyncController {
   }
 
   @Post('rombel')
+  @UseGuards(ApiKeyGuard)
   @HttpCode(HttpStatus.OK)
   async syncRombel(@Req() req: Request, @Body() data: any[]) {
     const sekolahId = this.getSekolahId(req);
@@ -39,6 +51,7 @@ export class SyncController {
   }
 
   @Post('siswa')
+  @UseGuards(ApiKeyGuard)
   @HttpCode(HttpStatus.OK)
   async syncSiswa(@Req() req: Request, @Body() data: any[]) {
     const sekolahId = this.getSekolahId(req);
@@ -48,6 +61,7 @@ export class SyncController {
   }
 
   @Post('gtk')
+  @UseGuards(ApiKeyGuard)
   @HttpCode(HttpStatus.OK)
   async syncGtk(@Req() req: Request, @Body() data: any[]) {
     const sekolahId = this.getSekolahId(req);
@@ -57,6 +71,7 @@ export class SyncController {
   }
 
   @Post('pengguna')
+  @UseGuards(ApiKeyGuard)
   @HttpCode(HttpStatus.OK)
   async syncPengguna(@Req() req: Request, @Body() data: any[]) {
     const sekolahId = this.getSekolahId(req);
@@ -66,6 +81,7 @@ export class SyncController {
   }
 
   @Post('sarpras')
+  @UseGuards(ApiKeyGuard)
   @HttpCode(HttpStatus.OK)
   async syncSarpras(@Req() req: Request, @Body() data: any[]) {
     const sekolahId = this.getSekolahId(req);
@@ -75,6 +91,7 @@ export class SyncController {
   }
 
   @Post('bidang_studi')
+  @UseGuards(ApiKeyGuard)
   @HttpCode(HttpStatus.OK)
   async syncBidangStudi(@Req() req: Request, @Body() data: any[]) {
     const sekolahId = this.getSekolahId(req);
@@ -84,6 +101,7 @@ export class SyncController {
   }
 
   @Post('lemb_sertifikasi')
+  @UseGuards(ApiKeyGuard)
   @HttpCode(HttpStatus.OK)
   async syncLembSertifikasi(@Req() req: Request, @Body() data: any[]) {
     const sekolahId = this.getSekolahId(req);
@@ -93,6 +111,7 @@ export class SyncController {
   }
 
   @Post('rwy_sertifikat')
+  @UseGuards(ApiKeyGuard)
   @HttpCode(HttpStatus.OK)
   async syncRwySertifikat(@Req() req: Request, @Body() data: any[]) {
     const sekolahId = this.getSekolahId(req);

@@ -25,6 +25,14 @@ let SyncController = class SyncController {
         const appKey = req['appKey'];
         return appKey?.sekolah_id;
     }
+    async validateSyncKey(body) {
+        const result = await this.syncService.validateAndRegisterDomain(body.key, body.domain);
+        return {
+            status: 'success',
+            message: 'Domain berhasil disinkronkan',
+            data: result
+        };
+    }
     async syncSekolah(req, data) {
         const rows = Array.isArray(data) ? data : [data];
         let sekolahId = this.getSekolahId(req);
@@ -86,7 +94,16 @@ let SyncController = class SyncController {
 };
 exports.SyncController = SyncController;
 __decorate([
+    (0, common_1.Post)('validate'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], SyncController.prototype, "validateSyncKey", null);
+__decorate([
     (0, common_1.Post)('sekolah'),
+    (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
@@ -96,6 +113,7 @@ __decorate([
 ], SyncController.prototype, "syncSekolah", null);
 __decorate([
     (0, common_1.Post)('rombel'),
+    (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
@@ -105,6 +123,7 @@ __decorate([
 ], SyncController.prototype, "syncRombel", null);
 __decorate([
     (0, common_1.Post)('siswa'),
+    (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
@@ -114,6 +133,7 @@ __decorate([
 ], SyncController.prototype, "syncSiswa", null);
 __decorate([
     (0, common_1.Post)('gtk'),
+    (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
@@ -123,6 +143,7 @@ __decorate([
 ], SyncController.prototype, "syncGtk", null);
 __decorate([
     (0, common_1.Post)('pengguna'),
+    (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
@@ -132,6 +153,7 @@ __decorate([
 ], SyncController.prototype, "syncPengguna", null);
 __decorate([
     (0, common_1.Post)('sarpras'),
+    (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
@@ -141,6 +163,7 @@ __decorate([
 ], SyncController.prototype, "syncSarpras", null);
 __decorate([
     (0, common_1.Post)('bidang_studi'),
+    (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
@@ -150,6 +173,7 @@ __decorate([
 ], SyncController.prototype, "syncBidangStudi", null);
 __decorate([
     (0, common_1.Post)('lemb_sertifikasi'),
+    (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
@@ -159,6 +183,7 @@ __decorate([
 ], SyncController.prototype, "syncLembSertifikasi", null);
 __decorate([
     (0, common_1.Post)('rwy_sertifikat'),
+    (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
@@ -168,7 +193,6 @@ __decorate([
 ], SyncController.prototype, "syncRwySertifikat", null);
 exports.SyncController = SyncController = __decorate([
     (0, common_1.Controller)('sync'),
-    (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
     __metadata("design:paramtypes", [sync_service_1.SyncService])
 ], SyncController);
 //# sourceMappingURL=sync.controller.js.map

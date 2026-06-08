@@ -7,6 +7,33 @@ export class SyncService {
 
   constructor(private readonly prisma: PrismaService) {}
 
+  async validateAndRegisterDomain(key: string, domain: string) {
+    const appKey = await this.prisma.appKey.findFirst({
+      where: {
+        OR: [{ key_api: key }, { key_webService: key }],
+      },
+    });
+
+    if (!appKey) {
+      throw new Error("API Key tidak valid.");
+    }
+
+    if (!appKey.is_active) {
+      throw new Error("API Key dinonaktifkan.");
+    }
+
+    // Update domain untuk key ini
+    await this.prisma.appKey.update({
+      where: { id: appKey.id },
+      data: { domain: domain },
+    });
+
+    return {
+      nama_app: appKey.nama_app,
+      sekolah_id: appKey.sekolah_id,
+    };
+  }
+
   private parseDate(d?: string | null): Date | null {
     if (!d || d === '1901-01-01' || d.startsWith('1900') || d.startsWith('1901')) return null;
     const date = new Date(d);

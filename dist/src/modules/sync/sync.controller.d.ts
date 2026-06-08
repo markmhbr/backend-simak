@@ -4,6 +4,17 @@ export declare class SyncController {
     private readonly syncService;
     constructor(syncService: SyncService);
     private getSekolahId;
+    validateSyncKey(body: {
+        key: string;
+        domain: string;
+    }): Promise<{
+        status: string;
+        message: string;
+        data: {
+            nama_app: string;
+            sekolah_id: string;
+        };
+    }>;
     syncSekolah(req: Request, data: any[]): Promise<{
         status: string;
         count: number;
