@@ -37,7 +37,13 @@ export class AppKeyService {
   async findByDomain(domain: string) {
     const appKey = await this.prisma.appKey.findFirst({
       where: {
-        domain: domain,
+        OR: [
+          { domain: domain },
+          { domain: `http://${domain}` },
+          { domain: `https://${domain}` },
+          { domain: `http://${domain}/` },
+          { domain: `https://${domain}/` },
+        ],
         is_active: true
       },
     });
