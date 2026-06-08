@@ -24,8 +24,26 @@ export class ApiKeyGuard implements CanActivate {
 
     if (!apiKey) {
       // Jika tidak ada API Key di header, coba cari berdasarkan domain (Domain-Based Identification)
-      const domain = request.headers.host || request.hostname;
-      const keyByDomain = await this.appKeyService.findByDomain(domain);
+      // Cek Origin atau Referer terlebih dahulu (untuk request dari browser/frontend)
+      const origin = request.headers.origin as string;
+      const referer = request.headers.referer as string;
+      const host = request.headers.host;
+
+      let domainToTest: string;
+      if (origin) {
+        domainToTest = origin.replace(/^https?:\/\//, '');
+      } else if (referer) {
+        try {
+          const url = new URL(referer);
+          domainToTest = url.host;
+        } catch {
+          domainToTest = host;
+        }
+      } else {
+        domainToTest = host;
+      }
+
+      const keyByDomain = await this.appKeyService.findByDomain(domainToTest);
       
       if (keyByDomain) {
         request['appKey'] = keyByDomain;

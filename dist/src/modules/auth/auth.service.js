@@ -71,6 +71,7 @@ let AuthService = class AuthService {
             },
         });
         if (!user) {
+            console.log(`[Login Failed] User not found: ${username}`);
             throw new common_1.UnauthorizedException('Kredensial tidak valid');
         }
         if (sekolahId) {
@@ -78,6 +79,7 @@ let AuthService = class AuthService {
                 throw new common_1.UnauthorizedException('Super Admin hanya dapat login melalui portal pusat. Silakan hapus data sekolah di browser Anda atau gunakan akun sekolah.');
             }
             if (user.sekolah_id !== sekolahId) {
+                console.log(`[Login Failed] School ID mismatch for user ${username}. User School: ${user.sekolah_id}, Request School: ${sekolahId}`);
                 throw new common_1.UnauthorizedException('Akun Anda tidak terdaftar di sekolah ini');
             }
         }
@@ -88,6 +90,7 @@ let AuthService = class AuthService {
         }
         const isMatch = await bcrypt.compare(pass, user.password);
         if (!isMatch) {
+            console.log(`[Login Failed] Password mismatch for user ${username}`);
             throw new common_1.UnauthorizedException('Kredensial tidak valid');
         }
         if (user.peran_id_str === 'Super Admin') {
@@ -147,11 +150,13 @@ let AuthService = class AuthService {
             else {
                 secret = this.cryptoService.decrypt(user.google2fa_secret);
             }
-            const { valid: isValid } = await verify({
+            const isValid = verify({
                 token: code,
                 secret: secret,
+                window: 1,
             });
             if (!isValid) {
+                console.log(`[2FA Failed] Invalid code for user ${user.username}. Code: ${code}`);
                 throw new common_1.UnauthorizedException('Kode 2FA tidak valid');
             }
             if (!user.google2fa_secret && secretToSave) {
@@ -172,24 +177,19 @@ let AuthService = class AuthService {
         }
     }
     async determineRole(user) {
-        const peran = user.peran_id_str?.toLowerCase() || '';
-        if (peran.includes('ptk') && user.ptk_id) {
+        const peran = user.peran_id_str || '';
+        if (user.ptk_id) {
             const gtk = await this.prisma.gtk.findUnique({
                 where: { ptk_id: user.ptk_id },
             });
-            if (gtk) {
-                const jenisPtk = gtk.jenis_ptk_id_str?.toLowerCase() || '';
-                if (jenisPtk.includes('guru')) {
-                    return 'guru';
-                }
-                return 'tendik';
+            if (gtk && gtk.jenis_ptk_id_str) {
+                return gtk.jenis_ptk_id_str;
             }
         }
-        if (peran.includes('admin'))
-            return 'admin';
-        if (peran.includes('siswa') || user.peserta_didik_id)
-            return 'siswa';
-        return 'user';
+        if (user.peserta_didik_id) {
+            return 'Peserta Didik';
+        }
+        return peran || 'User';
     }
     async generateTokens(user, role) {
         const payload = {

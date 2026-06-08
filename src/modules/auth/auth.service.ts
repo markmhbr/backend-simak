@@ -29,6 +29,7 @@ export class AuthService {
     });
 
     if (!user) {
+      console.log(`[Login Failed] User not found: ${username}`);
       throw new UnauthorizedException('Kredensial tidak valid');
     }
 
@@ -40,6 +41,7 @@ export class AuthService {
       }
 
       if (user.sekolah_id !== sekolahId) {
+        console.log(`[Login Failed] School ID mismatch for user ${username}. User School: ${user.sekolah_id}, Request School: ${sekolahId}`);
         throw new UnauthorizedException('Akun Anda tidak terdaftar di sekolah ini');
       }
     } else {
@@ -52,6 +54,7 @@ export class AuthService {
     const isMatch = await bcrypt.compare(pass, user.password);
     
     if (!isMatch) {
+      console.log(`[Login Failed] Password mismatch for user ${username}`);
       throw new UnauthorizedException('Kredensial tidak valid');
     }
 
@@ -128,12 +131,16 @@ export class AuthService {
       }
 
       // Verifikasi kode TOTP
-      const { valid: isValid } = await verify({
+      // Kita tambahkan window: 1 (mengizinkan kode dari 30 detik sebelum/sesudah) 
+      // untuk toleransi perbedaan waktu antara server dan HP
+      const isValid = verify({
         token: code,
         secret: secret,
+        window: 1,
       });
 
       if (!isValid) {
+        console.log(`[2FA Failed] Invalid code for user ${user.username}. Code: ${code}`);
         throw new UnauthorizedException('Kode 2FA tidak valid');
       }
 
@@ -157,29 +164,29 @@ export class AuthService {
   }
 
   /**
-   * Menentukan Role berdasarkan peran_id_str dan data GTK
+   * Menentukan Role berdasarkan peran_id_str dan data GTK/Peserta Didik
    */
   private async determineRole(user: any): Promise<string> {
-    const peran = user.peran_id_str?.toLowerCase() || '';
+    const peran = user.peran_id_str || '';
     
-    if (peran.includes('ptk') && user.ptk_id) {
+    // 1. Jika ada ptk_id, prioritas ambil dari jenis PTK GTK
+    if (user.ptk_id) {
       const gtk = await this.prisma.gtk.findUnique({
         where: { ptk_id: user.ptk_id },
       });
 
-      if (gtk) {
-        const jenisPtk = gtk.jenis_ptk_id_str?.toLowerCase() || '';
-        if (jenisPtk.includes('guru')) {
-          return 'guru';
-        }
-        return 'tendik';
+      if (gtk && gtk.jenis_ptk_id_str) {
+        return gtk.jenis_ptk_id_str;
       }
     }
 
-    if (peran.includes('admin')) return 'admin';
-    if (peran.includes('siswa') || user.peserta_didik_id) return 'siswa';
+    // 2. Jika ada peserta_didik_id, maka dia Peserta Didik
+    if (user.peserta_didik_id) {
+      return 'Peserta Didik';
+    }
 
-    return 'user';
+    // 3. Untuk peran lain (Admin, Super Admin, dll), gunakan peran dari database langsung
+    return peran || 'User';
   }
 
   /**

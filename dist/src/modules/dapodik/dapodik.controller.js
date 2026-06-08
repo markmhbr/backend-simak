@@ -65,6 +65,21 @@ let DapodikController = class DapodikController {
             data,
         };
     }
+    async getGtkRekapKategori(req) {
+        const { sekolahId } = this.getSekolahInfo(req);
+        const data = await this.dapodikService.getGtkRekapKategori(sekolahId);
+        return { status: 'success', data };
+    }
+    async getGtkRekapPendidikan(req) {
+        const { sekolahId } = this.getSekolahInfo(req);
+        const data = await this.dapodikService.getGtkRekapPendidikan(sekolahId);
+        return { status: 'success', data };
+    }
+    async getGtkRekapUsia(req) {
+        const { sekolahId } = this.getSekolahInfo(req);
+        const data = await this.dapodikService.getGtkRekapUsia(sekolahId);
+        return { status: 'success', data };
+    }
     async getTanahList(req) {
         const { sekolahId, namaApp } = this.getSekolahInfo(req);
         const data = await this.dapodikService.getTanah(sekolahId);
@@ -224,6 +239,27 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], DapodikController.prototype, "uploadSekolahLogo", null);
+__decorate([
+    (0, common_1.Get)('gtk/rekap-kategori'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "getGtkRekapKategori", null);
+__decorate([
+    (0, common_1.Get)('gtk/rekap-pendidikan'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "getGtkRekapPendidikan", null);
+__decorate([
+    (0, common_1.Get)('gtk/rekap-usia'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "getGtkRekapUsia", null);
 __decorate([
     (0, common_1.Get)('tanah'),
     __param(0, (0, common_1.Req)()),

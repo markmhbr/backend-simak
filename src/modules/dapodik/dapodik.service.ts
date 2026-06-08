@@ -54,9 +54,39 @@ export class DapodikService {
 
   async getSekolah(sekolahId: string | null) {
     const filter = this.getSekolahFilter(sekolahId);
-    return await this.prisma.sekolah.findUnique({
+    const sekolah = await this.prisma.sekolah.findUnique({
       where: { sekolah_id: filter.sekolah_id },
     });
+
+    if (!sekolah) return null;
+
+    // Diagnostic: Cek total GTK di sekolah ini
+    const totalGtk = await this.prisma.gtk.count({
+      where: { sekolah_id: filter.sekolah_id }
+    });
+
+    // Cari Kepala Sekolah dengan kriteria lebih luas
+    const kepalaSekolah = await this.prisma.gtk.findFirst({
+      where: {
+        AND: [
+          { sekolah_id: filter.sekolah_id },
+          { 
+            OR: [
+              { jabatan_ptk_id_str: { contains: 'Kepala Sekolah', mode: 'insensitive' } },
+              { jenis_ptk_id_str: { contains: 'Kepala Sekolah', mode: 'insensitive' } },
+              { ptk_induk: { contains: 'Kepala Sekolah', mode: 'insensitive' } }
+            ]
+          }
+        ]
+      },
+      select: { nama: true, jabatan_ptk_id_str: true, jenis_ptk_id_str: true, status: true }
+    });
+
+
+    return {
+      ...sekolah,
+      nama_kepala_sekolah: kepalaSekolah?.nama || null
+    };
   }
 
   async updateSekolah(sekolahId: string, data: any) {
@@ -410,5 +440,153 @@ export class DapodikService {
     ]);
 
     return { total, data };
+  }
+
+  async getGtkRekapKategori(sekolahId: string | null) {
+    const filter = this.getSekolahFilter(sekolahId);
+    
+    // Ambil semua GTK aktif untuk sekolah ini
+    const gtks = await this.prisma.gtk.findMany({
+      where: {
+        AND: [
+          { sekolah_id: filter.sekolah_id },
+          { status: 'Aktif' }
+        ]
+      },
+      select: {
+        jenis_ptk_id_str: true,
+        jenis_kelamin: true,
+        status_kepegawaian_id_str: true,
+      }
+    });
+
+    const isGuru = (j: string) => (j || '').toLowerCase().includes('guru');
+    const isAsn = (s: string) => ['pns', 'pppk'].includes((s || '').toLowerCase());
+
+    const guru = gtks.filter(i => isGuru(i.jenis_ptk_id_str));
+    const tendik = gtks.filter(i => !isGuru(i.jenis_ptk_id_str));
+
+    return [
+      {
+        id: 1,
+        kategori: "Guru",
+        lakiLaki: guru.filter(i => i.jenis_kelamin === 'L').length,
+        perempuan: guru.filter(i => i.jenis_kelamin === 'P').length,
+        totalJK: guru.length,
+        asn: guru.filter(i => isAsn(i.status_kepegawaian_id_str)).length,
+        nonAsn: guru.filter(i => !isAsn(i.status_kepegawaian_id_str)).length,
+        totalStatus: guru.length
+      },
+      {
+        id: 2,
+        kategori: "Tendik",
+        lakiLaki: tendik.filter(i => i.jenis_kelamin === 'L').length,
+        perempuan: tendik.filter(i => i.jenis_kelamin === 'P').length,
+        totalJK: tendik.length,
+        asn: tendik.filter(i => isAsn(i.status_kepegawaian_id_str)).length,
+        nonAsn: tendik.filter(i => !isAsn(i.status_kepegawaian_id_str)).length,
+        totalStatus: tendik.length
+      }
+    ];
+  }
+
+  async getGtkRekapPendidikan(sekolahId: string | null) {
+    const filter = this.getSekolahFilter(sekolahId);
+    
+    const gtks = await this.prisma.gtk.findMany({
+      where: {
+        AND: [
+          { sekolah_id: filter.sekolah_id },
+          { status: 'Aktif' }
+        ]
+      },
+      select: {
+        pendidikan_terakhir: true,
+        jenis_kelamin: true,
+        status_kepegawaian_id_str: true,
+      }
+    });
+
+    const isAsn = (s: string) => ['pns', 'pppk'].includes((s || '').toLowerCase());
+    
+    const categories = [
+      { label: "S2/Pasca Sarjana", keys: ["S2"] },
+      { label: "S1/Sarjana", keys: ["S1", null, ""] },
+      { label: "D3/Diploma", keys: ["D3"] },
+      { label: "SMA/Sederajat", keys: ["SMA", "SMK"] },
+    ];
+
+    return categories.map((cat, idx) => {
+      const subset = gtks.filter(i => {
+        if (cat.keys.includes(null) && !i.pendidikan_terakhir) return true;
+        return cat.keys.includes(i.pendidikan_terakhir);
+      });
+
+      return {
+        id: idx + 1,
+        pendidikan: cat.label,
+        lakiLaki: subset.filter(i => i.jenis_kelamin === 'L').length,
+        perempuan: subset.filter(i => i.jenis_kelamin === 'P').length,
+        totalJK: subset.length,
+        asn: subset.filter(i => isAsn(i.status_kepegawaian_id_str)).length,
+        nonAsn: subset.filter(i => !isAsn(i.status_kepegawaian_id_str)).length,
+        totalStatus: subset.length
+      };
+    });
+  }
+
+  async getGtkRekapUsia(sekolahId: string | null) {
+    const filter = this.getSekolahFilter(sekolahId);
+    
+    const gtks = await this.prisma.gtk.findMany({
+      where: {
+        AND: [
+          { sekolah_id: filter.sekolah_id },
+          { status: 'Aktif' }
+        ]
+      },
+      select: {
+        tanggal_lahir: true,
+        jenis_kelamin: true,
+        status_kepegawaian_id_str: true,
+      }
+    });
+
+    const isAsn = (s: string) => ['pns', 'pppk'].includes((s || '').toLowerCase());
+    const calculateAge = (birthDate: Date | null) => {
+      if (!birthDate) return 0;
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      return age;
+    };
+
+    const ranges = [
+      { label: "< 30 Tahun", min: 0, max: 30 },
+      { label: "31 - 40 Tahun", min: 31, max: 40 },
+      { label: "41 - 50 Tahun", min: 41, max: 50 },
+      { label: "> 50 Tahun", min: 51, max: 150 },
+    ];
+
+    return ranges.map((range, idx) => {
+      const subset = gtks.filter(i => {
+        const age = calculateAge(i.tanggal_lahir);
+        return age >= range.min && age <= range.max;
+      });
+
+      return {
+        id: idx + 1,
+        rentangUsia: range.label,
+        lakiLaki: subset.filter(i => i.jenis_kelamin === 'L').length,
+        perempuan: subset.filter(i => i.jenis_kelamin === 'P').length,
+        totalJK: subset.length,
+        asn: subset.filter(i => isAsn(i.status_kepegawaian_id_str)).length,
+        nonAsn: subset.filter(i => !isAsn(i.status_kepegawaian_id_str)).length,
+        totalStatus: subset.length
+      };
+    });
   }
 }

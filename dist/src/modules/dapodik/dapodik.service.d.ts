@@ -13,6 +13,7 @@ export declare class DapodikService {
         total_gtk: number;
     }>;
     getSekolah(sekolahId: string | null): Promise<{
+        nama_kepala_sekolah: string;
         sekolah_id: string;
         nama: string;
         email: string | null;
@@ -528,4 +529,34 @@ export declare class DapodikService {
             tandatangan: string | null;
         }[];
     }>;
+    getGtkRekapKategori(sekolahId: string | null): Promise<{
+        id: number;
+        kategori: string;
+        lakiLaki: number;
+        perempuan: number;
+        totalJK: number;
+        asn: number;
+        nonAsn: number;
+        totalStatus: number;
+    }[]>;
+    getGtkRekapPendidikan(sekolahId: string | null): Promise<{
+        id: number;
+        pendidikan: string;
+        lakiLaki: number;
+        perempuan: number;
+        totalJK: number;
+        asn: number;
+        nonAsn: number;
+        totalStatus: number;
+    }[]>;
+    getGtkRekapUsia(sekolahId: string | null): Promise<{
+        id: number;
+        rentangUsia: string;
+        lakiLaki: number;
+        perempuan: number;
+        totalJK: number;
+        asn: number;
+        nonAsn: number;
+        totalStatus: number;
+    }[]>;
 }

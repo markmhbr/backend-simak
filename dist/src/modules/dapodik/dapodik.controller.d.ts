@@ -20,6 +20,7 @@ export declare class DapodikController {
         status: string;
         klien: any;
         data: {
+            nama_kepala_sekolah: string;
             sekolah_id: string;
             nama: string;
             email: string | null;
@@ -138,6 +139,45 @@ export declare class DapodikController {
             peta: string | null;
             social_media: import("@prisma/client/runtime/client").JsonValue | null;
         };
+    }>;
+    getGtkRekapKategori(req: Request): Promise<{
+        status: string;
+        data: {
+            id: number;
+            kategori: string;
+            lakiLaki: number;
+            perempuan: number;
+            totalJK: number;
+            asn: number;
+            nonAsn: number;
+            totalStatus: number;
+        }[];
+    }>;
+    getGtkRekapPendidikan(req: Request): Promise<{
+        status: string;
+        data: {
+            id: number;
+            pendidikan: string;
+            lakiLaki: number;
+            perempuan: number;
+            totalJK: number;
+            asn: number;
+            nonAsn: number;
+            totalStatus: number;
+        }[];
+    }>;
+    getGtkRekapUsia(req: Request): Promise<{
+        status: string;
+        data: {
+            id: number;
+            rentangUsia: string;
+            lakiLaki: number;
+            perempuan: number;
+            totalJK: number;
+            asn: number;
+            nonAsn: number;
+            totalStatus: number;
+        }[];
     }>;
     getTanahList(req: Request): Promise<{
         status: string;

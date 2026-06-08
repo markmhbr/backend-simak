@@ -27,8 +27,26 @@ let ApiKeyGuard = class ApiKeyGuard {
             apiKey = request.params.key_api;
         }
         if (!apiKey) {
-            const domain = request.headers.host || request.hostname;
-            const keyByDomain = await this.appKeyService.findByDomain(domain);
+            const origin = request.headers.origin;
+            const referer = request.headers.referer;
+            const host = request.headers.host;
+            let domainToTest;
+            if (origin) {
+                domainToTest = origin.replace(/^https?:\/\//, '');
+            }
+            else if (referer) {
+                try {
+                    const url = new URL(referer);
+                    domainToTest = url.host;
+                }
+                catch {
+                    domainToTest = host;
+                }
+            }
+            else {
+                domainToTest = host;
+            }
+            const keyByDomain = await this.appKeyService.findByDomain(domainToTest);
             if (keyByDomain) {
                 request['appKey'] = keyByDomain;
                 return true;

@@ -62,6 +62,27 @@ export class DapodikController {
     };
   }
 
+  @Get('gtk/rekap-kategori')
+  async getGtkRekapKategori(@Req() req: Request) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.getGtkRekapKategori(sekolahId);
+    return { status: 'success', data };
+  }
+
+  @Get('gtk/rekap-pendidikan')
+  async getGtkRekapPendidikan(@Req() req: Request) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.getGtkRekapPendidikan(sekolahId);
+    return { status: 'success', data };
+  }
+
+  @Get('gtk/rekap-usia')
+  async getGtkRekapUsia(@Req() req: Request) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.getGtkRekapUsia(sekolahId);
+    return { status: 'success', data };
+  }
+
   @Get('tanah')
   async getTanahList(@Req() req: Request) {
     const { sekolahId, namaApp } = this.getSekolahInfo(req);
