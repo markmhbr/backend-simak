@@ -287,15 +287,16 @@ model PesertaDidik {
   pekerjaan_id      Int?
   status_data       Int?
   konfirmasi_mutasi Int?
-  vld_count         Int       @default(0)
+  vld_count         Int        @default(0)
   asal_data         String?
-  create_date       DateTime  @default(now())
-  last_update       DateTime  @updatedAt
-  created_at        DateTime  @default(now())
-  updated_at        DateTime  @updatedAt
+  create_date       DateTime   @default(now())
+  last_update       DateTime   @updatedAt
+  created_at        DateTime   @default(now())
+  updated_at        DateTime   @updatedAt
   soft_delete       String?
   last_sync         DateTime?
-  updater_id        String?   @db.Uuid
+  updater_id        String?    @db.Uuid
+  penggunas         Pengguna[]
 
   @@map("peserta_didik")
   @@schema("dapodik")
@@ -367,6 +368,8 @@ model Gtk {
   dusun            String?
   desa_kelurahan   String?
   kecamatan        String?
+  kabupaten_kota   String?
+  provinsi         String?
   kode_pos         String?
   lintang          Decimal?
   bujur            Decimal?
@@ -380,8 +383,9 @@ model Gtk {
 
   rwy_sertifikasi RwySertifikasi[]
 
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  penggunas  Pengguna[]
 
   @@map("gtks")
   @@schema("dapodik")
@@ -401,6 +405,9 @@ model Pengguna {
   no_hp            String?
   ptk_id           String? @db.Uuid
   peserta_didik_id String? @db.Uuid
+
+  peserta_didik PesertaDidik? @relation(fields: [peserta_didik_id], references: [peserta_didik_id], onDelete: Cascade)
+  gtk           Gtk?          @relation(fields: [ptk_id], references: [ptk_id], onDelete: Cascade)
 
   google2fa_secret String?
   remember_token   String?
@@ -570,7 +577,7 @@ model AppKey {
   key_api        String   @unique
   key_webService String?  @unique
   key_adminPanel String?
-  domain         String?  // Untuk verifikasi domain instalasi
+  domain         String? // Untuk verifikasi domain instalasi
   is_active      Boolean  @default(true)
   created_at     DateTime @default(now())
   updated_at     DateTime @updatedAt

@@ -12,13 +12,45 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ApiKeyGuard = void 0;
 const common_1 = require("@nestjs/common");
 const app_key_service_1 = require("./app-key.service");
+const config_1 = require("@nestjs/config");
+const prisma_service_1 = require("../prisma/prisma.service");
+const jwt = require('jsonwebtoken');
 let ApiKeyGuard = class ApiKeyGuard {
     appKeyService;
-    constructor(appKeyService) {
+    configService;
+    prisma;
+    constructor(appKeyService, configService, prisma) {
         this.appKeyService = appKeyService;
+        this.configService = configService;
+        this.prisma = prisma;
     }
     async canActivate(context) {
         const request = context.switchToHttp().getRequest();
+        const authHeader = request.headers['authorization'];
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            const token = authHeader.substring(7);
+            try {
+                const secret = this.configService.get('JWT_SECRET');
+                const decoded = jwt.verify(token, secret);
+                if (decoded && (decoded.role === 'Super Admin' || decoded.role === 'superadmin')) {
+                    const firstSekolah = await this.prisma.sekolah.findFirst({
+                        select: { sekolah_id: true }
+                    });
+                    const resolvedSekolahId = firstSekolah?.sekolah_id || '00000000-0000-0000-0000-000000000000';
+                    request['appKey'] = {
+                        id: 'super-admin-bypass',
+                        nama_app: 'Pusat (Super Admin)',
+                        sekolah_id: resolvedSekolahId,
+                        key_api: 'super-admin-bypass-key',
+                        domain: '*',
+                        is_active: true,
+                    };
+                    return true;
+                }
+            }
+            catch (err) {
+            }
+        }
         let apiKey = (request.headers['x-api-key'] || request.headers['x-sync-token']);
         if (!apiKey && request.query.key_api) {
             apiKey = request.query.key_api;
@@ -72,6 +104,8 @@ let ApiKeyGuard = class ApiKeyGuard {
 exports.ApiKeyGuard = ApiKeyGuard;
 exports.ApiKeyGuard = ApiKeyGuard = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [app_key_service_1.AppKeyService])
+    __metadata("design:paramtypes", [app_key_service_1.AppKeyService,
+        config_1.ConfigService,
+        prisma_service_1.PrismaService])
 ], ApiKeyGuard);
 //# sourceMappingURL=api-key.guard.js.map

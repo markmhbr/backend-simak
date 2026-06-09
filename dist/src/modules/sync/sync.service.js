@@ -321,6 +321,17 @@ let SyncService = SyncService_1 = class SyncService {
                 no_seri_ijazah: p.no_seri_ijazah || null,
                 no_seri_skhun: p.no_seri_skhun || null,
                 no_ujian_nasional: p.no_ujian_nasional || null,
+                jenis_pendaftaran_id: String(p.jenis_pendaftaran_id || ''),
+                jenis_pendaftaran_id_str: p.jenis_pendaftaran_id_str || null,
+                nomor_induk_pd: p.nomor_induk_pd || null,
+                jurusan_sp_id: p.jurusan_sp_id || null,
+                semester_id: p.semester_id || null,
+                tingkat_pendidikan_id: p.tingkat_pendidikan_id || null,
+                jenis_keluar_id: p.jenis_keluar_id || null,
+                ket_keluar: p.ket_keluar || null,
+                tanggal_keluar: this.parseDate(p.tanggal_keluar),
+                no_skhun: p.no_skhun || null,
+                no_peserta_ujian: p.no_peserta_ujian || null,
             };
             try {
                 const existing = await this.prisma.pesertaDidik.findUnique({
@@ -408,6 +419,12 @@ let SyncService = SyncService_1 = class SyncService {
                 no_hp: g.no_hp || null,
                 no_wa: g.no_wa || null,
                 email: g.email || null,
+                foto: g.foto || null,
+                tandatangan: g.tandatangan || null,
+                keahlian_laboratorium: g.keahlian_laboratorium || null,
+                mampu_menangani_kebutuhan_khusus: g.mampu_menangani_kebutuhan_khusus || null,
+                keahlian_braille: g.keahlian_braille === true || g.keahlian_braille === '1' || g.keahlian_braille === 1,
+                keahlian_bahasa_isyarat: g.keahlian_bahasa_isyarat === true || g.keahlian_bahasa_isyarat === '1' || g.keahlian_bahasa_isyarat === 1,
             };
             try {
                 await this.prisma.gtk.upsert({

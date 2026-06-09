@@ -60,7 +60,7 @@ export class AuthService {
 
     // Bypass 2FA untuk Super Admin (hanya jika di portal pusat)
     if (user.peran_id_str === 'Super Admin') {
-      const role = 'superadmin';
+      const role = 'Super Admin';
       const tokens = await this.generateTokens(user, role);
       return {
         requires2FA: false,
@@ -169,6 +169,11 @@ export class AuthService {
   private async determineRole(user: any): Promise<string> {
     const peran = user.peran_id_str || '';
     
+    // Jika peran di pengguna sudah Kepala Sekolah, gunakan itu
+    if (peran === 'Kepala Sekolah') {
+      return 'Kepala Sekolah';
+    }
+    
     // 1. Jika ada ptk_id, prioritas ambil dari jenis PTK GTK
     if (user.ptk_id) {
       const gtk = await this.prisma.gtk.findUnique({
@@ -178,6 +183,9 @@ export class AuthService {
       if (gtk && gtk.jenis_ptk_id_str) {
         return gtk.jenis_ptk_id_str;
       }
+      
+      // Jika ada ptk_id tapi jenis_ptk_id_str tidak ditemukan, arahkan ke admin
+      return 'Admin';
     }
 
     // 2. Jika ada peserta_didik_id, maka dia Peserta Didik

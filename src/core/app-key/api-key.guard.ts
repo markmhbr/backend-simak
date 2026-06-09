@@ -1,13 +1,51 @@
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { AppKeyService } from './app-key.service';
 import { Request } from 'express';
+import { ConfigService } from '@nestjs/config';
+import { PrismaService } from '../prisma/prisma.service';
+
+const jwt = require('jsonwebtoken');
 
 @Injectable()
 export class ApiKeyGuard implements CanActivate {
-  constructor(private readonly appKeyService: AppKeyService) {}
+  constructor(
+    private readonly appKeyService: AppKeyService,
+    private readonly configService: ConfigService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
+
+    // Cek apakah ada Bearer token di header
+    const authHeader = request.headers['authorization'];
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      try {
+        const secret = this.configService.get<string>('JWT_SECRET');
+        const decoded = jwt.verify(token, secret) as any;
+        if (decoded && (decoded.role === 'Super Admin' || decoded.role === 'superadmin')) {
+          // Ambil sekolah_id pertama untuk kebutuhan visualisasi data dashboard
+          const firstSekolah = await this.prisma.sekolah.findFirst({
+            select: { sekolah_id: true }
+          });
+          const resolvedSekolahId = firstSekolah?.sekolah_id || '00000000-0000-0000-0000-000000000000';
+
+          // Inject appKey dummy agar controller sekolah info / dapodik summary tidak error
+          request['appKey'] = {
+            id: 'super-admin-bypass',
+            nama_app: 'Pusat (Super Admin)',
+            sekolah_id: resolvedSekolahId,
+            key_api: 'super-admin-bypass-key',
+            domain: '*',
+            is_active: true,
+          };
+          return true;
+        }
+      } catch (err) {
+        // Token tidak valid atau kedaluwarsa, abaikan dan biarkan mengalir ke pengecekan API Key standar
+      }
+    }
     
     // 1. Cek dari header 'x-api-key' atau 'x-sync-token'
     let apiKey = (request.headers['x-api-key'] || request.headers['x-sync-token']) as string;

@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Req, Query, Patch, Body, Post, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, UseGuards, Req, Query, Patch, Body, Post, UseInterceptors, UploadedFile, Param } from '@nestjs/common';
 import { DapodikService } from './dapodik.service';
 import { ApiKeyGuard } from '../../core/app-key/api-key.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -130,6 +130,39 @@ export class DapodikController {
     };
   }
 
+  @Get('peserta-didik/rekap-tingkat')
+  async getPdRekapTingkat(@Req() req: Request) {
+    const { sekolahId, namaApp } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.getPdRekapTingkat(sekolahId);
+    return {
+      status: 'success',
+      klien: namaApp,
+      data,
+    };
+  }
+
+  @Get('peserta-didik/rekap-kompetensi')
+  async getPdRekapKompetensi(@Req() req: Request) {
+    const { sekolahId, namaApp } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.getPdRekapKompetensi(sekolahId);
+    return {
+      status: 'success',
+      klien: namaApp,
+      data,
+    };
+  }
+
+  @Get('peserta-didik/rekap-usia')
+  async getPdRekapUsia(@Req() req: Request) {
+    const { sekolahId, namaApp } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.getPdRekapUsia(sekolahId);
+    return {
+      status: 'success',
+      klien: namaApp,
+      data,
+    };
+  }
+
   @Get('peserta-didik')
   async getPesertaDidikList(
     @Req() req: Request, 
@@ -163,13 +196,15 @@ export class DapodikController {
     @Req() req: Request, 
     @Query('type') type?: 'reguler' | 'pilihan',
     @Query('limit') limit?: string,
-    @Query('page') page?: string
+    @Query('page') page?: string,
+    @Query('search') search?: string,
+    @Query('tingkat') tingkat?: string
   ) {
     const { sekolahId, namaApp } = this.getSekolahInfo(req);
     const take = limit ? parseInt(limit, 10) : 10;
     const skipPage = page ? parseInt(page, 10) : 1;
 
-    const { total, data } = await this.dapodikService.getRombonganBelajar(sekolahId, type, take, skipPage);
+    const { total, data } = await this.dapodikService.getRombonganBelajar(sekolahId, type, take, skipPage, search, tingkat);
     
     return {
       status: 'success',
@@ -184,10 +219,22 @@ export class DapodikController {
     };
   }
 
+  @Get('rombongan-belajar/:id/anggota')
+  async getRombelAnggota(@Param('id') id: string) {
+    const data = await this.dapodikService.getRombelAnggota(id);
+    return {
+      status: 'success',
+      data,
+    };
+  }
+
   @Get('ekstrakurikuler')
-  async getEkstrakurikulerList(@Req() req: Request) {
+  async getEkstrakurikulerList(
+    @Req() req: Request,
+    @Query('search') search?: string
+  ) {
     const { sekolahId, namaApp } = this.getSekolahInfo(req);
-    const data = await this.dapodikService.getEkstrakurikuler(sekolahId);
+    const data = await this.dapodikService.getEkstrakurikuler(sekolahId, search);
     return {
       status: 'success',
       klien: namaApp,
@@ -258,5 +305,33 @@ export class DapodikController {
         total_pages: Math.ceil(total / take)
       }
     };
+  }
+
+  @Get('gtk/:id')
+  async getGtkDetail(@Req() req: Request, @Param('id') id: string) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.getGtkById(sekolahId, id);
+    return { status: 'success', data };
+  }
+
+  @Patch('gtk/:id')
+  async updateGtkDetail(@Req() req: Request, @Param('id') id: string, @Body() body: any) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.updateGtk(sekolahId, id, body);
+    return { status: 'success', data };
+  }
+
+  @Get('peserta-didik/:id')
+  async getPesertaDidikDetail(@Req() req: Request, @Param('id') id: string) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.getPesertaDidikById(sekolahId, id);
+    return { status: 'success', data };
+  }
+
+  @Patch('peserta-didik/:id')
+  async updatePesertaDidikDetail(@Req() req: Request, @Param('id') id: string, @Body() body: any) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.updatePesertaDidik(sekolahId, id, body);
+    return { status: 'success', data };
   }
 }

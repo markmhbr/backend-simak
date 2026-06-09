@@ -94,7 +94,7 @@ let AuthService = class AuthService {
             throw new common_1.UnauthorizedException('Kredensial tidak valid');
         }
         if (user.peran_id_str === 'Super Admin') {
-            const role = 'superadmin';
+            const role = 'Super Admin';
             const tokens = await this.generateTokens(user, role);
             return {
                 requires2FA: false,
@@ -178,6 +178,9 @@ let AuthService = class AuthService {
     }
     async determineRole(user) {
         const peran = user.peran_id_str || '';
+        if (peran === 'Kepala Sekolah') {
+            return 'Kepala Sekolah';
+        }
         if (user.ptk_id) {
             const gtk = await this.prisma.gtk.findUnique({
                 where: { ptk_id: user.ptk_id },
@@ -185,6 +188,7 @@ let AuthService = class AuthService {
             if (gtk && gtk.jenis_ptk_id_str) {
                 return gtk.jenis_ptk_id_str;
             }
+            return 'Admin';
         }
         if (user.peserta_didik_id) {
             return 'Peserta Didik';

@@ -119,6 +119,33 @@ let DapodikController = class DapodikController {
             data,
         };
     }
+    async getPdRekapTingkat(req) {
+        const { sekolahId, namaApp } = this.getSekolahInfo(req);
+        const data = await this.dapodikService.getPdRekapTingkat(sekolahId);
+        return {
+            status: 'success',
+            klien: namaApp,
+            data,
+        };
+    }
+    async getPdRekapKompetensi(req) {
+        const { sekolahId, namaApp } = this.getSekolahInfo(req);
+        const data = await this.dapodikService.getPdRekapKompetensi(sekolahId);
+        return {
+            status: 'success',
+            klien: namaApp,
+            data,
+        };
+    }
+    async getPdRekapUsia(req) {
+        const { sekolahId, namaApp } = this.getSekolahInfo(req);
+        const data = await this.dapodikService.getPdRekapUsia(sekolahId);
+        return {
+            status: 'success',
+            klien: namaApp,
+            data,
+        };
+    }
     async getPesertaDidikList(req, limit, search, page, rombelName, status, tingkat) {
         const { sekolahId, namaApp } = this.getSekolahInfo(req);
         const take = limit ? parseInt(limit, 10) : 10;
@@ -136,11 +163,11 @@ let DapodikController = class DapodikController {
             }
         };
     }
-    async getRombonganBelajarList(req, type, limit, page) {
+    async getRombonganBelajarList(req, type, limit, page, search, tingkat) {
         const { sekolahId, namaApp } = this.getSekolahInfo(req);
         const take = limit ? parseInt(limit, 10) : 10;
         const skipPage = page ? parseInt(page, 10) : 1;
-        const { total, data } = await this.dapodikService.getRombonganBelajar(sekolahId, type, take, skipPage);
+        const { total, data } = await this.dapodikService.getRombonganBelajar(sekolahId, type, take, skipPage, search, tingkat);
         return {
             status: 'success',
             klien: namaApp,
@@ -153,9 +180,16 @@ let DapodikController = class DapodikController {
             }
         };
     }
-    async getEkstrakurikulerList(req) {
+    async getRombelAnggota(id) {
+        const data = await this.dapodikService.getRombelAnggota(id);
+        return {
+            status: 'success',
+            data,
+        };
+    }
+    async getEkstrakurikulerList(req, search) {
         const { sekolahId, namaApp } = this.getSekolahInfo(req);
-        const data = await this.dapodikService.getEkstrakurikuler(sekolahId);
+        const data = await this.dapodikService.getEkstrakurikuler(sekolahId, search);
         return {
             status: 'success',
             klien: namaApp,
@@ -205,6 +239,26 @@ let DapodikController = class DapodikController {
                 total_pages: Math.ceil(total / take)
             }
         };
+    }
+    async getGtkDetail(req, id) {
+        const { sekolahId } = this.getSekolahInfo(req);
+        const data = await this.dapodikService.getGtkById(sekolahId, id);
+        return { status: 'success', data };
+    }
+    async updateGtkDetail(req, id, body) {
+        const { sekolahId } = this.getSekolahInfo(req);
+        const data = await this.dapodikService.updateGtk(sekolahId, id, body);
+        return { status: 'success', data };
+    }
+    async getPesertaDidikDetail(req, id) {
+        const { sekolahId } = this.getSekolahInfo(req);
+        const data = await this.dapodikService.getPesertaDidikById(sekolahId, id);
+        return { status: 'success', data };
+    }
+    async updatePesertaDidikDetail(req, id, body) {
+        const { sekolahId } = this.getSekolahInfo(req);
+        const data = await this.dapodikService.updatePesertaDidik(sekolahId, id, body);
+        return { status: 'success', data };
     }
 };
 exports.DapodikController = DapodikController;
@@ -289,6 +343,27 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], DapodikController.prototype, "getRuangList", null);
 __decorate([
+    (0, common_1.Get)('peserta-didik/rekap-tingkat'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "getPdRekapTingkat", null);
+__decorate([
+    (0, common_1.Get)('peserta-didik/rekap-kompetensi'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "getPdRekapKompetensi", null);
+__decorate([
+    (0, common_1.Get)('peserta-didik/rekap-usia'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "getPdRekapUsia", null);
+__decorate([
     (0, common_1.Get)('peserta-didik'),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Query)('limit')),
@@ -307,15 +382,25 @@ __decorate([
     __param(1, (0, common_1.Query)('type')),
     __param(2, (0, common_1.Query)('limit')),
     __param(3, (0, common_1.Query)('page')),
+    __param(4, (0, common_1.Query)('search')),
+    __param(5, (0, common_1.Query)('tingkat')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, String, String]),
+    __metadata("design:paramtypes", [Object, String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], DapodikController.prototype, "getRombonganBelajarList", null);
 __decorate([
+    (0, common_1.Get)('rombongan-belajar/:id/anggota'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "getRombelAnggota", null);
+__decorate([
     (0, common_1.Get)('ekstrakurikuler'),
     __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('search')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], DapodikController.prototype, "getEkstrakurikulerList", null);
 __decorate([
@@ -347,6 +432,40 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], DapodikController.prototype, "getGtkList", null);
+__decorate([
+    (0, common_1.Get)('gtk/:id'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "getGtkDetail", null);
+__decorate([
+    (0, common_1.Patch)('gtk/:id'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, Object]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "updateGtkDetail", null);
+__decorate([
+    (0, common_1.Get)('peserta-didik/:id'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "getPesertaDidikDetail", null);
+__decorate([
+    (0, common_1.Patch)('peserta-didik/:id'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, Object]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "updatePesertaDidikDetail", null);
 exports.DapodikController = DapodikController = __decorate([
     (0, common_1.Controller)('dapodik'),
     (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
