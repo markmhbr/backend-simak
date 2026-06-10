@@ -228,6 +228,15 @@ export class DapodikController {
     };
   }
 
+  @Get('rombongan-belajar/:id/pembelajaran')
+  async getRombelPembelajaran(@Param('id') id: string) {
+    const data = await this.dapodikService.getRombelPembelajaran(id);
+    return {
+      status: 'success',
+      data,
+    };
+  }
+
   @Get('ekstrakurikuler')
   async getEkstrakurikulerList(
     @Req() req: Request,
@@ -277,6 +286,13 @@ export class DapodikController {
         total_pages: Math.ceil(total / take)
       }
     };
+  }
+
+  @Get('pembelajaran')
+  async getAllPembelajaran(@Req() req: Request) {
+    const { sekolahId, namaApp } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.getAllPembelajaran(sekolahId);
+    return { status: 'success', klien: namaApp, data };
   }
 
   @Get('gtk')

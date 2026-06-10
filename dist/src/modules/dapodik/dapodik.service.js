@@ -516,6 +516,44 @@ let DapodikService = class DapodikService {
             orderBy: { nama: 'asc' },
         });
     }
+    async getRombelPembelajaran(rombelId) {
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (!uuidRegex.test(rombelId)) {
+            return [];
+        }
+        const rombel = await this.prisma.rombonganBelajar.findUnique({
+            where: { rombongan_belajar_id: rombelId },
+            select: { nama: true, sekolah_id: true },
+        });
+        if (!rombel)
+            return [];
+        const relatedRombels = await this.prisma.rombonganBelajar.findMany({
+            where: {
+                nama: rombel.nama,
+                sekolah_id: rombel.sekolah_id,
+                jenis_rombel_str: { in: ['Kelas', 'Matapelajaran Pilihan'] },
+            },
+            select: { rombongan_belajar_id: true },
+        });
+        const rombelIds = relatedRombels.map((r) => r.rombongan_belajar_id);
+        return this.prisma.pembelajaran.findMany({
+            where: { rombongan_belajar_id: { in: rombelIds } },
+            select: {
+                pembelajaran_id: true,
+                nama_mata_pelajaran: true,
+                jam_mengajar_per_minggu: true,
+                ptk_id: true,
+                ptk_id_str: true,
+                gtk: {
+                    select: {
+                        nama: true,
+                        sekolah_id: true,
+                    },
+                },
+            },
+            orderBy: { nama_mata_pelajaran: 'asc' },
+        });
+    }
     async getEkstrakurikuler(sekolahId, search) {
         const filter = this.getSekolahFilter(sekolahId);
         let whereClause = {
@@ -611,6 +649,32 @@ let DapodikService = class DapodikService {
             }),
         ]);
         return { total, data };
+    }
+    async getAllPembelajaran(sekolahId) {
+        const filter = this.getSekolahFilter(sekolahId);
+        return this.prisma.pembelajaran.findMany({
+            where: { sekolah_id: filter.sekolah_id },
+            select: {
+                pembelajaran_id: true,
+                rombongan_belajar_id: true,
+                nama_mata_pelajaran: true,
+                jam_mengajar_per_minggu: true,
+                ptk_id: true,
+                ptk_id_str: true,
+                gtk: {
+                    select: {
+                        nama: true,
+                    },
+                },
+                rombongan_belajar: {
+                    select: {
+                        rombongan_belajar_id: true,
+                        nama: true,
+                    },
+                },
+            },
+            orderBy: { nama_mata_pelajaran: 'asc' },
+        });
     }
     async getGtk(sekolahId, limit = 10, search, page = 1, type, status) {
         const filter = this.getSekolahFilter(sekolahId);

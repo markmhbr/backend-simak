@@ -20,6 +20,9 @@ const crypto_module_1 = require("./core/crypto/crypto.module");
 const auth_module_1 = require("./modules/auth/auth.module");
 const dapodik_module_1 = require("./modules/dapodik/dapodik.module");
 const sync_module_1 = require("./modules/sync/sync.module");
+const kurikulum_module_1 = require("./modules/kurikulum/kurikulum.module");
+const jadwal_module_1 = require("./modules/jadwal/jadwal.module");
+const absensi_module_1 = require("./modules/absensi/absensi.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -36,6 +39,9 @@ exports.AppModule = AppModule = __decorate([
             auth_module_1.AuthModule,
             dapodik_module_1.DapodikModule,
             sync_module_1.SyncModule,
+            kurikulum_module_1.KurikulumModule,
+            jadwal_module_1.JadwalModule,
+            absensi_module_1.AbsensiModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [

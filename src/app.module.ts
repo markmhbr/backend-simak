@@ -11,6 +11,9 @@ import { CryptoModule } from './core/crypto/crypto.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { DapodikModule } from './modules/dapodik/dapodik.module';
 import { SyncModule } from './modules/sync/sync.module';
+import { KurikulumModule } from './modules/kurikulum/kurikulum.module';
+import { JadwalModule } from './modules/jadwal/jadwal.module';
+import { AbsensiModule } from './modules/absensi/absensi.module';
 
 @Module({
   imports: [
@@ -24,6 +27,9 @@ import { SyncModule } from './modules/sync/sync.module';
     AuthModule,
     DapodikModule,
     SyncModule,
+    KurikulumModule,
+    JadwalModule,
+    AbsensiModule,
   ],
 
 

@@ -1,11 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../core/prisma/prisma.service';
+import { AppKeyService } from '../../core/app-key/app-key.service';
 
 @Injectable()
 export class SyncService {
   private readonly logger = new Logger(SyncService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly appKeyService: AppKeyService,
+  ) {}
 
   async validateAndRegisterDomain(key: string, domain: string) {
     const appKey = await this.prisma.appKey.findFirst({
@@ -22,11 +26,8 @@ export class SyncService {
       throw new Error("API Key dinonaktifkan.");
     }
 
-    // Update domain untuk key ini
-    await this.prisma.appKey.update({
-      where: { id: appKey.id },
-      data: { domain: domain },
-    });
+    // Update domain dan generate QR Token massal secara otomatis
+    await this.appKeyService.updateSchoolDomain(appKey.sekolah_id, domain);
 
     return {
       nama_app: appKey.nama_app,
@@ -209,15 +210,25 @@ export class SyncService {
 
   async syncSiswa(sekolahId: string, dataRows: any[]) {
     let successCount = 0;
+    
+    // Ambil domain sekolah untuk auto-generate qr_token
+    const appKey = await this.prisma.appKey.findUnique({ where: { sekolah_id: sekolahId } });
+    const domain = appKey?.domain?.replace(/\/+$/, '') || '';
+
     for (const p of dataRows) {
       if (!p.peserta_didik_id) continue;
+
+      let qr_token = p.qr_token || null;
+      if (!qr_token && domain) {
+        qr_token = `${domain}/${p.peserta_didik_id}`;
+      }
 
       const payload = {
         sekolah_id: sekolahId,
         registrasi_id: p.registrasi_id || null,
         anggota_rombel_id: p.anggota_rombel_id || null,
         rombongan_belajar_id: p.rombongan_belajar_id || null,
-        qr_token: p.qr_token || null,
+        qr_token,
         status: p.status || 'Aktif',
         foto: p.foto || null,
         telegram_chat_id: p.telegram_chat_id || null,
@@ -363,8 +374,18 @@ export class SyncService {
 
   async syncGtk(sekolahId: string, dataRows: any[]) {
     let successCount = 0;
+
+    // Ambil domain sekolah untuk auto-generate qr_token
+    const appKey = await this.prisma.appKey.findUnique({ where: { sekolah_id: sekolahId } });
+    const domain = appKey?.domain?.replace(/\/+$/, '') || '';
+
     for (const g of dataRows) {
       if (!g.ptk_id) continue;
+
+      let qr_token = g.qr_token || null;
+      if (!qr_token && domain) {
+        qr_token = `${domain}/${g.ptk_id}`;
+      }
 
       const payload = {
         ptk_terdaftar_id: g.ptk_terdaftar_id || null,
@@ -374,7 +395,7 @@ export class SyncService {
         kode: g.kode || null,
         status: g.status || 'Aktif',
         sk_mengajar: g.sk_mengajar || null,
-        qr_token: g.qr_token || null,
+        qr_token,
         nama: g.nama || 'Tanpa Nama',
         jenis_kelamin: g.jenis_kelamin || null,
         tempat_lahir: g.tempat_lahir || null,

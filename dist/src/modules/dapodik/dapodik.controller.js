@@ -187,6 +187,13 @@ let DapodikController = class DapodikController {
             data,
         };
     }
+    async getRombelPembelajaran(id) {
+        const data = await this.dapodikService.getRombelPembelajaran(id);
+        return {
+            status: 'success',
+            data,
+        };
+    }
     async getEkstrakurikulerList(req, search) {
         const { sekolahId, namaApp } = this.getSekolahInfo(req);
         const data = await this.dapodikService.getEkstrakurikuler(sekolahId, search);
@@ -222,6 +229,11 @@ let DapodikController = class DapodikController {
                 total_pages: Math.ceil(total / take)
             }
         };
+    }
+    async getAllPembelajaran(req) {
+        const { sekolahId, namaApp } = this.getSekolahInfo(req);
+        const data = await this.dapodikService.getAllPembelajaran(sekolahId);
+        return { status: 'success', klien: namaApp, data };
     }
     async getGtkList(req, limit, search, page, type, status) {
         const { sekolahId, namaApp } = this.getSekolahInfo(req);
@@ -396,6 +408,13 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], DapodikController.prototype, "getRombelAnggota", null);
 __decorate([
+    (0, common_1.Get)('rombongan-belajar/:id/pembelajaran'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "getRombelPembelajaran", null);
+__decorate([
     (0, common_1.Get)('ekstrakurikuler'),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Query)('search')),
@@ -420,6 +439,13 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, String, String]),
     __metadata("design:returntype", Promise)
 ], DapodikController.prototype, "getMataPelajaranList", null);
+__decorate([
+    (0, common_1.Get)('pembelajaran'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "getAllPembelajaran", null);
 __decorate([
     (0, common_1.Get)('gtk'),
     __param(0, (0, common_1.Req)()),

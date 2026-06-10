@@ -1,8 +1,10 @@
 import { PrismaService } from '../../core/prisma/prisma.service';
+import { AppKeyService } from '../../core/app-key/app-key.service';
 export declare class SyncService {
     private readonly prisma;
+    private readonly appKeyService;
     private readonly logger;
-    constructor(prisma: PrismaService);
+    constructor(prisma: PrismaService, appKeyService: AppKeyService);
     validateAndRegisterDomain(key: string, domain: string): Promise<{
         nama_app: string;
         sekolah_id: string;

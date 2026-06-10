@@ -125,6 +125,37 @@ export class AppKeyService {
   }
 
   /**
+   * Mengupdate domain sekolah dan memperbarui semua QR Token siswa & GTK
+   */
+  async updateSchoolDomain(sekolahId: string, domain: string) {
+    const cleanDomain = domain.replace(/\/+$/, ''); // Hapus trailing slash
+
+    return await this.prisma.$transaction(async (tx) => {
+      // 1. Update domain di AppKey
+      const updatedKey = await tx.appKey.update({
+        where: { sekolah_id: sekolahId },
+        data: { domain: cleanDomain },
+      });
+
+      // 2. Update massal qr_token di PesertaDidik (Menggunakan Raw SQL untuk performa dan concat UUID)
+      await tx.$executeRaw`
+        UPDATE dapodik.peserta_didik 
+        SET qr_token = ${cleanDomain} || '/' || peserta_didik_id::text
+        WHERE sekolah_id = ${sekolahId}::uuid
+      `;
+
+      // 3. Update massal qr_token di Gtk
+      await tx.$executeRaw`
+        UPDATE dapodik.gtks 
+        SET qr_token = ${cleanDomain} || '/' || ptk_id::text
+        WHERE sekolah_id = ${sekolahId}::uuid
+      `;
+
+      return updatedKey;
+    });
+  }
+
+  /**
    * Mengaktifkan atau menonaktifkan key
    */
   async toggleActive(id: string) {

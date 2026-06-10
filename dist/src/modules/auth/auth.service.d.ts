@@ -53,16 +53,16 @@ export declare class AuthService {
         registeredDomain: string;
     }>;
     setupSystem(apiKey: string, domain: string): Promise<{
-        sekolah_id: string;
-        created_at: Date;
-        updated_at: Date;
         id: string;
+        sekolah_id: string;
         nama_app: string;
         key_api: string;
         key_webService: string | null;
         key_adminPanel: string | null;
-        domain: string | null;
         is_active: boolean;
+        created_at: Date;
+        updated_at: Date;
+        domain: string | null;
     }>;
     refreshTokens(refreshToken: string): Promise<{
         accessToken: string;

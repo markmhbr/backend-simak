@@ -13,11 +13,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SyncService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../core/prisma/prisma.service");
+const app_key_service_1 = require("../../core/app-key/app-key.service");
 let SyncService = SyncService_1 = class SyncService {
     prisma;
+    appKeyService;
     logger = new common_1.Logger(SyncService_1.name);
-    constructor(prisma) {
+    constructor(prisma, appKeyService) {
         this.prisma = prisma;
+        this.appKeyService = appKeyService;
     }
     async validateAndRegisterDomain(key, domain) {
         const appKey = await this.prisma.appKey.findFirst({
@@ -31,10 +34,7 @@ let SyncService = SyncService_1 = class SyncService {
         if (!appKey.is_active) {
             throw new Error("API Key dinonaktifkan.");
         }
-        await this.prisma.appKey.update({
-            where: { id: appKey.id },
-            data: { domain: domain },
-        });
+        await this.appKeyService.updateSchoolDomain(appKey.sekolah_id, domain);
         return {
             nama_app: appKey.nama_app,
             sekolah_id: appKey.sekolah_id,
@@ -207,15 +207,21 @@ let SyncService = SyncService_1 = class SyncService {
     }
     async syncSiswa(sekolahId, dataRows) {
         let successCount = 0;
+        const appKey = await this.prisma.appKey.findUnique({ where: { sekolah_id: sekolahId } });
+        const domain = appKey?.domain?.replace(/\/+$/, '') || '';
         for (const p of dataRows) {
             if (!p.peserta_didik_id)
                 continue;
+            let qr_token = p.qr_token || null;
+            if (!qr_token && domain) {
+                qr_token = `${domain}/${p.peserta_didik_id}`;
+            }
             const payload = {
                 sekolah_id: sekolahId,
                 registrasi_id: p.registrasi_id || null,
                 anggota_rombel_id: p.anggota_rombel_id || null,
                 rombongan_belajar_id: p.rombongan_belajar_id || null,
-                qr_token: p.qr_token || null,
+                qr_token,
                 status: p.status || 'Aktif',
                 foto: p.foto || null,
                 telegram_chat_id: p.telegram_chat_id || null,
@@ -356,9 +362,15 @@ let SyncService = SyncService_1 = class SyncService {
     }
     async syncGtk(sekolahId, dataRows) {
         let successCount = 0;
+        const appKey = await this.prisma.appKey.findUnique({ where: { sekolah_id: sekolahId } });
+        const domain = appKey?.domain?.replace(/\/+$/, '') || '';
         for (const g of dataRows) {
             if (!g.ptk_id)
                 continue;
+            let qr_token = g.qr_token || null;
+            if (!qr_token && domain) {
+                qr_token = `${domain}/${g.ptk_id}`;
+            }
             const payload = {
                 ptk_terdaftar_id: g.ptk_terdaftar_id || null,
                 tahun_ajaran_id: String(g.tahun_ajaran_id || ''),
@@ -367,7 +379,7 @@ let SyncService = SyncService_1 = class SyncService {
                 kode: g.kode || null,
                 status: g.status || 'Aktif',
                 sk_mengajar: g.sk_mengajar || null,
-                qr_token: g.qr_token || null,
+                qr_token,
                 nama: g.nama || 'Tanpa Nama',
                 jenis_kelamin: g.jenis_kelamin || null,
                 tempat_lahir: g.tempat_lahir || null,
@@ -690,6 +702,7 @@ let SyncService = SyncService_1 = class SyncService {
 exports.SyncService = SyncService;
 exports.SyncService = SyncService = SyncService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        app_key_service_1.AppKeyService])
 ], SyncService);
 //# sourceMappingURL=sync.service.js.map

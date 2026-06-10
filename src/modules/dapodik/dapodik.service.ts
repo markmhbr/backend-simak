@@ -566,6 +566,52 @@ export class DapodikService {
     });
   }
 
+  async getRombelPembelajaran(rombelId: string) {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(rombelId)) {
+      return [];
+    }
+
+    // 1. Cari dulu nama rombel ini
+    const rombel = await this.prisma.rombonganBelajar.findUnique({
+      where: { rombongan_belajar_id: rombelId },
+      select: { nama: true, sekolah_id: true },
+    });
+
+    if (!rombel) return [];
+
+    // 2. Cari semua rombel yang namanya sama (untuk menarik Matapelajaran Pilihan yang namanya sama dengan Kelas)
+    const relatedRombels = await this.prisma.rombonganBelajar.findMany({
+      where: {
+        nama: rombel.nama,
+        sekolah_id: rombel.sekolah_id,
+        jenis_rombel_str: { in: ['Kelas', 'Matapelajaran Pilihan'] },
+      },
+      select: { rombongan_belajar_id: true },
+    });
+
+    const rombelIds = relatedRombels.map((r) => r.rombongan_belajar_id);
+
+    // 3. Tarik semua pembelajaran dari rombel-rombel tersebut
+    return this.prisma.pembelajaran.findMany({
+      where: { rombongan_belajar_id: { in: rombelIds } },
+      select: {
+        pembelajaran_id: true,
+        nama_mata_pelajaran: true,
+        jam_mengajar_per_minggu: true,
+        ptk_id: true,
+        ptk_id_str: true, // Fallback nama guru dari dapodik
+        gtk: {
+          select: {
+            nama: true,
+            sekolah_id: true,
+          },
+        },
+      },
+      orderBy: { nama_mata_pelajaran: 'asc' },
+    });
+  }
+
   async getEkstrakurikuler(sekolahId: string | null, search?: string) {
     const filter = this.getSekolahFilter(sekolahId);
     
@@ -676,6 +722,33 @@ export class DapodikService {
     ]);
 
     return { total, data };
+  }
+
+  async getAllPembelajaran(sekolahId: string | null) {
+    const filter = this.getSekolahFilter(sekolahId);
+    return this.prisma.pembelajaran.findMany({
+      where: { sekolah_id: filter.sekolah_id },
+      select: {
+        pembelajaran_id: true,
+        rombongan_belajar_id: true,
+        nama_mata_pelajaran: true,
+        jam_mengajar_per_minggu: true,
+        ptk_id: true,
+        ptk_id_str: true,
+        gtk: {
+          select: {
+            nama: true,
+          },
+        },
+        rombongan_belajar: {
+          select: {
+            rombongan_belajar_id: true,
+            nama: true,
+          },
+        },
+      },
+      orderBy: { nama_mata_pelajaran: 'asc' },
+    });
   }
 
   async getGtk(sekolahId: string | null, limit: number = 10, search?: string, page: number = 1, type?: 'guru' | 'tendik', status?: 'aktif' | 'non-aktif') {

@@ -136,6 +136,26 @@ let AppKeyService = class AppKeyService {
             },
         });
     }
+    async updateSchoolDomain(sekolahId, domain) {
+        const cleanDomain = domain.replace(/\/+$/, '');
+        return await this.prisma.$transaction(async (tx) => {
+            const updatedKey = await tx.appKey.update({
+                where: { sekolah_id: sekolahId },
+                data: { domain: cleanDomain },
+            });
+            await tx.$executeRaw `
+        UPDATE dapodik.peserta_didik 
+        SET qr_token = ${cleanDomain} || '/' || peserta_didik_id::text
+        WHERE sekolah_id = ${sekolahId}::uuid
+      `;
+            await tx.$executeRaw `
+        UPDATE dapodik.gtks 
+        SET qr_token = ${cleanDomain} || '/' || ptk_id::text
+        WHERE sekolah_id = ${sekolahId}::uuid
+      `;
+            return updatedKey;
+        });
+    }
     async toggleActive(id) {
         const existing = await this.prisma.appKey.findUnique({ where: { id } });
         if (!existing) {
