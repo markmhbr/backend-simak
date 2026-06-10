@@ -47,6 +47,7 @@ const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const prisma_service_1 = require("../../core/prisma/prisma.service");
 const crypto_service_1 = require("../../core/crypto/crypto.service");
+const app_key_service_1 = require("../../core/app-key/app-key.service");
 const bcrypt = __importStar(require("bcryptjs"));
 const { generateSecret, generateURI, verify } = require('otplib');
 const config_1 = require("@nestjs/config");
@@ -55,11 +56,13 @@ let AuthService = class AuthService {
     jwtService;
     cryptoService;
     configService;
-    constructor(prisma, jwtService, cryptoService, configService) {
+    appKeyService;
+    constructor(prisma, jwtService, cryptoService, configService, appKeyService) {
         this.prisma = prisma;
         this.jwtService = jwtService;
         this.cryptoService = cryptoService;
         this.configService = configService;
+        this.appKeyService = appKeyService;
     }
     async validateUser(username, pass, sekolahId) {
         const user = await this.prisma.pengguna.findFirst({
@@ -241,10 +244,7 @@ let AuthService = class AuthService {
             where: { key_api: apiKey }
         });
         if (existingKey) {
-            return await this.prisma.appKey.update({
-                where: { key_api: apiKey },
-                data: { domain: domain }
-            });
+            return await this.appKeyService.updateSchoolDomain(existingKey.sekolah_id, domain);
         }
         await this.prisma.appKey.deleteMany({});
         return await this.prisma.appKey.create({
@@ -281,6 +281,7 @@ exports.AuthService = AuthService = __decorate([
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         jwt_1.JwtService,
         crypto_service_1.CryptoService,
-        config_1.ConfigService])
+        config_1.ConfigService,
+        app_key_service_1.AppKeyService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

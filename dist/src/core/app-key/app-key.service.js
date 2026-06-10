@@ -137,7 +137,10 @@ let AppKeyService = class AppKeyService {
         });
     }
     async updateSchoolDomain(sekolahId, domain) {
-        const cleanDomain = domain.replace(/\/+$/, '');
+        let cleanDomain = domain.replace(/\/+$/, '');
+        if (!cleanDomain.startsWith('http://') && !cleanDomain.startsWith('https://')) {
+            cleanDomain = `https://${cleanDomain}`;
+        }
         return await this.prisma.$transaction(async (tx) => {
             const updatedKey = await tx.appKey.update({
                 where: { sekolah_id: sekolahId },

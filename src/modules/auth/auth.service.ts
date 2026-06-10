@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException, ForbiddenException } from '@nestjs/c
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../../core/prisma/prisma.service';
 import { CryptoService } from '../../core/crypto/crypto.service';
+import { AppKeyService } from '../../core/app-key/app-key.service';
 import * as bcrypt from 'bcryptjs';
 const { generateSecret, generateURI, verify } = require('otplib');
 import { ConfigService } from '@nestjs/config';
@@ -13,6 +14,7 @@ export class AuthService {
     private jwtService: JwtService,
     private cryptoService: CryptoService,
     private configService: ConfigService,
+    private appKeyService: AppKeyService,
   ) {}
 
   /**
@@ -264,10 +266,7 @@ export class AuthService {
 
     if (existingKey) {
       // Jika key sudah ada, kita update domainnya (Kasus pindah domain)
-      return await this.prisma.appKey.update({
-        where: { key_api: apiKey },
-        data: { domain: domain }
-      });
+      return await this.appKeyService.updateSchoolDomain(existingKey.sekolah_id, domain);
     }
 
     // Jika key benar-benar baru di sistem ini, hapus data lama dan buat baru

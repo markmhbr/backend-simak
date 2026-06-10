@@ -128,7 +128,12 @@ export class AppKeyService {
    * Mengupdate domain sekolah dan memperbarui semua QR Token siswa & GTK
    */
   async updateSchoolDomain(sekolahId: string, domain: string) {
-    const cleanDomain = domain.replace(/\/+$/, ''); // Hapus trailing slash
+    let cleanDomain = domain.replace(/\/+$/, ''); // Hapus trailing slash
+    
+    // Pastikan ada protokol http:// atau https://
+    if (!cleanDomain.startsWith('http://') && !cleanDomain.startsWith('https://')) {
+      cleanDomain = `https://${cleanDomain}`;
+    }
 
     return await this.prisma.$transaction(async (tx) => {
       // 1. Update domain di AppKey

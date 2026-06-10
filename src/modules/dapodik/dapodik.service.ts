@@ -248,6 +248,16 @@ export class DapodikService {
         where: whereClause,
         take: limit,
         skip: skip,
+        select: {
+          peserta_didik_id: true,
+          nama: true,
+          nisn: true,
+          nipd: true,
+          jenis_kelamin: true,
+          foto: true,
+          qr_token: true,
+          nama_rombel: true,
+        },
         orderBy: { nama: 'asc' },
       }),
     ]);
@@ -542,14 +552,13 @@ export class DapodikService {
           nipd: true,
           jenis_kelamin: true,
           foto: true,
+          qr_token: true,
         },
         orderBy: { nama: 'asc' },
       });
     }
 
-    // Jika di anggotaRombel kosong, coba cari langsung di tabel PesertaDidik
-    // karena syncSiswa biasanya mengisi rombongan_belajar_id di sana
-    return await this.prisma.pesertaDidik.findMany({
+    const students = await this.prisma.pesertaDidik.findMany({
       where: {
         rombongan_belajar_id: rombelId,
         status: 'Aktif'
@@ -561,9 +570,13 @@ export class DapodikService {
         nipd: true,
         jenis_kelamin: true,
         foto: true,
+        qr_token: true,
       },
       orderBy: { nama: 'asc' },
     });
+
+    console.log(`[Backend Debug] Sending ${students.length} students. First student QR:`, students[0]?.qr_token);
+    return students;
   }
 
   async getRombelPembelajaran(rombelId: string) {
@@ -789,6 +802,16 @@ export class DapodikService {
         where: whereClause,
         take: limit,
         skip: skip,
+        select: {
+          ptk_id: true,
+          nama: true,
+          nuptk: true,
+          nip: true,
+          foto: true,
+          qr_token: true,
+          jabatan_ptk_id_str: true,
+          jenis_ptk_id_str: true,
+        },
         orderBy: { nama: 'asc' },
       }),
     ]);

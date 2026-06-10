@@ -1,13 +1,15 @@
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../../core/prisma/prisma.service';
 import { CryptoService } from '../../core/crypto/crypto.service';
+import { AppKeyService } from '../../core/app-key/app-key.service';
 import { ConfigService } from '@nestjs/config';
 export declare class AuthService {
     private prisma;
     private jwtService;
     private cryptoService;
     private configService;
-    constructor(prisma: PrismaService, jwtService: JwtService, cryptoService: CryptoService, configService: ConfigService);
+    private appKeyService;
+    constructor(prisma: PrismaService, jwtService: JwtService, cryptoService: CryptoService, configService: ConfigService, appKeyService: AppKeyService);
     validateUser(username: string, pass: string, sekolahId?: string): Promise<{
         accessToken: string;
         refreshToken: string;

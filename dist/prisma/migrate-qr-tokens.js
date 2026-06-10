@@ -25,18 +25,21 @@ async function main() {
     });
     console.log(`Ditemukan ${appKeys.length} sekolah dengan domain terkonfigurasi.`);
     for (const key of appKeys) {
-        const domain = key.domain.replace(/\/+$/, '');
+        let domain = key.domain.replace(/\/+$/, '');
+        if (!domain.startsWith('http://') && !domain.startsWith('https://')) {
+            domain = `https://${domain}`;
+        }
         const sekolahId = key.sekolah_id;
         console.log(`Memproses sekolah: ${key.nama_app} (${domain})`);
         const pdCount = await prisma.$executeRaw `
       UPDATE dapodik.peserta_didik 
       SET qr_token = ${domain} || '/' || peserta_didik_id::text
-      WHERE sekolah_id = ${sekolahId}::uuid AND (qr_token IS NULL OR qr_token = '')
+      WHERE sekolah_id = ${sekolahId}::uuid
     `;
         const gtkCount = await prisma.$executeRaw `
       UPDATE dapodik.gtks 
       SET qr_token = ${domain} || '/' || ptk_id::text
-      WHERE sekolah_id = ${sekolahId}::uuid AND (qr_token IS NULL OR qr_token = '')
+      WHERE sekolah_id = ${sekolahId}::uuid
     `;
         console.log(`   - Berhasil update ${pdCount} Siswa dan ${gtkCount} GTK.`);
     }
