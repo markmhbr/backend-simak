@@ -49,10 +49,10 @@ let SyncController = class SyncController {
         const result = await this.syncService.syncRombel(sekolahId, rows);
         return { status: 'success', count: result.successCount };
     }
-    async syncSiswa(req, data) {
+    async syncPesertaDidik(req, data) {
         const sekolahId = this.getSekolahId(req);
         const rows = Array.isArray(data) ? data : [data];
-        const result = await this.syncService.syncSiswa(sekolahId, rows);
+        const result = await this.syncService.syncPesertaDidik(sekolahId, rows);
         return { status: 'success', count: result.successCount };
     }
     async syncGtk(req, data) {
@@ -122,7 +122,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], SyncController.prototype, "syncRombel", null);
 __decorate([
-    (0, common_1.Post)('siswa'),
+    (0, common_1.Post)(['siswa', 'pesertadidik']),
     (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     __param(0, (0, common_1.Req)()),
@@ -130,7 +130,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Array]),
     __metadata("design:returntype", Promise)
-], SyncController.prototype, "syncSiswa", null);
+], SyncController.prototype, "syncPesertaDidik", null);
 __decorate([
     (0, common_1.Post)('gtk'),
     (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),

@@ -1,5 +1,5 @@
 import { PrismaService } from '../../core/prisma/prisma.service';
-export declare class AbsensiService {
+export declare class PresensiService {
     private readonly prisma;
     constructor(prisma: PrismaService);
     getHariLibur(sekolahId: string): Promise<{
@@ -32,7 +32,7 @@ export declare class AbsensiService {
     deleteHariLibur(sekolahId: string, hariLiburId: string): Promise<import("@prisma/client").Prisma.BatchPayload>;
     private checkHoliday;
     private getActiveSchedule;
-    absenPesertaDidik(sekolahId: string, data: {
+    presensiPesertaDidik(sekolahId: string, data: {
         peserta_didik_id: string;
         waktu: string;
         tipe: 'masuk' | 'pulang';
@@ -47,7 +47,7 @@ export declare class AbsensiService {
         status_masuk: number | null;
         status_pulang: number | null;
     }>;
-    absenGtk(sekolahId: string, data: {
+    presensiGtk(sekolahId: string, data: {
         ptk_id: string;
         waktu: string;
         tipe: 'masuk' | 'pulang';
@@ -62,7 +62,7 @@ export declare class AbsensiService {
         status_masuk: number | null;
         status_pulang: number | null;
     }>;
-    absenMapel(sekolahId: string, data: {
+    presensiMapel(sekolahId: string, data: {
         jadwal_pelajaran_id: string;
         peserta_didik_id: string;
         tanggal: string;
@@ -82,18 +82,7 @@ export declare class AbsensiService {
         jenis: number;
         tanggal: string;
         keterangan: string;
-    }): Promise<{
-        sekolah_id: string;
-        created_at: Date;
-        updated_at: Date;
-        ptk_id: string | null;
-        peserta_didik_id: string | null;
-        keterangan: string;
-        tanggal: Date;
-        izin_id: string;
-        jenis: number;
-        disetujui: boolean;
-    }>;
+    }): Promise<any>;
     getAttendanceConfig(sekolahId: string): Promise<{
         sekolah_nama: string;
         sekolah_id: string;
@@ -107,6 +96,20 @@ export declare class AbsensiService {
             rombongan_belajar_id: string;
             nisn: string;
         };
+        activeIzinKeluar: {
+            sekolah_id: string;
+            created_at: Date;
+            updated_at: Date;
+            ptk_id: string | null;
+            peserta_didik_id: string | null;
+            keterangan: string;
+            tanggal: Date;
+            izin_id: string;
+            jenis: number;
+            jam_keluar: Date | null;
+            jam_kembali: Date | null;
+            disetujui: boolean;
+        };
     } | {
         type: string;
         data: {
@@ -114,8 +117,29 @@ export declare class AbsensiService {
             ptk_id: string;
             nuptk: string;
         };
+        activeIzinKeluar: {
+            sekolah_id: string;
+            created_at: Date;
+            updated_at: Date;
+            ptk_id: string | null;
+            peserta_didik_id: string | null;
+            keterangan: string;
+            tanggal: Date;
+            izin_id: string;
+            jenis: number;
+            jam_keluar: Date | null;
+            jam_kembali: Date | null;
+            disetujui: boolean;
+        };
     }>;
     scanQr(sekolahId: string, token: string): Promise<{
+        peserta_didik: {
+            nama: string;
+            foto: string;
+            nisn: string;
+            rombongan_belajar_id: string;
+            nama_rombel: string;
+        };
         sekolah_id: string;
         created_at: Date;
         updated_at: Date;
@@ -126,6 +150,12 @@ export declare class AbsensiService {
         status_masuk: number | null;
         status_pulang: number | null;
     } | {
+        gtk: {
+            nama: string;
+            foto: string;
+            nuptk: string;
+            jenis_ptk_id_str: string;
+        };
         sekolah_id: string;
         created_at: Date;
         updated_at: Date;
@@ -136,4 +166,40 @@ export declare class AbsensiService {
         status_masuk: number | null;
         status_pulang: number | null;
     }>;
+    getPresensiPesertaDidik(sekolahId: string, dateStr?: string): Promise<{
+        presensi: {
+            sekolah_id: string;
+            created_at: Date;
+            updated_at: Date;
+            peserta_didik_id: string;
+            jam_masuk: Date | null;
+            jam_pulang: Date | null;
+            tanggal: Date;
+            status_masuk: number | null;
+            status_pulang: number | null;
+        };
+        nama: string;
+        peserta_didik_id: string;
+        foto: string;
+        nisn: string;
+        nama_rombel: string;
+    }[]>;
+    getPresensiGtk(sekolahId: string, dateStr?: string): Promise<{
+        presensi: {
+            sekolah_id: string;
+            created_at: Date;
+            updated_at: Date;
+            ptk_id: string;
+            jam_masuk: Date | null;
+            jam_pulang: Date | null;
+            tanggal: Date;
+            status_masuk: number | null;
+            status_pulang: number | null;
+        };
+        nama: string;
+        ptk_id: string;
+        nuptk: string;
+        jenis_ptk_id_str: string;
+        foto: string;
+    }[]>;
 }

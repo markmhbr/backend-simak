@@ -15,6 +15,8 @@ declare class EnvironmentVariables {
     ENCRYPTION_KEY: string;
     REDIS_HOST: string;
     REDIS_PORT: number;
+    URL_MANDALA?: string;
+    KEY_MANDALA?: string;
 }
 export declare function validate(config: Record<string, unknown>): EnvironmentVariables;
 export {};

@@ -367,6 +367,7 @@ export declare class DapodikService {
             ptk_id: string;
             qr_token: string;
             nuptk: string;
+            nik: string;
             jenis_ptk_id_str: string;
             jabatan_ptk_id_str: string;
             nip: string;

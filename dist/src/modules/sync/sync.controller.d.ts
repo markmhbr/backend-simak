@@ -23,7 +23,7 @@ export declare class SyncController {
         status: string;
         count: number;
     }>;
-    syncSiswa(req: Request, data: any[]): Promise<{
+    syncPesertaDidik(req: Request, data: any[]): Promise<{
         status: string;
         count: number;
     }>;

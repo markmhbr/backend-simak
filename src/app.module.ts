@@ -13,7 +13,8 @@ import { DapodikModule } from './modules/dapodik/dapodik.module';
 import { SyncModule } from './modules/sync/sync.module';
 import { KurikulumModule } from './modules/kurikulum/kurikulum.module';
 import { JadwalModule } from './modules/jadwal/jadwal.module';
-import { AbsensiModule } from './modules/absensi/absensi.module';
+import { PresensiModule } from './modules/presensi/presensi.module';
+import { MandalaModule } from './modules/mandala/mandala.module';
 
 @Module({
   imports: [
@@ -29,7 +30,8 @@ import { AbsensiModule } from './modules/absensi/absensi.module';
     SyncModule,
     KurikulumModule,
     JadwalModule,
-    AbsensiModule,
+    PresensiModule,
+    MandalaModule,
   ],
 
 

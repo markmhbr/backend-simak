@@ -205,7 +205,7 @@ let SyncService = SyncService_1 = class SyncService {
         }
         return { successCount };
     }
-    async syncSiswa(sekolahId, dataRows) {
+    async syncPesertaDidik(sekolahId, dataRows) {
         let successCount = 0;
         const appKey = await this.prisma.appKey.findUnique({ where: { sekolah_id: sekolahId } });
         const domain = appKey?.domain?.replace(/\/+$/, '') || '';

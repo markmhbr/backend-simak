@@ -40,6 +40,14 @@ class EnvironmentVariables {
 
   @IsNumber()
   REDIS_PORT: number;
+
+  @IsOptional()
+  @IsString()
+  URL_MANDALA?: string;
+
+  @IsOptional()
+  @IsString()
+  KEY_MANDALA?: string;
 }
 
 export function validate(config: Record<string, unknown>) {

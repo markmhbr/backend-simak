@@ -728,6 +728,7 @@ let DapodikService = class DapodikService {
                     ptk_id: true,
                     nama: true,
                     nuptk: true,
+                    nik: true,
                     nip: true,
                     foto: true,
                     qr_token: true,

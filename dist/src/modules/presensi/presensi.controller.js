@@ -45,51 +45,57 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AbsensiController = void 0;
+exports.PresensiController = void 0;
 const common_1 = require("@nestjs/common");
-const absensi_service_1 = require("./absensi.service");
+const presensi_service_1 = require("./presensi.service");
 const api_key_guard_1 = require("../../core/app-key/api-key.guard");
 const express = __importStar(require("express"));
-let AbsensiController = class AbsensiController {
-    absensiService;
-    constructor(absensiService) {
-        this.absensiService = absensiService;
+let PresensiController = class PresensiController {
+    presensiService;
+    constructor(presensiService) {
+        this.presensiService = presensiService;
     }
     getConfig(req) {
         const appKey = req['appKey'];
-        return this.absensiService.getAttendanceConfig(appKey.sekolah_id);
+        return this.presensiService.getAttendanceConfig(appKey.sekolah_id);
     }
     scanQr(req, data) {
         const appKey = req['appKey'];
-        return this.absensiService.scanQr(appKey.sekolah_id, data.token);
+        return this.presensiService.scanQr(appKey.sekolah_id, data.token);
     }
     lookupUser(req, data) {
         const appKey = req['appKey'];
-        return this.absensiService.findUserByQr(appKey.sekolah_id, data.token);
+        return this.presensiService.findUserByQr(appKey.sekolah_id, data.token);
     }
     getHariLibur(sekolahId) {
-        return this.absensiService.getHariLibur(sekolahId);
+        return this.presensiService.getHariLibur(sekolahId);
     }
     createHariLibur(sekolahId, data) {
-        return this.absensiService.createHariLibur(sekolahId, data);
+        return this.presensiService.createHariLibur(sekolahId, data);
     }
     deleteHariLibur(sekolahId, id) {
-        return this.absensiService.deleteHariLibur(sekolahId, id);
+        return this.presensiService.deleteHariLibur(sekolahId, id);
     }
-    absenPesertaDidik(sekolahId, data) {
-        return this.absensiService.absenPesertaDidik(sekolahId, data);
+    presensiPesertaDidik(sekolahId, data) {
+        return this.presensiService.presensiPesertaDidik(sekolahId, data);
     }
-    absenGtk(sekolahId, data) {
-        return this.absensiService.absenGtk(sekolahId, data);
+    presensiGtk(sekolahId, data) {
+        return this.presensiService.presensiGtk(sekolahId, data);
     }
-    absenMapel(sekolahId, data) {
-        return this.absensiService.absenMapel(sekolahId, data);
+    presensiMapel(sekolahId, data) {
+        return this.presensiService.presensiMapel(sekolahId, data);
     }
     createIzin(sekolahId, data) {
-        return this.absensiService.createIzin(sekolahId, data);
+        return this.presensiService.createIzin(sekolahId, data);
+    }
+    getRekapPesertaDidik(sekolahId, tanggal) {
+        return this.presensiService.getPresensiPesertaDidik(sekolahId, tanggal);
+    }
+    getRekapGtk(sekolahId, tanggal) {
+        return this.presensiService.getPresensiGtk(sekolahId, tanggal);
     }
 };
-exports.AbsensiController = AbsensiController;
+exports.PresensiController = PresensiController;
 __decorate([
     (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
     (0, common_1.Get)('config'),
@@ -97,7 +103,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
-], AbsensiController.prototype, "getConfig", null);
+], PresensiController.prototype, "getConfig", null);
 __decorate([
     (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
     (0, common_1.Post)('scan'),
@@ -106,7 +112,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
-], AbsensiController.prototype, "scanQr", null);
+], PresensiController.prototype, "scanQr", null);
 __decorate([
     (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
     (0, common_1.Post)('lookup'),
@@ -115,14 +121,14 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
-], AbsensiController.prototype, "lookupUser", null);
+], PresensiController.prototype, "lookupUser", null);
 __decorate([
     (0, common_1.Get)('hari-libur/:sekolahId'),
     __param(0, (0, common_1.Param)('sekolahId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
-], AbsensiController.prototype, "getHariLibur", null);
+], PresensiController.prototype, "getHariLibur", null);
 __decorate([
     (0, common_1.Post)('hari-libur/:sekolahId'),
     __param(0, (0, common_1.Param)('sekolahId')),
@@ -130,7 +136,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
-], AbsensiController.prototype, "createHariLibur", null);
+], PresensiController.prototype, "createHariLibur", null);
 __decorate([
     (0, common_1.Delete)('hari-libur/:sekolahId/:id'),
     __param(0, (0, common_1.Param)('sekolahId')),
@@ -138,7 +144,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
-], AbsensiController.prototype, "deleteHariLibur", null);
+], PresensiController.prototype, "deleteHariLibur", null);
 __decorate([
     (0, common_1.Post)('peserta-didik/:sekolahId'),
     __param(0, (0, common_1.Param)('sekolahId')),
@@ -146,7 +152,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
-], AbsensiController.prototype, "absenPesertaDidik", null);
+], PresensiController.prototype, "presensiPesertaDidik", null);
 __decorate([
     (0, common_1.Post)('gtk/:sekolahId'),
     __param(0, (0, common_1.Param)('sekolahId')),
@@ -154,7 +160,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
-], AbsensiController.prototype, "absenGtk", null);
+], PresensiController.prototype, "presensiGtk", null);
 __decorate([
     (0, common_1.Post)('mapel/:sekolahId'),
     __param(0, (0, common_1.Param)('sekolahId')),
@@ -162,7 +168,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
-], AbsensiController.prototype, "absenMapel", null);
+], PresensiController.prototype, "presensiMapel", null);
 __decorate([
     (0, common_1.Post)('izin/:sekolahId'),
     __param(0, (0, common_1.Param)('sekolahId')),
@@ -170,9 +176,25 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
-], AbsensiController.prototype, "createIzin", null);
-exports.AbsensiController = AbsensiController = __decorate([
-    (0, common_1.Controller)('kurikulum/absensi'),
-    __metadata("design:paramtypes", [absensi_service_1.AbsensiService])
-], AbsensiController);
-//# sourceMappingURL=absensi.controller.js.map
+], PresensiController.prototype, "createIzin", null);
+__decorate([
+    (0, common_1.Get)('rekap-pd/:sekolahId'),
+    __param(0, (0, common_1.Param)('sekolahId')),
+    __param(1, (0, common_1.Query)('tanggal')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], PresensiController.prototype, "getRekapPesertaDidik", null);
+__decorate([
+    (0, common_1.Get)('rekap-gtk/:sekolahId'),
+    __param(0, (0, common_1.Param)('sekolahId')),
+    __param(1, (0, common_1.Query)('tanggal')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], PresensiController.prototype, "getRekapGtk", null);
+exports.PresensiController = PresensiController = __decorate([
+    (0, common_1.Controller)('kurikulum/presensi'),
+    __metadata("design:paramtypes", [presensi_service_1.PresensiService])
+], PresensiController);
+//# sourceMappingURL=presensi.controller.js.map

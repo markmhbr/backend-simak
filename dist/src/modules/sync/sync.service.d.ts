@@ -17,7 +17,7 @@ export declare class SyncService {
     syncRombel(sekolahId: string, dataRows: any[]): Promise<{
         successCount: number;
     }>;
-    syncSiswa(sekolahId: string, dataRows: any[]): Promise<{
+    syncPesertaDidik(sekolahId: string, dataRows: any[]): Promise<{
         successCount: number;
     }>;
     syncGtk(sekolahId: string, dataRows: any[]): Promise<{

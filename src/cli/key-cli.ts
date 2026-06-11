@@ -1,12 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from '../app.module';
 import { AppKeyService } from '../core/app-key/app-key.service';
+import { MandalaService } from '../modules/mandala/mandala.service';
 import * as readline from 'readline';
+import * as crypto from 'crypto';
 
 async function bootstrap() {
   console.log('🔄 Menginisialisasi Sistem Manajemen Key SIMAK...');
   const app = await NestFactory.createApplicationContext(AppModule, { logger: false });
   const appKeyService = app.get(AppKeyService);
+  const mandalaService = app.get(MandalaService);
 
   const rl = readline.createInterface({
     input: process.stdin,
@@ -25,10 +28,12 @@ async function bootstrap() {
     console.log('2. Buat Key Baru (Generate Secure Key)');
     console.log('3. Regenerate / Ganti Key yang Sudah Ada');
     console.log('4. Ubah Status Aktif / Nonaktif Key');
+    console.log('5. Tampilkan Koneksi Mandala');
+    console.log('6. Setup / Generate Key Mandala Baru');
     console.log('0. Keluar');
     console.log('=====================================================');
     
-    const answer = await question('Pilih menu (0-4): ');
+    const answer = await question('Pilih menu (0-6): ');
     await handleMenu(answer.trim());
   };
 
@@ -46,6 +51,12 @@ async function bootstrap() {
           break;
         case '4':
           await toggleKey(appKeyService, question);
+          break;
+        case '5':
+          await showMandalaConnection(mandalaService);
+          break;
+        case '6':
+          await setupMandalaConnection(mandalaService, question);
           break;
         case '0':
           console.log('👋 Keluar dari sistem manajemen key.');
@@ -147,6 +158,39 @@ async function toggleKey(service: AppKeyService, question: (q: string) => Promis
 
   const updated = await service.toggleActive(idInput.trim());
   console.log(`\n✅ Status berhasil diubah menjadi: ${updated.is_active ? '🟢 AKTIF' : '🔴 NONAKTIF'}`);
+}
+
+async function showMandalaConnection(service: MandalaService) {
+  console.log('\n📋 DETAIL KONEKSI MANDALA:');
+  const config = await service.getConnection();
+  if (!config) {
+    console.log('⚠️ Belum ada koneksi Mandala yang dikonfigurasi.');
+    return;
+  }
+
+  console.log(`ID          : ${config.id}`);
+  console.log(`URL Mandala : ${config.url_mandala}`);
+  console.log(`Key Mandala : ${config.key}`);
+  console.log(`Dibuat      : ${new Date(config.created_at).toLocaleString()}`);
+}
+
+async function setupMandalaConnection(service: MandalaService, question: (q: string) => Promise<string>) {
+  console.log('\n➕ SETUP / GENERATE KEY MANDALA BARU');
+  const urlMandala = await question('Masukkan URL Mandala (contoh: http://localhost:3001): ');
+  if (!urlMandala.trim()) {
+    console.log('❌ URL Mandala tidak boleh kosong!');
+    return;
+  }
+
+  console.log('⏳ Sedang men-generate secure key untuk Mandala...');
+  const secureKey = `simak_mandala_${crypto.randomBytes(24).toString('hex')}`;
+  
+  const result = await service.saveOrUpdateConnection(secureKey, urlMandala.trim());
+  console.log('\n✅ KONEKSI MANDALA BERHASIL DIKONFIGURASI!');
+  console.log(`ID          : ${result.id}`);
+  console.log(`URL Mandala : ${result.url_mandala}`);
+  console.log(`Key Mandala : ${result.key}`);
+  console.log(`\n👉 Silakan gunakan Key di atas pada konfigurasi klien Mandala.`);
 }
 
 bootstrap();

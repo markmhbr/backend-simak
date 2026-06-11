@@ -30,6 +30,8 @@ class EnvironmentVariables {
     ENCRYPTION_KEY;
     REDIS_HOST;
     REDIS_PORT;
+    URL_MANDALA;
+    KEY_MANDALA;
 }
 __decorate([
     (0, class_validator_1.IsEnum)(Environment),
@@ -75,6 +77,16 @@ __decorate([
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], EnvironmentVariables.prototype, "REDIS_PORT", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], EnvironmentVariables.prototype, "URL_MANDALA", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], EnvironmentVariables.prototype, "KEY_MANDALA", void 0);
 function validate(config) {
     const validatedConfig = (0, class_transformer_1.plainToInstance)(EnvironmentVariables, config, { enableImplicitConversion: true });
     const errors = (0, class_validator_1.validateSync)(validatedConfig, { skipMissingProperties: false });

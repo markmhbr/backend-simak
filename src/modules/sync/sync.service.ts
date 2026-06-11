@@ -208,7 +208,7 @@ export class SyncService {
     return { successCount };
   }
 
-  async syncSiswa(sekolahId: string, dataRows: any[]) {
+  async syncPesertaDidik(sekolahId: string, dataRows: any[]) {
     let successCount = 0;
     
     // Ambil domain sekolah untuk auto-generate qr_token

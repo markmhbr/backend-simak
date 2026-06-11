@@ -22,7 +22,8 @@ const dapodik_module_1 = require("./modules/dapodik/dapodik.module");
 const sync_module_1 = require("./modules/sync/sync.module");
 const kurikulum_module_1 = require("./modules/kurikulum/kurikulum.module");
 const jadwal_module_1 = require("./modules/jadwal/jadwal.module");
-const absensi_module_1 = require("./modules/absensi/absensi.module");
+const presensi_module_1 = require("./modules/presensi/presensi.module");
+const mandala_module_1 = require("./modules/mandala/mandala.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -41,7 +42,8 @@ exports.AppModule = AppModule = __decorate([
             sync_module_1.SyncModule,
             kurikulum_module_1.KurikulumModule,
             jadwal_module_1.JadwalModule,
-            absensi_module_1.AbsensiModule,
+            presensi_module_1.PresensiModule,
+            mandala_module_1.MandalaModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [

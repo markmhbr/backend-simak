@@ -50,13 +50,13 @@ export class SyncController {
     return { status: 'success', count: result.successCount };
   }
 
-  @Post('siswa')
+  @Post(['siswa', 'pesertadidik'])
   @UseGuards(ApiKeyGuard)
   @HttpCode(HttpStatus.OK)
-  async syncSiswa(@Req() req: Request, @Body() data: any[]) {
+  async syncPesertaDidik(@Req() req: Request, @Body() data: any[]) {
     const sekolahId = this.getSekolahId(req);
     const rows = Array.isArray(data) ? data : [data];
-    const result = await this.syncService.syncSiswa(sekolahId, rows);
+    const result = await this.syncService.syncPesertaDidik(sekolahId, rows);
     return { status: 'success', count: result.successCount };
   }
 

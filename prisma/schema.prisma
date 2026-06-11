@@ -1,10 +1,11 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
   provider = "postgresql"
-  schemas  = ["dapodik", "simak"]
+  schemas  = ["dapodik", "simak", "mandala"]
 }
 
 model Sekolah {
@@ -46,10 +47,10 @@ model Sekolah {
   jadwal_pelajaran              JadwalPelajaran[]
   jenis_jadwal                  JenisJadwal[]
   hari_libur                    HariLibur[]
-  absensi_pd                    AbsensiPesertaDidik[]
-  absensi_gtk                   AbsensiGtk[]
+  presensi_pd                    PresensiPesertaDidik[]
+  presensi_gtk                   PresensiGtk[]
   izin                          Izin[]
-  absensi_mapel                 AbsensiMapel[]
+  presensi_mapel                 PresensiMapel[]
 
   @@map("sekolah")
   @@schema("dapodik")
@@ -282,8 +283,8 @@ model PesertaDidik {
   updated_at                DateTime              @updatedAt
   waktu_tempuh_menit        String?
   penggunas                 Pengguna[]
-  absensi_pd                AbsensiPesertaDidik[]
-  absensi_mapel             AbsensiMapel[]
+  presensi_pd                PresensiPesertaDidik[]
+  presensi_mapel             PresensiMapel[]
   izin                      Izin[]
 
   @@index([sekolah_id])
@@ -370,7 +371,7 @@ model Gtk {
   penggunas                        Pengguna[]
   rwy_sertifikasi                  RwySertifikasi[]
   izins                            Izin[]
-  absensiGtks                      AbsensiGtk[]
+  presensiGtks                      PresensiGtk[]
 
   @@index([sekolah_id])
   @@index([qr_token])
@@ -728,7 +729,7 @@ model JadwalPelajaran {
   pembelajaran         Pembelajaran     @relation(fields: [pembelajaran_id], references: [pembelajaran_id], onDelete: Cascade)
   rombongan_belajar    RombonganBelajar @relation(fields: [rombongan_belajar_id], references: [rombongan_belajar_id], onDelete: Cascade)
   sekolah              Sekolah          @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
-  absensi_mapel        AbsensiMapel[]
+  presensi_mapel        PresensiMapel[]
 
   @@unique([sekolah_id, jenis_jadwal_id, rombongan_belajar_id, hari, urutan])
   @@index([sekolah_id])
@@ -760,16 +761,18 @@ model HariLibur {
 }
 
 model Izin {
-  izin_id          String   @id @default(uuid()) @db.Uuid
-  sekolah_id       String   @db.Uuid
-  peserta_didik_id String?  @db.Uuid
-  ptk_id           String?  @db.Uuid
-  jenis            Int      @db.SmallInt // 1=Terlambat, 2=Keluar, 3=Pulang Awal, 4=Tidak Masuk, 5=Sakit
-  tanggal          DateTime @db.Date
-  keterangan       String   @db.VarChar(255)
-  disetujui        Boolean  @default(false)
-  created_at       DateTime @default(now()) @db.Timestamptz(6)
-  updated_at       DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  izin_id          String    @id @default(uuid()) @db.Uuid
+  sekolah_id       String    @db.Uuid
+  peserta_didik_id String?   @db.Uuid
+  ptk_id           String?   @db.Uuid
+  jenis            Int       @db.SmallInt // 1=Terlambat, 2=Keluar, 3=Pulang Awal, 4=Tidak Masuk, 5=Sakit
+  tanggal          DateTime  @db.Date
+  keterangan       String    @db.VarChar(255)
+  jam_keluar       DateTime? @db.Timestamptz(6)
+  jam_kembali      DateTime? @db.Timestamptz(6)
+  disetujui        Boolean   @default(false)
+  created_at       DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
 
   sekolah       Sekolah       @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
   peserta_didik PesertaDidik? @relation(fields: [peserta_didik_id], references: [peserta_didik_id], onDelete: Cascade)
@@ -782,7 +785,7 @@ model Izin {
   @@schema("simak")
 }
 
-model AbsensiPesertaDidik {
+model PresensiPesertaDidik {
   peserta_didik_id String    @db.Uuid
   tanggal          DateTime  @db.Date
   sekolah_id       String    @db.Uuid
@@ -798,11 +801,11 @@ model AbsensiPesertaDidik {
 
   @@id([peserta_didik_id, tanggal])
   @@index([sekolah_id, tanggal])
-  @@map("absensi_peserta_didik")
+  @@map("presensi_peserta_didik")
   @@schema("simak")
 }
 
-model AbsensiGtk {
+model PresensiGtk {
   ptk_id        String    @db.Uuid
   tanggal       DateTime  @db.Date
   sekolah_id    String    @db.Uuid
@@ -818,11 +821,11 @@ model AbsensiGtk {
 
   @@id([ptk_id, tanggal])
   @@index([sekolah_id, tanggal])
-  @@map("absensi_gtk")
+  @@map("presensi_gtk")
   @@schema("simak")
 }
 
-model AbsensiMapel {
+model PresensiMapel {
   jadwal_pelajaran_id String   @db.Uuid
   peserta_didik_id    String   @db.Uuid
   tanggal             DateTime @db.Date
@@ -837,6 +840,17 @@ model AbsensiMapel {
 
   @@id([jadwal_pelajaran_id, peserta_didik_id, tanggal])
   @@index([sekolah_id])
-  @@map("absensi_mapel")
+  @@map("presensi_mapel")
   @@schema("simak")
+}
+
+model Mandala {
+  id          String   @id @default(uuid()) @db.Uuid
+  key         String   @unique
+  url_mandala String
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime @updatedAt @db.Timestamptz(6)
+
+  @@map("mandala")
+  @@schema("mandala")
 }

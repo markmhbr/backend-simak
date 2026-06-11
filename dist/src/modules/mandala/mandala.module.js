@@ -6,21 +6,20 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AbsensiModule = void 0;
+exports.MandalaModule = void 0;
 const common_1 = require("@nestjs/common");
-const absensi_service_1 = require("./absensi.service");
-const absensi_controller_1 = require("./absensi.controller");
+const mandala_service_1 = require("./mandala.service");
+const mandala_controller_1 = require("./mandala.controller");
 const prisma_module_1 = require("../../core/prisma/prisma.module");
-const app_key_module_1 = require("../../core/app-key/app-key.module");
-let AbsensiModule = class AbsensiModule {
+let MandalaModule = class MandalaModule {
 };
-exports.AbsensiModule = AbsensiModule;
-exports.AbsensiModule = AbsensiModule = __decorate([
+exports.MandalaModule = MandalaModule;
+exports.MandalaModule = MandalaModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, app_key_module_1.AppKeyModule],
-        controllers: [absensi_controller_1.AbsensiController],
-        providers: [absensi_service_1.AbsensiService],
-        exports: [absensi_service_1.AbsensiService],
+        imports: [prisma_module_1.PrismaModule],
+        controllers: [mandala_controller_1.MandalaController],
+        providers: [mandala_service_1.MandalaService],
+        exports: [mandala_service_1.MandalaService],
     })
-], AbsensiModule);
-//# sourceMappingURL=absensi.module.js.map
+], MandalaModule);
+//# sourceMappingURL=mandala.module.js.map
