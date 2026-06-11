@@ -527,7 +527,6 @@ let DapodikService = class DapodikService {
             },
             orderBy: { nama: 'asc' },
         });
-        console.log(`[Backend Debug] Sending ${students.length} students. First student QR:`, students[0]?.qr_token);
         return students;
     }
     async getRombelPembelajaran(rombelId) {
