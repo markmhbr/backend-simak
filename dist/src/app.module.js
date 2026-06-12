@@ -24,6 +24,8 @@ const kurikulum_module_1 = require("./modules/kurikulum/kurikulum.module");
 const jadwal_module_1 = require("./modules/jadwal/jadwal.module");
 const presensi_module_1 = require("./modules/presensi/presensi.module");
 const mandala_module_1 = require("./modules/mandala/mandala.module");
+const indisipliner_module_1 = require("./modules/indisipliner/indisipliner.module");
+const spp_module_1 = require("./modules/spp/spp.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -44,6 +46,8 @@ exports.AppModule = AppModule = __decorate([
             jadwal_module_1.JadwalModule,
             presensi_module_1.PresensiModule,
             mandala_module_1.MandalaModule,
+            indisipliner_module_1.IndisiplinerModule,
+            spp_module_1.SppModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [

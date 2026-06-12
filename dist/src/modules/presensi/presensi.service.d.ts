@@ -93,8 +93,10 @@ export declare class PresensiService {
         data: {
             nama: string;
             peserta_didik_id: string;
+            foto: string;
             rombongan_belajar_id: string;
             nisn: string;
+            nama_rombel: string;
         };
         activeIzinKeluar: {
             sekolah_id: string;
@@ -116,6 +118,8 @@ export declare class PresensiService {
             nama: string;
             ptk_id: string;
             nuptk: string;
+            jenis_ptk_id_str: string;
+            foto: string;
         };
         activeIzinKeluar: {
             sekolah_id: string;

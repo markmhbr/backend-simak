@@ -1,0 +1,191 @@
+import { PrismaService } from '../../core/prisma/prisma.service';
+import { CreateJenisPelanggaranDto } from './dto/create-jenis-pelanggaran.dto';
+import { CreateJenisTindakLanjutDto } from './dto/create-jenis-tindak-lanjut.dto';
+import { CreatePelanggaranDto } from './dto/create-pelanggaran.dto';
+import { CreateTindakLanjutDto } from './dto/create-tindak-lanjut.dto';
+export declare class IndisiplinerService {
+    private readonly prisma;
+    constructor(prisma: PrismaService);
+    getJenisPelanggaran(sekolahId: string): Promise<{
+        sekolah_id: string;
+        created_at: Date;
+        updated_at: Date;
+        nama: string;
+        aktif: boolean;
+        target: number;
+        poin: number;
+        jenis_pelanggaran_id: string;
+    }[]>;
+    createJenisPelanggaran(dto: CreateJenisPelanggaranDto): Promise<{
+        sekolah_id: string;
+        created_at: Date;
+        updated_at: Date;
+        nama: string;
+        aktif: boolean;
+        target: number;
+        poin: number;
+        jenis_pelanggaran_id: string;
+    }>;
+    getJenisTindakLanjut(sekolahId: string): Promise<{
+        sekolah_id: string;
+        created_at: Date;
+        updated_at: Date;
+        nama: string;
+        aktif: boolean;
+        target: number;
+        jenis_tindak_lanjut_id: string;
+    }[]>;
+    createJenisTindakLanjut(dto: CreateJenisTindakLanjutDto): Promise<{
+        sekolah_id: string;
+        created_at: Date;
+        updated_at: Date;
+        nama: string;
+        aktif: boolean;
+        target: number;
+        jenis_tindak_lanjut_id: string;
+    }>;
+    getPelanggaran(sekolahId: string, filter?: {
+        peserta_didik_id?: string;
+        ptk_id?: string;
+        status?: number;
+    }): Promise<({
+        peserta_didik: {
+            nama: string;
+            peserta_didik_id: string;
+            foto: string;
+            nisn: string;
+            nama_rombel: string;
+        };
+        gtk: {
+            nama: string;
+            ptk_id: string;
+            nuptk: string;
+            jenis_ptk_id_str: string;
+            foto: string;
+        };
+        tindak_lanjut: ({
+            jenis_tindak_lanjut: {
+                sekolah_id: string;
+                created_at: Date;
+                updated_at: Date;
+                nama: string;
+                aktif: boolean;
+                target: number;
+                jenis_tindak_lanjut_id: string;
+            };
+            petugas: {
+                nama: string;
+                ptk_id: string;
+            };
+        } & {
+            created_at: Date;
+            updated_at: Date;
+            keterangan: string | null;
+            tanggal: Date;
+            pelanggaran_id: string;
+            jenis_tindak_lanjut_id: string;
+            petugas_ptk_id: string | null;
+            tindak_lanjut_id: string;
+        })[];
+        jenis_pelanggaran: {
+            sekolah_id: string;
+            created_at: Date;
+            updated_at: Date;
+            nama: string;
+            aktif: boolean;
+            target: number;
+            poin: number;
+            jenis_pelanggaran_id: string;
+        };
+        pelapor: {
+            nama: string;
+            ptk_id: string;
+        };
+    } & {
+        sekolah_id: string;
+        created_at: Date;
+        updated_at: Date;
+        ptk_id: string | null;
+        peserta_didik_id: string | null;
+        status: number;
+        keterangan: string | null;
+        tanggal: Date;
+        poin: number;
+        jenis_pelanggaran_id: string;
+        waktu: Date;
+        pelapor_ptk_id: string | null;
+        pelanggaran_id: string;
+    })[]>;
+    createPelanggaran(dto: CreatePelanggaranDto): Promise<{
+        sekolah_id: string;
+        created_at: Date;
+        updated_at: Date;
+        ptk_id: string | null;
+        peserta_didik_id: string | null;
+        status: number;
+        keterangan: string | null;
+        tanggal: Date;
+        poin: number;
+        jenis_pelanggaran_id: string;
+        waktu: Date;
+        pelapor_ptk_id: string | null;
+        pelanggaran_id: string;
+    }>;
+    updatePelanggaranStatus(id: string, status: number): Promise<{
+        sekolah_id: string;
+        created_at: Date;
+        updated_at: Date;
+        ptk_id: string | null;
+        peserta_didik_id: string | null;
+        status: number;
+        keterangan: string | null;
+        tanggal: Date;
+        poin: number;
+        jenis_pelanggaran_id: string;
+        waktu: Date;
+        pelapor_ptk_id: string | null;
+        pelanggaran_id: string;
+    }>;
+    createTindakLanjut(dto: CreateTindakLanjutDto): Promise<{
+        created_at: Date;
+        updated_at: Date;
+        keterangan: string | null;
+        tanggal: Date;
+        pelanggaran_id: string;
+        jenis_tindak_lanjut_id: string;
+        petugas_ptk_id: string | null;
+        tindak_lanjut_id: string;
+    }>;
+    getSchoolSummary(sekolahId: string): Promise<{
+        stats: {
+            total_pelanggaran: number;
+            total_pelanggaran_gtk: number;
+            total_pelanggaran_siswa: number;
+            master_jenis_pelanggaran: number;
+            master_jenis_tindak_lanjut: number;
+        };
+        top_siswa: {
+            peserta_didik_id: string;
+            nama: string;
+            nisn: string;
+            rombongan_belajar: string;
+            foto: string;
+            total_poin: number;
+            total_pelanggaran: number;
+        }[];
+        top_gtk: {
+            ptk_id: string;
+            nama: string;
+            nuptk: string;
+            jabatan: string;
+            foto: string;
+            total_poin: number;
+            total_pelanggaran: number;
+        }[];
+        top_pelanggaran_jenis: {
+            nama: string;
+            target: number;
+            count: number;
+        }[];
+    }>;
+}

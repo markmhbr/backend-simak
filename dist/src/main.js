@@ -43,6 +43,9 @@ const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const config_1 = require("@nestjs/config");
 const common_1 = require("@nestjs/common");
 async function bootstrap() {
+    BigInt.prototype.toJSON = function () {
+        return this.toString();
+    };
     const logger = new common_1.Logger('Bootstrap');
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     const configService = app.get(config_1.ConfigService);

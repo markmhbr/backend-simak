@@ -502,6 +502,8 @@ export class PresensiService {
         nama: true,
         nisn: true,
         rombongan_belajar_id: true,
+        nama_rombel: true,
+        foto: true,
       },
     });
 
@@ -525,6 +527,8 @@ export class PresensiService {
         ptk_id: true,
         nama: true,
         nuptk: true,
+        foto: true,
+        jenis_ptk_id_str: true,
       },
     });
 

@@ -441,6 +441,8 @@ let PresensiService = class PresensiService {
                 nama: true,
                 nisn: true,
                 rombongan_belajar_id: true,
+                nama_rombel: true,
+                foto: true,
             },
         });
         if (pd) {
@@ -461,6 +463,8 @@ let PresensiService = class PresensiService {
                 ptk_id: true,
                 nama: true,
                 nuptk: true,
+                foto: true,
+                jenis_ptk_id_str: true,
             },
         });
         if (gtk) {

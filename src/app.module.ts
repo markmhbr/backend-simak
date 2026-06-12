@@ -15,6 +15,8 @@ import { KurikulumModule } from './modules/kurikulum/kurikulum.module';
 import { JadwalModule } from './modules/jadwal/jadwal.module';
 import { PresensiModule } from './modules/presensi/presensi.module';
 import { MandalaModule } from './modules/mandala/mandala.module';
+import { IndisiplinerModule } from './modules/indisipliner/indisipliner.module';
+import { SppModule } from './modules/spp/spp.module';
 
 @Module({
   imports: [
@@ -32,6 +34,8 @@ import { MandalaModule } from './modules/mandala/mandala.module';
     JadwalModule,
     PresensiModule,
     MandalaModule,
+    IndisiplinerModule,
+    SppModule,
   ],
 
 

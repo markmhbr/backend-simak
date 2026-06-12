@@ -51,6 +51,9 @@ model Sekolah {
   presensi_gtk                   PresensiGtk[]
   izin                          Izin[]
   presensi_mapel                 PresensiMapel[]
+  pengaturan_tagihan    PengaturanTagihan[]
+  spp                   Spp[]
+  riwayat_transaksi_spp RiwayatTransaksiSpp[]
 
   @@map("sekolah")
   @@schema("dapodik")
@@ -83,6 +86,8 @@ model RombonganBelajar {
   anggota_rombel            AnggotaRombel[]
   pembelajaran              Pembelajaran[]
   jadwal_pelajaran          JadwalPelajaran[]
+  peserta_didik         PesertaDidik[]            @relation("RombelPesertaDidik")
+  pengaturan_rombel     PengaturanTagihanRombel[]
 
   @@index([sekolah_id])
   @@map("rombongan_belajar")
@@ -286,6 +291,10 @@ model PesertaDidik {
   presensi_pd                PresensiPesertaDidik[]
   presensi_mapel             PresensiMapel[]
   izin                      Izin[]
+  pelanggaran               Pelanggaran[]         @relation("PesertaDidikPelanggaran")
+  rombongan_belajar     RombonganBelajar?         @relation("RombelPesertaDidik", fields: [rombongan_belajar_id], references: [rombongan_belajar_id], onDelete: SetNull)
+  spp                   Spp[]
+  riwayat_transaksi_spp RiwayatTransaksiSpp[]
 
   @@index([sekolah_id])
   @@index([rombongan_belajar_id])
@@ -372,6 +381,9 @@ model Gtk {
   rwy_sertifikasi                  RwySertifikasi[]
   izins                            Izin[]
   presensiGtks                      PresensiGtk[]
+  pelanggaran             Pelanggaran[]    @relation("GtkPelanggaran")
+  pelanggaran_dilaporkan  Pelanggaran[]    @relation("PelaporGtk")
+  tindak_lanjut_petugas   TindakLanjut[]   @relation("PetugasTindakLanjut")
 
   @@index([sekolah_id])
   @@index([qr_token])
@@ -853,4 +865,179 @@ model Mandala {
 
   @@map("mandala")
   @@schema("mandala")
+}
+
+model JenisPelanggaran {
+  jenis_pelanggaran_id String        @id @default(uuid()) @db.Uuid
+  sekolah_id           String        @db.Uuid
+  nama                 String        @db.VarChar(150)
+  target               Int           @db.SmallInt // 0 = GTK, 1 = Peserta Didik, 2 = Keduanya
+  poin                 Int           @db.SmallInt
+  aktif                Boolean       @default(true)
+  created_at           DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime      @updatedAt @db.Timestamptz(6)
+  pelanggaran          Pelanggaran[]
+
+  @@index([sekolah_id])
+  @@index([target])
+  @@map("jenis_pelanggaran")
+  @@schema("simak")
+}
+
+model JenisTindakLanjut {
+  jenis_tindak_lanjut_id String        @id @default(uuid()) @db.Uuid
+  sekolah_id             String        @db.Uuid
+  nama                 String        @db.VarChar(150)
+  target                 Int           @db.SmallInt // 0 = GTK, 1 = Peserta Didik, 2 = Keduanya
+  aktif                  Boolean       @default(true)
+  created_at             DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime      @updatedAt @db.Timestamptz(6)
+  tindak_lanjut          TindakLanjut[]
+
+  @@index([sekolah_id])
+  @@index([target])
+  @@map("jenis_tindak_lanjut")
+  @@schema("simak")
+}
+
+model Pelanggaran {
+  pelanggaran_id       String            @id @default(uuid()) @db.Uuid
+  sekolah_id           String            @db.Uuid
+  peserta_didik_id     String?           @db.Uuid
+  ptk_id               String?           @db.Uuid
+  jenis_pelanggaran_id String            @db.Uuid
+  tanggal              DateTime          @db.Date
+  waktu                DateTime          @db.Timestamptz(6)
+  keterangan           String?           @db.Text
+  poin                 Int               @db.SmallInt
+  status               Int               @default(1) @db.SmallInt // 1 = Draft, 2 = Diproses, 3 = Selesai, 4 = Dibatalkan
+  pelapor_ptk_id       String?           @db.Uuid
+  created_at           DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime          @updatedAt @db.Timestamptz(6)
+
+  jenis_pelanggaran    JenisPelanggaran  @relation(fields: [jenis_pelanggaran_id], references: [jenis_pelanggaran_id], onDelete: Cascade)
+  peserta_didik        PesertaDidik?     @relation("PesertaDidikPelanggaran", fields: [peserta_didik_id], references: [peserta_didik_id], onDelete: Cascade)
+  gtk                  Gtk?              @relation("GtkPelanggaran", fields: [ptk_id], references: [ptk_id], onDelete: Cascade)
+  pelapor              Gtk?              @relation("PelaporGtk", fields: [pelapor_ptk_id], references: [ptk_id], onDelete: SetNull)
+  tindak_lanjut        TindakLanjut[]
+
+  @@index([sekolah_id])
+  @@index([peserta_didik_id])
+  @@index([ptk_id])
+  @@index([jenis_pelanggaran_id])
+  @@index([tanggal])
+  @@map("pelanggaran")
+  @@schema("simak")
+}
+
+model TindakLanjut {
+  tindak_lanjut_id       String            @id @default(uuid()) @db.Uuid
+  pelanggaran_id         String            @db.Uuid
+  jenis_tindak_lanjut_id String            @db.Uuid
+  tanggal                DateTime          @db.Date
+  keterangan             String?           @db.Text
+  petugas_ptk_id         String?           @db.Uuid
+  created_at             DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime          @updatedAt @db.Timestamptz(6)
+
+  pelanggaran            Pelanggaran       @relation(fields: [pelanggaran_id], references: [pelanggaran_id], onDelete: Cascade)
+  jenis_tindak_lanjut    JenisTindakLanjut @relation(fields: [jenis_tindak_lanjut_id], references: [jenis_tindak_lanjut_id], onDelete: Cascade)
+  petugas                Gtk?              @relation("PetugasTindakLanjut", fields: [petugas_ptk_id], references: [ptk_id], onDelete: SetNull)
+
+  @@index([pelanggaran_id])
+  @@index([jenis_tindak_lanjut_id])
+  @@index([tanggal])
+  @@map("tindak_lanjut")
+  @@schema("simak")
+}
+
+model PengaturanTagihan {
+  pengaturan_tagihan_id String                    @id @default(uuid()) @db.Uuid
+  sekolah_id            String                    @db.Uuid
+  nama_tagihan          String                    @db.VarChar(150)
+  nominal               BigInt
+  tipe                  Int                       @db.SmallInt // 1 = Bulanan, 2 = Tahunan, 3 = Sekali Bayar
+  aktif                 Boolean                   @default(true)
+  created_at            DateTime                  @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime                  @updatedAt @db.Timestamptz(6)
+
+  // Relations
+  sekolah               Sekolah                   @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
+  pengaturan_rombel     PengaturanTagihanRombel[]
+  spp                   Spp[]
+
+  @@index([sekolah_id])
+  @@index([tipe])
+  @@index([aktif])
+  @@map("pengaturan_tagihan")
+  @@schema("simak")
+}
+
+model PengaturanTagihanRombel {
+  pengaturan_tagihan_rombel_id String            @id @default(uuid()) @db.Uuid
+  pengaturan_tagihan_id        String            @db.Uuid
+  rombongan_belajar_id         String            @db.Uuid
+  created_at                   DateTime          @default(now()) @db.Timestamptz(6)
+
+  // Relations
+  pengaturan_tagihan           PengaturanTagihan @relation(fields: [pengaturan_tagihan_id], references: [pengaturan_tagihan_id], onDelete: Cascade)
+  rombongan_belajar            RombonganBelajar  @relation(fields: [rombongan_belajar_id], references: [rombongan_belajar_id], onDelete: Cascade)
+
+  @@unique([pengaturan_tagihan_id, rombongan_belajar_id])
+  @@index([pengaturan_tagihan_id])
+  @@index([rombongan_belajar_id])
+  @@map("pengaturan_tagihan_rombel")
+  @@schema("simak")
+}
+
+model Spp {
+  spp_id                String                @id @default(uuid()) @db.Uuid
+  sekolah_id            String                @db.Uuid
+  peserta_didik_id      String                @db.Uuid
+  pengaturan_tagihan_id String                @db.Uuid
+  nominal_tagihan       BigInt
+  nominal_terbayar      BigInt                @default(0)
+  status                Int                   @default(1) @db.SmallInt // 1 = Belum Bayar, 2 = Sebagian, 3 = Lunas
+  jatuh_tempo           DateTime?             @db.Date
+  created_at            DateTime              @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime              @updatedAt @db.Timestamptz(6)
+
+  // Relations
+  sekolah               Sekolah               @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
+  peserta_didik         PesertaDidik          @relation(fields: [peserta_didik_id], references: [peserta_didik_id], onDelete: Cascade)
+  pengaturan_tagihan    PengaturanTagihan     @relation(fields: [pengaturan_tagihan_id], references: [pengaturan_tagihan_id], onDelete: Cascade)
+  riwayat_transaksi     RiwayatTransaksiSpp[]
+
+  @@index([sekolah_id])
+  @@index([peserta_didik_id])
+  @@index([pengaturan_tagihan_id])
+  @@index([status])
+  @@map("spp")
+  @@schema("simak")
+}
+
+model RiwayatTransaksiSpp {
+  riwayat_transaksi_spp_id String   @id @default(uuid()) @db.Uuid
+  spp_id                   String   @db.Uuid
+  sekolah_id               String   @db.Uuid
+  peserta_didik_id         String   @db.Uuid
+  jenis_transaksi          Int      @db.SmallInt // 1 = Pembayaran, 2 = Beasiswa, 3 = Denda, 4 = Pengurangan, 5 = Pengembalian Dana
+  nominal                  BigInt
+  tanggal_transaksi        DateTime @db.Timestamptz(6)
+  metode_pembayaran        Int?     @db.SmallInt // 1 = Tunai, 2 = Transfer, 3 = QRIS, 4 = Virtual Account
+  keterangan               String?  @db.VarChar(255)
+  created_at               DateTime @default(now()) @db.Timestamptz(6)
+
+  // Relations
+  spp                      Spp          @relation(fields: [spp_id], references: [spp_id], onDelete: Cascade)
+  sekolah                  Sekolah      @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
+  peserta_didik            PesertaDidik @relation(fields: [peserta_didik_id], references: [peserta_didik_id], onDelete: Cascade)
+
+  @@index([spp_id])
+  @@index([sekolah_id])
+  @@index([peserta_didik_id])
+  @@index([jenis_transaksi])
+  @@index([tanggal_transaksi])
+  @@map("riwayat_transaksi_spp")
+  @@schema("simak")
 }
