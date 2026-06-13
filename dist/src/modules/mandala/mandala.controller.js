@@ -85,6 +85,20 @@ let MandalaController = class MandalaController {
             status
         });
     }
+    async getGtk(sekolahId, limit, page, search, status, type) {
+        if (!sekolahId) {
+            throw new common_1.BadRequestException('sekolah_id query parameter is required.');
+        }
+        const take = limit ? parseInt(limit, 10) : 10;
+        const skipPage = page ? parseInt(page, 10) : 1;
+        return await this.mandalaService.getGtkForMandala(sekolahId, {
+            limit: take,
+            page: skipPage,
+            search,
+            status,
+            type
+        });
+    }
 };
 exports.MandalaController = MandalaController;
 __decorate([
@@ -136,6 +150,19 @@ __decorate([
     __metadata("design:paramtypes", [String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], MandalaController.prototype, "getPesertaDidik", null);
+__decorate([
+    (0, common_1.Get)('dapodik/gtk'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Query)('sekolah_id')),
+    __param(1, (0, common_1.Query)('limit')),
+    __param(2, (0, common_1.Query)('page')),
+    __param(3, (0, common_1.Query)('search')),
+    __param(4, (0, common_1.Query)('status')),
+    __param(5, (0, common_1.Query)('type')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String, String, String, String]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "getGtk", null);
 exports.MandalaController = MandalaController = __decorate([
     (0, common_1.Controller)('mandala'),
     __metadata("design:paramtypes", [mandala_service_1.MandalaService])

@@ -92,4 +92,28 @@ export class MandalaController {
       status
     });
   }
+
+  @Get('dapodik/gtk')
+  @UseGuards(MandalaKeyGuard)
+  async getGtk(
+    @Query('sekolah_id') sekolahId: string,
+    @Query('limit') limit?: string,
+    @Query('page') page?: string,
+    @Query('search') search?: string,
+    @Query('status') status?: 'aktif' | 'non-aktif',
+    @Query('type') type?: 'guru' | 'tendik'
+  ) {
+    if (!sekolahId) {
+      throw new BadRequestException('sekolah_id query parameter is required.');
+    }
+    const take = limit ? parseInt(limit, 10) : 10;
+    const skipPage = page ? parseInt(page, 10) : 1;
+    return await this.mandalaService.getGtkForMandala(sekolahId, {
+      limit: take,
+      page: skipPage,
+      search,
+      status,
+      type
+    });
+  }
 }

@@ -130,4 +130,40 @@ export declare class MandalaController {
             current_page: number;
         };
     }>;
+    getGtk(sekolahId: string, limit?: string, page?: string, search?: string, status?: 'aktif' | 'non-aktif', type?: 'guru' | 'tendik'): Promise<{
+        status: string;
+        data: {
+            identitas: {
+                id: string;
+                nama: string;
+                nip: string;
+                nik: string;
+                nuptk: string;
+                jenis_kelamin: string;
+                tempat_lahir: string;
+                tanggal_lahir: Date;
+                agama: string;
+            };
+            kepegawaian: {
+                jenis_ptk: string;
+                jabatan: string;
+                status_kepegawaian: string;
+                status: string;
+            };
+            data_pendukung: {
+                alamat_lengkap: string;
+                no_hp: string;
+                no_wa: string;
+                email: string;
+            };
+        }[];
+        total_data: number;
+        total_pages: number;
+        current_page: number;
+        meta: {
+            total_data: number;
+            total_pages: number;
+            current_page: number;
+        };
+    }>;
 }

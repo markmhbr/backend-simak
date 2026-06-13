@@ -233,4 +233,110 @@ export class MandalaService implements OnModuleInit {
       },
     };
   }
+
+  async getGtkForMandala(
+    sekolahId: string,
+    query: {
+      limit: number;
+      page: number;
+      search?: string;
+      status?: 'aktif' | 'non-aktif';
+      type?: 'guru' | 'tendik';
+    }
+  ) {
+    const { limit, page, search, status, type } = query;
+
+    const whereClause: any = {
+      sekolah_id: sekolahId,
+    };
+
+    if (search) {
+      whereClause.OR = [
+        { nama: { contains: search, mode: 'insensitive' } },
+        { nuptk: { contains: search, mode: 'insensitive' } },
+        { nip: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    if (type === 'guru') {
+      whereClause.jenis_ptk_id_str = { contains: 'Guru', mode: 'insensitive' };
+    } else if (type === 'tendik') {
+      whereClause.NOT = {
+        jenis_ptk_id_str: { contains: 'Guru', mode: 'insensitive' },
+      };
+    }
+
+    if (status === 'aktif') {
+      whereClause.status = 'Aktif';
+    } else if (status === 'non-aktif') {
+      whereClause.status = { not: 'Aktif' };
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [total, gtks] = await Promise.all([
+      this.prisma.gtk.count({ where: whereClause }),
+      this.prisma.gtk.findMany({
+        where: whereClause,
+        take: limit,
+        skip: skip,
+        orderBy: { nama: 'asc' },
+      }),
+    ]);
+
+    const formattedData = gtks.map((g) => {
+      // Construct alamat lengkap
+      const addressParts = [
+        g.alamat_jalan,
+        g.rt ? `RT ${g.rt}` : null,
+        g.rw ? `RW ${g.rw}` : null,
+        g.dusun ? `Dusun ${g.dusun}` : null,
+        g.desa_kelurahan ? `Desa/Kel. ${g.desa_kelurahan}` : null,
+        g.kecamatan ? `Kec. ${g.kecamatan}` : null,
+        g.kabupaten_kota,
+        g.provinsi,
+        g.kode_pos
+      ].filter(Boolean);
+      const alamatLengkap = addressParts.length > 0 ? addressParts.join(', ') : '';
+
+      return {
+        identitas: {
+          id: g.ptk_id,
+          nama: g.nama,
+          nip: g.nip || '',
+          nik: g.nik || '',
+          nuptk: g.nuptk || '',
+          jenis_kelamin: g.jenis_kelamin || '',
+          tempat_lahir: g.tempat_lahir || '',
+          tanggal_lahir: g.tanggal_lahir || null,
+          agama: g.agama_id_str || g.agama_id || '',
+        },
+        kepegawaian: {
+          jenis_ptk: g.jenis_ptk_id_str || '',
+          jabatan: g.jabatan_ptk_id_str || '',
+          status_kepegawaian: g.status_kepegawaian_id_str || '',
+          status: g.status,
+        },
+        data_pendukung: {
+          alamat_lengkap: alamatLengkap,
+          no_hp: g.no_hp || '',
+          no_wa: g.no_wa || '',
+          email: g.email || '',
+        },
+      };
+    });
+
+    return {
+      status: 'success',
+      data: formattedData,
+      total_data: total,
+      total_pages: Math.ceil(total / limit),
+      current_page: page,
+      meta: {
+        total_data: total,
+        total_pages: Math.ceil(total / limit),
+        current_page: page,
+      },
+    };
+  }
 }
