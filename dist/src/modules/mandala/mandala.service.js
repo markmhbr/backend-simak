@@ -87,6 +87,8 @@ let MandalaService = MandalaService_1 = class MandalaService {
                 kabupate_kota: school.kabupaten_kota,
                 kabupaten_kota: school.kabupaten_kota,
                 kecamatan: school.kecamatan,
+                lintang: school.lintang,
+                bujur: school.bujur,
                 desa_kelurahan: school.desa_kelurahan,
                 total_siswa: totalSiswa,
                 total_gtk: totalGtk,

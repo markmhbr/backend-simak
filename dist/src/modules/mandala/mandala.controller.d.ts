@@ -45,6 +45,8 @@ export declare class MandalaController {
             kabupate_kota: string;
             kabupaten_kota: string;
             kecamatan: string;
+            lintang: import("@prisma/client-runtime-utils").Decimal;
+            bujur: import("@prisma/client-runtime-utils").Decimal;
             desa_kelurahan: string;
             total_siswa: number;
             total_gtk: number;
