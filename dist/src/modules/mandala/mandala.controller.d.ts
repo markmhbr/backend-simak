@@ -40,6 +40,12 @@ export declare class MandalaController {
             alamat: string;
             email: string;
             website: string;
+            bentuk_pendidikan_is_str: string;
+            bentuk_pendidikan_id_str: string;
+            kabupate_kota: string;
+            kabupaten_kota: string;
+            kecamatan: string;
+            desa_kelurahan: string;
             total_siswa: number;
             total_gtk: number;
         }[];

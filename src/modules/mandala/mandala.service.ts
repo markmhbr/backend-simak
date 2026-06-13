@@ -76,6 +76,12 @@ export class MandalaService implements OnModuleInit {
           alamat: school.alamat_jalan,
           email: school.email,
           website: school.website,
+          bentuk_pendidikan_is_str: school.bentuk_pendidikan_id_str,
+          bentuk_pendidikan_id_str: school.bentuk_pendidikan_id_str,
+          kabupate_kota: school.kabupaten_kota,
+          kabupaten_kota: school.kabupaten_kota,
+          kecamatan: school.kecamatan,
+          desa_kelurahan: school.desa_kelurahan,
           total_siswa: totalSiswa,
           total_gtk: totalGtk,
         };
