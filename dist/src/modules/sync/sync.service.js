@@ -29,10 +29,10 @@ let SyncService = SyncService_1 = class SyncService {
             },
         });
         if (!appKey) {
-            throw new Error("API Key tidak valid.");
+            throw new common_1.UnauthorizedException("API Key tidak valid.");
         }
         if (!appKey.is_active) {
-            throw new Error("API Key dinonaktifkan.");
+            throw new common_1.UnauthorizedException("API Key dinonaktifkan.");
         }
         await this.appKeyService.updateSchoolDomain(appKey.sekolah_id, domain);
         return {

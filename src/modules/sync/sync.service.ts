@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../../core/prisma/prisma.service';
 import { AppKeyService } from '../../core/app-key/app-key.service';
 
@@ -19,11 +19,11 @@ export class SyncService {
     });
 
     if (!appKey) {
-      throw new Error("API Key tidak valid.");
+      throw new UnauthorizedException("API Key tidak valid.");
     }
 
     if (!appKey.is_active) {
-      throw new Error("API Key dinonaktifkan.");
+      throw new UnauthorizedException("API Key dinonaktifkan.");
     }
 
     // Update domain dan generate QR Token massal secara otomatis
