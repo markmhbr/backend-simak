@@ -186,4 +186,19 @@ export class SyncController {
       return { status: 'success', count: result.successCount };
     });
   }
+
+  @Post('pembelajaran')
+  @UseGuards(ApiKeyGuard)
+  @HttpCode(HttpStatus.OK)
+  async syncPembelajaran(@Req() req: Request, @Body() data: any[]) {
+    const sekolahId = this.getSekolahId(req);
+    if (!sekolahId) {
+      throw new NotFoundException('sekolah_id tidak ditemukan.');
+    }
+    return this.getLock(sekolahId).run(async () => {
+      const rows = Array.isArray(data) ? data : [data];
+      const result = await this.syncService.syncPembelajaran(sekolahId, rows);
+      return { status: 'success', count: result.successCount };
+    });
+  }
 }

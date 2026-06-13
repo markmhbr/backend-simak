@@ -748,4 +748,38 @@ export class SyncService {
     }
     return { successCount };
   }
+
+  async syncPembelajaran(sekolahId: string, dataRows: any[]) {
+    let successCount = 0;
+    for (const p of dataRows) {
+      if (!p.pembelajaran_id) continue;
+
+      const payload = {
+        pembelajaran_id: p.pembelajaran_id,
+        sekolah_id: sekolahId,
+        rombongan_belajar_id: p.rombongan_belajar_id,
+        mata_pelajaran_id: String(p.mata_pelajaran_id || ''),
+        mata_pelajaran_id_str: p.mata_pelajaran_id_str || null,
+        ptk_terdaftar_id: p.ptk_terdaftar_id || null,
+        ptk_id: p.ptk_id || null,
+        nama_mata_pelajaran: p.nama_mata_pelajaran || null,
+        induk_pembelajaran_id: p.induk_pembelajaran_id || null,
+        jam_mengajar_per_minggu: String(p.jam_mengajar_per_minggu || ''),
+        status_di_kurikulum: String(p.status_di_kurikulum || ''),
+        status_di_kurikulum_str: p.status_di_kurikulum_str || null,
+      };
+
+      try {
+        await this.prisma.pembelajaran.upsert({
+          where: { pembelajaran_id: p.pembelajaran_id },
+          create: payload,
+          update: { ...payload, updated_at: new Date() },
+        });
+        successCount++;
+      } catch (err) {
+        this.logger.error(`Error upsert Pembelajaran ${p.pembelajaran_id}: ${err.message}`);
+      }
+    }
+    return { successCount };
+  }
 }
