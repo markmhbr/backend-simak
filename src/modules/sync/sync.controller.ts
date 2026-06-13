@@ -3,9 +3,30 @@ import { SyncService } from './sync.service';
 import { ApiKeyGuard } from '../../core/app-key/api-key.guard';
 import type { Request } from 'express';
 
+class Mutex {
+  private queue: Promise<any> = Promise.resolve();
+
+  async run<T>(fn: () => Promise<T>): Promise<T> {
+    const next = this.queue.then(fn);
+    this.queue = next.then(() => {}, () => {});
+    return next;
+  }
+}
+
 @Controller('sync')
 export class SyncController {
+  private readonly schoolLocks = new Map<string, Mutex>();
+
   constructor(private readonly syncService: SyncService) {}
+
+  private getLock(sekolahId: string): Mutex {
+    let lock = this.schoolLocks.get(sekolahId);
+    if (!lock) {
+      lock = new Mutex();
+      this.schoolLocks.set(sekolahId, lock);
+    }
+    return lock;
+  }
 
   private getSekolahId(req: Request): string {
     const appKey = req['appKey'];
@@ -36,8 +57,14 @@ export class SyncController {
       sekolahId = rows[0].sekolah_id || rows[0].id || rows[0].npsn;
     }
 
-    const result = await this.syncService.syncSekolah(sekolahId, rows, rawApiKey);
-    return { status: 'success', count: result.successCount };
+    if (!sekolahId) {
+      throw new NotFoundException('sekolah_id tidak ditemukan.');
+    }
+
+    return this.getLock(sekolahId).run(async () => {
+      const result = await this.syncService.syncSekolah(sekolahId, rows, rawApiKey);
+      return { status: 'success', count: result.successCount };
+    });
   }
 
   @Post('rombel')
@@ -45,9 +72,14 @@ export class SyncController {
   @HttpCode(HttpStatus.OK)
   async syncRombel(@Req() req: Request, @Body() data: any[]) {
     const sekolahId = this.getSekolahId(req);
-    const rows = Array.isArray(data) ? data : [data];
-    const result = await this.syncService.syncRombel(sekolahId, rows);
-    return { status: 'success', count: result.successCount };
+    if (!sekolahId) {
+      throw new NotFoundException('sekolah_id tidak ditemukan.');
+    }
+    return this.getLock(sekolahId).run(async () => {
+      const rows = Array.isArray(data) ? data : [data];
+      const result = await this.syncService.syncRombel(sekolahId, rows);
+      return { status: 'success', count: result.successCount };
+    });
   }
 
   @Post(['siswa', 'pesertadidik'])
@@ -55,9 +87,14 @@ export class SyncController {
   @HttpCode(HttpStatus.OK)
   async syncPesertaDidik(@Req() req: Request, @Body() data: any[]) {
     const sekolahId = this.getSekolahId(req);
-    const rows = Array.isArray(data) ? data : [data];
-    const result = await this.syncService.syncPesertaDidik(sekolahId, rows);
-    return { status: 'success', count: result.successCount };
+    if (!sekolahId) {
+      throw new NotFoundException('sekolah_id tidak ditemukan.');
+    }
+    return this.getLock(sekolahId).run(async () => {
+      const rows = Array.isArray(data) ? data : [data];
+      const result = await this.syncService.syncPesertaDidik(sekolahId, rows);
+      return { status: 'success', count: result.successCount };
+    });
   }
 
   @Post('gtk')
@@ -65,9 +102,14 @@ export class SyncController {
   @HttpCode(HttpStatus.OK)
   async syncGtk(@Req() req: Request, @Body() data: any[]) {
     const sekolahId = this.getSekolahId(req);
-    const rows = Array.isArray(data) ? data : [data];
-    const result = await this.syncService.syncGtk(sekolahId, rows);
-    return { status: 'success', count: result.successCount };
+    if (!sekolahId) {
+      throw new NotFoundException('sekolah_id tidak ditemukan.');
+    }
+    return this.getLock(sekolahId).run(async () => {
+      const rows = Array.isArray(data) ? data : [data];
+      const result = await this.syncService.syncGtk(sekolahId, rows);
+      return { status: 'success', count: result.successCount };
+    });
   }
 
   @Post('pengguna')
@@ -75,9 +117,14 @@ export class SyncController {
   @HttpCode(HttpStatus.OK)
   async syncPengguna(@Req() req: Request, @Body() data: any[]) {
     const sekolahId = this.getSekolahId(req);
-    const rows = Array.isArray(data) ? data : [data];
-    const result = await this.syncService.syncPengguna(sekolahId, rows);
-    return { status: 'success', count: result.successCount };
+    if (!sekolahId) {
+      throw new NotFoundException('sekolah_id tidak ditemukan.');
+    }
+    return this.getLock(sekolahId).run(async () => {
+      const rows = Array.isArray(data) ? data : [data];
+      const result = await this.syncService.syncPengguna(sekolahId, rows);
+      return { status: 'success', count: result.successCount };
+    });
   }
 
   @Post('sarpras')
@@ -85,9 +132,14 @@ export class SyncController {
   @HttpCode(HttpStatus.OK)
   async syncSarpras(@Req() req: Request, @Body() data: any[]) {
     const sekolahId = this.getSekolahId(req);
-    const rows = Array.isArray(data) ? data : [data];
-    const result = await this.syncService.syncSarpras(sekolahId, rows);
-    return { status: 'success', count: result.successCount };
+    if (!sekolahId) {
+      throw new NotFoundException('sekolah_id tidak ditemukan.');
+    }
+    return this.getLock(sekolahId).run(async () => {
+      const rows = Array.isArray(data) ? data : [data];
+      const result = await this.syncService.syncSarpras(sekolahId, rows);
+      return { status: 'success', count: result.successCount };
+    });
   }
 
   @Post('bidang_studi')
@@ -95,9 +147,14 @@ export class SyncController {
   @HttpCode(HttpStatus.OK)
   async syncBidangStudi(@Req() req: Request, @Body() data: any[]) {
     const sekolahId = this.getSekolahId(req);
-    const rows = Array.isArray(data) ? data : [data];
-    const result = await this.syncService.syncBidangStudi(sekolahId, rows);
-    return { status: 'success', count: result.successCount };
+    if (!sekolahId) {
+      throw new NotFoundException('sekolah_id tidak ditemukan.');
+    }
+    return this.getLock(sekolahId).run(async () => {
+      const rows = Array.isArray(data) ? data : [data];
+      const result = await this.syncService.syncBidangStudi(sekolahId, rows);
+      return { status: 'success', count: result.successCount };
+    });
   }
 
   @Post('lemb_sertifikasi')
@@ -105,9 +162,14 @@ export class SyncController {
   @HttpCode(HttpStatus.OK)
   async syncLembSertifikasi(@Req() req: Request, @Body() data: any[]) {
     const sekolahId = this.getSekolahId(req);
-    const rows = Array.isArray(data) ? data : [data];
-    const result = await this.syncService.syncLembSertifikasi(sekolahId, rows);
-    return { status: 'success', count: result.successCount };
+    if (!sekolahId) {
+      throw new NotFoundException('sekolah_id tidak ditemukan.');
+    }
+    return this.getLock(sekolahId).run(async () => {
+      const rows = Array.isArray(data) ? data : [data];
+      const result = await this.syncService.syncLembSertifikasi(sekolahId, rows);
+      return { status: 'success', count: result.successCount };
+    });
   }
 
   @Post('rwy_sertifikat')
@@ -115,8 +177,13 @@ export class SyncController {
   @HttpCode(HttpStatus.OK)
   async syncRwySertifikat(@Req() req: Request, @Body() data: any[]) {
     const sekolahId = this.getSekolahId(req);
-    const rows = Array.isArray(data) ? data : [data];
-    const result = await this.syncService.syncRwySertifikat(sekolahId, rows);
-    return { status: 'success', count: result.successCount };
+    if (!sekolahId) {
+      throw new NotFoundException('sekolah_id tidak ditemukan.');
+    }
+    return this.getLock(sekolahId).run(async () => {
+      const rows = Array.isArray(data) ? data : [data];
+      const result = await this.syncService.syncRwySertifikat(sekolahId, rows);
+      return { status: 'success', count: result.successCount };
+    });
   }
 }

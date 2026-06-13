@@ -2,7 +2,9 @@ import { SyncService } from './sync.service';
 import type { Request } from 'express';
 export declare class SyncController {
     private readonly syncService;
+    private readonly schoolLocks;
     constructor(syncService: SyncService);
+    private getLock;
     private getSekolahId;
     validateSyncKey(body: {
         key: string;

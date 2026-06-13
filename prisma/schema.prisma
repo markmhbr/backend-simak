@@ -390,6 +390,7 @@ model Gtk {
   pelanggaran_dilaporkan  Pelanggaran[]    @relation("PelaporGtk")
   tindak_lanjut_petugas   TindakLanjut[]   @relation("PetugasTindakLanjut")
   surat_keluar            SuratKeluar[]
+  riwayat_pendidikan_formal RiwayatPendidikanFormal[]
 
   @@index([sekolah_id])
   @@index([qr_token])
@@ -1159,4 +1160,31 @@ model SuratKeluar {
   @@index([status])
   @@map("surat_keluar")
   @@schema("simak")
+}
+
+model RiwayatPendidikanFormal {
+  riwayat_pendidikan_formal_id String   @id @db.Uuid
+  ptk_id                       String   @db.Uuid
+  satuan_pendidikan_formal     String
+  fakultas                     String?
+  kependidikan                 String?
+  tahun_masuk                  String?
+  tahun_lulus                  String?
+  nim                          String?
+  status_kuliah                String?
+  semester                     String?
+  ipk                          String?
+  prodi                        String?
+  id_reg_pd                    String?
+  bidang_studi_id_str          String?
+  jenjang_pendidikan_id_str    String?
+  gelar_akademik_id_str        String?
+  created_at                   DateTime @default(now())
+  updated_at                   DateTime @updatedAt
+
+  gtk Gtk @relation(fields: [ptk_id], references: [ptk_id], onDelete: Cascade)
+
+  @@map("riwayat_pendidikan_formal")
+  @@schema("dapodik")
+  @@index([ptk_id])
 }

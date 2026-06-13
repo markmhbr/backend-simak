@@ -434,6 +434,7 @@ export class SyncService {
         pendidikan_terakhir: g.pendidikan_terakhir || null,
         bidang_studi_terakhir: g.bidang_studi_terakhir || null,
         pangkat_golongan_terakhir: g.pangkat_golongan_terakhir || null,
+        rwy_pend_formal: g.rwy_pend_formal || null,
         alamat_jalan: g.alamat_jalan || null,
         rt: g.rt || null,
         rw: g.rw || null,
@@ -461,6 +462,38 @@ export class SyncService {
           create: { ...payload, ptk_id: g.ptk_id },
           update: { ...payload, updated_at: new Date() },
         });
+
+        // Sync formal education history inside the same transaction loop
+        if (g.rwy_pend_formal && Array.isArray(g.rwy_pend_formal)) {
+          for (const edu of g.rwy_pend_formal) {
+            if (!edu.riwayat_pendidikan_formal_id) continue;
+            
+            const eduPayload = {
+              ptk_id: g.ptk_id,
+              satuan_pendidikan_formal: edu.satuan_pendidikan_formal || 'Tanpa Nama',
+              fakultas: edu.fakultas || null,
+              kependidikan: String(edu.kependidikan || ''),
+              tahun_masuk: String(edu.tahun_masuk || ''),
+              tahun_lulus: String(edu.tahun_lulus || ''),
+              nim: edu.nim || null,
+              status_kuliah: String(edu.status_kuliah || ''),
+              semester: String(edu.semester || ''),
+              ipk: edu.ipk || null,
+              prodi: edu.prodi || null,
+              id_reg_pd: edu.id_reg_pd || null,
+              bidang_studi_id_str: edu.bidang_studi_id_str || null,
+              jenjang_pendidikan_id_str: edu.jenjang_pendidikan_id_str || null,
+              gelar_akademik_id_str: edu.gelar_akademik_id_str || null,
+            };
+
+            await this.prisma.riwayatPendidikanFormal.upsert({
+              where: { riwayat_pendidikan_formal_id: edu.riwayat_pendidikan_formal_id },
+              create: { ...eduPayload, riwayat_pendidikan_formal_id: edu.riwayat_pendidikan_formal_id },
+              update: { ...eduPayload, updated_at: new Date() },
+            });
+          }
+        }
+
         successCount++;
       } catch (err) {
         this.logger.error(`Error upsert GTK ${g.ptk_id}: ${err.message}`);
