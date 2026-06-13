@@ -11,6 +11,9 @@ export class MandalaKeyGuard implements CanActivate {
 
     // 1. Get mandala key from header or query param
     let key = request.headers['x-mandala-key'] as string;
+    if (!key && request.query['x-mandala-key']) {
+      key = request.query['x-mandala-key'] as string;
+    }
     if (!key && request.query.key) {
       key = request.query.key as string;
     }

@@ -96,4 +96,38 @@ export declare class MandalaController {
             total_gtk: number;
         };
     }>;
+    getPesertaDidik(sekolahId: string, limit?: string, page?: string, search?: string, status?: 'aktif' | 'non-aktif'): Promise<{
+        status: string;
+        data: {
+            identitas: {
+                id: string;
+                nama: string;
+                nisn: string;
+                nik: string;
+                jenis_kelamin: string;
+                tempat_lahir: string;
+                tanggal_lahir: Date;
+                agama: string;
+            };
+            akademik: {
+                nama_rombel: string;
+                tingkat: string;
+                jurusan: string;
+            };
+            data_pendukung: {
+                alamat_lengkap: string;
+                nama_ayah: string;
+                nama_ibu: string;
+                hp_orang_tua: string;
+            };
+        }[];
+        total_data: number;
+        total_pages: number;
+        current_page: number;
+        meta: {
+            total_data: number;
+            total_pages: number;
+            current_page: number;
+        };
+    }>;
 }

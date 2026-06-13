@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, UseGuards, HttpStatus, HttpCode, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, HttpStatus, HttpCode, NotFoundException, Query, BadRequestException } from '@nestjs/common';
 import { MandalaService } from './mandala.service';
 import { MandalaKeyGuard } from '../../core/mandala/mandala-key.guard';
 
@@ -69,5 +69,27 @@ export class MandalaController {
       status: 'success',
       data,
     };
+  }
+
+  @Get('dapodik/peserta-didik')
+  @UseGuards(MandalaKeyGuard)
+  async getPesertaDidik(
+    @Query('sekolah_id') sekolahId: string,
+    @Query('limit') limit?: string,
+    @Query('page') page?: string,
+    @Query('search') search?: string,
+    @Query('status') status?: 'aktif' | 'non-aktif'
+  ) {
+    if (!sekolahId) {
+      throw new BadRequestException('sekolah_id query parameter is required.');
+    }
+    const take = limit ? parseInt(limit, 10) : 10;
+    const skipPage = page ? parseInt(page, 10) : 1;
+    return await this.mandalaService.getPesertaDidikForMandala(sekolahId, {
+      limit: take,
+      page: skipPage,
+      search,
+      status
+    });
   }
 }

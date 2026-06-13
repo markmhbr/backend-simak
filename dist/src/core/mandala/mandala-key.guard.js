@@ -20,6 +20,9 @@ let MandalaKeyGuard = class MandalaKeyGuard {
     async canActivate(context) {
         const request = context.switchToHttp().getRequest();
         let key = request.headers['x-mandala-key'];
+        if (!key && request.query['x-mandala-key']) {
+            key = request.query['x-mandala-key'];
+        }
         if (!key && request.query.key) {
             key = request.query.key;
         }
