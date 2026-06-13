@@ -76,7 +76,7 @@ export declare class MandalaService implements OnModuleInit {
         total_siswa: number;
         total_gtk: number;
     }>;
-    getPesertaDidikForMandala(sekolahId: string, query: {
+    getPesertaDidikForMandala(sekolahId: string | undefined, query: {
         limit: number;
         page: number;
         search?: string;
@@ -86,6 +86,7 @@ export declare class MandalaService implements OnModuleInit {
         data: {
             identitas: {
                 id: string;
+                sekolah_id: string;
                 nama: string;
                 nisn: string;
                 nik: string;
@@ -115,7 +116,7 @@ export declare class MandalaService implements OnModuleInit {
             current_page: number;
         };
     }>;
-    getGtkForMandala(sekolahId: string, query: {
+    getGtkForMandala(sekolahId: string | undefined, query: {
         limit: number;
         page: number;
         search?: string;
@@ -126,6 +127,7 @@ export declare class MandalaService implements OnModuleInit {
         data: {
             identitas: {
                 id: string;
+                sekolah_id: string;
                 nama: string;
                 nip: string;
                 nik: string;

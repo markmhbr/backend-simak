@@ -133,9 +133,10 @@ let MandalaService = MandalaService_1 = class MandalaService {
     }
     async getPesertaDidikForMandala(sekolahId, query) {
         const { limit, page, search, status } = query;
-        const whereClause = {
-            sekolah_id: sekolahId,
-        };
+        const whereClause = {};
+        if (sekolahId) {
+            whereClause.sekolah_id = sekolahId;
+        }
         if (search) {
             whereClause.OR = [
                 { nama: { contains: search, mode: 'insensitive' } },
@@ -178,6 +179,7 @@ let MandalaService = MandalaService_1 = class MandalaService {
             return {
                 identitas: {
                     id: pd.peserta_didik_id,
+                    sekolah_id: pd.sekolah_id,
                     nama: pd.nama,
                     nisn: pd.nisn,
                     nik: pd.nik,
@@ -214,9 +216,10 @@ let MandalaService = MandalaService_1 = class MandalaService {
     }
     async getGtkForMandala(sekolahId, query) {
         const { limit, page, search, status, type } = query;
-        const whereClause = {
-            sekolah_id: sekolahId,
-        };
+        const whereClause = {};
+        if (sekolahId) {
+            whereClause.sekolah_id = sekolahId;
+        }
         if (search) {
             whereClause.OR = [
                 { nama: { contains: search, mode: 'insensitive' } },
@@ -264,6 +267,7 @@ let MandalaService = MandalaService_1 = class MandalaService {
             return {
                 identitas: {
                     id: g.ptk_id,
+                    sekolah_id: g.sekolah_id,
                     nama: g.nama,
                     nip: g.nip || '',
                     nik: g.nik || '',

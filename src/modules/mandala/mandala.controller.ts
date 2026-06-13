@@ -74,16 +74,16 @@ export class MandalaController {
   @Get('dapodik/peserta-didik')
   @UseGuards(MandalaKeyGuard)
   async getPesertaDidik(
-    @Query('sekolah_id') sekolahId: string,
+    @Query('sekolah_id') sekolahId?: string,
     @Query('limit') limit?: string,
     @Query('page') page?: string,
     @Query('search') search?: string,
     @Query('status') status?: 'aktif' | 'non-aktif'
   ) {
-    if (!sekolahId) {
-      throw new BadRequestException('sekolah_id query parameter is required.');
+    let take = limit ? parseInt(limit, 10) : 10;
+    if (take > 100) {
+      take = 100; // Cap at 100 to optimize performance
     }
-    const take = limit ? parseInt(limit, 10) : 10;
     const skipPage = page ? parseInt(page, 10) : 1;
     return await this.mandalaService.getPesertaDidikForMandala(sekolahId, {
       limit: take,
@@ -96,17 +96,17 @@ export class MandalaController {
   @Get('dapodik/gtk')
   @UseGuards(MandalaKeyGuard)
   async getGtk(
-    @Query('sekolah_id') sekolahId: string,
+    @Query('sekolah_id') sekolahId?: string,
     @Query('limit') limit?: string,
     @Query('page') page?: string,
     @Query('search') search?: string,
     @Query('status') status?: 'aktif' | 'non-aktif',
     @Query('type') type?: 'guru' | 'tendik'
   ) {
-    if (!sekolahId) {
-      throw new BadRequestException('sekolah_id query parameter is required.');
+    let take = limit ? parseInt(limit, 10) : 10;
+    if (take > 100) {
+      take = 100; // Cap at 100 to optimize performance
     }
-    const take = limit ? parseInt(limit, 10) : 10;
     const skipPage = page ? parseInt(page, 10) : 1;
     return await this.mandalaService.getGtkForMandala(sekolahId, {
       limit: take,

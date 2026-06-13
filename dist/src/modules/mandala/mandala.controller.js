@@ -73,10 +73,10 @@ let MandalaController = class MandalaController {
         };
     }
     async getPesertaDidik(sekolahId, limit, page, search, status) {
-        if (!sekolahId) {
-            throw new common_1.BadRequestException('sekolah_id query parameter is required.');
+        let take = limit ? parseInt(limit, 10) : 10;
+        if (take > 100) {
+            take = 100;
         }
-        const take = limit ? parseInt(limit, 10) : 10;
         const skipPage = page ? parseInt(page, 10) : 1;
         return await this.mandalaService.getPesertaDidikForMandala(sekolahId, {
             limit: take,
@@ -86,10 +86,10 @@ let MandalaController = class MandalaController {
         });
     }
     async getGtk(sekolahId, limit, page, search, status, type) {
-        if (!sekolahId) {
-            throw new common_1.BadRequestException('sekolah_id query parameter is required.');
+        let take = limit ? parseInt(limit, 10) : 10;
+        if (take > 100) {
+            take = 100;
         }
-        const take = limit ? parseInt(limit, 10) : 10;
         const skipPage = page ? parseInt(page, 10) : 1;
         return await this.mandalaService.getGtkForMandala(sekolahId, {
             limit: take,

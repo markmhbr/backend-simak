@@ -96,11 +96,12 @@ export declare class MandalaController {
             total_gtk: number;
         };
     }>;
-    getPesertaDidik(sekolahId: string, limit?: string, page?: string, search?: string, status?: 'aktif' | 'non-aktif'): Promise<{
+    getPesertaDidik(sekolahId?: string, limit?: string, page?: string, search?: string, status?: 'aktif' | 'non-aktif'): Promise<{
         status: string;
         data: {
             identitas: {
                 id: string;
+                sekolah_id: string;
                 nama: string;
                 nisn: string;
                 nik: string;
@@ -130,11 +131,12 @@ export declare class MandalaController {
             current_page: number;
         };
     }>;
-    getGtk(sekolahId: string, limit?: string, page?: string, search?: string, status?: 'aktif' | 'non-aktif', type?: 'guru' | 'tendik'): Promise<{
+    getGtk(sekolahId?: string, limit?: string, page?: string, search?: string, status?: 'aktif' | 'non-aktif', type?: 'guru' | 'tendik'): Promise<{
         status: string;
         data: {
             identitas: {
                 id: string;
+                sekolah_id: string;
                 nama: string;
                 nip: string;
                 nik: string;

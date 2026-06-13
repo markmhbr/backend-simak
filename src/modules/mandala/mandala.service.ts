@@ -135,7 +135,7 @@ export class MandalaService implements OnModuleInit {
   }
 
   async getPesertaDidikForMandala(
-    sekolahId: string,
+    sekolahId: string | undefined,
     query: {
       limit: number;
       page: number;
@@ -145,9 +145,10 @@ export class MandalaService implements OnModuleInit {
   ) {
     const { limit, page, search, status } = query;
 
-    const whereClause: any = {
-      sekolah_id: sekolahId,
-    };
+    const whereClause: any = {};
+    if (sekolahId) {
+      whereClause.sekolah_id = sekolahId;
+    }
 
     if (search) {
       whereClause.OR = [
@@ -198,6 +199,7 @@ export class MandalaService implements OnModuleInit {
       return {
         identitas: {
           id: pd.peserta_didik_id,
+          sekolah_id: pd.sekolah_id,
           nama: pd.nama,
           nisn: pd.nisn,
           nik: pd.nik,
@@ -235,7 +237,7 @@ export class MandalaService implements OnModuleInit {
   }
 
   async getGtkForMandala(
-    sekolahId: string,
+    sekolahId: string | undefined,
     query: {
       limit: number;
       page: number;
@@ -246,9 +248,10 @@ export class MandalaService implements OnModuleInit {
   ) {
     const { limit, page, search, status, type } = query;
 
-    const whereClause: any = {
-      sekolah_id: sekolahId,
-    };
+    const whereClause: any = {};
+    if (sekolahId) {
+      whereClause.sekolah_id = sekolahId;
+    }
 
     if (search) {
       whereClause.OR = [
@@ -302,6 +305,7 @@ export class MandalaService implements OnModuleInit {
       return {
         identitas: {
           id: g.ptk_id,
+          sekolah_id: g.sekolah_id,
           nama: g.nama,
           nip: g.nip || '',
           nik: g.nik || '',
