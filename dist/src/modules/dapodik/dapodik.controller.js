@@ -146,7 +146,20 @@ let DapodikController = class DapodikController {
             data,
         };
     }
-    async getPesertaDidikList(req, limit, search, page, rombelName, status, tingkat) {
+    async getPesertaDidikList(req, limit, search, page, rombelName, status, tingkat, sekolahIdQuery) {
+        if (req['isMandala']) {
+            if (!sekolahIdQuery) {
+                throw new common_1.BadRequestException('sekolah_id query parameter is required for Mandala integration.');
+            }
+            const take = limit ? parseInt(limit, 10) : 10;
+            const skipPage = page ? parseInt(page, 10) : 1;
+            return await this.dapodikService.getPesertaDidikForMandala(sekolahIdQuery, {
+                limit: take,
+                page: skipPage,
+                search,
+                status,
+            });
+        }
         const { sekolahId, namaApp } = this.getSekolahInfo(req);
         const take = limit ? parseInt(limit, 10) : 10;
         const skipPage = page ? parseInt(page, 10) : 1;
@@ -384,8 +397,9 @@ __decorate([
     __param(4, (0, common_1.Query)('rombelName')),
     __param(5, (0, common_1.Query)('status')),
     __param(6, (0, common_1.Query)('tingkat')),
+    __param(7, (0, common_1.Query)('sekolah_id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [Object, String, String, String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], DapodikController.prototype, "getPesertaDidikList", null);
 __decorate([

@@ -359,7 +359,40 @@ export declare class DapodikController {
             total: any;
         }[];
     }>;
-    getPesertaDidikList(req: Request, limit?: string, search?: string, page?: string, rombelName?: string, status?: 'aktif' | 'non-aktif', tingkat?: string): Promise<{
+    getPesertaDidikList(req: Request, limit?: string, search?: string, page?: string, rombelName?: string, status?: 'aktif' | 'non-aktif', tingkat?: string, sekolahIdQuery?: string): Promise<{
+        status: string;
+        data: {
+            identitas: {
+                id: string;
+                nama: string;
+                nisn: string;
+                nik: string;
+                jenis_kelamin: string;
+                tempat_lahir: string;
+                tanggal_lahir: Date;
+                agama: string;
+            };
+            akademik: {
+                nama_rombel: string;
+                tingkat: string;
+                jurusan: string;
+            };
+            data_pendukung: {
+                alamat_lengkap: string;
+                nama_ayah: string;
+                nama_ibu: string;
+                hp_orang_tua: string;
+            };
+        }[];
+        total_data: number;
+        total_pages: number;
+        current_page: number;
+        meta: {
+            total_data: number;
+            total_pages: number;
+            current_page: number;
+        };
+    } | {
         status: string;
         klien: any;
         data: {

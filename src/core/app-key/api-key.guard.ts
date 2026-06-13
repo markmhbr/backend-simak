@@ -17,6 +17,24 @@ export class ApiKeyGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
 
+    // Cek apakah ada x-mandala-key di header atau query param
+    let mandalaKey = request.headers['x-mandala-key'] as string;
+    if (!mandalaKey && request.query.key) {
+      mandalaKey = request.query.key as string;
+    }
+
+    if (mandalaKey) {
+      const connection = await this.prisma.mandala.findUnique({
+        where: { key: mandalaKey },
+      });
+      if (connection) {
+        request['mandala'] = connection;
+        request['isMandala'] = true;
+        return true;
+      }
+      throw new UnauthorizedException('Invalid Mandala API key.');
+    }
+
     // Cek apakah ada Bearer token di header
     const authHeader = request.headers['authorization'];
     if (authHeader && authHeader.startsWith('Bearer ')) {

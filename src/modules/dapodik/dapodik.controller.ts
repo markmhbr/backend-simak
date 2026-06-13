@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Req, Query, Patch, Body, Post, UseInterceptors, UploadedFile, Param } from '@nestjs/common';
+import { Controller, Get, UseGuards, Req, Query, Patch, Body, Post, UseInterceptors, UploadedFile, Param, BadRequestException } from '@nestjs/common';
 import { DapodikService } from './dapodik.service';
 import { ApiKeyGuard } from '../../core/app-key/api-key.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -171,8 +171,23 @@ export class DapodikController {
     @Query('page') page?: string,
     @Query('rombelName') rombelName?: string,
     @Query('status') status?: 'aktif' | 'non-aktif',
-    @Query('tingkat') tingkat?: string
+    @Query('tingkat') tingkat?: string,
+    @Query('sekolah_id') sekolahIdQuery?: string
     ) {
+    if (req['isMandala']) {
+      if (!sekolahIdQuery) {
+        throw new BadRequestException('sekolah_id query parameter is required for Mandala integration.');
+      }
+      const take = limit ? parseInt(limit, 10) : 10;
+      const skipPage = page ? parseInt(page, 10) : 1;
+      return await this.dapodikService.getPesertaDidikForMandala(sekolahIdQuery, {
+        limit: take,
+        page: skipPage,
+        search,
+        status,
+      });
+    }
+
     const { sekolahId, namaApp } = this.getSekolahInfo(req);
     const take = limit ? parseInt(limit, 10) : 10;
     const skipPage = page ? parseInt(page, 10) : 1;

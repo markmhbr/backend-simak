@@ -26,6 +26,21 @@ let ApiKeyGuard = class ApiKeyGuard {
     }
     async canActivate(context) {
         const request = context.switchToHttp().getRequest();
+        let mandalaKey = request.headers['x-mandala-key'];
+        if (!mandalaKey && request.query.key) {
+            mandalaKey = request.query.key;
+        }
+        if (mandalaKey) {
+            const connection = await this.prisma.mandala.findUnique({
+                where: { key: mandalaKey },
+            });
+            if (connection) {
+                request['mandala'] = connection;
+                request['isMandala'] = true;
+                return true;
+            }
+            throw new common_1.UnauthorizedException('Invalid Mandala API key.');
+        }
         const authHeader = request.headers['authorization'];
         if (authHeader && authHeader.startsWith('Bearer ')) {
             const token = authHeader.substring(7);

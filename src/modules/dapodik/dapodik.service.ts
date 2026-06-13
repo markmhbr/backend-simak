@@ -264,6 +264,107 @@ export class DapodikService {
 
     return { total, data };
   }
+
+  async getPesertaDidikForMandala(
+    sekolahId: string,
+    query: {
+      limit: number;
+      page: number;
+      search?: string;
+      status?: 'aktif' | 'non-aktif';
+    }
+  ) {
+    const { limit, page, search, status } = query;
+
+    const whereClause: any = {
+      sekolah_id: sekolahId,
+    };
+
+    if (search) {
+      whereClause.OR = [
+        { nama: { contains: search, mode: 'insensitive' } },
+        { nisn: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    if (status === 'aktif') {
+      whereClause.status = 'Aktif';
+    } else if (status === 'non-aktif') {
+      whereClause.status = { not: 'Aktif' };
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [total, students] = await Promise.all([
+      this.prisma.pesertaDidik.count({ where: whereClause }),
+      this.prisma.pesertaDidik.findMany({
+        where: whereClause,
+        take: limit,
+        skip: skip,
+        include: {
+          rombongan_belajar: true,
+        },
+        orderBy: { nama: 'asc' },
+      }),
+    ]);
+
+    const formattedData = students.map((pd) => {
+      // Construct alamat lengkap
+      const addressParts = [
+        pd.alamat_jalan,
+        pd.rt ? `RT ${pd.rt}` : null,
+        pd.rw ? `RW ${pd.rw}` : null,
+        pd.dusun ? `Dusun ${pd.dusun}` : null,
+        pd.desa_kelurahan ? `Desa/Kel. ${pd.desa_kelurahan}` : null,
+        pd.kecamatan ? `Kec. ${pd.kecamatan}` : null,
+        pd.kabupaten_kota,
+        pd.provinsi,
+        pd.kode_pos
+      ].filter(Boolean);
+      const alamatLengkap = addressParts.length > 0 ? addressParts.join(', ') : '';
+
+      // Select HP Orang Tua (priority: no_wa_ayah -> no_wa_ibu -> no_wa -> nomor_telepon_seluler)
+      const hpOrangTua = pd.no_wa_ayah || pd.no_wa_ibu || pd.no_wa || pd.nomor_telepon_seluler || '';
+
+      return {
+        identitas: {
+          id: pd.peserta_didik_id,
+          nama: pd.nama,
+          nisn: pd.nisn,
+          nik: pd.nik,
+          jenis_kelamin: pd.jenis_kelamin,
+          tempat_lahir: pd.tempat_lahir,
+          tanggal_lahir: pd.tanggal_lahir,
+          agama: pd.agama_id_str || pd.agama_id || '',
+        },
+        akademik: {
+          nama_rombel: pd.nama_rombel || pd.rombongan_belajar?.nama || '',
+          tingkat: pd.rombongan_belajar?.tingkat_pendidikan_id_str || pd.rombongan_belajar?.tingkat_pendidikan_id || pd.tingkat_pendidikan_id || '',
+          jurusan: pd.rombongan_belajar?.jurusan_id_str || pd.rombongan_belajar?.jurusan_id || pd.jurusan_sp_id || '',
+        },
+        data_pendukung: {
+          alamat_lengkap: alamatLengkap,
+          nama_ayah: pd.nama_ayah || '',
+          nama_ibu: pd.nama_ibu_kandung || pd.nama_ibu || '',
+          hp_orang_tua: hpOrangTua,
+        },
+      };
+    });
+
+    return {
+      status: 'success',
+      data: formattedData,
+      total_data: total,
+      total_pages: Math.ceil(total / limit),
+      current_page: page,
+      meta: {
+        total_data: total,
+        total_pages: Math.ceil(total / limit),
+        current_page: page,
+      },
+    };
+  }
+
   async getPdRekapTingkat(sekolahId: string | null) {
     const filter = this.getSekolahFilter(sekolahId);
     
