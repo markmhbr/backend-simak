@@ -101,15 +101,15 @@ let ApiKeyGuard = class ApiKeyGuard {
             if (request.url.includes('/api/auth/')) {
                 return true;
             }
-            throw new common_1.UnauthorizedException('Sistem belum terhubung. API Key tidak ditemukan dan domain tidak terdaftar.');
+            throw new common_1.ForbiddenException('Sistem belum terhubung. API Key tidak ditemukan dan domain tidak terdaftar.');
         }
         const validKey = await this.appKeyService.validateApiKey(apiKey);
         const isSyncSekolah = request.method === 'POST' && request.url.includes('/api/sync/sekolah');
         if (!validKey && !isSyncSekolah) {
             if (request.url.includes('/api/auth/')) {
-                throw new common_1.UnauthorizedException('API Key tidak valid');
+                throw new common_1.ForbiddenException('API Key tidak valid');
             }
-            throw new common_1.UnauthorizedException('API Key tidak valid atau tidak aktif');
+            throw new common_1.ForbiddenException('API Key tidak valid atau tidak aktif');
         }
         request['appKey'] = validKey;
         request['rawApiKey'] = apiKey;

@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { AppKeyService } from './app-key.service';
 import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
@@ -110,7 +110,7 @@ export class ApiKeyGuard implements CanActivate {
       if (request.url.includes('/api/auth/')) {
         return true;
       }
-      throw new UnauthorizedException('Sistem belum terhubung. API Key tidak ditemukan dan domain tidak terdaftar.');
+      throw new ForbiddenException('Sistem belum terhubung. API Key tidak ditemukan dan domain tidak terdaftar.');
     }
 
     const validKey = await this.appKeyService.validateApiKey(apiKey);
@@ -123,9 +123,9 @@ export class ApiKeyGuard implements CanActivate {
     if (!validKey && !isSyncSekolah) {
       // Jika di route auth tapi key salah, kita tetap tolak demi keamanan
       if (request.url.includes('/api/auth/')) {
-        throw new UnauthorizedException('API Key tidak valid');
+        throw new ForbiddenException('API Key tidak valid');
       }
-      throw new UnauthorizedException('API Key tidak valid atau tidak aktif');
+      throw new ForbiddenException('API Key tidak valid atau tidak aktif');
     }
 
     // Simpan informasi key ke dalam request (bisa null jika isSyncSekolah)
