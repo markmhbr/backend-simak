@@ -68,6 +68,13 @@ let SyncService = SyncService_1 = class SyncService {
                     }
                 });
             }
+            else if (existingKey.key_webService !== rawApiKey) {
+                this.logger.log(`Updating WebService Key for Sekolah ID: ${sekolahId}`);
+                await this.prisma.appKey.update({
+                    where: { sekolah_id: sekolahId },
+                    data: { key_webService: rawApiKey }
+                });
+            }
         }
         for (const row of dataRows) {
             if (!row.sekolah_id && !row.id && !row.npsn)

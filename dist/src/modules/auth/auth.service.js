@@ -246,6 +246,14 @@ let AuthService = class AuthService {
         if (existingKey) {
             return await this.appKeyService.updateSchoolDomain(existingKey.sekolah_id, domain);
         }
+        const currentKey = await this.prisma.appKey.findFirst();
+        if (currentKey) {
+            await this.appKeyService.updateSchoolDomain(currentKey.sekolah_id, domain);
+            return await this.prisma.appKey.update({
+                where: { id: currentKey.id },
+                data: { key_api: apiKey }
+            });
+        }
         await this.prisma.appKey.deleteMany({});
         return await this.prisma.appKey.create({
             data: {

@@ -269,6 +269,17 @@ export class AuthService {
       return await this.appKeyService.updateSchoolDomain(existingKey.sekolah_id, domain);
     }
 
+    // Cek apakah sudah ada AppKey terdaftar di sistem ini
+    const currentKey = await this.prisma.appKey.findFirst();
+    if (currentKey) {
+      // Jika sudah ada key sebelumnya, kita timpa key_api dan domainnya agar sekolah_id tidak berubah
+      await this.appKeyService.updateSchoolDomain(currentKey.sekolah_id, domain);
+      return await this.prisma.appKey.update({
+        where: { id: currentKey.id },
+        data: { key_api: apiKey }
+      });
+    }
+
     // Jika key benar-benar baru di sistem ini, hapus data lama dan buat baru
     await this.prisma.appKey.deleteMany({});
 
