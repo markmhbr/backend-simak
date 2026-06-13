@@ -101,8 +101,12 @@ export class MandalaController {
     @Query('page') page?: string,
     @Query('search') search?: string,
     @Query('status') status?: 'aktif' | 'non-aktif',
-    @Query('type') type?: 'guru' | 'tendik'
+    @Query('type') type?: 'guru' | 'tendik',
+    @Query('tab') tab?: string
   ) {
+    if (tab === 'rekap') {
+      return await this.mandalaService.getGtkRekapForMandala(sekolahId);
+    }
     let take = limit ? parseInt(limit, 10) : 10;
     if (take > 100) {
       take = 100; // Cap at 100 to optimize performance

@@ -159,4 +159,39 @@ export declare class MandalaService implements OnModuleInit {
             current_page: number;
         };
     }>;
+    getGtkRekapForMandala(sekolahId: string | undefined): Promise<{
+        status: string;
+        data: {
+            rekap_kategori: {
+                id: number;
+                kategori: string;
+                lakiLaki: number;
+                perempuan: number;
+                totalJK: number;
+                asn: number;
+                nonAsn: number;
+                totalStatus: number;
+            }[];
+            rekap_pendidikan: {
+                id: number;
+                pendidikan: string;
+                lakiLaki: number;
+                perempuan: number;
+                totalJK: number;
+                asn: number;
+                nonAsn: number;
+                totalStatus: number;
+            }[];
+            rekap_usia: {
+                id: number;
+                rentangUsia: string;
+                lakiLaki: number;
+                perempuan: number;
+                totalJK: number;
+                asn: number;
+                nonAsn: number;
+                totalStatus: number;
+            }[];
+        };
+    }>;
 }

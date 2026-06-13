@@ -54,6 +54,10 @@ model Sekolah {
   pengaturan_tagihan    PengaturanTagihan[]
   spp                   Spp[]
   riwayat_transaksi_spp RiwayatTransaksiSpp[]
+  pengaturan_nomor_surat PengaturanNomorSurat[]
+  template_surat         TemplateSurat[]
+  surat_masuk            SuratMasuk[]
+  surat_keluar           SuratKeluar[]
 
   @@map("sekolah")
   @@schema("dapodik")
@@ -295,6 +299,7 @@ model PesertaDidik {
   rombongan_belajar     RombonganBelajar?         @relation("RombelPesertaDidik", fields: [rombongan_belajar_id], references: [rombongan_belajar_id], onDelete: SetNull)
   spp                   Spp[]
   riwayat_transaksi_spp RiwayatTransaksiSpp[]
+  surat_keluar           SuratKeluar[]
 
   @@index([sekolah_id])
   @@index([rombongan_belajar_id])
@@ -384,6 +389,7 @@ model Gtk {
   pelanggaran             Pelanggaran[]    @relation("GtkPelanggaran")
   pelanggaran_dilaporkan  Pelanggaran[]    @relation("PelaporGtk")
   tindak_lanjut_petugas   TindakLanjut[]   @relation("PetugasTindakLanjut")
+  surat_keluar            SuratKeluar[]
 
   @@index([sekolah_id])
   @@index([qr_token])
@@ -1039,5 +1045,118 @@ model RiwayatTransaksiSpp {
   @@index([jenis_transaksi])
   @@index([tanggal_transaksi])
   @@map("riwayat_transaksi_spp")
+  @@schema("simak")
+}
+
+model PengaturanNomorSurat {
+  pengaturan_nomor_surat_id String   @id @default(uuid()) @db.Uuid
+  sekolah_id                String   @db.Uuid
+  kategori                  Int      @db.SmallInt // 0 = Peserta Didik, 1 = GTK, 2 = SK Sekolah
+  nama_label                String   @db.VarChar(100) // SK, SKL, SPT, SPD, SKB
+  format_nomor              String   @db.VarChar(255) // e.g. {NO}/SMKN1/{LABEL}/{ROMAWI}/{TAHUN}
+  counter                   Int      @default(0)
+  aktif                     Boolean  @default(true)
+  created_at                DateTime @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime @updatedAt @db.Timestamptz(6)
+
+  // Relations
+  sekolah                   Sekolah  @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
+  surat_keluar              SuratKeluar[]
+
+  @@unique([sekolah_id, kategori, nama_label])
+  @@index([sekolah_id])
+  @@index([kategori])
+  @@index([aktif])
+  @@map("pengaturan_nomor_surat")
+  @@schema("simak")
+}
+
+model TemplateSurat {
+  template_surat_id String   @id @default(uuid()) @db.Uuid
+  sekolah_id        String   @db.Uuid
+  nama_template     String   @db.VarChar(150)
+  kategori          Int      @db.SmallInt // 0 = Peserta Didik, 1 = GTK, 2 = SK Sekolah
+  ukuran_kertas     Int      @db.SmallInt // 1 = A4, 2 = F4, 3 = Letter, 4 = Legal
+  margin_atas       Int      @default(20) @db.SmallInt
+  margin_bawah      Int      @default(20) @db.SmallInt
+  margin_kiri       Int      @default(20) @db.SmallInt
+  margin_kanan      Int      @default(20) @db.SmallInt
+  konten_html       String   @db.Text
+  aktif             Boolean  @default(true)
+  created_at        DateTime @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime @updatedAt @db.Timestamptz(6)
+
+  // Relations
+  sekolah           Sekolah  @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
+  surat_keluar      SuratKeluar[]
+
+  @@index([sekolah_id])
+  @@index([kategori])
+  @@index([aktif])
+  @@map("template_surat")
+  @@schema("simak")
+}
+
+model SuratMasuk {
+  surat_masuk_id   String   @id @default(uuid()) @db.Uuid
+  sekolah_id       String   @db.Uuid
+  tanggal_surat    DateTime @db.Date
+  tanggal_diterima DateTime @db.Date
+  nomor_agenda     String   @db.VarChar(50)
+  nomor_surat      String   @db.VarChar(100)
+  asal_surat       String   @db.VarChar(255)
+  tujuan_disposisi String   @db.VarChar(255)
+  perihal          String   @db.VarChar(255)
+  keterangan       String?  @db.Text
+  file_url         String   @db.VarChar(500)
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime @updatedAt @db.Timestamptz(6)
+
+  // Relations
+  sekolah          Sekolah  @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
+
+  @@unique([sekolah_id, nomor_agenda])
+  @@index([sekolah_id])
+  @@index([tanggal_surat])
+  @@index([tanggal_diterima])
+  @@index([nomor_agenda])
+  @@index([nomor_surat])
+  @@map("surat_masuk")
+  @@schema("simak")
+}
+
+model SuratKeluar {
+  surat_keluar_id           String               @id @default(uuid()) @db.Uuid
+  sekolah_id                String               @db.Uuid
+  template_surat_id         String               @db.Uuid
+  pengaturan_nomor_surat_id String               @db.Uuid
+  kategori                  Int                  @db.SmallInt // 0 = Peserta Didik, 1 = GTK, 2 = SK Sekolah
+  peserta_didik_id          String?              @db.Uuid
+  ptk_id                    String?              @db.Uuid
+  nomor_surat               String?              @db.VarChar(255) // Nullable for drafts/previews
+  tanggal_surat             DateTime             @db.Date
+  perihal                   String               @db.VarChar(255)
+  isi_final_html            String               @db.Text
+  file_pdf                  String?              @db.VarChar(500)
+  status                    Int                  @default(1) @db.SmallInt // 1 = Draft, 2 = Terbit, 3 = Dibatalkan
+  created_at                DateTime             @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime             @updatedAt @db.Timestamptz(6)
+
+  // Relations
+  sekolah                   Sekolah              @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
+  template_surat            TemplateSurat        @relation(fields: [template_surat_id], references: [template_surat_id])
+  pengaturan_nomor_surat    PengaturanNomorSurat @relation(fields: [pengaturan_nomor_surat_id], references: [pengaturan_nomor_surat_id])
+  peserta_didik             PesertaDidik?        @relation(fields: [peserta_didik_id], references: [peserta_didik_id])
+  gtk                       Gtk?                 @relation(fields: [ptk_id], references: [ptk_id])
+
+  @@unique([sekolah_id, nomor_surat])
+  @@index([sekolah_id])
+  @@index([template_surat_id])
+  @@index([pengaturan_nomor_surat_id])
+  @@index([peserta_didik_id])
+  @@index([ptk_id])
+  @@index([tanggal_surat])
+  @@index([status])
+  @@map("surat_keluar")
   @@schema("simak")
 }

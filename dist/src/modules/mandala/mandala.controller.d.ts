@@ -131,7 +131,41 @@ export declare class MandalaController {
             current_page: number;
         };
     }>;
-    getGtk(sekolahId?: string, limit?: string, page?: string, search?: string, status?: 'aktif' | 'non-aktif', type?: 'guru' | 'tendik'): Promise<{
+    getGtk(sekolahId?: string, limit?: string, page?: string, search?: string, status?: 'aktif' | 'non-aktif', type?: 'guru' | 'tendik', tab?: string): Promise<{
+        status: string;
+        data: {
+            rekap_kategori: {
+                id: number;
+                kategori: string;
+                lakiLaki: number;
+                perempuan: number;
+                totalJK: number;
+                asn: number;
+                nonAsn: number;
+                totalStatus: number;
+            }[];
+            rekap_pendidikan: {
+                id: number;
+                pendidikan: string;
+                lakiLaki: number;
+                perempuan: number;
+                totalJK: number;
+                asn: number;
+                nonAsn: number;
+                totalStatus: number;
+            }[];
+            rekap_usia: {
+                id: number;
+                rentangUsia: string;
+                lakiLaki: number;
+                perempuan: number;
+                totalJK: number;
+                asn: number;
+                nonAsn: number;
+                totalStatus: number;
+            }[];
+        };
+    } | {
         status: string;
         data: {
             identitas: {

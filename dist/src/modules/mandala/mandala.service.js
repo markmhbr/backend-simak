@@ -304,6 +304,120 @@ let MandalaService = MandalaService_1 = class MandalaService {
             },
         };
     }
+    async getGtkRekapForMandala(sekolahId) {
+        if (!sekolahId) {
+            throw new common_1.BadRequestException('sekolah_id query parameter is required for GTK recap.');
+        }
+        const school = await this.prisma.sekolah.findUnique({
+            where: { sekolah_id: sekolahId },
+        });
+        if (!school) {
+            throw new common_1.NotFoundException(`School with ID ${sekolahId} not found.`);
+        }
+        const gtks = await this.prisma.gtk.findMany({
+            where: {
+                sekolah_id: sekolahId,
+                status: 'Aktif',
+            },
+            select: {
+                jenis_ptk_id_str: true,
+                jenis_kelamin: true,
+                status_kepegawaian_id_str: true,
+                tanggal_lahir: true,
+                pendidikan_terakhir: true,
+            },
+        });
+        const isGuru = (j) => (j || '').toLowerCase().includes('guru');
+        const isAsn = (s) => ['pns', 'pppk'].includes((s || '').toLowerCase());
+        const guru = gtks.filter(i => isGuru(i.jenis_ptk_id_str));
+        const tendik = gtks.filter(i => !isGuru(i.jenis_ptk_id_str));
+        const rekapKategori = [
+            {
+                id: 1,
+                kategori: "Guru",
+                lakiLaki: guru.filter(i => i.jenis_kelamin === 'L').length,
+                perempuan: guru.filter(i => i.jenis_kelamin === 'P').length,
+                totalJK: guru.length,
+                asn: guru.filter(i => isAsn(i.status_kepegawaian_id_str)).length,
+                nonAsn: guru.filter(i => !isAsn(i.status_kepegawaian_id_str)).length,
+                totalStatus: guru.length
+            },
+            {
+                id: 2,
+                kategori: "Tendik",
+                lakiLaki: tendik.filter(i => i.jenis_kelamin === 'L').length,
+                perempuan: tendik.filter(i => i.jenis_kelamin === 'P').length,
+                totalJK: tendik.length,
+                asn: tendik.filter(i => isAsn(i.status_kepegawaian_id_str)).length,
+                nonAsn: tendik.filter(i => !isAsn(i.status_kepegawaian_id_str)).length,
+                totalStatus: tendik.length
+            }
+        ];
+        const categories = [
+            { label: "S2/Pasca Sarjana", keys: ["S2"] },
+            { label: "S1/Sarjana", keys: ["S1", null, ""] },
+            { label: "D3/Diploma", keys: ["D3"] },
+            { label: "SMA/Sederajat", keys: ["SMA", "SMK"] },
+        ];
+        const rekapPendidikan = categories.map((cat, idx) => {
+            const subset = gtks.filter(i => {
+                if (cat.keys.includes(null) && !i.pendidikan_terakhir)
+                    return true;
+                return cat.keys.includes(i.pendidikan_terakhir);
+            });
+            return {
+                id: idx + 1,
+                pendidikan: cat.label,
+                lakiLaki: subset.filter(i => i.jenis_kelamin === 'L').length,
+                perempuan: subset.filter(i => i.jenis_kelamin === 'P').length,
+                totalJK: subset.length,
+                asn: subset.filter(i => isAsn(i.status_kepegawaian_id_str)).length,
+                nonAsn: subset.filter(i => !isAsn(i.status_kepegawaian_id_str)).length,
+                totalStatus: subset.length
+            };
+        });
+        const calculateAge = (birthDate) => {
+            if (!birthDate)
+                return 0;
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            return age;
+        };
+        const ranges = [
+            { label: "< 30 Tahun", min: 0, max: 30 },
+            { label: "31 - 40 Tahun", min: 31, max: 40 },
+            { label: "41 - 50 Tahun", min: 41, max: 50 },
+            { label: "> 50 Tahun", min: 51, max: 150 },
+        ];
+        const rekapUsia = ranges.map((range, idx) => {
+            const subset = gtks.filter(i => {
+                const age = calculateAge(i.tanggal_lahir);
+                return age >= range.min && age <= range.max;
+            });
+            return {
+                id: idx + 1,
+                rentangUsia: range.label,
+                lakiLaki: subset.filter(i => i.jenis_kelamin === 'L').length,
+                perempuan: subset.filter(i => i.jenis_kelamin === 'P').length,
+                totalJK: subset.length,
+                asn: subset.filter(i => isAsn(i.status_kepegawaian_id_str)).length,
+                nonAsn: subset.filter(i => !isAsn(i.status_kepegawaian_id_str)).length,
+                totalStatus: subset.length
+            };
+        });
+        return {
+            status: 'success',
+            data: {
+                rekap_kategori: rekapKategori,
+                rekap_pendidikan: rekapPendidikan,
+                rekap_usia: rekapUsia,
+            }
+        };
+    }
 };
 exports.MandalaService = MandalaService;
 exports.MandalaService = MandalaService = MandalaService_1 = __decorate([

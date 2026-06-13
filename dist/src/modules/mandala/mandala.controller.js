@@ -85,7 +85,10 @@ let MandalaController = class MandalaController {
             status
         });
     }
-    async getGtk(sekolahId, limit, page, search, status, type) {
+    async getGtk(sekolahId, limit, page, search, status, type, tab) {
+        if (tab === 'rekap') {
+            return await this.mandalaService.getGtkRekapForMandala(sekolahId);
+        }
         let take = limit ? parseInt(limit, 10) : 10;
         if (take > 100) {
             take = 100;
@@ -159,8 +162,9 @@ __decorate([
     __param(3, (0, common_1.Query)('search')),
     __param(4, (0, common_1.Query)('status')),
     __param(5, (0, common_1.Query)('type')),
+    __param(6, (0, common_1.Query)('tab')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], MandalaController.prototype, "getGtk", null);
 exports.MandalaController = MandalaController = __decorate([

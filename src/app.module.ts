@@ -17,6 +17,7 @@ import { PresensiModule } from './modules/presensi/presensi.module';
 import { MandalaModule } from './modules/mandala/mandala.module';
 import { IndisiplinerModule } from './modules/indisipliner/indisipliner.module';
 import { SppModule } from './modules/spp/spp.module';
+import { SuratModule } from './modules/surat/surat.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { SppModule } from './modules/spp/spp.module';
     MandalaModule,
     IndisiplinerModule,
     SppModule,
+    SuratModule,
   ],
 
 

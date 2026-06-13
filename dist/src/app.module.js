@@ -26,6 +26,7 @@ const presensi_module_1 = require("./modules/presensi/presensi.module");
 const mandala_module_1 = require("./modules/mandala/mandala.module");
 const indisipliner_module_1 = require("./modules/indisipliner/indisipliner.module");
 const spp_module_1 = require("./modules/spp/spp.module");
+const surat_module_1 = require("./modules/surat/surat.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -48,6 +49,7 @@ exports.AppModule = AppModule = __decorate([
             mandala_module_1.MandalaModule,
             indisipliner_module_1.IndisiplinerModule,
             spp_module_1.SppModule,
+            surat_module_1.SuratModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [

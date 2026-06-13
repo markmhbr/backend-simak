@@ -23,10 +23,20 @@ let DapodikController = class DapodikController {
         this.dapodikService = dapodikService;
     }
     getSekolahInfo(req) {
+        if (req['isMandala']) {
+            const querySekolahId = req.query.sekolah_id;
+            if (!querySekolahId) {
+                throw new common_1.BadRequestException('sekolah_id query parameter is required for Mandala integration.');
+            }
+            return {
+                sekolahId: querySekolahId,
+                namaApp: 'Mandala Integration',
+            };
+        }
         const appKey = req['appKey'];
         return {
-            sekolahId: appKey.sekolah_id,
-            namaApp: appKey.nama_app,
+            sekolahId: appKey?.sekolah_id || null,
+            namaApp: appKey?.nama_app || '',
         };
     }
     async getSummarySummary(req) {
