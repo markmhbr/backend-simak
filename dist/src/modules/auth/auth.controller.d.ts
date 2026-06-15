@@ -57,7 +57,6 @@ export declare class AuthController {
     }>;
     getSystemInfo(request: Request): Promise<{
         isConfigured: boolean;
-        apiKey: string;
         registeredDomain: string;
     }>;
     systemSetup(apiKey: string, request: Request): Promise<{

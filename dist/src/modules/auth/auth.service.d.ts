@@ -51,7 +51,6 @@ export declare class AuthService {
     private generateTokens;
     getSystemInfo(currentDomain: string): Promise<{
         isConfigured: boolean;
-        apiKey: string;
         registeredDomain: string;
     }>;
     setupSystem(apiKey: string, domain: string): Promise<{

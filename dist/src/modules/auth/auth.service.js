@@ -233,8 +233,7 @@ let AuthService = class AuthService {
         const isDomainValid = activeKey && activeKey.domain === currentDomain;
         return {
             isConfigured: !!isDomainValid,
-            apiKey: isDomainValid ? activeKey?.key_api : null,
-            registeredDomain: activeKey?.domain || null
+            registeredDomain: isDomainValid ? activeKey?.domain : null
         };
     }
     async setupSystem(apiKey, domain) {

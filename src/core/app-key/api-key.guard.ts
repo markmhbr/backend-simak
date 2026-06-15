@@ -35,30 +35,44 @@ export class ApiKeyGuard implements CanActivate {
       throw new UnauthorizedException('Invalid Mandala API key.');
     }
 
-    // Cek apakah ada Bearer token di header
+    // Cek apakah ada Bearer token di header (Untuk akses dari browser)
     const authHeader = request.headers['authorization'];
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.substring(7);
       try {
         const secret = this.configService.get<string>('JWT_SECRET');
         const decoded = jwt.verify(token, secret) as any;
-        if (decoded && (decoded.role === 'Super Admin' || decoded.role === 'superadmin')) {
-          // Ambil sekolah_id pertama untuk kebutuhan visualisasi data dashboard
-          const firstSekolah = await this.prisma.sekolah.findFirst({
-            select: { sekolah_id: true }
-          });
-          const resolvedSekolahId = firstSekolah?.sekolah_id || '00000000-0000-0000-0000-000000000000';
+        if (decoded) {
+          if (decoded.role === 'Super Admin' || decoded.role === 'superadmin') {
+            // Ambil sekolah_id pertama untuk kebutuhan visualisasi data dashboard
+            const firstSekolah = await this.prisma.sekolah.findFirst({
+              select: { sekolah_id: true }
+            });
+            const resolvedSekolahId = firstSekolah?.sekolah_id || '00000000-0000-0000-0000-000000000000';
 
-          // Inject appKey dummy agar controller sekolah info / dapodik summary tidak error
-          request['appKey'] = {
-            id: 'super-admin-bypass',
-            nama_app: 'Pusat (Super Admin)',
-            sekolah_id: resolvedSekolahId,
-            key_api: 'super-admin-bypass-key',
-            domain: '*',
-            is_active: true,
-          };
-          return true;
+            // Inject appKey dummy agar controller sekolah info / dapodik summary tidak error
+            request['appKey'] = {
+              id: 'super-admin-bypass',
+              nama_app: 'Pusat (Super Admin)',
+              sekolah_id: resolvedSekolahId,
+              key_api: 'super-admin-bypass-key',
+              domain: '*',
+              is_active: true,
+            };
+            return true;
+          }
+
+          // Untuk Guru, Siswa, Admin Sekolah
+          if (decoded.sekolahId) {
+            const appKey = await this.prisma.appKey.findUnique({
+              where: { sekolah_id: decoded.sekolahId }
+            });
+            if (appKey && appKey.is_active) {
+              request['appKey'] = appKey;
+              request['user'] = decoded;
+              return true;
+            }
+          }
         }
       } catch (err) {
         // Token tidak valid atau kedaluwarsa, abaikan dan biarkan mengalir ke pengecekan API Key standar
@@ -79,38 +93,35 @@ export class ApiKeyGuard implements CanActivate {
     }
 
     if (!apiKey) {
-      // Jika tidak ada API Key di header, coba cari berdasarkan domain (Domain-Based Identification)
-      // Cek Origin atau Referer terlebih dahulu (untuk request dari browser/frontend)
-      const origin = request.headers.origin as string;
-      const referer = request.headers.referer as string;
-      const host = request.headers.host;
+      // Izinkan lewat tanpa API Key HANYA untuk route login/auth (pengecekan dilakukan di service)
+      // dan cari appKey berdasarkan domain untuk mengeset sekolahId saat login/info.
+      if (request.url.includes('/auth/')) {
+        const origin = request.headers.origin as string;
+        const referer = request.headers.referer as string;
+        const host = request.headers.host;
 
-      let domainToTest: string;
-      if (origin) {
-        domainToTest = origin.replace(/^https?:\/\//, '');
-      } else if (referer) {
-        try {
-          const url = new URL(referer);
-          domainToTest = url.host;
-        } catch {
+        let domainToTest: string;
+        if (origin) {
+          domainToTest = origin.replace(/^https?:\/\//, '');
+        } else if (referer) {
+          try {
+            const url = new URL(referer);
+            domainToTest = url.host;
+          } catch {
+            domainToTest = host;
+          }
+        } else {
           domainToTest = host;
         }
-      } else {
-        domainToTest = host;
-      }
 
-      const keyByDomain = await this.appKeyService.findByDomain(domainToTest);
-      
-      if (keyByDomain) {
-        request['appKey'] = keyByDomain;
+        const keyByDomain = await this.appKeyService.findByDomain(domainToTest);
+        if (keyByDomain) {
+          request['appKey'] = keyByDomain;
+        }
         return true;
       }
 
-      // Izinkan lewat tanpa API Key HANYA untuk route login/auth (pengecekan dilakukan di service)
-      if (request.url.includes('/api/auth/')) {
-        return true;
-      }
-      throw new ForbiddenException('Sistem belum terhubung. API Key tidak ditemukan dan domain tidak terdaftar.');
+      throw new ForbiddenException('Akses ditolak. Silakan login atau sertakan API Key yang valid.');
     }
 
     const validKey = await this.appKeyService.validateApiKey(apiKey);

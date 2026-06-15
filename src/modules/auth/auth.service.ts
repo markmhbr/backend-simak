@@ -248,8 +248,7 @@ export class AuthService {
 
     return {
       isConfigured: !!isDomainValid,
-      apiKey: isDomainValid ? activeKey?.key_api : null,
-      registeredDomain: activeKey?.domain || null
+      registeredDomain: isDomainValid ? activeKey?.domain : null
     };
   }
 

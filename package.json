@@ -55,6 +55,7 @@
     "ioredis": "^5.10.1",
     "multer": "^2.1.1",
     "nest-winston": "^1.10.2",
+    "otpauth": "^9.5.1",
     "otplib": "^13.4.1",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
@@ -65,6 +66,10 @@
     "socket.io": "^4.8.3",
     "swagger-ui-express": "^5.0.1",
     "winston": "^3.19.0"
+  },
+  "overrides": {
+    "@scure/base": "1.1.1",
+    "@noble/hashes": "1.8.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",

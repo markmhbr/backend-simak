@@ -47,20 +47,32 @@ let ApiKeyGuard = class ApiKeyGuard {
             try {
                 const secret = this.configService.get('JWT_SECRET');
                 const decoded = jwt.verify(token, secret);
-                if (decoded && (decoded.role === 'Super Admin' || decoded.role === 'superadmin')) {
-                    const firstSekolah = await this.prisma.sekolah.findFirst({
-                        select: { sekolah_id: true }
-                    });
-                    const resolvedSekolahId = firstSekolah?.sekolah_id || '00000000-0000-0000-0000-000000000000';
-                    request['appKey'] = {
-                        id: 'super-admin-bypass',
-                        nama_app: 'Pusat (Super Admin)',
-                        sekolah_id: resolvedSekolahId,
-                        key_api: 'super-admin-bypass-key',
-                        domain: '*',
-                        is_active: true,
-                    };
-                    return true;
+                if (decoded) {
+                    if (decoded.role === 'Super Admin' || decoded.role === 'superadmin') {
+                        const firstSekolah = await this.prisma.sekolah.findFirst({
+                            select: { sekolah_id: true }
+                        });
+                        const resolvedSekolahId = firstSekolah?.sekolah_id || '00000000-0000-0000-0000-000000000000';
+                        request['appKey'] = {
+                            id: 'super-admin-bypass',
+                            nama_app: 'Pusat (Super Admin)',
+                            sekolah_id: resolvedSekolahId,
+                            key_api: 'super-admin-bypass-key',
+                            domain: '*',
+                            is_active: true,
+                        };
+                        return true;
+                    }
+                    if (decoded.sekolahId) {
+                        const appKey = await this.prisma.appKey.findUnique({
+                            where: { sekolah_id: decoded.sekolahId }
+                        });
+                        if (appKey && appKey.is_active) {
+                            request['appKey'] = appKey;
+                            request['user'] = decoded;
+                            return true;
+                        }
+                    }
                 }
             }
             catch (err) {
@@ -74,34 +86,33 @@ let ApiKeyGuard = class ApiKeyGuard {
             apiKey = request.params.key_api;
         }
         if (!apiKey) {
-            const origin = request.headers.origin;
-            const referer = request.headers.referer;
-            const host = request.headers.host;
-            let domainToTest;
-            if (origin) {
-                domainToTest = origin.replace(/^https?:\/\//, '');
-            }
-            else if (referer) {
-                try {
-                    const url = new URL(referer);
-                    domainToTest = url.host;
+            if (request.url.includes('/auth/')) {
+                const origin = request.headers.origin;
+                const referer = request.headers.referer;
+                const host = request.headers.host;
+                let domainToTest;
+                if (origin) {
+                    domainToTest = origin.replace(/^https?:\/\//, '');
                 }
-                catch {
+                else if (referer) {
+                    try {
+                        const url = new URL(referer);
+                        domainToTest = url.host;
+                    }
+                    catch {
+                        domainToTest = host;
+                    }
+                }
+                else {
                     domainToTest = host;
                 }
-            }
-            else {
-                domainToTest = host;
-            }
-            const keyByDomain = await this.appKeyService.findByDomain(domainToTest);
-            if (keyByDomain) {
-                request['appKey'] = keyByDomain;
+                const keyByDomain = await this.appKeyService.findByDomain(domainToTest);
+                if (keyByDomain) {
+                    request['appKey'] = keyByDomain;
+                }
                 return true;
             }
-            if (request.url.includes('/api/auth/')) {
-                return true;
-            }
-            throw new common_1.ForbiddenException('Sistem belum terhubung. API Key tidak ditemukan dan domain tidak terdaftar.');
+            throw new common_1.ForbiddenException('Akses ditolak. Silakan login atau sertakan API Key yang valid.');
         }
         const validKey = await this.appKeyService.validateApiKey(apiKey);
         const isSyncSekolah = request.method === 'POST' && request.url.includes('/api/sync/sekolah');
