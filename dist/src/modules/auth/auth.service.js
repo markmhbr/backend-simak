@@ -225,15 +225,13 @@ let AuthService = class AuthService {
         };
     }
     async getSystemInfo(currentDomain) {
+        const matchingKey = await this.appKeyService.findByDomain(currentDomain);
         const activeKey = await this.prisma.appKey.findFirst({
-            where: {
-                is_active: true,
-            }
+            where: { is_active: true }
         });
-        const isDomainValid = activeKey && activeKey.domain === currentDomain;
         return {
-            isConfigured: !!isDomainValid,
-            registeredDomain: isDomainValid ? activeKey?.domain : null
+            isConfigured: !!matchingKey,
+            registeredDomain: matchingKey ? matchingKey.domain : (activeKey?.domain || null)
         };
     }
     async setupSystem(apiKey, domain) {

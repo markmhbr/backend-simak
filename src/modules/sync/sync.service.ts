@@ -520,6 +520,29 @@ export class SyncService {
         targetSekolahId = null;
       }
 
+      let validatedPtkId = u.ptk_id || null;
+      let validatedPesertaDidikId = u.peserta_didik_id || null;
+
+      // Cek apakah ptk_id benar-benar ada di database untuk mencegah foreign key violation
+      if (u.ptk_id) {
+        const gtkExists = await this.prisma.gtk.findUnique({
+          where: { ptk_id: u.ptk_id }
+        });
+        if (!gtkExists) {
+          validatedPtkId = null;
+        }
+      }
+
+      // Cek apakah peserta_didik_id benar-benar ada di database untuk mencegah foreign key violation
+      if (u.peserta_didik_id) {
+        const pdExists = await this.prisma.pesertaDidik.findUnique({
+          where: { peserta_didik_id: u.peserta_didik_id }
+        });
+        if (!pdExists) {
+          validatedPesertaDidikId = null;
+        }
+      }
+
       const payload = {
         sekolah_id: targetSekolahId,
         username: u.username,
@@ -530,8 +553,8 @@ export class SyncService {
         alamat: u.alamat || null,
         no_telepon: u.no_telepon || null,
         no_hp: u.no_hp || null,
-        ptk_id: u.ptk_id || null,
-        peserta_didik_id: u.peserta_didik_id || null,
+        ptk_id: validatedPtkId,
+        peserta_didik_id: validatedPesertaDidikId,
       };
 
       try {

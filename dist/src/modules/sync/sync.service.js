@@ -498,6 +498,24 @@ let SyncService = SyncService_1 = class SyncService {
             if (u.peran_id_str === 'Administrator' || u.username === 'admin' || u.username.includes('admin')) {
                 targetSekolahId = null;
             }
+            let validatedPtkId = u.ptk_id || null;
+            let validatedPesertaDidikId = u.peserta_didik_id || null;
+            if (u.ptk_id) {
+                const gtkExists = await this.prisma.gtk.findUnique({
+                    where: { ptk_id: u.ptk_id }
+                });
+                if (!gtkExists) {
+                    validatedPtkId = null;
+                }
+            }
+            if (u.peserta_didik_id) {
+                const pdExists = await this.prisma.pesertaDidik.findUnique({
+                    where: { peserta_didik_id: u.peserta_didik_id }
+                });
+                if (!pdExists) {
+                    validatedPesertaDidikId = null;
+                }
+            }
             const payload = {
                 sekolah_id: targetSekolahId,
                 username: u.username,
@@ -508,8 +526,8 @@ let SyncService = SyncService_1 = class SyncService {
                 alamat: u.alamat || null,
                 no_telepon: u.no_telepon || null,
                 no_hp: u.no_hp || null,
-                ptk_id: u.ptk_id || null,
-                peserta_didik_id: u.peserta_didik_id || null,
+                ptk_id: validatedPtkId,
+                peserta_didik_id: validatedPesertaDidikId,
             };
             try {
                 const existing = await this.prisma.pengguna.findUnique({ where: { username: u.username } });

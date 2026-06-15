@@ -67,15 +67,36 @@ export class AuthController {
   // Endpoint untuk mendapatkan identitas sekolah (Public)
   @Get('system-info')
   async getSystemInfo(@Req() request: Request) {
-    const domain = request.headers.host || request.hostname;
+    const domain = this.getRequestDomain(request);
     return this.authService.getSystemInfo(domain);
   }
 
   // Endpoint untuk setup awal oleh Operator
   @Post('system-setup')
   async systemSetup(@Body('apiKey') apiKey: string, @Req() request: Request) {
-    const domain = request.headers.host || request.hostname;
+    const domain = this.getRequestDomain(request);
     return this.authService.setupSystem(apiKey, domain);
+  }
+
+  private getRequestDomain(request: Request): string {
+    const origin = request.headers.origin as string;
+    const referer = request.headers.referer as string;
+    const host = request.headers.host;
+
+    let domainToTest: string;
+    if (origin) {
+      domainToTest = origin.replace(/^https?:\/\//, '');
+    } else if (referer) {
+      try {
+        const url = new URL(referer);
+        domainToTest = url.host;
+      } catch {
+        domainToTest = host;
+      }
+    } else {
+      domainToTest = host;
+    }
+    return domainToTest;
   }
 
   private setRefreshTokenCookie(response: Response, token: string) {

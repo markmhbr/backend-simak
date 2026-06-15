@@ -55,12 +55,34 @@ let AuthController = class AuthController {
         return { status: 'success', message: 'Logout berhasil' };
     }
     async getSystemInfo(request) {
-        const domain = request.headers.host || request.hostname;
+        const domain = this.getRequestDomain(request);
         return this.authService.getSystemInfo(domain);
     }
     async systemSetup(apiKey, request) {
-        const domain = request.headers.host || request.hostname;
+        const domain = this.getRequestDomain(request);
         return this.authService.setupSystem(apiKey, domain);
+    }
+    getRequestDomain(request) {
+        const origin = request.headers.origin;
+        const referer = request.headers.referer;
+        const host = request.headers.host;
+        let domainToTest;
+        if (origin) {
+            domainToTest = origin.replace(/^https?:\/\//, '');
+        }
+        else if (referer) {
+            try {
+                const url = new URL(referer);
+                domainToTest = url.host;
+            }
+            catch {
+                domainToTest = host;
+            }
+        }
+        else {
+            domainToTest = host;
+        }
+        return domainToTest;
     }
     setRefreshTokenCookie(response, token) {
         response.cookie('refresh_token', token, {

@@ -195,6 +195,7 @@ let MandalaService = MandalaService_1 = class MandalaService {
                     tempat_lahir: pd.tempat_lahir,
                     tanggal_lahir: pd.tanggal_lahir,
                     agama: pd.agama_id_str || pd.agama_id || '',
+                    jenis_pendaftaran_id_str: pd.jenis_pendaftaran_id_str || pd.jenis_pendaftaran_id || '',
                 },
                 akademik: {
                     nama_rombel: pd.nama_rombel || pd.rombongan_belajar?.nama || '',

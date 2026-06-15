@@ -231,24 +231,15 @@ export class AuthService {
       },
     };
   }
-  /**
-   * Mengambil informasi API Key sistem yang sudah terdaftar
-   */
   async getSystemInfo(currentDomain: string) {
+    const matchingKey = await this.appKeyService.findByDomain(currentDomain);
     const activeKey = await this.prisma.appKey.findFirst({
-      where: { 
-        is_active: true,
-        // domain: currentDomain // Kita bisa filter langsung di DB atau cek manual
-      }
+      where: { is_active: true }
     });
-    
-    // Verifikasi domain: Jika domain tidak cocok, dianggap belum dikonfigurasi untuk domain ini
-    // (Mencegah satu key dicuri dan dipakai di domain lain tanpa izin)
-    const isDomainValid = activeKey && activeKey.domain === currentDomain;
 
     return {
-      isConfigured: !!isDomainValid,
-      registeredDomain: isDomainValid ? activeKey?.domain : null
+      isConfigured: !!matchingKey,
+      registeredDomain: matchingKey ? matchingKey.domain : (activeKey?.domain || null)
     };
   }
 

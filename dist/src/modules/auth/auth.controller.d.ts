@@ -71,5 +71,6 @@ export declare class AuthController {
         updated_at: Date;
         domain: string | null;
     }>;
+    private getRequestDomain;
     private setRefreshTokenCookie;
 }
