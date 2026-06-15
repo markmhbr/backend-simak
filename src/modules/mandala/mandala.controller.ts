@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, UseGuards, HttpStatus, HttpCode, NotFoundException, Query, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, HttpStatus, HttpCode, NotFoundException, Query, BadRequestException, Patch, Delete } from '@nestjs/common';
 import { MandalaService } from './mandala.service';
 import { MandalaKeyGuard } from '../../core/mandala/mandala-key.guard';
 
@@ -42,6 +42,129 @@ export class MandalaController {
     return {
       status: 'success',
       data,
+    };
+  }
+
+  // --- CADISDIK ENDPOINTS ---
+
+  @Get('cadisdik')
+  @UseGuards(MandalaKeyGuard)
+  async getCadisdiks() {
+    const data = await this.mandalaService.getCadisdiks();
+    return {
+      status: 'success',
+      data,
+    };
+  }
+
+  @Get('cadisdik/:id')
+  @UseGuards(MandalaKeyGuard)
+  async getCadisdikDetail(@Param('id') id: string) {
+    const data = await this.mandalaService.getCadisdikById(id);
+    return {
+      status: 'success',
+      data,
+    };
+  }
+
+  @Post('cadisdik')
+  @UseGuards(MandalaKeyGuard)
+  async createCadisdik(@Body() body: any) {
+    if (!body.nama_instansi) {
+      throw new BadRequestException('nama_instansi is required.');
+    }
+    const data = await this.mandalaService.createCadisdik(body);
+    return {
+      status: 'success',
+      message: 'Cadisdik successfully created.',
+      data,
+    };
+  }
+
+  @Patch('cadisdik/:id')
+  @UseGuards(MandalaKeyGuard)
+  async updateCadisdik(@Param('id') id: string, @Body() body: any) {
+    const data = await this.mandalaService.updateCadisdik(id, body);
+    return {
+      status: 'success',
+      message: 'Cadisdik successfully updated.',
+      data,
+    };
+  }
+
+  @Delete('cadisdik/:id')
+  @UseGuards(MandalaKeyGuard)
+  async deleteCadisdik(@Param('id') id: string) {
+    await this.mandalaService.deleteCadisdik(id);
+    return {
+      status: 'success',
+      message: 'Cadisdik successfully deleted.',
+    };
+  }
+
+  // --- PEGAWAI ENDPOINTS ---
+
+  @Post('auth/login')
+  @HttpCode(HttpStatus.OK)
+  async loginPegawai(@Body() body: any) {
+    if (!body.identifier || !body.password) {
+      throw new BadRequestException('identifier (NIP/Email) and password are required.');
+    }
+    return await this.mandalaService.loginPegawai(body);
+  }
+
+  @Get('pegawai')
+  @UseGuards(MandalaKeyGuard)
+  async getPegawais(@Query('cadisdik_id') cadisdikId?: string) {
+    const data = await this.mandalaService.getPegawais(cadisdikId);
+    return {
+      status: 'success',
+      data,
+    };
+  }
+
+  @Get('pegawai/:id')
+  @UseGuards(MandalaKeyGuard)
+  async getPegawaiDetail(@Param('id') id: string) {
+    const data = await this.mandalaService.getPegawaiById(id);
+    return {
+      status: 'success',
+      data,
+    };
+  }
+
+  @Post('pegawai')
+  @UseGuards(MandalaKeyGuard)
+  async createPegawai(@Body() body: any) {
+    if (!body.cadisdik_id || !body.nama_lengkap || !body.nip || !body.email || !body.password || body.jabatan === undefined || body.jenis_kelamin === undefined) {
+      throw new BadRequestException('Required fields: cadisdik_id, nama_lengkap, nip, email, password, jabatan, jenis_kelamin.');
+    }
+    const data = await this.mandalaService.createPegawai(body);
+    return {
+      status: 'success',
+      message: 'Pegawai successfully created.',
+      data,
+    };
+  }
+
+  @Patch('pegawai/:id')
+  @UseGuards(MandalaKeyGuard)
+  async updatePegawai(@Param('id') id: string, @Body() body: any) {
+    const data = await this.mandalaService.updatePegawai(id, body);
+    return {
+      status: 'success',
+      message: 'Pegawai successfully updated.',
+      data,
+    };
+  }
+
+  @Delete('pegawai/:id')
+  @UseGuards(MandalaKeyGuard)
+  async deletePegawai(@Param('id') id: string) {
+    await this.mandalaService.deletePegawai(id);
+    return {
+      status: 'success',
+      message: 'Pegawai successfully deleted.',
     };
   }
 

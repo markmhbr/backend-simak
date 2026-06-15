@@ -1,11 +1,18 @@
-import { Injectable, OnModuleInit, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, OnModuleInit, Logger, BadRequestException, NotFoundException, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../core/prisma/prisma.service';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class MandalaService implements OnModuleInit {
   private readonly logger = new Logger(MandalaService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+  ) {}
 
   async onModuleInit() {
     const urlMandala = process.env.URL_MANDALA;
@@ -58,6 +65,9 @@ export class MandalaService implements OnModuleInit {
 
   async getSchools() {
     const schools = await this.prisma.sekolah.findMany({
+      include: {
+        cadisdik: true,
+      },
       orderBy: { nama: 'asc' },
     });
 
@@ -86,11 +96,235 @@ export class MandalaService implements OnModuleInit {
           desa_kelurahan: school.desa_kelurahan,
           total_siswa: totalSiswa,
           total_gtk: totalGtk,
+          cadisdik: school.cadisdik ? {
+            id: school.cadisdik.cadisdik_id,
+            nama: school.cadisdik.nama_instansi,
+          } : null,
         };
       }),
     );
 
     return richSchools;
+  }
+
+  // --- CADISDIK CRUD ---
+
+  async getCadisdiks() {
+    return await this.prisma.cadisdik.findMany({
+      orderBy: { nama_instansi: 'asc' },
+    });
+  }
+
+  async getCadisdikById(id: string) {
+    const data = await this.prisma.cadisdik.findUnique({
+      where: { cadisdik_id: id },
+      include: {
+        sekolah: {
+          select: {
+            sekolah_id: true,
+            nama: true,
+            npsn: true,
+          },
+        },
+      },
+    });
+    if (!data) throw new NotFoundException(`Cadisdik with ID ${id} not found.`);
+    return data;
+  }
+
+  async createCadisdik(data: any) {
+    return await this.prisma.cadisdik.create({
+      data: {
+        nama_instansi: data.nama_instansi,
+        alamat: data.alamat,
+        email: data.email,
+        nomor_telepon: data.nomor_telepon,
+        website: data.website,
+        aktif: data.aktif !== undefined ? data.aktif : true,
+      },
+    });
+  }
+
+  async updateCadisdik(id: string, data: any) {
+    await this.getCadisdikById(id); // Ensure exists
+    return await this.prisma.cadisdik.update({
+      where: { cadisdik_id: id },
+      data: {
+        nama_instansi: data.nama_instansi,
+        alamat: data.alamat,
+        email: data.email,
+        nomor_telepon: data.nomor_telepon,
+        website: data.website,
+        aktif: data.aktif,
+        updated_at: new Date(),
+      },
+    });
+  }
+
+  async deleteCadisdik(id: string) {
+    await this.getCadisdikById(id); // Ensure exists
+    return await this.prisma.cadisdik.delete({
+      where: { cadisdik_id: id },
+    });
+  }
+
+  // --- PEGAWAI CRUD ---
+
+  async getPegawais(cadisdikId?: string) {
+    const where: any = {};
+    if (cadisdikId) where.cadisdik_id = cadisdikId;
+
+    return await this.prisma.pegawai.findMany({
+      where,
+      include: {
+        cadisdik: {
+          select: {
+            nama_instansi: true,
+          },
+        },
+      },
+      orderBy: { nama_lengkap: 'asc' },
+    });
+  }
+
+  async getPegawaiById(id: string) {
+    const data = await this.prisma.pegawai.findUnique({
+      where: { pegawai_id: id },
+      include: {
+        cadisdik: true,
+      },
+    });
+    if (!data) throw new NotFoundException(`Pegawai with ID ${id} not found.`);
+    return data;
+  }
+
+  async createPegawai(data: any) {
+    // Check for duplicate NIP or Email
+    const existing = await this.prisma.pegawai.findFirst({
+      where: {
+        OR: [
+          { nip: data.nip },
+          { email: data.email },
+        ],
+      },
+    });
+
+    if (existing) {
+      throw new BadRequestException('Pegawai with this NIP or Email already exists.');
+    }
+
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+
+    return await this.prisma.pegawai.create({
+      data: {
+        cadisdik_id: data.cadisdik_id,
+        nama_lengkap: data.nama_lengkap,
+        nip: data.nip,
+        email: data.email,
+        password: hashedPassword,
+        jabatan: data.jabatan,
+        jenis_kelamin: data.jenis_kelamin,
+        nomor_telepon: data.nomor_telepon,
+        foto: data.foto,
+        aktif: data.aktif !== undefined ? data.aktif : true,
+      },
+    });
+  }
+
+  async updatePegawai(id: string, data: any) {
+    const pegawai = await this.getPegawaiById(id);
+
+    const updateData: any = {
+      nama_lengkap: data.nama_lengkap,
+      nip: data.nip,
+      email: data.email,
+      jabatan: data.jabatan,
+      jenis_kelamin: data.jenis_kelamin,
+      nomor_telepon: data.nomor_telepon,
+      foto: data.foto,
+      aktif: data.aktif,
+      cadisdik_id: data.cadisdik_id,
+      updated_at: new Date(),
+    };
+
+    if (data.password) {
+      updateData.password = await bcrypt.hash(data.password, 10);
+    }
+
+    return await this.prisma.pegawai.update({
+      where: { pegawai_id: id },
+      data: updateData,
+    });
+  }
+
+  async deletePegawai(id: string) {
+    await this.getPegawaiById(id);
+    return await this.prisma.pegawai.delete({
+      where: { pegawai_id: id },
+    });
+  }
+
+  // --- PEGAWAI AUTH ---
+
+  async loginPegawai(credentials: { identifier: string; password: any }) {
+    const { identifier, password } = credentials;
+
+    const pegawai = await this.prisma.pegawai.findFirst({
+      where: {
+        OR: [
+          { nip: identifier },
+          { email: identifier },
+        ],
+      },
+      include: {
+        cadisdik: true,
+      },
+    });
+
+    if (!pegawai) {
+      throw new UnauthorizedException('Kredensial tidak valid (User tidak ditemukan).');
+    }
+
+    if (!pegawai.aktif) {
+      throw new ForbiddenException('Akun Anda telah dinonaktifkan.');
+    }
+
+    const isMatch = await bcrypt.compare(password, pegawai.password);
+    if (!isMatch) {
+      throw new UnauthorizedException('Kredensial tidak valid (Password salah).');
+    }
+
+    const payload = {
+      sub: pegawai.pegawai_id,
+      email: pegawai.email,
+      nip: pegawai.nip,
+      role: 'Mandala Pegawai',
+      cadisdik_id: pegawai.cadisdik_id,
+      cadisdik_nama: pegawai.cadisdik?.nama_instansi,
+    };
+
+    const accessToken = this.jwtService.sign(payload);
+
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: this.configService.get('JWT_REFRESH_SECRET'),
+      expiresIn: this.configService.get('JWT_REFRESH_EXPIRATION') || '7d',
+    });
+
+    return {
+      status: 'success',
+      data: {
+        accessToken,
+        refreshToken,
+        pegawai: {
+          id: pegawai.pegawai_id,
+          nama: pegawai.nama_lengkap,
+          nip: pegawai.nip,
+          email: pegawai.email,
+          role: 'Mandala Pegawai',
+          cadisdik: pegawai.cadisdik?.nama_instansi,
+        },
+      },
+    };
   }
 
   async getSchoolDetail(sekolahId: string) {

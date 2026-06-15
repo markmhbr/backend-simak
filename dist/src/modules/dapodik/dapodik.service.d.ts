@@ -15,6 +15,7 @@ export declare class DapodikService {
     getSekolah(sekolahId: string | null): Promise<{
         logo: string;
         nama_kepala_sekolah: string;
+        nama_operator: string;
         sekolah_id: string;
         created_at: Date;
         updated_at: Date;

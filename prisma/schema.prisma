@@ -44,6 +44,7 @@ model Sekolah {
   created_at                    DateTime              @default(now())
   updated_at                    DateTime              @updatedAt
   cadisdik_id                   String?               @db.Uuid
+  cadisdik                      Cadisdik?             @relation(fields: [cadisdik_id], references: [cadisdik_id])
   jadwal_pelajaran              JadwalPelajaran[]
   jenis_jadwal                  JenisJadwal[]
   hari_libur                    HariLibur[]
@@ -871,6 +872,48 @@ model Mandala {
   updated_at  DateTime @updatedAt @db.Timestamptz(6)
 
   @@map("mandala")
+  @@schema("mandala")
+}
+
+model Cadisdik {
+  cadisdik_id   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nama_instansi String   @db.VarChar(255)
+  alamat        String?  @db.Text
+  email         String?  @db.VarChar(255)
+  nomor_telepon String?  @db.VarChar(50)
+  website       String?  @db.VarChar(255)
+  aktif         Boolean  @default(true)
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  sekolah       Sekolah[]
+  pegawai       Pegawai[]
+
+  @@map("cadisdik")
+  @@schema("mandala")
+}
+
+model Pegawai {
+  pegawai_id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cadisdik_id          String   @db.Uuid
+  nama_lengkap         String   @db.VarChar(255)
+  nip                  String   @unique @db.VarChar(30)
+  email                String   @unique @db.VarChar(255)
+  password             String   @db.VarChar(255)
+  authenticator_secret String?  @db.VarChar(255)
+  jabatan              Int      @db.SmallInt
+  jenis_kelamin        Int      @db.SmallInt
+  nomor_telepon        String?  @db.VarChar(30)
+  foto                 String?  @db.VarChar(500)
+  aktif                Boolean  @default(true)
+  created_at           DateTime @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  cadisdik Cadisdik @relation(fields: [cadisdik_id], references: [cadisdik_id], onDelete: Restrict)
+
+  @@index([cadisdik_id])
+  @@index([nip])
+  @@index([email])
+  @@map("pegawai")
   @@schema("mandala")
 }
 

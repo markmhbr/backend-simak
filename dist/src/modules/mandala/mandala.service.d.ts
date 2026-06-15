@@ -1,9 +1,13 @@
 import { OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../../core/prisma/prisma.service';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 export declare class MandalaService implements OnModuleInit {
     private readonly prisma;
+    private readonly jwtService;
+    private readonly configService;
     private readonly logger;
-    constructor(prisma: PrismaService);
+    constructor(prisma: PrismaService, jwtService: JwtService, configService: ConfigService);
     onModuleInit(): Promise<void>;
     getConnection(): Promise<{
         id: string;
@@ -37,7 +41,186 @@ export declare class MandalaService implements OnModuleInit {
         desa_kelurahan: string;
         total_siswa: number;
         total_gtk: number;
+        cadisdik: {
+            id: string;
+            nama: string;
+        };
     }[]>;
+    getCadisdiks(): Promise<{
+        created_at: Date;
+        updated_at: Date;
+        email: string | null;
+        alamat: string | null;
+        nomor_telepon: string | null;
+        website: string | null;
+        cadisdik_id: string;
+        aktif: boolean;
+        nama_instansi: string;
+    }[]>;
+    getCadisdikById(id: string): Promise<{
+        sekolah: {
+            sekolah_id: string;
+            nama: string;
+            npsn: string;
+        }[];
+    } & {
+        created_at: Date;
+        updated_at: Date;
+        email: string | null;
+        alamat: string | null;
+        nomor_telepon: string | null;
+        website: string | null;
+        cadisdik_id: string;
+        aktif: boolean;
+        nama_instansi: string;
+    }>;
+    createCadisdik(data: any): Promise<{
+        created_at: Date;
+        updated_at: Date;
+        email: string | null;
+        alamat: string | null;
+        nomor_telepon: string | null;
+        website: string | null;
+        cadisdik_id: string;
+        aktif: boolean;
+        nama_instansi: string;
+    }>;
+    updateCadisdik(id: string, data: any): Promise<{
+        created_at: Date;
+        updated_at: Date;
+        email: string | null;
+        alamat: string | null;
+        nomor_telepon: string | null;
+        website: string | null;
+        cadisdik_id: string;
+        aktif: boolean;
+        nama_instansi: string;
+    }>;
+    deleteCadisdik(id: string): Promise<{
+        created_at: Date;
+        updated_at: Date;
+        email: string | null;
+        alamat: string | null;
+        nomor_telepon: string | null;
+        website: string | null;
+        cadisdik_id: string;
+        aktif: boolean;
+        nama_instansi: string;
+    }>;
+    getPegawais(cadisdikId?: string): Promise<({
+        cadisdik: {
+            nama_instansi: string;
+        };
+    } & {
+        created_at: Date;
+        updated_at: Date;
+        password: string;
+        email: string;
+        nomor_telepon: string | null;
+        cadisdik_id: string;
+        jenis_kelamin: number;
+        nip: string;
+        foto: string | null;
+        aktif: boolean;
+        pegawai_id: string;
+        nama_lengkap: string;
+        authenticator_secret: string | null;
+        jabatan: number;
+    })[]>;
+    getPegawaiById(id: string): Promise<{
+        cadisdik: {
+            created_at: Date;
+            updated_at: Date;
+            email: string | null;
+            alamat: string | null;
+            nomor_telepon: string | null;
+            website: string | null;
+            cadisdik_id: string;
+            aktif: boolean;
+            nama_instansi: string;
+        };
+    } & {
+        created_at: Date;
+        updated_at: Date;
+        password: string;
+        email: string;
+        nomor_telepon: string | null;
+        cadisdik_id: string;
+        jenis_kelamin: number;
+        nip: string;
+        foto: string | null;
+        aktif: boolean;
+        pegawai_id: string;
+        nama_lengkap: string;
+        authenticator_secret: string | null;
+        jabatan: number;
+    }>;
+    createPegawai(data: any): Promise<{
+        created_at: Date;
+        updated_at: Date;
+        password: string;
+        email: string;
+        nomor_telepon: string | null;
+        cadisdik_id: string;
+        jenis_kelamin: number;
+        nip: string;
+        foto: string | null;
+        aktif: boolean;
+        pegawai_id: string;
+        nama_lengkap: string;
+        authenticator_secret: string | null;
+        jabatan: number;
+    }>;
+    updatePegawai(id: string, data: any): Promise<{
+        created_at: Date;
+        updated_at: Date;
+        password: string;
+        email: string;
+        nomor_telepon: string | null;
+        cadisdik_id: string;
+        jenis_kelamin: number;
+        nip: string;
+        foto: string | null;
+        aktif: boolean;
+        pegawai_id: string;
+        nama_lengkap: string;
+        authenticator_secret: string | null;
+        jabatan: number;
+    }>;
+    deletePegawai(id: string): Promise<{
+        created_at: Date;
+        updated_at: Date;
+        password: string;
+        email: string;
+        nomor_telepon: string | null;
+        cadisdik_id: string;
+        jenis_kelamin: number;
+        nip: string;
+        foto: string | null;
+        aktif: boolean;
+        pegawai_id: string;
+        nama_lengkap: string;
+        authenticator_secret: string | null;
+        jabatan: number;
+    }>;
+    loginPegawai(credentials: {
+        identifier: string;
+        password: any;
+    }): Promise<{
+        status: string;
+        data: {
+            accessToken: string;
+            refreshToken: string;
+            pegawai: {
+                id: string;
+                nama: string;
+                nip: string;
+                email: string;
+                role: string;
+                cadisdik: string;
+            };
+        };
+    }>;
     getSchoolDetail(sekolahId: string): Promise<{
         nama_kepala_sekolah: string;
         sekolah_id: string;

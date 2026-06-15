@@ -1,10 +1,43 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
@@ -13,11 +46,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MandalaService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../core/prisma/prisma.service");
+const jwt_1 = require("@nestjs/jwt");
+const config_1 = require("@nestjs/config");
+const bcrypt = __importStar(require("bcryptjs"));
 let MandalaService = MandalaService_1 = class MandalaService {
     prisma;
+    jwtService;
+    configService;
     logger = new common_1.Logger(MandalaService_1.name);
-    constructor(prisma) {
+    constructor(prisma, jwtService, configService) {
         this.prisma = prisma;
+        this.jwtService = jwtService;
+        this.configService = configService;
     }
     async onModuleInit() {
         const urlMandala = process.env.URL_MANDALA;
@@ -67,6 +107,9 @@ let MandalaService = MandalaService_1 = class MandalaService {
     }
     async getSchools() {
         const schools = await this.prisma.sekolah.findMany({
+            include: {
+                cadisdik: true,
+            },
             orderBy: { nama: 'asc' },
         });
         const richSchools = await Promise.all(schools.map(async (school) => {
@@ -92,9 +135,203 @@ let MandalaService = MandalaService_1 = class MandalaService {
                 desa_kelurahan: school.desa_kelurahan,
                 total_siswa: totalSiswa,
                 total_gtk: totalGtk,
+                cadisdik: school.cadisdik ? {
+                    id: school.cadisdik.cadisdik_id,
+                    nama: school.cadisdik.nama_instansi,
+                } : null,
             };
         }));
         return richSchools;
+    }
+    async getCadisdiks() {
+        return await this.prisma.cadisdik.findMany({
+            orderBy: { nama_instansi: 'asc' },
+        });
+    }
+    async getCadisdikById(id) {
+        const data = await this.prisma.cadisdik.findUnique({
+            where: { cadisdik_id: id },
+            include: {
+                sekolah: {
+                    select: {
+                        sekolah_id: true,
+                        nama: true,
+                        npsn: true,
+                    },
+                },
+            },
+        });
+        if (!data)
+            throw new common_1.NotFoundException(`Cadisdik with ID ${id} not found.`);
+        return data;
+    }
+    async createCadisdik(data) {
+        return await this.prisma.cadisdik.create({
+            data: {
+                nama_instansi: data.nama_instansi,
+                alamat: data.alamat,
+                email: data.email,
+                nomor_telepon: data.nomor_telepon,
+                website: data.website,
+                aktif: data.aktif !== undefined ? data.aktif : true,
+            },
+        });
+    }
+    async updateCadisdik(id, data) {
+        await this.getCadisdikById(id);
+        return await this.prisma.cadisdik.update({
+            where: { cadisdik_id: id },
+            data: {
+                nama_instansi: data.nama_instansi,
+                alamat: data.alamat,
+                email: data.email,
+                nomor_telepon: data.nomor_telepon,
+                website: data.website,
+                aktif: data.aktif,
+                updated_at: new Date(),
+            },
+        });
+    }
+    async deleteCadisdik(id) {
+        await this.getCadisdikById(id);
+        return await this.prisma.cadisdik.delete({
+            where: { cadisdik_id: id },
+        });
+    }
+    async getPegawais(cadisdikId) {
+        const where = {};
+        if (cadisdikId)
+            where.cadisdik_id = cadisdikId;
+        return await this.prisma.pegawai.findMany({
+            where,
+            include: {
+                cadisdik: {
+                    select: {
+                        nama_instansi: true,
+                    },
+                },
+            },
+            orderBy: { nama_lengkap: 'asc' },
+        });
+    }
+    async getPegawaiById(id) {
+        const data = await this.prisma.pegawai.findUnique({
+            where: { pegawai_id: id },
+            include: {
+                cadisdik: true,
+            },
+        });
+        if (!data)
+            throw new common_1.NotFoundException(`Pegawai with ID ${id} not found.`);
+        return data;
+    }
+    async createPegawai(data) {
+        const existing = await this.prisma.pegawai.findFirst({
+            where: {
+                OR: [
+                    { nip: data.nip },
+                    { email: data.email },
+                ],
+            },
+        });
+        if (existing) {
+            throw new common_1.BadRequestException('Pegawai with this NIP or Email already exists.');
+        }
+        const hashedPassword = await bcrypt.hash(data.password, 10);
+        return await this.prisma.pegawai.create({
+            data: {
+                cadisdik_id: data.cadisdik_id,
+                nama_lengkap: data.nama_lengkap,
+                nip: data.nip,
+                email: data.email,
+                password: hashedPassword,
+                jabatan: data.jabatan,
+                jenis_kelamin: data.jenis_kelamin,
+                nomor_telepon: data.nomor_telepon,
+                foto: data.foto,
+                aktif: data.aktif !== undefined ? data.aktif : true,
+            },
+        });
+    }
+    async updatePegawai(id, data) {
+        const pegawai = await this.getPegawaiById(id);
+        const updateData = {
+            nama_lengkap: data.nama_lengkap,
+            nip: data.nip,
+            email: data.email,
+            jabatan: data.jabatan,
+            jenis_kelamin: data.jenis_kelamin,
+            nomor_telepon: data.nomor_telepon,
+            foto: data.foto,
+            aktif: data.aktif,
+            cadisdik_id: data.cadisdik_id,
+            updated_at: new Date(),
+        };
+        if (data.password) {
+            updateData.password = await bcrypt.hash(data.password, 10);
+        }
+        return await this.prisma.pegawai.update({
+            where: { pegawai_id: id },
+            data: updateData,
+        });
+    }
+    async deletePegawai(id) {
+        await this.getPegawaiById(id);
+        return await this.prisma.pegawai.delete({
+            where: { pegawai_id: id },
+        });
+    }
+    async loginPegawai(credentials) {
+        const { identifier, password } = credentials;
+        const pegawai = await this.prisma.pegawai.findFirst({
+            where: {
+                OR: [
+                    { nip: identifier },
+                    { email: identifier },
+                ],
+            },
+            include: {
+                cadisdik: true,
+            },
+        });
+        if (!pegawai) {
+            throw new common_1.UnauthorizedException('Kredensial tidak valid (User tidak ditemukan).');
+        }
+        if (!pegawai.aktif) {
+            throw new common_1.ForbiddenException('Akun Anda telah dinonaktifkan.');
+        }
+        const isMatch = await bcrypt.compare(password, pegawai.password);
+        if (!isMatch) {
+            throw new common_1.UnauthorizedException('Kredensial tidak valid (Password salah).');
+        }
+        const payload = {
+            sub: pegawai.pegawai_id,
+            email: pegawai.email,
+            nip: pegawai.nip,
+            role: 'Mandala Pegawai',
+            cadisdik_id: pegawai.cadisdik_id,
+            cadisdik_nama: pegawai.cadisdik?.nama_instansi,
+        };
+        const accessToken = this.jwtService.sign(payload);
+        const refreshToken = this.jwtService.sign(payload, {
+            secret: this.configService.get('JWT_REFRESH_SECRET'),
+            expiresIn: this.configService.get('JWT_REFRESH_EXPIRATION') || '7d',
+        });
+        return {
+            status: 'success',
+            data: {
+                accessToken,
+                refreshToken,
+                pegawai: {
+                    id: pegawai.pegawai_id,
+                    nama: pegawai.nama_lengkap,
+                    nip: pegawai.nip,
+                    email: pegawai.email,
+                    role: 'Mandala Pegawai',
+                    cadisdik: pegawai.cadisdik?.nama_instansi,
+                },
+            },
+        };
     }
     async getSchoolDetail(sekolahId) {
         const school = await this.prisma.sekolah.findUnique({
@@ -432,6 +669,8 @@ let MandalaService = MandalaService_1 = class MandalaService {
 exports.MandalaService = MandalaService;
 exports.MandalaService = MandalaService = MandalaService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        jwt_1.JwtService,
+        config_1.ConfigService])
 ], MandalaService);
 //# sourceMappingURL=mandala.service.js.map

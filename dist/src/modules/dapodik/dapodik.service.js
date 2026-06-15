@@ -57,30 +57,46 @@ let DapodikService = class DapodikService {
         });
         if (!sekolah)
             return null;
-        const totalGtk = await this.prisma.gtk.count({
-            where: { sekolah_id: filter.sekolah_id }
-        });
-        const kepalaSekolah = await this.prisma.gtk.findFirst({
+        let kepalaSekolah = await this.prisma.pengguna.findFirst({
             where: {
-                AND: [
-                    { sekolah_id: filter.sekolah_id },
-                    {
-                        OR: [
-                            { jabatan_ptk_id_str: { contains: 'Kepala Sekolah', mode: 'insensitive' } },
-                            { jenis_ptk_id_str: { contains: 'Kepala Sekolah', mode: 'insensitive' } },
-                            { ptk_induk: { contains: 'Kepala Sekolah', mode: 'insensitive' } }
-                        ]
-                    }
-                ]
+                sekolah_id: filter.sekolah_id,
+                peran_id_str: { contains: 'Kepala Sekolah', mode: 'insensitive' }
             },
-            select: { nama: true, jabatan_ptk_id_str: true, jenis_ptk_id_str: true, status: true }
+            select: { nama: true }
+        });
+        let namaKepalaSekolah = kepalaSekolah?.nama || null;
+        if (!namaKepalaSekolah) {
+            const kepalaSekolahGtk = await this.prisma.gtk.findFirst({
+                where: {
+                    AND: [
+                        { sekolah_id: filter.sekolah_id },
+                        {
+                            OR: [
+                                { jabatan_ptk_id_str: { contains: 'Kepala Sekolah', mode: 'insensitive' } },
+                                { jenis_ptk_id_str: { contains: 'Kepala Sekolah', mode: 'insensitive' } },
+                                { ptk_induk: { contains: 'Kepala Sekolah', mode: 'insensitive' } }
+                            ]
+                        }
+                    ]
+                },
+                select: { nama: true }
+            });
+            namaKepalaSekolah = kepalaSekolahGtk?.nama || null;
+        }
+        const operatorSekolah = await this.prisma.pengguna.findFirst({
+            where: {
+                sekolah_id: filter.sekolah_id,
+                peran_id_str: { contains: 'Operator Sekolah', mode: 'insensitive' }
+            },
+            select: { nama: true }
         });
         const appUrl = process.env.APP_URL || 'http://localhost:3000';
         const logoUrl = sekolah.logo ? (sekolah.logo.startsWith('http') ? sekolah.logo : `${appUrl}${sekolah.logo}`) : null;
         return {
             ...sekolah,
             logo: logoUrl,
-            nama_kepala_sekolah: kepalaSekolah?.nama || null
+            nama_kepala_sekolah: namaKepalaSekolah,
+            nama_operator: operatorSekolah?.nama || null
         };
     }
     async updateSekolah(sekolahId, data) {

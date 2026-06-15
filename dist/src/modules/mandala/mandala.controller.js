@@ -52,6 +52,92 @@ let MandalaController = class MandalaController {
             data,
         };
     }
+    async getCadisdiks() {
+        const data = await this.mandalaService.getCadisdiks();
+        return {
+            status: 'success',
+            data,
+        };
+    }
+    async getCadisdikDetail(id) {
+        const data = await this.mandalaService.getCadisdikById(id);
+        return {
+            status: 'success',
+            data,
+        };
+    }
+    async createCadisdik(body) {
+        if (!body.nama_instansi) {
+            throw new common_1.BadRequestException('nama_instansi is required.');
+        }
+        const data = await this.mandalaService.createCadisdik(body);
+        return {
+            status: 'success',
+            message: 'Cadisdik successfully created.',
+            data,
+        };
+    }
+    async updateCadisdik(id, body) {
+        const data = await this.mandalaService.updateCadisdik(id, body);
+        return {
+            status: 'success',
+            message: 'Cadisdik successfully updated.',
+            data,
+        };
+    }
+    async deleteCadisdik(id) {
+        await this.mandalaService.deleteCadisdik(id);
+        return {
+            status: 'success',
+            message: 'Cadisdik successfully deleted.',
+        };
+    }
+    async loginPegawai(body) {
+        if (!body.identifier || !body.password) {
+            throw new common_1.BadRequestException('identifier (NIP/Email) and password are required.');
+        }
+        return await this.mandalaService.loginPegawai(body);
+    }
+    async getPegawais(cadisdikId) {
+        const data = await this.mandalaService.getPegawais(cadisdikId);
+        return {
+            status: 'success',
+            data,
+        };
+    }
+    async getPegawaiDetail(id) {
+        const data = await this.mandalaService.getPegawaiById(id);
+        return {
+            status: 'success',
+            data,
+        };
+    }
+    async createPegawai(body) {
+        if (!body.cadisdik_id || !body.nama_lengkap || !body.nip || !body.email || !body.password || body.jabatan === undefined || body.jenis_kelamin === undefined) {
+            throw new common_1.BadRequestException('Required fields: cadisdik_id, nama_lengkap, nip, email, password, jabatan, jenis_kelamin.');
+        }
+        const data = await this.mandalaService.createPegawai(body);
+        return {
+            status: 'success',
+            message: 'Pegawai successfully created.',
+            data,
+        };
+    }
+    async updatePegawai(id, body) {
+        const data = await this.mandalaService.updatePegawai(id, body);
+        return {
+            status: 'success',
+            message: 'Pegawai successfully updated.',
+            data,
+        };
+    }
+    async deletePegawai(id) {
+        await this.mandalaService.deletePegawai(id);
+        return {
+            status: 'success',
+            message: 'Pegawai successfully deleted.',
+        };
+    }
     async getSchoolDetail(id) {
         const data = await this.mandalaService.getSchoolDetail(id);
         if (!data) {
@@ -125,6 +211,95 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], MandalaController.prototype, "getSchools", null);
+__decorate([
+    (0, common_1.Get)('cadisdik'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "getCadisdiks", null);
+__decorate([
+    (0, common_1.Get)('cadisdik/:id'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "getCadisdikDetail", null);
+__decorate([
+    (0, common_1.Post)('cadisdik'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "createCadisdik", null);
+__decorate([
+    (0, common_1.Patch)('cadisdik/:id'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "updateCadisdik", null);
+__decorate([
+    (0, common_1.Delete)('cadisdik/:id'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "deleteCadisdik", null);
+__decorate([
+    (0, common_1.Post)('auth/login'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "loginPegawai", null);
+__decorate([
+    (0, common_1.Get)('pegawai'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Query)('cadisdik_id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "getPegawais", null);
+__decorate([
+    (0, common_1.Get)('pegawai/:id'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "getPegawaiDetail", null);
+__decorate([
+    (0, common_1.Post)('pegawai'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "createPegawai", null);
+__decorate([
+    (0, common_1.Patch)('pegawai/:id'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "updatePegawai", null);
+__decorate([
+    (0, common_1.Delete)('pegawai/:id'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "deletePegawai", null);
 __decorate([
     (0, common_1.Get)('sekolah/:id'),
     (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
