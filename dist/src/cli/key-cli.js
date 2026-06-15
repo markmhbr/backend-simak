@@ -117,6 +117,7 @@ async function listKeys(service) {
         console.log(`\n[${index + 1}] ID: ${k.id}`);
         console.log(`    Nama Klien  : ${k.nama_app}`);
         console.log(`    Sekolah ID  : ${k.sekolah_id || 'Global (Sistem)'}`);
+        console.log(`    Domain      : ${k.domain || '[Belum Terhubung / Terdaftar]'}`);
         console.log(`    Key API     : ${k.key_api}`);
         console.log(`    Key WebSvc  : ${k.key_webService}`);
         console.log(`    Key AdmPanel: ${k.key_adminPanel}`);
@@ -147,6 +148,7 @@ async function createNewKey(service, question) {
     console.log(`ID          : ${result.id}`);
     console.log(`Nama Klien  : ${result.nama_app}`);
     console.log(`Sekolah ID  : ${result.sekolah_id}`);
+    console.log(`Domain      : ${result.domain || '[Belum Terhubung / Terdaftar]'}`);
     console.log(`Key API     : ${result.key_api}`);
     console.log(`Key WebSvc  : ${result.key_webService || '[NULL - Menunggu koneksi/POST dari Web Service]'}`);
     console.log(`Key AdmPanel: ${result.key_adminPanel || '[NULL - Menunggu pengaturan Admin Panel]'}`);
