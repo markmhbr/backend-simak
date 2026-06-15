@@ -75,6 +75,43 @@ let DapodikController = class DapodikController {
             data,
         };
     }
+    async uploadSiswaFoto(req, uuid, file) {
+        if (!file) {
+            throw new common_1.BadRequestException('Berkas foto wajib disertakan.');
+        }
+        const { sekolahId, namaApp } = this.getSekolahInfo(req);
+        try {
+            const data = await this.dapodikService.uploadSiswaFoto(sekolahId, uuid, file);
+            return {
+                status: 'success',
+                klien: namaApp,
+                data,
+            };
+        }
+        catch (err) {
+            throw new common_1.BadRequestException(err.message);
+        }
+    }
+    async uploadSiswaDokumen(req, uuid, namaDokumen, file) {
+        if (!file) {
+            throw new common_1.BadRequestException('Berkas dokumen wajib disertakan.');
+        }
+        if (!namaDokumen) {
+            throw new common_1.BadRequestException('Parameter nama_dokumen wajib diisi.');
+        }
+        const { sekolahId, namaApp } = this.getSekolahInfo(req);
+        try {
+            const data = await this.dapodikService.uploadSiswaDokumen(sekolahId, uuid, file, namaDokumen);
+            return {
+                status: 'success',
+                klien: namaApp,
+                data,
+            };
+        }
+        catch (err) {
+            throw new common_1.BadRequestException(err.message);
+        }
+    }
     async getGtkRekapKategori(req) {
         const { sekolahId } = this.getSekolahInfo(req);
         const data = await this.dapodikService.getGtkRekapKategori(sekolahId);
@@ -328,6 +365,27 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], DapodikController.prototype, "uploadSekolahLogo", null);
+__decorate([
+    (0, common_1.Post)('siswa/:uuid/upload-foto'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('uuid')),
+    __param(2, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, Object]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "uploadSiswaFoto", null);
+__decorate([
+    (0, common_1.Post)('siswa/:uuid/upload-dokumen'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('uuid')),
+    __param(2, (0, common_1.Body)('nama_dokumen')),
+    __param(3, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String, Object]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "uploadSiswaDokumen", null);
 __decorate([
     (0, common_1.Get)('gtk/rekap-kategori'),
     __param(0, (0, common_1.Req)()),

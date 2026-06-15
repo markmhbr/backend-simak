@@ -329,6 +329,7 @@ export class MandalaService implements OnModuleInit {
           jabatan: g.jabatan_ptk_id_str || '',
           status_kepegawaian: g.status_kepegawaian_id_str || '',
           status: g.status,
+          pendidikan_terakhir: g.pendidikan_terakhir || '',
         },
         data_pendukung: {
           alamat_lengkap: alamatLengkap,

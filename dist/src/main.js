@@ -42,6 +42,7 @@ const express = __importStar(require("express"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const config_1 = require("@nestjs/config");
 const common_1 = require("@nestjs/common");
+const path = __importStar(require("path"));
 async function bootstrap() {
     BigInt.prototype.toJSON = function () {
         return this.toString();
@@ -55,6 +56,7 @@ async function bootstrap() {
         credentials: true,
     });
     app.use((0, cookie_parser_1.default)());
+    app.use('/storage', express.static(path.join(process.cwd(), 'storage')));
     app.useGlobalPipes(new common_1.ValidationPipe({
         whitelist: true,
         transform: true,

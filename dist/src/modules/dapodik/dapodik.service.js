@@ -75,8 +75,11 @@ let DapodikService = class DapodikService {
             },
             select: { nama: true, jabatan_ptk_id_str: true, jenis_ptk_id_str: true, status: true }
         });
+        const appUrl = process.env.APP_URL || 'http://localhost:3000';
+        const logoUrl = sekolah.logo ? (sekolah.logo.startsWith('http') ? sekolah.logo : `${appUrl}${sekolah.logo}`) : null;
         return {
             ...sekolah,
+            logo: logoUrl,
             nama_kepala_sekolah: kepalaSekolah?.nama || null
         };
     }
@@ -94,21 +97,71 @@ let DapodikService = class DapodikService {
         });
     }
     async uploadLogo(sekolahId, file) {
-        const fs = require('fs');
         const path = require('path');
-        const frontendPublicDir = path.join(process.cwd(), '../frontend-simak/public/uploads');
-        if (!fs.existsSync(frontendPublicDir)) {
-            fs.mkdirSync(frontendPublicDir, { recursive: true });
-        }
-        const fileExt = path.extname(file.originalname);
-        const fileName = `logo_${sekolahId}${fileExt}`;
-        const filePath = path.join(frontendPublicDir, fileName);
-        fs.writeFileSync(filePath, file.buffer);
-        const relativePath = `/uploads/${fileName}`;
+        const { compressAndSaveImage } = require('../../common/utils/upload.util');
+        const destDir = path.join(process.cwd(), 'storage', sekolahId);
+        const fileName = 'logo';
+        await compressAndSaveImage(file.buffer, destDir, fileName);
+        const relativePath = `/storage/${sekolahId}/logo.jpg`;
         return await this.prisma.sekolah.update({
             where: { sekolah_id: sekolahId },
             data: { logo: relativePath },
         });
+    }
+    async uploadSiswaFoto(sekolahId, uuidSiswa, file) {
+        const path = require('path');
+        const { compressAndSaveImage } = require('../../common/utils/upload.util');
+        const siswa = await this.prisma.pesertaDidik.findFirst({
+            where: { peserta_didik_id: uuidSiswa, sekolah_id: sekolahId }
+        });
+        if (!siswa) {
+            throw new Error('Siswa tidak ditemukan atau tidak terdaftar di sekolah Anda.');
+        }
+        const destDir = path.join(process.cwd(), 'storage', sekolahId, 'siswa', uuidSiswa);
+        const fileName = 'foto_profil';
+        const savedPath = await compressAndSaveImage(file.buffer, destDir, fileName);
+        const relativePath = `/storage/${sekolahId}/siswa/${uuidSiswa}/foto_profil.jpg`;
+        await this.prisma.pesertaDidik.update({
+            where: { peserta_didik_id: uuidSiswa },
+            data: { foto: relativePath }
+        });
+        return {
+            filePath: relativePath,
+            savedPath
+        };
+    }
+    async uploadSiswaDokumen(sekolahId, uuidSiswa, file, docName) {
+        const path = require('path');
+        const { compressAndSaveImage, saveDocument } = require('../../common/utils/upload.util');
+        const siswa = await this.prisma.pesertaDidik.findFirst({
+            where: { peserta_didik_id: uuidSiswa, sekolah_id: sekolahId }
+        });
+        if (!siswa) {
+            throw new Error('Siswa tidak ditemukan atau tidak terdaftar di sekolah Anda.');
+        }
+        const destDir = path.join(process.cwd(), 'storage', sekolahId, 'siswa', uuidSiswa, 'dokumen');
+        const fileExt = path.extname(file.originalname).toLowerCase();
+        const cleanDocName = docName.replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
+        const finalFileName = `${cleanDocName}${fileExt}`;
+        let savedPath = '';
+        let isCompressed = false;
+        if (['.jpg', '.jpeg', '.png', '.webp'].includes(fileExt)) {
+            savedPath = await compressAndSaveImage(file.buffer, destDir, finalFileName);
+            isCompressed = true;
+        }
+        else if (fileExt === '.pdf') {
+            savedPath = saveDocument(file.buffer, destDir, finalFileName, 200 * 1024);
+        }
+        else {
+            throw new Error('Format dokumen tidak didukung. Gunakan PDF atau Gambar (JPG, PNG, WebP).');
+        }
+        const relativePath = `/storage/${sekolahId}/siswa/${uuidSiswa}/dokumen/${finalFileName}`;
+        return {
+            fileName: finalFileName,
+            filePath: relativePath,
+            isCompressed,
+            sizeBytes: file.buffer.length
+        };
     }
     async getTanah(sekolahId) {
         const filter = this.getSekolahFilter(sekolahId);
@@ -233,7 +286,12 @@ let DapodikService = class DapodikService {
                 orderBy: { nama: 'asc' },
             }),
         ]);
-        return { total, data };
+        const appUrl = process.env.APP_URL || 'http://localhost:3000';
+        const formattedData = data.map(item => ({
+            ...item,
+            foto: item.foto ? (item.foto.startsWith('http') ? item.foto : `${appUrl}${item.foto}`) : null
+        }));
+        return { total, data: formattedData };
     }
     async getPesertaDidikForMandala(sekolahId, query) {
         const { limit, page, search, status } = query;

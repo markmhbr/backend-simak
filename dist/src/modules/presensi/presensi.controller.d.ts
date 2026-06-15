@@ -99,8 +99,8 @@ export declare class PresensiController {
         created_at: Date;
         updated_at: Date;
         nama: string;
-        aktif: boolean;
         keterangan: string | null;
+        aktif: boolean;
         hari_libur_id: string;
         tanggal_mulai: Date;
         tanggal_selesai: Date;
@@ -115,8 +115,8 @@ export declare class PresensiController {
         created_at: Date;
         updated_at: Date;
         nama: string;
-        aktif: boolean;
         keterangan: string | null;
+        aktif: boolean;
         hari_libur_id: string;
         tanggal_mulai: Date;
         tanggal_selesai: Date;

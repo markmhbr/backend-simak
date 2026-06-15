@@ -20,6 +20,7 @@ export declare class DapodikController {
         status: string;
         klien: any;
         data: {
+            logo: string;
             nama_kepala_sekolah: string;
             sekolah_id: string;
             created_at: Date;
@@ -50,7 +51,6 @@ export declare class DapodikController {
             provinsi: string | null;
             cadisdik_edit_count: number;
             spmb: string | null;
-            logo: string | null;
             background_kartu_gtk: string | null;
             background_kartu_pesertadidik: string | null;
             peta: string | null;
@@ -140,6 +140,24 @@ export declare class DapodikController {
             cadisdik_id: string | null;
         };
     }>;
+    uploadSiswaFoto(req: Request, uuid: string, file: Express.Multer.File): Promise<{
+        status: string;
+        klien: any;
+        data: {
+            filePath: string;
+            savedPath: any;
+        };
+    }>;
+    uploadSiswaDokumen(req: Request, uuid: string, namaDokumen: string, file: Express.Multer.File): Promise<{
+        status: string;
+        klien: any;
+        data: {
+            fileName: string;
+            filePath: string;
+            isCompressed: boolean;
+            sizeBytes: number;
+        };
+    }>;
     getGtkRekapKategori(req: Request): Promise<{
         status: string;
         data: {
@@ -194,6 +212,14 @@ export declare class DapodikController {
             lintang: import("@prisma/client-runtime-utils").Decimal | null;
             bujur: import("@prisma/client-runtime-utils").Decimal | null;
             desa_kelurahan: string | null;
+            nama_dusun: string | null;
+            vld_count: number;
+            asal_data: string | null;
+            create_date: Date;
+            last_update: Date;
+            soft_delete: string | null;
+            last_sync: Date | null;
+            updater_id: string | null;
             id_tanah: string;
             jenis_prasarana_id: number;
             id_hapus_buku: string | null;
@@ -209,23 +235,15 @@ export declare class DapodikController {
             panjang: number | null;
             lebar: number | null;
             nilai_perolehan_aset: import("@prisma/client-runtime-utils").Decimal | null;
-            nama_dusun: string | null;
             tgl_mutasi_keluar: Date | null;
             batas: string | null;
             ket_tanah: string | null;
             luas: import("@prisma/client-runtime-utils").Decimal | null;
             luas_lahan_tersedia: import("@prisma/client-runtime-utils").Decimal | null;
             no_sertifikat_tanah: string | null;
-            asal_data: string | null;
-            create_date: Date;
-            last_update: Date;
-            soft_delete: string | null;
-            last_sync: Date | null;
-            updater_id: string | null;
             jenis_prasarana_id_str: string | null;
             kode_wilayah_str: string | null;
             sekolah_id_str: string | null;
-            vld_count: number;
         }[];
     }>;
     getTahunPelajaranList(req: Request): Promise<{
@@ -246,6 +264,13 @@ export declare class DapodikController {
             sekolah_id: string;
             nama: string;
             ptk_id: string | null;
+            vld_count: number;
+            asal_data: string | null;
+            create_date: Date;
+            last_update: Date;
+            soft_delete: string | null;
+            last_sync: Date | null;
+            updater_id: string | null;
             id_tanah: string;
             jenis_prasarana_id: number;
             id_hapus_buku: string | null;
@@ -261,15 +286,8 @@ export declare class DapodikController {
             panjang: number | null;
             lebar: number | null;
             nilai_perolehan_aset: import("@prisma/client-runtime-utils").Decimal | null;
-            asal_data: string | null;
-            create_date: Date;
-            last_update: Date;
-            soft_delete: string | null;
-            last_sync: Date | null;
-            updater_id: string | null;
             jenis_prasarana_id_str: string | null;
             sekolah_id_str: string | null;
-            vld_count: number;
             id_bangunan: string;
             jml_lantai: string | null;
             thn_dibangun: string | null;
@@ -301,15 +319,15 @@ export declare class DapodikController {
         data: {
             sekolah_id: string;
             id_ruang: string;
-            jenis_prasarana_id: number;
-            panjang: number | null;
-            lebar: number | null;
             asal_data: string | null;
             create_date: Date;
             last_update: Date;
             soft_delete: string | null;
             last_sync: Date | null;
             updater_id: string | null;
+            jenis_prasarana_id: number;
+            panjang: number | null;
+            lebar: number | null;
             jenis_prasarana_id_str: string | null;
             sekolah_id_str: string | null;
             id_bangunan: string;
@@ -396,11 +414,11 @@ export declare class DapodikController {
         status: string;
         klien: any;
         data: {
+            foto: string;
             nama: string;
             peserta_didik_id: string;
             qr_token: string;
             jenis_kelamin: string;
-            foto: string;
             nisn: string;
             nipd: string;
             nama_rombel: string;
@@ -602,13 +620,13 @@ export declare class DapodikController {
                 updated_at: Date;
                 ptk_id: string | null;
                 ptk_id_str: string | null;
+                vld_count: number;
                 asal_data: string | null;
                 create_date: Date | null;
                 last_update: Date | null;
                 soft_delete: string | null;
                 last_sync: Date | null;
                 updater_id: string | null;
-                vld_count: number;
                 riwayat_sertifikasi_id: string;
                 kode_lemb_sert: string | null;
                 bidang_studi_id: number | null;
@@ -816,19 +834,12 @@ export declare class DapodikController {
             semester_id: string | null;
             kurikulum_id: string | null;
             kurikulum_id_str: string | null;
-            nama_dusun: string | null;
-            asal_data: string | null;
-            create_date: Date;
-            last_update: Date;
-            soft_delete: string | null;
-            last_sync: Date | null;
-            updater_id: string | null;
-            vld_count: number;
-            nisn: string | null;
             registrasi_id: string | null;
             anggota_rombel_id: string | null;
+            nisn: string | null;
             kebutuhan_khusus_id: number | null;
             kebutuhan_khusus: string | null;
+            nama_dusun: string | null;
             jenis_tinggal_id: string | null;
             alat_transportasi_id: string | null;
             nomor_telepon_rumah: string | null;
@@ -898,6 +909,13 @@ export declare class DapodikController {
             pekerjaan_id: number | null;
             status_data: number | null;
             konfirmasi_mutasi: number | null;
+            vld_count: number;
+            asal_data: string | null;
+            create_date: Date;
+            last_update: Date;
+            soft_delete: string | null;
+            last_sync: Date | null;
+            updater_id: string | null;
             alasan_layak_pip: string | null;
             alasan_menolak_kip: string | null;
             alat_transportasi_id_str: string | null;
@@ -970,19 +988,12 @@ export declare class DapodikController {
             semester_id: string | null;
             kurikulum_id: string | null;
             kurikulum_id_str: string | null;
-            nama_dusun: string | null;
-            asal_data: string | null;
-            create_date: Date;
-            last_update: Date;
-            soft_delete: string | null;
-            last_sync: Date | null;
-            updater_id: string | null;
-            vld_count: number;
-            nisn: string | null;
             registrasi_id: string | null;
             anggota_rombel_id: string | null;
+            nisn: string | null;
             kebutuhan_khusus_id: number | null;
             kebutuhan_khusus: string | null;
+            nama_dusun: string | null;
             jenis_tinggal_id: string | null;
             alat_transportasi_id: string | null;
             nomor_telepon_rumah: string | null;
@@ -1052,6 +1063,13 @@ export declare class DapodikController {
             pekerjaan_id: number | null;
             status_data: number | null;
             konfirmasi_mutasi: number | null;
+            vld_count: number;
+            asal_data: string | null;
+            create_date: Date;
+            last_update: Date;
+            soft_delete: string | null;
+            last_sync: Date | null;
+            updater_id: string | null;
             alasan_layak_pip: string | null;
             alasan_menolak_kip: string | null;
             alat_transportasi_id_str: string | null;

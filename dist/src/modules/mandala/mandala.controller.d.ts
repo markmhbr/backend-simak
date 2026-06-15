@@ -194,6 +194,7 @@ export declare class MandalaController {
                 jabatan: string;
                 status_kepegawaian: string;
                 status: string;
+                pendidikan_terakhir: string;
             };
             data_pendukung: {
                 alamat_lengkap: string;

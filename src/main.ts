@@ -4,6 +4,7 @@ import * as express from 'express';
 import cookieParser from 'cookie-parser';
 import { ConfigService } from '@nestjs/config';
 import { Logger, ValidationPipe } from '@nestjs/common';
+import * as path from 'path';
 
 async function bootstrap() {
   (BigInt.prototype as any).toJSON = function () {
@@ -22,6 +23,9 @@ async function bootstrap() {
   });
 
   app.use(cookieParser());
+
+  // Serve static files from storage directory
+  app.use('/storage', express.static(path.join(process.cwd(), 'storage')));
 
   // Tambahkan ValidationPipe global
   app.useGlobalPipes(new ValidationPipe({

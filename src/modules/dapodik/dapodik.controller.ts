@@ -72,6 +72,56 @@ export class DapodikController {
     };
   }
 
+  @Post('siswa/:uuid/upload-foto')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadSiswaFoto(
+    @Req() req: Request, 
+    @Param('uuid') uuid: string, 
+    @UploadedFile() file: Express.Multer.File
+  ) {
+    if (!file) {
+      throw new BadRequestException('Berkas foto wajib disertakan.');
+    }
+    const { sekolahId, namaApp } = this.getSekolahInfo(req);
+    try {
+      const data = await this.dapodikService.uploadSiswaFoto(sekolahId, uuid, file);
+      return {
+        status: 'success',
+        klien: namaApp,
+        data,
+      };
+    } catch (err) {
+      throw new BadRequestException(err.message);
+    }
+  }
+
+  @Post('siswa/:uuid/upload-dokumen')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadSiswaDokumen(
+    @Req() req: Request,
+    @Param('uuid') uuid: string,
+    @Body('nama_dokumen') namaDokumen: string,
+    @UploadedFile() file: Express.Multer.File
+  ) {
+    if (!file) {
+      throw new BadRequestException('Berkas dokumen wajib disertakan.');
+    }
+    if (!namaDokumen) {
+      throw new BadRequestException('Parameter nama_dokumen wajib diisi.');
+    }
+    const { sekolahId, namaApp } = this.getSekolahInfo(req);
+    try {
+      const data = await this.dapodikService.uploadSiswaDokumen(sekolahId, uuid, file, namaDokumen);
+      return {
+        status: 'success',
+        klien: namaApp,
+        data,
+      };
+    } catch (err) {
+      throw new BadRequestException(err.message);
+    }
+  }
+
   @Get('gtk/rekap-kategori')
   async getGtkRekapKategori(@Req() req: Request) {
     const { sekolahId } = this.getSekolahInfo(req);
