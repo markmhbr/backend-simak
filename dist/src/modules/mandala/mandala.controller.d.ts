@@ -49,6 +49,8 @@ export declare class MandalaController {
             desa_kelurahan: string;
             total_siswa: number;
             total_gtk: number;
+            nomor_telepon: string;
+            kode_wilayah: string;
             cadisdik: {
                 id: string;
                 nama: string;
