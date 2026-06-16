@@ -354,17 +354,7 @@ export class SyncService {
       };
 
       try {
-        // Logika Prioritas: Jangan biarkan status 'Aktif' ditimpa oleh status 'Keluar/Lulus'
-        const existing = await this.prisma.pesertaDidik.findUnique({
-          where: { peserta_didik_id: p.peserta_didik_id },
-          select: { status: true }
-        });
-
-        if (existing && existing.status === 'Aktif' && payload.status !== 'Aktif') {
-          // Jika sudah Aktif, dan data baru adalah Keluar/Lulus, tetap pertahankan status Aktif
-          payload.status = 'Aktif';
-        }
-
+        // Langsung update dengan data dari payload, membiarkan status tertimpa
         await this.prisma.pesertaDidik.upsert({
           where: { peserta_didik_id: p.peserta_didik_id },
           create: { ...payload, peserta_didik_id: p.peserta_didik_id },
@@ -391,6 +381,20 @@ export class SyncService {
       let qr_token = g.qr_token || null;
       if (!qr_token && domain) {
         qr_token = `${domain}/${g.ptk_id}`;
+      }
+
+      let kabKota = g.kabupaten_kota || null;
+      let prov = g.provinsi || null;
+      
+      if (g.kecamatan && (!kabKota || !prov)) {
+        const kecStr = g.kecamatan.toLowerCase().replace(/\s+/g, '');
+        if (kecStr === 'baleendah') {
+          if (!kabKota) kabKota = 'Kabupaten Bandung';
+          if (!prov) prov = 'Jawa Barat';
+        } else if (['karangtengah', 'ciranjang', 'sukaluyu', 'sualuyu', 'cianjur', 'haurwangi', 'gekbrong', 'pacet', 'bojongpicung', 'cugenang', 'cikalongkulon', 'mande'].includes(kecStr)) {
+          if (!kabKota) kabKota = 'Kabupaten Cianjur';
+          if (!prov) prov = 'Jawa Barat';
+        }
       }
 
       const payload = {
@@ -446,6 +450,8 @@ export class SyncService {
         dusun: g.dusun || null,
         desa_kelurahan: g.desa_kelurahan || null,
         kecamatan: g.kecamatan || null,
+        kabupaten_kota: kabKota,
+        provinsi: prov,
         kode_pos: g.kode_pos || null,
         lintang: this.parseNumber(g.lintang),
         bujur: this.parseNumber(g.bujur),
