@@ -712,12 +712,12 @@ let MandalaService = MandalaService_1 = class MandalaService {
         };
     }
     async getPesertaDidikPresenceForMandala(sekolahId, date) {
-        const startOfDay = new Date(date);
-        startOfDay.setHours(0, 0, 0, 0);
+        const wibDate = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+        const dateOnly = new Date(wibDate.toISOString().split('T')[0]);
         return await this.prisma.presensiPesertaDidik.findMany({
             where: {
                 sekolah_id: sekolahId,
-                tanggal: startOfDay,
+                tanggal: dateOnly,
             },
             include: {
                 peserta_didik: {
@@ -739,12 +739,12 @@ let MandalaService = MandalaService_1 = class MandalaService {
         });
     }
     async getGtkPresenceForMandala(sekolahId, date) {
-        const startOfDay = new Date(date);
-        startOfDay.setHours(0, 0, 0, 0);
+        const wibDate = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+        const dateOnly = new Date(wibDate.toISOString().split('T')[0]);
         return await this.prisma.presensiGtk.findMany({
             where: {
                 sekolah_id: sekolahId,
-                tanggal: startOfDay,
+                tanggal: dateOnly,
             },
             include: {
                 gtk: {

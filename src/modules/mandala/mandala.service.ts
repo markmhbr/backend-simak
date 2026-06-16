@@ -771,13 +771,14 @@ export class MandalaService implements OnModuleInit {
   }
 
   async getPesertaDidikPresenceForMandala(sekolahId: string, date: Date) {
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
+    // Adopsi logika presensi yang ada (WIB offset UTC+7)
+    const wibDate = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+    const dateOnly = new Date(wibDate.toISOString().split('T')[0]);
 
     return await this.prisma.presensiPesertaDidik.findMany({
       where: {
         sekolah_id: sekolahId,
-        tanggal: startOfDay,
+        tanggal: dateOnly,
       },
       include: {
         peserta_didik: {
@@ -800,13 +801,14 @@ export class MandalaService implements OnModuleInit {
   }
 
   async getGtkPresenceForMandala(sekolahId: string, date: Date) {
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
+    // Adopsi logika presensi yang ada (WIB offset UTC+7)
+    const wibDate = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+    const dateOnly = new Date(wibDate.toISOString().split('T')[0]);
 
     return await this.prisma.presensiGtk.findMany({
       where: {
         sekolah_id: sekolahId,
-        tanggal: startOfDay,
+        tanggal: dateOnly,
       },
       include: {
         gtk: {
