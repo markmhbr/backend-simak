@@ -59,6 +59,7 @@ model Sekolah {
   template_surat         TemplateSurat[]
   surat_masuk            SuratMasuk[]
   surat_keluar           SuratKeluar[]
+  mapping_pengawas       MappingPengawas[]
 
   @@map("sekolah")
   @@schema("dapodik")
@@ -361,7 +362,6 @@ model Gtk {
   pendidikan_terakhir              String?
   bidang_studi_terakhir            String?
   pangkat_golongan_terakhir        String?
-  rwy_pend_formal                  Json?
   rwy_kepangkatan                  Json?
   alamat_jalan                     String?
   rt                               String?
@@ -909,11 +909,29 @@ model Pegawai {
   updated_at           DateTime @default(now()) @updatedAt @db.Timestamptz(6)
 
   cadisdik Cadisdik @relation(fields: [cadisdik_id], references: [cadisdik_id], onDelete: Restrict)
+  mapping_pengawas MappingPengawas[]
 
   @@index([cadisdik_id])
   @@index([nip])
   @@index([email])
   @@map("pegawai")
+  @@schema("mandala")
+}
+
+model MappingPengawas {
+  mapping_pengawas_id String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  pegawai_id          String   @db.Uuid
+  sekolah_id          String   @db.Uuid
+  created_at          DateTime @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  pegawai Pegawai @relation(fields: [pegawai_id], references: [pegawai_id], onDelete: Cascade)
+  sekolah Sekolah @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
+
+  @@index([pegawai_id])
+  @@index([sekolah_id])
+  @@unique([pegawai_id, sekolah_id])
+  @@map("mapping_pengawas")
   @@schema("mandala")
 }
 

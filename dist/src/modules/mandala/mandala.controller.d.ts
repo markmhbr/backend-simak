@@ -150,11 +150,11 @@ export declare class MandalaController {
             updated_at: Date;
             password: string;
             email: string;
+            jenis_kelamin: number;
+            foto: string | null;
+            nip: string;
             nomor_telepon: string | null;
             cadisdik_id: string;
-            jenis_kelamin: number;
-            nip: string;
-            foto: string | null;
             aktif: boolean;
             pegawai_id: string;
             nama_lengkap: string;
@@ -181,11 +181,11 @@ export declare class MandalaController {
             updated_at: Date;
             password: string;
             email: string;
+            jenis_kelamin: number;
+            foto: string | null;
+            nip: string;
             nomor_telepon: string | null;
             cadisdik_id: string;
-            jenis_kelamin: number;
-            nip: string;
-            foto: string | null;
             aktif: boolean;
             pegawai_id: string;
             nama_lengkap: string;
@@ -201,11 +201,11 @@ export declare class MandalaController {
             updated_at: Date;
             password: string;
             email: string;
+            jenis_kelamin: number;
+            foto: string | null;
+            nip: string;
             nomor_telepon: string | null;
             cadisdik_id: string;
-            jenis_kelamin: number;
-            nip: string;
-            foto: string | null;
             aktif: boolean;
             pegawai_id: string;
             nama_lengkap: string;
@@ -221,11 +221,11 @@ export declare class MandalaController {
             updated_at: Date;
             password: string;
             email: string;
+            jenis_kelamin: number;
+            foto: string | null;
+            nip: string;
             nomor_telepon: string | null;
             cadisdik_id: string;
-            jenis_kelamin: number;
-            nip: string;
-            foto: string | null;
             aktif: boolean;
             pegawai_id: string;
             nama_lengkap: string;
@@ -234,6 +234,40 @@ export declare class MandalaController {
         };
     }>;
     deletePegawai(id: string): Promise<{
+        status: string;
+        message: string;
+    }>;
+    getMappingPengawas(pegawaiId?: string, sekolahId?: string): Promise<{
+        status: string;
+        data: ({
+            sekolah: {
+                nama: string;
+                npsn: string;
+            };
+            pegawai: {
+                nip: string;
+                nama_lengkap: string;
+            };
+        } & {
+            sekolah_id: string;
+            created_at: Date;
+            updated_at: Date;
+            pegawai_id: string;
+            mapping_pengawas_id: string;
+        })[];
+    }>;
+    createMappingPengawas(body: any): Promise<{
+        status: string;
+        message: string;
+        data: {
+            sekolah_id: string;
+            created_at: Date;
+            updated_at: Date;
+            pegawai_id: string;
+            mapping_pengawas_id: string;
+        };
+    }>;
+    deleteMappingPengawas(id: string): Promise<{
         status: string;
         message: string;
     }>;
@@ -246,28 +280,28 @@ export declare class MandalaController {
             updated_at: Date;
             nama: string;
             email: string | null;
+            alamat_jalan: string | null;
+            rt: string | null;
+            rw: string | null;
+            desa_kelurahan: string | null;
+            kode_wilayah: string | null;
+            kode_pos: string | null;
+            lintang: import("@prisma/client-runtime-utils").Decimal | null;
+            bujur: import("@prisma/client-runtime-utils").Decimal | null;
+            dusun: string | null;
+            kabupaten_kota: string | null;
+            kecamatan: string | null;
+            provinsi: string | null;
             nss: string | null;
             npsn: string | null;
             bentuk_pendidikan_id: number | null;
             bentuk_pendidikan_id_str: string | null;
             status_sekolah: string | null;
             status_sekolah_str: string | null;
-            alamat_jalan: string | null;
-            rt: string | null;
-            rw: string | null;
-            kode_wilayah: string | null;
-            kode_pos: string | null;
             nomor_telepon: string | null;
             nomor_fax: string | null;
             website: string | null;
             is_sks: boolean | null;
-            lintang: import("@prisma/client-runtime-utils").Decimal | null;
-            bujur: import("@prisma/client-runtime-utils").Decimal | null;
-            dusun: string | null;
-            desa_kelurahan: string | null;
-            kecamatan: string | null;
-            kabupaten_kota: string | null;
-            provinsi: string | null;
             cadisdik_edit_count: number;
             spmb: string | null;
             logo: string | null;

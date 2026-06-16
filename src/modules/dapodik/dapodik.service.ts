@@ -176,6 +176,38 @@ export class DapodikService {
     };
   }
 
+  async uploadGtkFoto(sekolahId: string, uuidGtk: string, file: Express.Multer.File) {
+    const path = require('path');
+    const { compressAndSaveImage } = require('../../common/utils/upload.util');
+    
+    // Validasi GTK ada dan milik sekolah ini
+    const gtk = await this.prisma.gtk.findFirst({
+      where: { ptk_id: uuidGtk, sekolah_id: sekolahId }
+    });
+    if (!gtk) {
+      throw new Error('GTK tidak ditemukan atau tidak terdaftar di sekolah Anda.');
+    }
+
+    const destDir = path.join(process.cwd(), 'storage', sekolahId, 'gtk', uuidGtk);
+    const fileName = 'foto_profil'; // sharp helper will append .jpg automatically
+
+    // Kompres & Simpan foto
+    const savedPath = await compressAndSaveImage(file.buffer, destDir, fileName);
+
+    // Path yang disimpan di DB (untuk diakses web client)
+    const relativePath = `/storage/${sekolahId}/gtk/${uuidGtk}/foto_profil.jpg`;
+
+    await this.prisma.gtk.update({
+      where: { ptk_id: uuidGtk },
+      data: { foto: relativePath }
+    });
+
+    return {
+      filePath: relativePath,
+      savedPath
+    };
+  }
+
   async uploadSiswaDokumen(sekolahId: string, uuidSiswa: string, file: Express.Multer.File, docName: string) {
     const path = require('path');
     const { compressAndSaveImage, saveDocument } = require('../../common/utils/upload.util');
@@ -215,6 +247,63 @@ export class DapodikService {
       isCompressed,
       sizeBytes: file.buffer.length
     };
+  }
+
+  async uploadGtkDokumen(sekolahId: string, uuidGtk: string, file: Express.Multer.File, docName: string) {
+    const path = require('path');
+    const { compressAndSaveImage, saveDocument } = require('../../common/utils/upload.util');
+
+    const gtk = await this.prisma.gtk.findFirst({
+      where: { ptk_id: uuidGtk, sekolah_id: sekolahId }
+    });
+    if (!gtk) {
+      throw new Error('GTK tidak ditemukan atau tidak terdaftar di sekolah Anda.');
+    }
+
+    const destDir = path.join(process.cwd(), 'storage', sekolahId, 'gtk', uuidGtk, 'dokumen');
+    
+    const fileExt = path.extname(file.originalname).toLowerCase();
+    const cleanDocName = docName.replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
+    const finalFileName = `${cleanDocName}${fileExt}`;
+
+    let savedPath = '';
+    let isCompressed = false;
+
+    if (['.jpg', '.jpeg', '.png', '.webp'].includes(fileExt)) {
+      savedPath = await compressAndSaveImage(file.buffer, destDir, finalFileName);
+      isCompressed = true;
+    } else if (fileExt === '.pdf') {
+      savedPath = saveDocument(file.buffer, destDir, finalFileName, 200 * 1024);
+    } else {
+      throw new Error('Format dokumen tidak didukung. Gunakan PDF atau Gambar (JPG, PNG, WebP).');
+    }
+
+    const relativePath = `/storage/${sekolahId}/gtk/${uuidGtk}/dokumen/${finalFileName}`;
+
+    return {
+      fileName: finalFileName,
+      filePath: relativePath,
+      isCompressed,
+      sizeBytes: file.buffer.length
+    };
+  }
+
+  async deleteGtkDokumen(sekolahId: string, uuidGtk: string, fileName: string) {
+    const fs = require('fs');
+    const path = require('path');
+    const destFile = path.join(process.cwd(), 'storage', sekolahId, 'gtk', uuidGtk, 'dokumen', fileName);
+    if (fs.existsSync(destFile)) {
+      fs.unlinkSync(destFile);
+    }
+  }
+
+  async deleteSiswaDokumen(sekolahId: string, uuidSiswa: string, fileName: string) {
+    const fs = require('fs');
+    const path = require('path');
+    const destFile = path.join(process.cwd(), 'storage', sekolahId, 'siswa', uuidSiswa, 'dokumen', fileName);
+    if (fs.existsSync(destFile)) {
+      fs.unlinkSync(destFile);
+    }
   }
 
   async getTanah(sekolahId: string | null) {
@@ -1019,7 +1108,7 @@ export class DapodikService {
   }
 
   async getGtkById(sekolahId: string, id: string) {
-    return await this.prisma.gtk.findFirst({
+    const gtk = await this.prisma.gtk.findFirst({
       where: {
         AND: [{ ptk_id: id }, { sekolah_id: sekolahId }],
       },
@@ -1032,9 +1121,39 @@ export class DapodikService {
             bidang_studi: true,
             lemb_sertifikasi: true,
           }
-        }
+        },
+        riwayat_pendidikan_formal: true,
       },
     });
+
+    if (gtk) {
+      const fs = require('fs');
+      const path = require('path');
+      const destDir = path.join(process.cwd(), 'storage', sekolahId, 'gtk', id, 'dokumen');
+      let fotoDokumen: any[] = [];
+      if (fs.existsSync(destDir)) {
+        try {
+          const files = fs.readdirSync(destDir);
+          fotoDokumen = files.map((file: string, index: number) => {
+            const baseName = file.substring(0, file.lastIndexOf('.'));
+            const nameWords = baseName.split('_').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+            return {
+              id: index,
+              nama: nameWords,
+              fileName: file,
+              fileUrl: `/storage/${sekolahId}/gtk/${id}/dokumen/${file}`
+            };
+          });
+        } catch (e) {
+          console.error('Error reading GTK documents directory:', e);
+        }
+      }
+      return {
+        ...gtk,
+        foto_dokumen: fotoDokumen
+      };
+    }
+    return null;
   }
 
   async updateGtk(sekolahId: string, id: string, data: any) {
@@ -1075,7 +1194,7 @@ export class DapodikService {
   }
 
   async getPesertaDidikById(sekolahId: string, id: string) {
-    return await this.prisma.pesertaDidik.findFirst({
+    const student = await this.prisma.pesertaDidik.findFirst({
       where: {
         AND: [{ peserta_didik_id: id }, { sekolah_id: sekolahId }],
       },
@@ -1085,6 +1204,25 @@ export class DapodikService {
         },
       },
     });
+
+    if (student) {
+      const fs = require('fs');
+      const path = require('path');
+      const destDir = path.join(process.cwd(), 'storage', sekolahId, 'siswa', id, 'dokumen');
+      let uploadedDocs: string[] = [];
+      if (fs.existsSync(destDir)) {
+        try {
+          uploadedDocs = fs.readdirSync(destDir);
+        } catch (e) {
+          console.error('Error reading student documents directory:', e);
+        }
+      }
+      return {
+        ...student,
+        uploaded_docs: uploadedDocs
+      };
+    }
+    return null;
   }
 
   async updatePesertaDidik(sekolahId: string, id: string, data: any) {

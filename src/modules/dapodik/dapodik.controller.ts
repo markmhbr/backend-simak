@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Req, Query, Patch, Body, Post, UseInterceptors, UploadedFile, Param, BadRequestException } from '@nestjs/common';
+import { Controller, Get, UseGuards, Req, Query, Patch, Body, Post, Delete, UseInterceptors, UploadedFile, Param, BadRequestException } from '@nestjs/common';
 import { DapodikService } from './dapodik.service';
 import { ApiKeyGuard } from '../../core/app-key/api-key.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -95,6 +95,29 @@ export class DapodikController {
     }
   }
 
+  @Post('gtk/:uuid/upload-foto')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadGtkFoto(
+    @Req() req: Request, 
+    @Param('uuid') uuid: string, 
+    @UploadedFile() file: Express.Multer.File
+  ) {
+    if (!file) {
+      throw new BadRequestException('Berkas foto wajib disertakan.');
+    }
+    const { sekolahId, namaApp } = this.getSekolahInfo(req);
+    try {
+      const data = await this.dapodikService.uploadGtkFoto(sekolahId, uuid, file);
+      return {
+        status: 'success',
+        klien: namaApp,
+        data,
+      };
+    } catch (err) {
+      throw new BadRequestException(err.message);
+    }
+  }
+
   @Post('siswa/:uuid/upload-dokumen')
   @UseInterceptors(FileInterceptor('file'))
   async uploadSiswaDokumen(
@@ -117,6 +140,63 @@ export class DapodikController {
         klien: namaApp,
         data,
       };
+    } catch (err) {
+      throw new BadRequestException(err.message);
+    }
+  }
+
+  @Post('gtk/:uuid/upload-dokumen')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadGtkDokumen(
+    @Req() req: Request,
+    @Param('uuid') uuid: string,
+    @Body('nama_dokumen') namaDokumen: string,
+    @UploadedFile() file: Express.Multer.File
+  ) {
+    if (!file) {
+      throw new BadRequestException('Berkas dokumen wajib disertakan.');
+    }
+    if (!namaDokumen) {
+      throw new BadRequestException('Parameter nama_dokumen wajib diisi.');
+    }
+    const { sekolahId, namaApp } = this.getSekolahInfo(req);
+    try {
+      const data = await this.dapodikService.uploadGtkDokumen(sekolahId, uuid, file, namaDokumen);
+      return {
+        status: 'success',
+        klien: namaApp,
+        data,
+      };
+    } catch (err) {
+      throw new BadRequestException(err.message);
+    }
+  }
+
+  @Delete('gtk/:uuid/dokumen/:fileName')
+  async deleteGtkDokumen(
+    @Req() req: Request,
+    @Param('uuid') uuid: string,
+    @Param('fileName') fileName: string
+  ) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    try {
+      await this.dapodikService.deleteGtkDokumen(sekolahId, uuid, fileName);
+      return { status: 'success', message: 'Dokumen berhasil dihapus' };
+    } catch (err) {
+      throw new BadRequestException(err.message);
+    }
+  }
+
+  @Delete('siswa/:uuid/dokumen/:fileName')
+  async deleteSiswaDokumen(
+    @Req() req: Request,
+    @Param('uuid') uuid: string,
+    @Param('fileName') fileName: string
+  ) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    try {
+      await this.dapodikService.deleteSiswaDokumen(sekolahId, uuid, fileName);
+      return { status: 'success', message: 'Dokumen berhasil dihapus' };
     } catch (err) {
       throw new BadRequestException(err.message);
     }

@@ -264,6 +264,58 @@ export class MandalaService implements OnModuleInit {
     });
   }
 
+  // --- MAPPING PENGAWAS CRUD ---
+
+  async getMappingPengawas(pegawaiId?: string, sekolahId?: string) {
+    const where: any = {};
+    if (pegawaiId) where.pegawai_id = pegawaiId;
+    if (sekolahId) where.sekolah_id = sekolahId;
+
+    return await this.prisma.mappingPengawas.findMany({
+      where,
+      include: {
+        pegawai: {
+          select: { nama_lengkap: true, nip: true },
+        },
+        sekolah: {
+          select: { nama: true, npsn: true },
+        },
+      },
+      orderBy: { created_at: 'desc' },
+    });
+  }
+
+  async createMappingPengawas(data: any) {
+    const existing = await this.prisma.mappingPengawas.findFirst({
+      where: {
+        pegawai_id: data.pegawai_id,
+        sekolah_id: data.sekolah_id,
+      },
+    });
+
+    if (existing) {
+      throw new BadRequestException('Mapping for this Pegawai and Sekolah already exists.');
+    }
+
+    return await this.prisma.mappingPengawas.create({
+      data: {
+        pegawai_id: data.pegawai_id,
+        sekolah_id: data.sekolah_id,
+      },
+    });
+  }
+
+  async deleteMappingPengawas(id: string) {
+    const existing = await this.prisma.mappingPengawas.findUnique({ where: { mapping_pengawas_id: id } });
+    if (!existing) {
+      throw new NotFoundException(`MappingPengawas with ID ${id} not found.`);
+    }
+
+    return await this.prisma.mappingPengawas.delete({
+      where: { mapping_pengawas_id: id },
+    });
+  }
+
   // --- PEGAWAI AUTH ---
 
   async loginPegawai(credentials: { identifier: string; password: any }) {

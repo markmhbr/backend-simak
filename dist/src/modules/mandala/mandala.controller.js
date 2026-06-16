@@ -138,6 +138,31 @@ let MandalaController = class MandalaController {
             message: 'Pegawai successfully deleted.',
         };
     }
+    async getMappingPengawas(pegawaiId, sekolahId) {
+        const data = await this.mandalaService.getMappingPengawas(pegawaiId, sekolahId);
+        return {
+            status: 'success',
+            data,
+        };
+    }
+    async createMappingPengawas(body) {
+        if (!body.pegawai_id || !body.sekolah_id) {
+            throw new common_1.BadRequestException('pegawai_id and sekolah_id are required.');
+        }
+        const data = await this.mandalaService.createMappingPengawas(body);
+        return {
+            status: 'success',
+            message: 'Mapping Pengawas successfully created.',
+            data,
+        };
+    }
+    async deleteMappingPengawas(id) {
+        await this.mandalaService.deleteMappingPengawas(id);
+        return {
+            status: 'success',
+            message: 'Mapping Pengawas successfully deleted.',
+        };
+    }
     async getSchoolDetail(id) {
         const data = await this.mandalaService.getSchoolDetail(id);
         if (!data) {
@@ -300,6 +325,31 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], MandalaController.prototype, "deletePegawai", null);
+__decorate([
+    (0, common_1.Get)('mapping-pengawas'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Query)('pegawai_id')),
+    __param(1, (0, common_1.Query)('sekolah_id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "getMappingPengawas", null);
+__decorate([
+    (0, common_1.Post)('mapping-pengawas'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "createMappingPengawas", null);
+__decorate([
+    (0, common_1.Delete)('mapping-pengawas/:id'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "deleteMappingPengawas", null);
 __decorate([
     (0, common_1.Get)('sekolah/:id'),
     (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),

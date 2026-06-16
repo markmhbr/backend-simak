@@ -51,10 +51,10 @@ export declare class PresensiController {
         data: {
             nama: string;
             peserta_didik_id: string;
-            foto: string;
             rombongan_belajar_id: string;
             nisn: string;
             nama_rombel: string;
+            foto: string;
         };
         activeIzinKeluar: {
             sekolah_id: string;
@@ -75,9 +75,9 @@ export declare class PresensiController {
         data: {
             nama: string;
             ptk_id: string;
+            foto: string;
             nuptk: string;
             jenis_ptk_id_str: string;
-            foto: string;
         };
         activeIzinKeluar: {
             sekolah_id: string;
@@ -187,9 +187,9 @@ export declare class PresensiController {
         };
         nama: string;
         peserta_didik_id: string;
-        foto: string;
         nisn: string;
         nama_rombel: string;
+        foto: string;
     }[]>;
     getRekapGtk(sekolahId: string, tanggal?: string): Promise<{
         presensi: {
@@ -205,8 +205,8 @@ export declare class PresensiController {
         };
         nama: string;
         ptk_id: string;
+        foto: string;
         nuptk: string;
         jenis_ptk_id_str: string;
-        foto: string;
     }[]>;
 }

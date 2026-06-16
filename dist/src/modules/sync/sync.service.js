@@ -425,7 +425,6 @@ let SyncService = SyncService_1 = class SyncService {
                 pendidikan_terakhir: g.pendidikan_terakhir || null,
                 bidang_studi_terakhir: g.bidang_studi_terakhir || null,
                 pangkat_golongan_terakhir: g.pangkat_golongan_terakhir || null,
-                rwy_pend_formal: g.rwy_pend_formal || null,
                 alamat_jalan: g.alamat_jalan || null,
                 rt: g.rt || null,
                 rw: g.rw || null,

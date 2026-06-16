@@ -31,8 +31,8 @@ export declare class SppController {
                 rombongan_belajar: {
                     nama: string;
                     rombongan_belajar_id: string;
-                    tingkat_pendidikan_id_str: string;
                     semester_id: string;
+                    tingkat_pendidikan_id_str: string;
                 };
             } & {
                 created_at: Date;

@@ -168,6 +168,42 @@ export class MandalaController {
     };
   }
 
+  // --- MAPPING PENGAWAS ENDPOINTS ---
+
+  @Get('mapping-pengawas')
+  @UseGuards(MandalaKeyGuard)
+  async getMappingPengawas(@Query('pegawai_id') pegawaiId?: string, @Query('sekolah_id') sekolahId?: string) {
+    const data = await this.mandalaService.getMappingPengawas(pegawaiId, sekolahId);
+    return {
+      status: 'success',
+      data,
+    };
+  }
+
+  @Post('mapping-pengawas')
+  @UseGuards(MandalaKeyGuard)
+  async createMappingPengawas(@Body() body: any) {
+    if (!body.pegawai_id || !body.sekolah_id) {
+      throw new BadRequestException('pegawai_id and sekolah_id are required.');
+    }
+    const data = await this.mandalaService.createMappingPengawas(body);
+    return {
+      status: 'success',
+      message: 'Mapping Pengawas successfully created.',
+      data,
+    };
+  }
+
+  @Delete('mapping-pengawas/:id')
+  @UseGuards(MandalaKeyGuard)
+  async deleteMappingPengawas(@Param('id') id: string) {
+    await this.mandalaService.deleteMappingPengawas(id);
+    return {
+      status: 'success',
+      message: 'Mapping Pengawas successfully deleted.',
+    };
+  }
+
   @Get('sekolah/:id')
   @UseGuards(MandalaKeyGuard)
   async getSchoolDetail(@Param('id') id: string) {

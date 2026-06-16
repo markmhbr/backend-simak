@@ -52,16 +52,16 @@ export declare class IndisiplinerService {
         peserta_didik: {
             nama: string;
             peserta_didik_id: string;
-            foto: string;
             nisn: string;
             nama_rombel: string;
+            foto: string;
         };
         gtk: {
             nama: string;
             ptk_id: string;
+            foto: string;
             nuptk: string;
             jenis_ptk_id_str: string;
-            foto: string;
         };
         tindak_lanjut: ({
             jenis_tindak_lanjut: {
@@ -107,8 +107,8 @@ export declare class IndisiplinerService {
         updated_at: Date;
         ptk_id: string | null;
         peserta_didik_id: string | null;
-        status: number;
         keterangan: string | null;
+        status: number;
         tanggal: Date;
         poin: number;
         jenis_pelanggaran_id: string;
@@ -122,8 +122,8 @@ export declare class IndisiplinerService {
         updated_at: Date;
         ptk_id: string | null;
         peserta_didik_id: string | null;
-        status: number;
         keterangan: string | null;
+        status: number;
         tanggal: Date;
         poin: number;
         jenis_pelanggaran_id: string;
@@ -137,8 +137,8 @@ export declare class IndisiplinerService {
         updated_at: Date;
         ptk_id: string | null;
         peserta_didik_id: string | null;
-        status: number;
         keterangan: string | null;
+        status: number;
         tanggal: Date;
         poin: number;
         jenis_pelanggaran_id: string;
