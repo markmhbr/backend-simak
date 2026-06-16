@@ -399,3 +399,4 @@ Temporary Items
 .serverless/**/*.zip
 
 /generated/prisma
+storage/
