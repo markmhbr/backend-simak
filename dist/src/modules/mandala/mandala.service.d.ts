@@ -418,7 +418,9 @@ export declare class MandalaService implements OnModuleInit {
             }[];
         };
     }>;
-    getPesertaDidikPresenceForMandala(sekolahId: string, date: Date): Promise<({
+    getPesertaDidikPresenceForMandala(sekolahId: string, date: Date): Promise<{
+        status_masuk_str: string;
+        status_pulang_str: string;
         peserta_didik: {
             nama: string;
             nisn: string;
@@ -429,7 +431,6 @@ export declare class MandalaService implements OnModuleInit {
                 tingkat_pendidikan_id_str: string;
             };
         };
-    } & {
         sekolah_id: string;
         created_at: Date;
         updated_at: Date;
@@ -439,8 +440,10 @@ export declare class MandalaService implements OnModuleInit {
         tanggal: Date;
         status_masuk: number | null;
         status_pulang: number | null;
-    })[]>;
-    getGtkPresenceForMandala(sekolahId: string, date: Date): Promise<({
+    }[]>;
+    getGtkPresenceForMandala(sekolahId: string, date: Date): Promise<{
+        status_masuk_str: string;
+        status_pulang_str: string;
         gtk: {
             nama: string;
             foto: string;
@@ -448,7 +451,6 @@ export declare class MandalaService implements OnModuleInit {
             jenis_ptk_id_str: string;
             nip: string;
         };
-    } & {
         sekolah_id: string;
         created_at: Date;
         updated_at: Date;
@@ -458,5 +460,7 @@ export declare class MandalaService implements OnModuleInit {
         tanggal: Date;
         status_masuk: number | null;
         status_pulang: number | null;
-    })[]>;
+    }[]>;
+    private mapStatusMasuk;
+    private mapStatusPulang;
 }

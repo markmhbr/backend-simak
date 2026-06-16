@@ -434,7 +434,9 @@ export declare class MandalaController {
     }>;
     getPesertaDidikPresence(sekolahId: string, tanggal?: string): Promise<{
         status: string;
-        data: ({
+        data: {
+            status_masuk_str: string;
+            status_pulang_str: string;
             peserta_didik: {
                 nama: string;
                 nisn: string;
@@ -445,7 +447,6 @@ export declare class MandalaController {
                     tingkat_pendidikan_id_str: string;
                 };
             };
-        } & {
             sekolah_id: string;
             created_at: Date;
             updated_at: Date;
@@ -455,11 +456,13 @@ export declare class MandalaController {
             tanggal: Date;
             status_masuk: number | null;
             status_pulang: number | null;
-        })[];
+        }[];
     }>;
     getGtkPresence(sekolahId: string, tanggal?: string): Promise<{
         status: string;
-        data: ({
+        data: {
+            status_masuk_str: string;
+            status_pulang_str: string;
             gtk: {
                 nama: string;
                 foto: string;
@@ -467,7 +470,6 @@ export declare class MandalaController {
                 jenis_ptk_id_str: string;
                 nip: string;
             };
-        } & {
             sekolah_id: string;
             created_at: Date;
             updated_at: Date;
@@ -477,6 +479,6 @@ export declare class MandalaController {
             tanggal: Date;
             status_masuk: number | null;
             status_pulang: number | null;
-        })[];
+        }[];
     }>;
 }

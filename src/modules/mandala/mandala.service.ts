@@ -775,7 +775,7 @@ export class MandalaService implements OnModuleInit {
     const wibDate = new Date(date.getTime() + 7 * 60 * 60 * 1000);
     const dateOnly = new Date(wibDate.toISOString().split('T')[0]);
 
-    return await this.prisma.presensiPesertaDidik.findMany({
+    const data = await this.prisma.presensiPesertaDidik.findMany({
       where: {
         sekolah_id: sekolahId,
         tanggal: dateOnly,
@@ -798,6 +798,12 @@ export class MandalaService implements OnModuleInit {
       },
       orderBy: { jam_masuk: 'desc' },
     });
+
+    return data.map(item => ({
+      ...item,
+      status_masuk_str: this.mapStatusMasuk(item.status_masuk),
+      status_pulang_str: this.mapStatusPulang(item.status_pulang),
+    }));
   }
 
   async getGtkPresenceForMandala(sekolahId: string, date: Date) {
@@ -805,7 +811,7 @@ export class MandalaService implements OnModuleInit {
     const wibDate = new Date(date.getTime() + 7 * 60 * 60 * 1000);
     const dateOnly = new Date(wibDate.toISOString().split('T')[0]);
 
-    return await this.prisma.presensiGtk.findMany({
+    const data = await this.prisma.presensiGtk.findMany({
       where: {
         sekolah_id: sekolahId,
         tanggal: dateOnly,
@@ -823,5 +829,31 @@ export class MandalaService implements OnModuleInit {
       },
       orderBy: { jam_masuk: 'desc' },
     });
+
+    return data.map(item => ({
+      ...item,
+      status_masuk_str: this.mapStatusMasuk(item.status_masuk),
+      status_pulang_str: this.mapStatusPulang(item.status_pulang),
+    }));
+  }
+
+  private mapStatusMasuk(status: number | null): string {
+    switch (status) {
+      case 1: return 'Hadir';
+      case 2: return 'Terlambat';
+      case 3: return 'Izin';
+      case 4: return 'Sakit';
+      case 5: return 'Alpha';
+      default: return '-';
+    }
+  }
+
+  private mapStatusPulang(status: number | null): string {
+    switch (status) {
+      case 1: return 'Normal';
+      case 2: return 'Pulang Awal';
+      case 3: return 'Izin Pulang';
+      default: return '-';
+    }
   }
 }
