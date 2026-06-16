@@ -856,4 +856,79 @@ export class MandalaService implements OnModuleInit {
       default: return '-';
     }
   }
+
+  async getPesertaDidikAnnualSummaryForMandala(sekolahId: string, year: number) {
+    const startDate = new Date(year, 0, 1);
+    const endDate = new Date(year, 11, 31, 23, 59, 59);
+
+    const presensi = await this.prisma.presensiPesertaDidik.findMany({
+      where: {
+        sekolah_id: sekolahId,
+        tanggal: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+      select: {
+        tanggal: true,
+        status_masuk: true,
+      },
+    });
+
+    return this.calculateMonthlySummary(presensi);
+  }
+
+  async getGtkAnnualSummaryForMandala(sekolahId: string, year: number) {
+    const startDate = new Date(year, 0, 1);
+    const endDate = new Date(year, 11, 31, 23, 59, 59);
+
+    const presensi = await this.prisma.presensiGtk.findMany({
+      where: {
+        sekolah_id: sekolahId,
+        tanggal: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+      select: {
+        tanggal: true,
+        status_masuk: true,
+      },
+    });
+
+    return this.calculateMonthlySummary(presensi);
+  }
+
+  private calculateMonthlySummary(presensi: any[]) {
+    const months = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+
+    const summary = months.map((month, index) => ({
+      bulan: month,
+      index: index + 1,
+      hadir: 0,
+      sakit: 0,
+      izin: 0,
+      alpha: 0,
+    }));
+
+    presensi.forEach(item => {
+      const monthIndex = new Date(item.tanggal).getMonth();
+      const status = item.status_masuk;
+
+      if (status === 1 || status === 2) {
+        summary[monthIndex].hadir++;
+      } else if (status === 3) {
+        summary[monthIndex].izin++;
+      } else if (status === 4) {
+        summary[monthIndex].sakit++;
+      } else if (status === 5) {
+        summary[monthIndex].alpha++;
+      }
+    });
+
+    return summary;
+  }
 }

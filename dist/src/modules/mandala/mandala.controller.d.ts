@@ -481,4 +481,26 @@ export declare class MandalaController {
             status_pulang: number | null;
         }[];
     }>;
+    getPesertaDidikPresenceSummary(sekolahId: string, tahun?: string): Promise<{
+        status: string;
+        data: {
+            bulan: string;
+            index: number;
+            hadir: number;
+            sakit: number;
+            izin: number;
+            alpha: number;
+        }[];
+    }>;
+    getGtkPresenceSummary(sekolahId: string, tahun?: string): Promise<{
+        status: string;
+        data: {
+            bulan: string;
+            index: number;
+            hadir: number;
+            sakit: number;
+            izin: number;
+            alpha: number;
+        }[];
+    }>;
 }

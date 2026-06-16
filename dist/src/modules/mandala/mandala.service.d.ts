@@ -463,4 +463,21 @@ export declare class MandalaService implements OnModuleInit {
     }[]>;
     private mapStatusMasuk;
     private mapStatusPulang;
+    getPesertaDidikAnnualSummaryForMandala(sekolahId: string, year: number): Promise<{
+        bulan: string;
+        index: number;
+        hadir: number;
+        sakit: number;
+        izin: number;
+        alpha: number;
+    }[]>;
+    getGtkAnnualSummaryForMandala(sekolahId: string, year: number): Promise<{
+        bulan: string;
+        index: number;
+        hadir: number;
+        sakit: number;
+        izin: number;
+        alpha: number;
+    }[]>;
+    private calculateMonthlySummary;
 }

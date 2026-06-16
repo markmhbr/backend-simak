@@ -235,6 +235,28 @@ let MandalaController = class MandalaController {
             data,
         };
     }
+    async getPesertaDidikPresenceSummary(sekolahId, tahun) {
+        if (!sekolahId) {
+            throw new common_1.BadRequestException('sekolah_id is required.');
+        }
+        const year = tahun ? parseInt(tahun, 10) : new Date().getFullYear();
+        const data = await this.mandalaService.getPesertaDidikAnnualSummaryForMandala(sekolahId, year);
+        return {
+            status: 'success',
+            data,
+        };
+    }
+    async getGtkPresenceSummary(sekolahId, tahun) {
+        if (!sekolahId) {
+            throw new common_1.BadRequestException('sekolah_id is required.');
+        }
+        const year = tahun ? parseInt(tahun, 10) : new Date().getFullYear();
+        const data = await this.mandalaService.getGtkAnnualSummaryForMandala(sekolahId, year);
+        return {
+            status: 'success',
+            data,
+        };
+    }
 };
 exports.MandalaController = MandalaController;
 __decorate([
@@ -432,6 +454,24 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], MandalaController.prototype, "getGtkPresence", null);
+__decorate([
+    (0, common_1.Get)('presensi/peserta-didik/summary'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Query)('sekolah_id')),
+    __param(1, (0, common_1.Query)('tahun')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "getPesertaDidikPresenceSummary", null);
+__decorate([
+    (0, common_1.Get)('presensi/gtk/summary'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Query)('sekolah_id')),
+    __param(1, (0, common_1.Query)('tahun')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "getGtkPresenceSummary", null);
 exports.MandalaController = MandalaController = __decorate([
     (0, common_1.Controller)('mandala'),
     __metadata("design:paramtypes", [mandala_service_1.MandalaService])

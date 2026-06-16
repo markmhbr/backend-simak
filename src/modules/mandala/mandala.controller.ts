@@ -313,4 +313,38 @@ export class MandalaController {
       data,
     };
   }
+
+  @Get('presensi/peserta-didik/summary')
+  @UseGuards(MandalaKeyGuard)
+  async getPesertaDidikPresenceSummary(
+    @Query('sekolah_id') sekolahId: string,
+    @Query('tahun') tahun?: string,
+  ) {
+    if (!sekolahId) {
+      throw new BadRequestException('sekolah_id is required.');
+    }
+    const year = tahun ? parseInt(tahun, 10) : new Date().getFullYear();
+    const data = await this.mandalaService.getPesertaDidikAnnualSummaryForMandala(sekolahId, year);
+    return {
+      status: 'success',
+      data,
+    };
+  }
+
+  @Get('presensi/gtk/summary')
+  @UseGuards(MandalaKeyGuard)
+  async getGtkPresenceSummary(
+    @Query('sekolah_id') sekolahId: string,
+    @Query('tahun') tahun?: string,
+  ) {
+    if (!sekolahId) {
+      throw new BadRequestException('sekolah_id is required.');
+    }
+    const year = tahun ? parseInt(tahun, 10) : new Date().getFullYear();
+    const data = await this.mandalaService.getGtkAnnualSummaryForMandala(sekolahId, year);
+    return {
+      status: 'success',
+      data,
+    };
+  }
 }
