@@ -711,6 +711,55 @@ let MandalaService = MandalaService_1 = class MandalaService {
             }
         };
     }
+    async getPesertaDidikPresenceForMandala(sekolahId, date) {
+        const startOfDay = new Date(date);
+        startOfDay.setHours(0, 0, 0, 0);
+        return await this.prisma.presensiPesertaDidik.findMany({
+            where: {
+                sekolah_id: sekolahId,
+                tanggal: startOfDay,
+            },
+            include: {
+                peserta_didik: {
+                    select: {
+                        nama: true,
+                        nisn: true,
+                        nipd: true,
+                        foto: true,
+                        rombongan_belajar: {
+                            select: {
+                                nama: true,
+                                tingkat_pendidikan_id_str: true,
+                            }
+                        }
+                    }
+                }
+            },
+            orderBy: { jam_masuk: 'desc' },
+        });
+    }
+    async getGtkPresenceForMandala(sekolahId, date) {
+        const startOfDay = new Date(date);
+        startOfDay.setHours(0, 0, 0, 0);
+        return await this.prisma.presensiGtk.findMany({
+            where: {
+                sekolah_id: sekolahId,
+                tanggal: startOfDay,
+            },
+            include: {
+                gtk: {
+                    select: {
+                        nama: true,
+                        nuptk: true,
+                        nip: true,
+                        foto: true,
+                        jenis_ptk_id_str: true,
+                    }
+                }
+            },
+            orderBy: { jam_masuk: 'desc' },
+        });
+    }
 };
 exports.MandalaService = MandalaService;
 exports.MandalaService = MandalaService = MandalaService_1 = __decorate([

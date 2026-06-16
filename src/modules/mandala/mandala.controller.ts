@@ -279,4 +279,38 @@ export class MandalaController {
       type
     });
   }
+
+  @Get('presensi/peserta-didik')
+  @UseGuards(MandalaKeyGuard)
+  async getPesertaDidikPresence(
+    @Query('sekolah_id') sekolahId: string,
+    @Query('tanggal') tanggal?: string,
+  ) {
+    if (!sekolahId) {
+      throw new BadRequestException('sekolah_id is required.');
+    }
+    const date = tanggal ? new Date(tanggal) : new Date();
+    const data = await this.mandalaService.getPesertaDidikPresenceForMandala(sekolahId, date);
+    return {
+      status: 'success',
+      data,
+    };
+  }
+
+  @Get('presensi/gtk')
+  @UseGuards(MandalaKeyGuard)
+  async getGtkPresence(
+    @Query('sekolah_id') sekolahId: string,
+    @Query('tanggal') tanggal?: string,
+  ) {
+    if (!sekolahId) {
+      throw new BadRequestException('sekolah_id is required.');
+    }
+    const date = tanggal ? new Date(tanggal) : new Date();
+    const data = await this.mandalaService.getGtkPresenceForMandala(sekolahId, date);
+    return {
+      status: 'success',
+      data,
+    };
+  }
 }

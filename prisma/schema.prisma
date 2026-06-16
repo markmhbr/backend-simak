@@ -378,6 +378,10 @@ model Gtk {
   email                            String?
   foto                             String?
   tandatangan                      String?
+  id_bank                          String?
+  nama_kcp                         String?
+  rekening_bank                    String?
+  rekening_atas_nama               String?
   created_at                       DateTime         @default(now())
   updated_at                       DateTime         @updatedAt
   kabupaten_kota                   String?

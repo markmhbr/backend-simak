@@ -769,4 +769,57 @@ export class MandalaService implements OnModuleInit {
       }
     };
   }
+
+  async getPesertaDidikPresenceForMandala(sekolahId: string, date: Date) {
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    return await this.prisma.presensiPesertaDidik.findMany({
+      where: {
+        sekolah_id: sekolahId,
+        tanggal: startOfDay,
+      },
+      include: {
+        peserta_didik: {
+          select: {
+            nama: true,
+            nisn: true,
+            nipd: true,
+            foto: true,
+            rombongan_belajar: {
+              select: {
+                nama: true,
+                tingkat_pendidikan_id_str: true,
+              }
+            }
+          }
+        }
+      },
+      orderBy: { jam_masuk: 'desc' },
+    });
+  }
+
+  async getGtkPresenceForMandala(sekolahId: string, date: Date) {
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    return await this.prisma.presensiGtk.findMany({
+      where: {
+        sekolah_id: sekolahId,
+        tanggal: startOfDay,
+      },
+      include: {
+        gtk: {
+          select: {
+            nama: true,
+            nuptk: true,
+            nip: true,
+            foto: true,
+            jenis_ptk_id_str: true,
+          }
+        }
+      },
+      orderBy: { jam_masuk: 'desc' },
+    });
+  }
 }

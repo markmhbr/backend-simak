@@ -418,4 +418,45 @@ export declare class MandalaService implements OnModuleInit {
             }[];
         };
     }>;
+    getPesertaDidikPresenceForMandala(sekolahId: string, date: Date): Promise<({
+        peserta_didik: {
+            nama: string;
+            nisn: string;
+            nipd: string;
+            foto: string;
+            rombongan_belajar: {
+                nama: string;
+                tingkat_pendidikan_id_str: string;
+            };
+        };
+    } & {
+        sekolah_id: string;
+        created_at: Date;
+        updated_at: Date;
+        peserta_didik_id: string;
+        jam_masuk: Date | null;
+        jam_pulang: Date | null;
+        tanggal: Date;
+        status_masuk: number | null;
+        status_pulang: number | null;
+    })[]>;
+    getGtkPresenceForMandala(sekolahId: string, date: Date): Promise<({
+        gtk: {
+            nama: string;
+            foto: string;
+            nuptk: string;
+            jenis_ptk_id_str: string;
+            nip: string;
+        };
+    } & {
+        sekolah_id: string;
+        created_at: Date;
+        updated_at: Date;
+        ptk_id: string;
+        jam_masuk: Date | null;
+        jam_pulang: Date | null;
+        tanggal: Date;
+        status_masuk: number | null;
+        status_pulang: number | null;
+    })[]>;
 }
