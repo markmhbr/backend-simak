@@ -33,7 +33,6 @@ export declare class MandalaService implements OnModuleInit {
         website: string;
         bentuk_pendidikan_is_str: string;
         bentuk_pendidikan_id_str: string;
-        kabupate_kota: string;
         kabupaten_kota: string;
         kecamatan: string;
         lintang: import("@prisma/client-runtime-utils").Decimal;
