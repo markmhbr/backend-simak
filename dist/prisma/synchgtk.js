@@ -27,7 +27,7 @@ async function syncGtkProfil() {
     let skippedCount = 0;
     let notFoundCount = 0;
     for (const item of gtks) {
-        if (item.status !== 'Aktif' && item.status !== 'Mutasi/Pindah Tugas') {
+        if (item.status !== 'Aktif') {
             skippedCount++;
             continue;
         }
@@ -41,6 +41,23 @@ async function syncGtkProfil() {
                 }
             });
             if (existing) {
+                let kabKota = item.kabupaten_kota || null;
+                let prov = item.provinsi || null;
+                if (item.kecamatan && (!kabKota || !prov)) {
+                    const kecStr = item.kecamatan.toLowerCase().replace(/\s+/g, '');
+                    if (kecStr === 'baleendah') {
+                        if (!kabKota)
+                            kabKota = 'Kabupaten Bandung';
+                        if (!prov)
+                            prov = 'Jawa Barat';
+                    }
+                    else if (['karangtengah', 'ciranjang', 'sukaluyu', 'sualuyu', 'cianjur', 'haurwangi', 'gekbrong', 'pacet', 'bojongpicung', 'cugenang', 'cikalongkulon', 'mande'].includes(kecStr)) {
+                        if (!kabKota)
+                            kabKota = 'Kabupaten Cianjur';
+                        if (!prov)
+                            prov = 'Jawa Barat';
+                    }
+                }
                 await prisma.gtk.update({
                     where: { ptk_id: item.ptk_id },
                     data: {
@@ -61,6 +78,17 @@ async function syncGtkProfil() {
                         pekerjaan_suami_istri: item.pekerjaan_suami_istri || null,
                         nama_wajib_pajak: item.nama_wajib_pajak || null,
                         npwp: item.npwp || null,
+                        alamat_jalan: item.alamat_jalan || null,
+                        rt: item.rt || null,
+                        rw: item.rw || null,
+                        dusun: item.dusun || null,
+                        desa_kelurahan: item.desa_kelurahan || null,
+                        kecamatan: item.kecamatan || null,
+                        kabupaten_kota: kabKota,
+                        provinsi: prov,
+                        kode_pos: item.kode_pos || null,
+                        lintang: item.lintang ? parseFloat(item.lintang) : null,
+                        bujur: item.bujur ? parseFloat(item.bujur) : null,
                         status: item.status
                     }
                 });
