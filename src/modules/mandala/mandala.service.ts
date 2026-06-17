@@ -200,18 +200,19 @@ export class MandalaService implements OnModuleInit {
   }
 
   async createPegawai(data: any) {
-    // Check for duplicate NIP or Email
+    // Check for duplicate NIP, Email, or NIK
     const existing = await this.prisma.pegawai.findFirst({
       where: {
         OR: [
           { nip: data.nip },
           { email: data.email },
+          { nik: data.nik },
         ],
       },
     });
 
     if (existing) {
-      throw new BadRequestException('Pegawai with this NIP or Email already exists.');
+      throw new BadRequestException('Pegawai with this NIP, Email, or NIK already exists.');
     }
 
     const hashedPassword = await bcrypt.hash(data.password, 10);
@@ -220,6 +221,10 @@ export class MandalaService implements OnModuleInit {
       data: {
         cadisdik_id: data.cadisdik_id,
         nama_lengkap: data.nama_lengkap,
+        nik: data.nik,
+        tempat_lahir: data.tempat_lahir,
+        tanggal_lahir: new Date(data.tanggal_lahir),
+        alamat_lengkap: data.alamat_lengkap,
         nip: data.nip,
         email: data.email,
         password: hashedPassword,
@@ -233,10 +238,15 @@ export class MandalaService implements OnModuleInit {
   }
 
   async updatePegawai(id: string, data: any) {
-    const pegawai = await this.getPegawaiById(id);
+    await this.getPegawaiById(id);
 
     const updateData: any = {
+      cadisdik_id: data.cadisdik_id,
       nama_lengkap: data.nama_lengkap,
+      nik: data.nik,
+      tempat_lahir: data.tempat_lahir,
+      tanggal_lahir: data.tanggal_lahir ? new Date(data.tanggal_lahir) : undefined,
+      alamat_lengkap: data.alamat_lengkap,
       nip: data.nip,
       email: data.email,
       jabatan: data.jabatan,
@@ -244,7 +254,6 @@ export class MandalaService implements OnModuleInit {
       nomor_telepon: data.nomor_telepon,
       foto: data.foto,
       aktif: data.aktif,
-      cadisdik_id: data.cadisdik_id,
       updated_at: new Date(),
     };
 
@@ -327,6 +336,7 @@ export class MandalaService implements OnModuleInit {
         OR: [
           { nip: identifier },
           { email: identifier },
+          { nik: identifier },
         ],
       },
       include: {
@@ -351,6 +361,7 @@ export class MandalaService implements OnModuleInit {
       sub: pegawai.pegawai_id,
       email: pegawai.email,
       nip: pegawai.nip,
+      nik: pegawai.nik,
       role: 'Mandala Pegawai',
       cadisdik_id: pegawai.cadisdik_id,
       cadisdik_nama: pegawai.cadisdik?.nama_instansi,
@@ -372,6 +383,7 @@ export class MandalaService implements OnModuleInit {
           id: pegawai.pegawai_id,
           nama: pegawai.nama_lengkap,
           nip: pegawai.nip,
+          nik: pegawai.nik,
           email: pegawai.email,
           role: 'Mandala Pegawai',
           cadisdik: pegawai.cadisdik?.nama_instansi,

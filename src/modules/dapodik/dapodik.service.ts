@@ -331,12 +331,35 @@ export class DapodikService {
     }
   }
 
-  async getTanah(sekolahId: string | null) {
+  async getTanah(sekolahId: string | null, limit: number = 10, search?: string, page: number = 1) {
     const filter = this.getSekolahFilter(sekolahId);
-    return await this.prisma.tanah.findMany({
-      where: filter,
-      orderBy: { nama: 'asc' },
-    });
+    let whereClause: any = {
+      AND: [{ sekolah_id: filter.sekolah_id }],
+    };
+
+    if (search) {
+      whereClause.AND.push({
+        OR: [
+          { nama: { contains: search, mode: 'insensitive' } },
+          { alamat_jalan: { contains: search, mode: 'insensitive' } },
+          { no_sertifikat_tanah: { contains: search, mode: 'insensitive' } },
+        ],
+      });
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [total, data] = await Promise.all([
+      this.prisma.tanah.count({ where: whereClause }),
+      this.prisma.tanah.findMany({
+        where: whereClause,
+        take: limit,
+        skip: skip,
+        orderBy: { nama: 'asc' },
+      }),
+    ]);
+
+    return { total, data };
   }
 
   async getTahunPelajaran(sekolahId: string | null) {
@@ -369,20 +392,64 @@ export class DapodikService {
     });
   }
 
-  async getBangunan(sekolahId: string | null) {
+  async getBangunan(sekolahId: string | null, limit: number = 10, search?: string, page: number = 1) {
     const filter = this.getSekolahFilter(sekolahId);
-    return await this.prisma.bangunan.findMany({
-      where: filter,
-      orderBy: { nama: 'asc' },
-    });
+    let whereClause: any = {
+      AND: [{ sekolah_id: filter.sekolah_id }],
+    };
+
+    if (search) {
+      whereClause.AND.push({
+        OR: [
+          { nama: { contains: search, mode: 'insensitive' } },
+          { thn_dibangun: { contains: search, mode: 'insensitive' } },
+        ],
+      });
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [total, data] = await Promise.all([
+      this.prisma.bangunan.count({ where: whereClause }),
+      this.prisma.bangunan.findMany({
+        where: whereClause,
+        take: limit,
+        skip: skip,
+        orderBy: { nama: 'asc' },
+      }),
+    ]);
+
+    return { total, data };
   }
 
-  async getRuang(sekolahId: string | null) {
+  async getRuang(sekolahId: string | null, limit: number = 10, search?: string, page: number = 1) {
     const filter = this.getSekolahFilter(sekolahId);
-    return await this.prisma.ruang.findMany({
-      where: filter,
-      orderBy: { nm_ruang: 'asc' },
-    });
+    let whereClause: any = {
+      AND: [{ sekolah_id: filter.sekolah_id }],
+    };
+
+    if (search) {
+      whereClause.AND.push({
+        OR: [
+          { nm_ruang: { contains: search, mode: 'insensitive' } },
+          { kd_ruang: { contains: search, mode: 'insensitive' } },
+        ],
+      });
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [total, data] = await Promise.all([
+      this.prisma.ruang.count({ where: whereClause }),
+      this.prisma.ruang.findMany({
+        where: whereClause,
+        take: limit,
+        skip: skip,
+        orderBy: { nm_ruang: 'asc' },
+      }),
+    ]);
+
+    return { total, data };
   }
 
   async getPesertaDidik(sekolahId: string | null, limit: number = 10, search?: string, page: number = 1, rombelName?: string, status?: 'aktif' | 'non-aktif', tingkat?: string) {
@@ -803,6 +870,107 @@ export class DapodikService {
       total: result[key].total
     }));
   }
+  async getRombelRekapKategori(sekolahId: string | null) {
+    if (!sekolahId) return [];
+    const semesterId = await this.getLatestSemesterId(sekolahId);
+    
+    const baseFilter = { 
+      sekolah_id: sekolahId,
+      semester_id: semesterId || undefined
+    };
+
+    const categories = [
+      { id: 1, label: 'Reguler', pattern: 'Kelas' },
+      { id: 2, label: 'Praktik', pattern: 'Praktik' },
+      { id: 3, label: 'Ekskul', pattern: 'Ekstra' },
+      { id: 4, label: 'Matpel Pilihan', pattern: 'Pilihan' },
+    ];
+
+    const results = await Promise.all(categories.map(async (cat) => {
+      const [t10, t11, t12, total] = await Promise.all([
+        this.prisma.rombonganBelajar.count({
+          where: {
+            ...baseFilter,
+            jenis_rombel_str: { contains: cat.pattern, mode: 'insensitive' },
+            tingkat_pendidikan_id: '10'
+          }
+        }),
+        this.prisma.rombonganBelajar.count({
+          where: {
+            ...baseFilter,
+            jenis_rombel_str: { contains: cat.pattern, mode: 'insensitive' },
+            tingkat_pendidikan_id: '11'
+          }
+        }),
+        this.prisma.rombonganBelajar.count({
+          where: {
+            ...baseFilter,
+            jenis_rombel_str: { contains: cat.pattern, mode: 'insensitive' },
+            tingkat_pendidikan_id: '12'
+          }
+        }),
+        this.prisma.rombonganBelajar.count({
+          where: {
+            ...baseFilter,
+            jenis_rombel_str: { contains: cat.pattern, mode: 'insensitive' },
+          }
+        }),
+      ]);
+
+      return {
+        id: cat.id,
+        kategori: cat.label,
+        tingkat10: t10,
+        tingkat11: t11,
+        tingkat12: t12,
+        total: total
+      };
+    }));
+
+    return results;
+  }
+
+  async getRombelRekapKompetensi(sekolahId: string | null) {
+    if (!sekolahId) return [];
+    const semesterId = await this.getLatestSemesterId(sekolahId);
+    
+    // Ambil daftar jurusan unik
+    const jurusans = await this.prisma.rombonganBelajar.findMany({
+      where: { 
+        sekolah_id: sekolahId,
+        semester_id: semesterId || undefined,
+        jurusan_id_str: { not: null },
+        jenis_rombel_str: { not: 'Ekstrakurikuler' }
+      },
+      select: { jurusan_id_str: true },
+      distinct: ['jurusan_id_str']
+    });
+
+    const results = await Promise.all(jurusans.map(async (j, index) => {
+      const counts = await Promise.all(['10', '11', '12'].map(tingkat => 
+        this.prisma.rombonganBelajar.count({
+          where: {
+            sekolah_id: sekolahId,
+            semester_id: semesterId || undefined,
+            jurusan_id_str: j.jurusan_id_str,
+            tingkat_pendidikan_id: tingkat
+          }
+        })
+      ));
+
+      return {
+        id: index + 1,
+        kompetensi: j.jurusan_id_str,
+        tingkat10: counts[0],
+        tingkat11: counts[1],
+        tingkat12: counts[2],
+        total: counts[0] + counts[1] + counts[2]
+      };
+    }));
+
+    return results;
+  }
+
   async getRombonganBelajar(sekolahId: string | null, type?: 'reguler' | 'pilihan', limit: number = 10, page: number = 1, search?: string, tingkat?: string) {
     const filter = this.getSekolahFilter(sekolahId);
     

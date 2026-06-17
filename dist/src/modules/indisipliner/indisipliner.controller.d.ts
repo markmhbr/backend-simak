@@ -9,10 +9,10 @@ export declare class IndisiplinerController {
     getJenisPelanggaran(sekolahId: string): Promise<{
         status: string;
         data: {
-            sekolah_id: string;
+            nama: string;
             created_at: Date;
             updated_at: Date;
-            nama: string;
+            sekolah_id: string;
             aktif: boolean;
             target: number;
             poin: number;
@@ -23,10 +23,10 @@ export declare class IndisiplinerController {
         status: string;
         message: string;
         data: {
-            sekolah_id: string;
+            nama: string;
             created_at: Date;
             updated_at: Date;
-            nama: string;
+            sekolah_id: string;
             aktif: boolean;
             target: number;
             poin: number;
@@ -36,10 +36,10 @@ export declare class IndisiplinerController {
     getJenisTindakLanjut(sekolahId: string): Promise<{
         status: string;
         data: {
-            sekolah_id: string;
+            nama: string;
             created_at: Date;
             updated_at: Date;
-            nama: string;
+            sekolah_id: string;
             aktif: boolean;
             target: number;
             jenis_tindak_lanjut_id: string;
@@ -49,10 +49,10 @@ export declare class IndisiplinerController {
         status: string;
         message: string;
         data: {
-            sekolah_id: string;
+            nama: string;
             created_at: Date;
             updated_at: Date;
-            nama: string;
+            sekolah_id: string;
             aktif: boolean;
             target: number;
             jenis_tindak_lanjut_id: string;
@@ -77,10 +77,10 @@ export declare class IndisiplinerController {
             };
             tindak_lanjut: ({
                 jenis_tindak_lanjut: {
-                    sekolah_id: string;
+                    nama: string;
                     created_at: Date;
                     updated_at: Date;
-                    nama: string;
+                    sekolah_id: string;
                     aktif: boolean;
                     target: number;
                     jenis_tindak_lanjut_id: string;
@@ -100,10 +100,10 @@ export declare class IndisiplinerController {
                 tindak_lanjut_id: string;
             })[];
             jenis_pelanggaran: {
-                sekolah_id: string;
+                nama: string;
                 created_at: Date;
                 updated_at: Date;
-                nama: string;
+                sekolah_id: string;
                 aktif: boolean;
                 target: number;
                 poin: number;
@@ -114,10 +114,10 @@ export declare class IndisiplinerController {
                 ptk_id: string;
             };
         } & {
-            sekolah_id: string;
+            ptk_id: string | null;
             created_at: Date;
             updated_at: Date;
-            ptk_id: string | null;
+            sekolah_id: string;
             peserta_didik_id: string | null;
             status: number;
             keterangan: string | null;
@@ -133,10 +133,10 @@ export declare class IndisiplinerController {
         status: string;
         message: string;
         data: {
-            sekolah_id: string;
+            ptk_id: string | null;
             created_at: Date;
             updated_at: Date;
-            ptk_id: string | null;
+            sekolah_id: string;
             peserta_didik_id: string | null;
             status: number;
             keterangan: string | null;
@@ -152,10 +152,10 @@ export declare class IndisiplinerController {
         status: string;
         message: string;
         data: {
-            sekolah_id: string;
+            ptk_id: string | null;
             created_at: Date;
             updated_at: Date;
-            ptk_id: string | null;
+            sekolah_id: string;
             peserta_didik_id: string | null;
             status: number;
             keterangan: string | null;

@@ -899,6 +899,13 @@ model Pegawai {
   pegawai_id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   cadisdik_id          String   @db.Uuid
   nama_lengkap         String   @db.VarChar(255)
+  
+  // Kolom Tambahan Baru
+  nik                  String   @unique @db.VarChar(16) // NIK standar 16 digit dan bersifat unik
+  tempat_lahir         String   @db.VarChar(100)
+  tanggal_lahir        DateTime @db.Date                // Menggunakan tipe DATE di PostgreSQL (tanpa jam/timezone)
+  alamat_lengkap       String   @db.Text                // Menggunakan TEXT untuk mengakomodasi alamat yang panjang
+  
   nip                  String   @unique @db.VarChar(30)
   email                String   @unique @db.VarChar(255)
   password             String   @db.VarChar(255)
@@ -915,6 +922,7 @@ model Pegawai {
   mapping_pengawas MappingPengawas[]
 
   @@index([cadisdik_id])
+  @@index([nik]) // Menambahkan index pada NIK untuk mempercepat query pencarian data pegawai
   @@index([nip])
   @@index([email])
   @@map("pegawai")

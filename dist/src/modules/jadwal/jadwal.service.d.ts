@@ -4,9 +4,9 @@ export declare class JadwalService {
     constructor(prisma: PrismaService);
     getJenisJadwal(sekolahId: string): Promise<({
         pengaturan_jadwal: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             aktif: boolean;
             jenis_jadwal_id: string;
             urutan: number;
@@ -16,9 +16,9 @@ export declare class JadwalService {
             durasi_menit: number;
         }[];
         pengaturan_hari: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             aktif: boolean;
             jenis_jadwal_id: string;
             hari: number;
@@ -27,10 +27,10 @@ export declare class JadwalService {
             jam_pulang: Date;
         }[];
     } & {
-        sekolah_id: string;
+        nama: string;
         created_at: Date;
         updated_at: Date;
-        nama: string;
+        sekolah_id: string;
         aktif: boolean;
         jenis_jadwal_id: string;
         custom_mapel: boolean;
@@ -41,10 +41,10 @@ export declare class JadwalService {
         jam_pulang: string;
         custom_mapel?: boolean;
     }): Promise<{
-        sekolah_id: string;
+        nama: string;
         created_at: Date;
         updated_at: Date;
-        nama: string;
+        sekolah_id: string;
         aktif: boolean;
         jenis_jadwal_id: string;
         custom_mapel: boolean;
@@ -54,28 +54,28 @@ export declare class JadwalService {
         custom_mapel?: boolean;
         aktif?: boolean;
     }): Promise<{
-        sekolah_id: string;
+        nama: string;
         created_at: Date;
         updated_at: Date;
-        nama: string;
+        sekolah_id: string;
         aktif: boolean;
         jenis_jadwal_id: string;
         custom_mapel: boolean;
     }>;
     deleteJenisJadwal(sekolahId: string, jenisJadwalId: string): Promise<{
-        sekolah_id: string;
+        nama: string;
         created_at: Date;
         updated_at: Date;
-        nama: string;
+        sekolah_id: string;
         aktif: boolean;
         jenis_jadwal_id: string;
         custom_mapel: boolean;
     }>;
     toggleJenisJadwal(sekolahId: string, jenisJadwalId: string, aktif: boolean): Promise<{
-        sekolah_id: string;
+        nama: string;
         created_at: Date;
         updated_at: Date;
-        nama: string;
+        sekolah_id: string;
         aktif: boolean;
         jenis_jadwal_id: string;
         custom_mapel: boolean;
@@ -87,9 +87,9 @@ export declare class JadwalService {
         jam_pulang?: string;
         aktif?: boolean;
     }): Promise<{
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         aktif: boolean;
         jenis_jadwal_id: string;
         hari: number;
@@ -98,9 +98,9 @@ export declare class JadwalService {
         jam_pulang: Date;
     }>;
     getPengaturanJadwal(sekolahId: string, jenisJadwalId: string, hari?: number): Promise<{
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         aktif: boolean;
         jenis_jadwal_id: string;
         urutan: number;
@@ -117,9 +117,9 @@ export declare class JadwalService {
         durasi_menit: number;
         aktif?: boolean;
     }): Promise<{
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         aktif: boolean;
         jenis_jadwal_id: string;
         urutan: number;
@@ -129,9 +129,9 @@ export declare class JadwalService {
         durasi_menit: number;
     }>;
     deletePengaturanJadwal(sekolahId: string, pengaturanJadwalId: string): Promise<{
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         aktif: boolean;
         jenis_jadwal_id: string;
         urutan: number;
@@ -143,13 +143,13 @@ export declare class JadwalService {
     getJadwalPelajaran(sekolahId: string, jenisJadwalId: string, rombelId: string): Promise<({
         pembelajaran: {
             gtk: {
-                sekolah_id: string | null;
+                nama: string;
+                ptk_id: string;
                 created_at: Date;
                 updated_at: Date;
-                nama: string;
+                sekolah_id: string | null;
                 email: string | null;
                 no_hp: string | null;
-                ptk_id: string;
                 alamat_jalan: string | null;
                 rt: string | null;
                 rw: string | null;
@@ -220,13 +220,13 @@ export declare class JadwalService {
                 rekening_atas_nama: string | null;
             };
         } & {
-            sekolah_id: string | null;
+            rombongan_belajar_id: string;
+            ptk_id: string | null;
+            ptk_id_str: string | null;
             created_at: Date;
             updated_at: Date;
-            ptk_id: string | null;
+            sekolah_id: string | null;
             ptk_terdaftar_id: string | null;
-            rombongan_belajar_id: string;
-            ptk_id_str: string | null;
             pembelajaran_id: string;
             mata_pelajaran_id: string | null;
             mata_pelajaran_id_str: string | null;
@@ -237,10 +237,10 @@ export declare class JadwalService {
             status_di_kurikulum_str: string | null;
         };
     } & {
-        sekolah_id: string;
+        rombongan_belajar_id: string;
         created_at: Date;
         updated_at: Date;
-        rombongan_belajar_id: string;
+        sekolah_id: string;
         aktif: boolean;
         pembelajaran_id: string;
         jenis_jadwal_id: string;
@@ -255,10 +255,10 @@ export declare class JadwalService {
         hari: number;
         urutan: number;
     }): Promise<{
-        sekolah_id: string;
+        rombongan_belajar_id: string;
         created_at: Date;
         updated_at: Date;
-        rombongan_belajar_id: string;
+        sekolah_id: string;
         aktif: boolean;
         pembelajaran_id: string;
         jenis_jadwal_id: string;
@@ -267,10 +267,10 @@ export declare class JadwalService {
         jadwal_pelajaran_id: string;
     }>;
     deleteJadwalPelajaran(sekolahId: string, jadwalPelajaranId: string): Promise<{
-        sekolah_id: string;
+        rombongan_belajar_id: string;
         created_at: Date;
         updated_at: Date;
-        rombongan_belajar_id: string;
+        sekolah_id: string;
         aktif: boolean;
         pembelajaran_id: string;
         jenis_jadwal_id: string;

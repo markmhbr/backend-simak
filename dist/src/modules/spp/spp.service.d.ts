@@ -7,9 +7,9 @@ export declare class SppService {
     private readonly prisma;
     constructor(prisma: PrismaService);
     createPengaturanTagihan(dto: CreatePengaturanTagihanDto): Promise<{
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         aktif: boolean;
         tipe: number;
         nama_tagihan: string;
@@ -19,21 +19,21 @@ export declare class SppService {
     getPengaturanTagihan(sekolahId: string): Promise<({
         pengaturan_rombel: ({
             rombongan_belajar: {
-                nama: string;
                 rombongan_belajar_id: string;
+                nama: string;
                 tingkat_pendidikan_id_str: string;
                 semester_id: string;
             };
         } & {
-            created_at: Date;
             rombongan_belajar_id: string;
+            created_at: Date;
             pengaturan_tagihan_id: string;
             pengaturan_tagihan_rombel_id: string;
         })[];
     } & {
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         aktif: boolean;
         tipe: number;
         nama_tagihan: string;
@@ -41,9 +41,9 @@ export declare class SppService {
         pengaturan_tagihan_id: string;
     })[]>;
     updatePengaturanTagihan(id: string, dto: UpdatePengaturanTagihanDto): Promise<{
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         aktif: boolean;
         tipe: number;
         nama_tagihan: string;
@@ -51,9 +51,9 @@ export declare class SppService {
         pengaturan_tagihan_id: string;
     }>;
     deletePengaturanTagihan(id: string): Promise<{
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         aktif: boolean;
         tipe: number;
         nama_tagihan: string;
@@ -65,14 +65,14 @@ export declare class SppService {
             nama: string;
         };
     } & {
-        created_at: Date;
         rombongan_belajar_id: string;
+        created_at: Date;
         pengaturan_tagihan_id: string;
         pengaturan_tagihan_rombel_id: string;
     }>;
     deletePengaturanTagihanRombel(id: string): Promise<{
-        created_at: Date;
         rombongan_belajar_id: string;
+        created_at: Date;
         pengaturan_tagihan_id: string;
         pengaturan_tagihan_rombel_id: string;
     }>;
@@ -94,8 +94,8 @@ export declare class SppService {
             nama_tagihan: string;
         };
         riwayat_transaksi: {
-            sekolah_id: string;
             created_at: Date;
+            sekolah_id: string;
             peserta_didik_id: string;
             keterangan: string | null;
             nominal: bigint;
@@ -106,9 +106,9 @@ export declare class SppService {
             riwayat_transaksi_spp_id: string;
         }[];
     } & {
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         peserta_didik_id: string;
         status: number;
         pengaturan_tagihan_id: string;
@@ -118,8 +118,8 @@ export declare class SppService {
         jatuh_tempo: Date | null;
     })[]>;
     createTransaksiSpp(dto: CreateTransaksiSppDto): Promise<{
-        sekolah_id: string;
         created_at: Date;
+        sekolah_id: string;
         peserta_didik_id: string;
         keterangan: string | null;
         nominal: bigint;

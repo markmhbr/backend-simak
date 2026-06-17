@@ -224,14 +224,27 @@ export class DapodikController {
   }
 
   @Get('tanah')
-  async getTanahList(@Req() req: Request) {
+  async getTanahList(
+    @Req() req: Request,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+    @Query('page') page?: string
+  ) {
     const { sekolahId, namaApp } = this.getSekolahInfo(req);
-    const data = await this.dapodikService.getTanah(sekolahId);
+    const take = limit ? parseInt(limit, 10) : 10;
+    const skipPage = page ? parseInt(page, 10) : 1;
+
+    const { data, total } = await this.dapodikService.getTanah(sekolahId, take, search, skipPage);
     return {
       status: 'success',
       klien: namaApp,
-      count: data.length,
       data,
+      meta: {
+        total,
+        page: skipPage,
+        limit: take,
+        total_pages: Math.ceil(total / take)
+      }
     };
   }
 
@@ -247,26 +260,52 @@ export class DapodikController {
   }
 
   @Get('bangunan')
-  async getBangunanList(@Req() req: Request) {
+  async getBangunanList(
+    @Req() req: Request,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+    @Query('page') page?: string
+  ) {
     const { sekolahId, namaApp } = this.getSekolahInfo(req);
-    const data = await this.dapodikService.getBangunan(sekolahId);
+    const take = limit ? parseInt(limit, 10) : 10;
+    const skipPage = page ? parseInt(page, 10) : 1;
+
+    const { data, total } = await this.dapodikService.getBangunan(sekolahId, take, search, skipPage);
     return {
       status: 'success',
       klien: namaApp,
-      count: data.length,
       data,
+      meta: {
+        total,
+        page: skipPage,
+        limit: take,
+        total_pages: Math.ceil(total / take)
+      }
     };
   }
 
   @Get('ruang')
-  async getRuangList(@Req() req: Request) {
+  async getRuangList(
+    @Req() req: Request,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+    @Query('page') page?: string
+  ) {
     const { sekolahId, namaApp } = this.getSekolahInfo(req);
-    const data = await this.dapodikService.getRuang(sekolahId);
+    const take = limit ? parseInt(limit, 10) : 10;
+    const skipPage = page ? parseInt(page, 10) : 1;
+
+    const { data, total } = await this.dapodikService.getRuang(sekolahId, take, search, skipPage);
     return {
       status: 'success',
       klien: namaApp,
-      count: data.length,
       data,
+      meta: {
+        total,
+        page: skipPage,
+        limit: take,
+        total_pages: Math.ceil(total / take)
+      }
     };
   }
 
@@ -344,6 +383,20 @@ export class DapodikController {
         total_pages: Math.ceil(total / take)
       }
     };
+  }
+
+  @Get('rombongan-belajar/rekap-kategori')
+  async getRombelRekapKategori(@Req() req: Request) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.getRombelRekapKategori(sekolahId);
+    return { status: 'success', data };
+  }
+
+  @Get('rombongan-belajar/rekap-kompetensi')
+  async getRombelRekapKompetensi(@Req() req: Request) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.getRombelRekapKompetensi(sekolahId);
+    return { status: 'success', data };
   }
 
   @Get('rombongan-belajar')

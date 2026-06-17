@@ -232,17 +232,22 @@ let MandalaService = MandalaService_1 = class MandalaService {
                 OR: [
                     { nip: data.nip },
                     { email: data.email },
+                    { nik: data.nik },
                 ],
             },
         });
         if (existing) {
-            throw new common_1.BadRequestException('Pegawai with this NIP or Email already exists.');
+            throw new common_1.BadRequestException('Pegawai with this NIP, Email, or NIK already exists.');
         }
         const hashedPassword = await bcrypt.hash(data.password, 10);
         return await this.prisma.pegawai.create({
             data: {
                 cadisdik_id: data.cadisdik_id,
                 nama_lengkap: data.nama_lengkap,
+                nik: data.nik,
+                tempat_lahir: data.tempat_lahir,
+                tanggal_lahir: new Date(data.tanggal_lahir),
+                alamat_lengkap: data.alamat_lengkap,
                 nip: data.nip,
                 email: data.email,
                 password: hashedPassword,
@@ -255,9 +260,14 @@ let MandalaService = MandalaService_1 = class MandalaService {
         });
     }
     async updatePegawai(id, data) {
-        const pegawai = await this.getPegawaiById(id);
+        await this.getPegawaiById(id);
         const updateData = {
+            cadisdik_id: data.cadisdik_id,
             nama_lengkap: data.nama_lengkap,
+            nik: data.nik,
+            tempat_lahir: data.tempat_lahir,
+            tanggal_lahir: data.tanggal_lahir ? new Date(data.tanggal_lahir) : undefined,
+            alamat_lengkap: data.alamat_lengkap,
             nip: data.nip,
             email: data.email,
             jabatan: data.jabatan,
@@ -265,7 +275,6 @@ let MandalaService = MandalaService_1 = class MandalaService {
             nomor_telepon: data.nomor_telepon,
             foto: data.foto,
             aktif: data.aktif,
-            cadisdik_id: data.cadisdik_id,
             updated_at: new Date(),
         };
         if (data.password) {
@@ -334,6 +343,7 @@ let MandalaService = MandalaService_1 = class MandalaService {
                 OR: [
                     { nip: identifier },
                     { email: identifier },
+                    { nik: identifier },
                 ],
             },
             include: {
@@ -354,6 +364,7 @@ let MandalaService = MandalaService_1 = class MandalaService {
             sub: pegawai.pegawai_id,
             email: pegawai.email,
             nip: pegawai.nip,
+            nik: pegawai.nik,
             role: 'Mandala Pegawai',
             cadisdik_id: pegawai.cadisdik_id,
             cadisdik_nama: pegawai.cadisdik?.nama_instansi,
@@ -372,6 +383,7 @@ let MandalaService = MandalaService_1 = class MandalaService {
                     id: pegawai.pegawai_id,
                     nama: pegawai.nama_lengkap,
                     nip: pegawai.nip,
+                    nik: pegawai.nik,
                     email: pegawai.email,
                     role: 'Mandala Pegawai',
                     cadisdik: pegawai.cadisdik?.nama_instansi,
