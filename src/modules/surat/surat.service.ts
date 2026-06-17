@@ -546,7 +546,7 @@ export class SuratService {
           .replace(/{{kelas}}/g, student.rombongan_belajar?.nama || student.nama_rombel || '')
           .replace(/{{alamat}}/g, addressStr)
           .replace(/{{nama_ayah}}/g, student.nama_ayah || '')
-          .replace(/{{nama_ibu}}/g, student.nama_ibu_kandung || student.nama_ibu || '');
+          .replace(/{{nama_ibu}}/g, student.nama_ibu || '');
       }
     }
 

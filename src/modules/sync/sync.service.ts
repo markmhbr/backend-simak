@@ -296,7 +296,7 @@ export class SyncService {
         kebutuhan_khusus_ayah: p.kebutuhan_khusus_ayah || null,
         no_wa_ayah: p.no_wa_ayah || null,
         nik_ibu: p.nik_ibu || null,
-        nama_ibu: p.nama_ibu || null,
+        nama_ibu: p.nama_ibu || p.nama_ibu_kandung || null,
         tahun_lahir_ibu: String(p.tahun_lahir_ibu || ''),
         jenjang_pendidikan_ibu: p.jenjang_pendidikan_ibu || null,
         pendidikan_ibu_id_str: p.pendidikan_ibu_id_str || null,
@@ -591,7 +591,54 @@ export class SyncService {
     let successCount = 0;
     for (const item of dataRows) {
       try {
-        if (item._entity === 'tanah' || item.id_tanah) {
+        // Deteksi Entitas dengan prioritas _entity flag atau ID yang paling spesifik
+        if (item._entity === 'ruang' || item.id_ruang) {
+          if (!item.id_ruang) continue;
+          const payload = {
+            sekolah_id: sekolahId,
+            id_bangunan: item.id_bangunan || '00000000-0000-0000-0000-000000000000',
+            jenis_prasarana_id: this.parseNumber(item.jenis_prasarana_id) || 3,
+            nm_ruang: item.nm_ruang || item.nama || 'Ruang Tanpa Nama',
+            kd_ruang: item.kd_ruang || null,
+            lantai: String(item.lantai || '1'),
+            panjang: this.parseNumber(item.panjang),
+            lebar: this.parseNumber(item.lebar),
+            kapasitas: String(item.kapasitas || '0'),
+            luas_ruang: this.parseNumber(item.luas_ruang),
+            jenis_prasarana_id_str: item.jenis_prasarana_id_str || null,
+          };
+          await this.prisma.ruang.upsert({
+            where: { id_ruang: item.id_ruang },
+            create: { ...payload, id_ruang: item.id_ruang },
+            update: { ...payload, last_update: new Date() },
+          });
+          successCount++;
+        } else if (item._entity === 'bangunan' || item.id_bangunan) {
+          if (!item.id_bangunan) continue;
+          const payload = {
+            sekolah_id: sekolahId,
+            id_tanah: item.id_tanah || '00000000-0000-0000-0000-000000000000',
+            jenis_prasarana_id: this.parseNumber(item.jenis_prasarana_id) || 2,
+            nama: item.nama || 'Bangunan Tanpa Nama',
+            panjang: this.parseNumber(item.panjang),
+            lebar: this.parseNumber(item.lebar),
+            jml_lantai: String(item.jml_lantai || '1'),
+            thn_dibangun: String(item.thn_dibangun || ''),
+            luas_tapak_bangunan: this.parseNumber(item.luas_tapak_bangunan),
+            ket_bangunan: item.ket_bangunan || null,
+            nilai_kerusakan: this.parseNumber(item.nilai_kerusakan),
+            kriteria_kerusakan: item.kriteria_kerusakan || null,
+            nilai_perolehan_aset: this.parseNumber(item.nilai_perolehan_aset),
+            kepemilikan_sarpras_id: item.kepemilikan_sarpras_id || null,
+            jenis_prasarana_id_str: item.jenis_prasarana_id_str || null,
+          };
+          await this.prisma.bangunan.upsert({
+            where: { id_bangunan: item.id_bangunan },
+            create: { ...payload, id_bangunan: item.id_bangunan },
+            update: { ...payload, last_update: new Date() },
+          });
+          successCount++;
+        } else if (item._entity === 'tanah' || item.id_tanah) {
           if (!item.id_tanah) continue;
           const payload = {
             sekolah_id: sekolahId,
@@ -612,52 +659,13 @@ export class SyncService {
             bujur: this.parseNumber(item.bujur),
             no_sertifikat_tanah: item.no_sertifikat_tanah || null,
             ket_tanah: item.ket_tanah || null,
+            kepemilikan_sarpras_id: item.kepemilikan_sarpras_id || null,
+            nilai_perolehan_aset: this.parseNumber(item.nilai_perolehan_aset),
+            jenis_prasarana_id_str: item.jenis_prasarana_id_str || null,
           };
           await this.prisma.tanah.upsert({
             where: { id_tanah: item.id_tanah },
             create: { ...payload, id_tanah: item.id_tanah },
-            update: { ...payload, last_update: new Date() },
-          });
-          successCount++;
-        } else if (item._entity === 'bangunan' || item.id_bangunan) {
-          if (!item.id_bangunan) continue;
-          const payload = {
-            sekolah_id: sekolahId,
-            id_tanah: item.id_tanah || '00000000-0000-0000-0000-000000000000',
-            jenis_prasarana_id: this.parseNumber(item.jenis_prasarana_id) || 2,
-            nama: item.nama || 'Bangunan Tanpa Nama',
-            panjang: this.parseNumber(item.panjang),
-            lebar: this.parseNumber(item.lebar),
-            jml_lantai: String(item.jml_lantai || '1'),
-            thn_dibangun: String(item.thn_dibangun || ''),
-            luas_tapak_bangunan: this.parseNumber(item.luas_tapak_bangunan),
-            ket_bangunan: item.ket_bangunan || null,
-            nilai_kerusakan: this.parseNumber(item.nilai_kerusakan),
-            kriteria_kerusakan: item.kriteria_kerusakan || null,
-          };
-          await this.prisma.bangunan.upsert({
-            where: { id_bangunan: item.id_bangunan },
-            create: { ...payload, id_bangunan: item.id_bangunan },
-            update: { ...payload, last_update: new Date() },
-          });
-          successCount++;
-        } else if (item._entity === 'ruang' || item.id_ruang) {
-          if (!item.id_ruang) continue;
-          const payload = {
-            sekolah_id: sekolahId,
-            id_bangunan: item.id_bangunan || '00000000-0000-0000-0000-000000000000',
-            jenis_prasarana_id: this.parseNumber(item.jenis_prasarana_id) || 3,
-            nm_ruang: item.nm_ruang || item.nama || 'Ruang Tanpa Nama',
-            kd_ruang: item.kd_ruang || null,
-            lantai: String(item.lantai || '1'),
-            panjang: this.parseNumber(item.panjang),
-            lebar: this.parseNumber(item.lebar),
-            kapasitas: String(item.kapasitas || '0'),
-            luas_ruang: this.parseNumber(item.luas_ruang),
-          };
-          await this.prisma.ruang.upsert({
-            where: { id_ruang: item.id_ruang },
-            create: { ...payload, id_ruang: item.id_ruang },
             update: { ...payload, last_update: new Date() },
           });
           successCount++;

@@ -488,7 +488,7 @@ let MandalaService = MandalaService_1 = class MandalaService {
                 data_pendukung: {
                     alamat_lengkap: alamatLengkap,
                     nama_ayah: pd.nama_ayah || '',
-                    nama_ibu: pd.nama_ibu_kandung || pd.nama_ibu || '',
+                    nama_ibu: pd.nama_ibu || '',
                     hp_orang_tua: hpOrangTua,
                 },
             };

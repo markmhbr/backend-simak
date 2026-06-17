@@ -32,14 +32,33 @@ export class DapodikService {
   }
 
   async getSummary(sekolahId: string | null) {
-    const filter = this.getSekolahFilter(sekolahId);
+    if (!sekolahId) return null;
 
-    const [totalTanah, totalBangunan, totalRuang, totalSiswa, totalGtk] = await Promise.all([
-      this.prisma.tanah.count({ where: filter }),
-      this.prisma.bangunan.count({ where: filter }),
-      this.prisma.ruang.count({ where: filter }),
-      this.prisma.pesertaDidik.count({ where: filter }),
-      this.prisma.gtk.count({ where: filter }),
+    const semesterId = await this.getLatestSemesterId(sekolahId);
+
+    const [totalTanah, totalBangunan, totalRuang, totalSiswa, totalGtk, totalRombel] = await Promise.all([
+      this.prisma.tanah.count({ where: { sekolah_id: sekolahId } }),
+      this.prisma.bangunan.count({ where: { sekolah_id: sekolahId } }),
+      this.prisma.ruang.count({ where: { sekolah_id: sekolahId } }),
+      this.prisma.pesertaDidik.count({ 
+        where: { 
+          sekolah_id: sekolahId,
+          status: 'Aktif'
+        } 
+      }),
+      this.prisma.gtk.count({ 
+        where: { 
+          sekolah_id: sekolahId,
+          status: 'Aktif'
+        } 
+      }),
+      this.prisma.rombonganBelajar.count({ 
+        where: { 
+          sekolah_id: sekolahId,
+          semester_id: semesterId || undefined,
+          jenis_rombel_str: { contains: 'Kelas', mode: 'insensitive' }
+        } 
+      }),
     ]);
 
     return {
@@ -48,7 +67,9 @@ export class DapodikService {
       total_bangunan: totalBangunan,
       total_ruang: totalRuang,
       total_siswa: totalSiswa,
+      total_pd: totalSiswa,
       total_gtk: totalGtk,
+      total_rombel: totalRombel,
     };
   }
 
@@ -117,6 +138,10 @@ export class DapodikService {
       data: {
         nama: data.nama,
         npsn: data.npsn,
+        nomor_telepon: data.nomor_telepon,
+        nomor_fax: data.nomor_fax,
+        email: data.email,
+        website: data.website,
         spmb: data.spmb,
         peta: data.peta,
         social_media: data.social_media,
@@ -532,7 +557,7 @@ export class DapodikService {
         data_pendukung: {
           alamat_lengkap: alamatLengkap,
           nama_ayah: pd.nama_ayah || '',
-          nama_ibu: pd.nama_ibu_kandung || pd.nama_ibu || '',
+          nama_ibu: pd.nama_ibu || '',
           hp_orang_tua: hpOrangTua,
         },
       };

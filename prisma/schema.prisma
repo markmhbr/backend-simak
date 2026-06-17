@@ -189,7 +189,6 @@ model PesertaDidik {
   penghasilan_id_ayah       String?
   kebutuhan_khusus_id_ayah  Int?
   nik_ibu                   String?
-  nama_ibu_kandung          String?
   nama_ibu                  String?
   tahun_lahir_ibu           String?
   jenjang_pendidikan_ibu    String?
