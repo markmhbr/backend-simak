@@ -135,6 +135,9 @@ export declare class MandalaController {
                 nama: string;
                 nip: string;
                 nik: string;
+                tempat_lahir: string;
+                tanggal_lahir: Date;
+                alamat_lengkap: string;
                 email: string;
                 role: string;
                 cadisdik: string;
