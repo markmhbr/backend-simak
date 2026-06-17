@@ -326,11 +326,15 @@ let DapodikService = class DapodikService {
         let whereClause = {
             AND: [
                 { sekolah_id: filter.sekolah_id },
-                { NOT: { nama_rombel: { contains: 'Ekstrakurikuler', mode: 'insensitive' } } },
             ],
         };
+        if (status !== 'non-aktif') {
+            whereClause.AND.push({
+                NOT: { nama_rombel: { contains: 'Ekstrakurikuler', mode: 'insensitive' } }
+            });
+        }
         if (rombelName) {
-            whereClause.AND[1] = { nama_rombel: rombelName };
+            whereClause.AND.push({ nama_rombel: rombelName });
         }
         if (tingkat && tingkat !== 'all') {
             let rombelPrefix = '';
@@ -390,10 +394,35 @@ let DapodikService = class DapodikService {
                     nama: true,
                     nisn: true,
                     nipd: true,
+                    nik: true,
+                    no_kk: true,
                     jenis_kelamin: true,
                     foto: true,
                     qr_token: true,
                     nama_rombel: true,
+                    tempat_lahir: true,
+                    tanggal_lahir: true,
+                    jenis_pendaftaran_id_str: true,
+                    jenis_keluar_id: true,
+                    ket_keluar: true,
+                    tanggal_keluar: true,
+                    status: true,
+                    tingkat_pendidikan_id: true,
+                    tanggal_masuk_sekolah: true,
+                    agama_id_str: true,
+                    alamat_jalan: true,
+                    rt: true,
+                    rw: true,
+                    provinsi: true,
+                    kabupaten_kota: true,
+                    kecamatan: true,
+                    desa_kelurahan: true,
+                    nomor_telepon_seluler: true,
+                    email: true,
+                    nama_ayah: true,
+                    nama_ibu: true,
+                    tinggi_badan: true,
+                    berat_badan: true,
                 },
                 orderBy: { nama: 'asc' },
             }),
@@ -985,11 +1014,33 @@ let DapodikService = class DapodikService {
                     qr_token: true,
                     jabatan_ptk_id_str: true,
                     jenis_ptk_id_str: true,
+                    ptk_induk: true,
+                    jenis_kelamin: true,
+                    tempat_lahir: true,
+                    tanggal_lahir: true,
+                    nama_ibu_kandung: true,
+                    status_kepegawaian_id_str: true,
+                    alamat_jalan: true,
+                    tanggal_surat_tugas: true,
+                    status: true,
+                    no_kk: true,
+                    no_hp: true,
+                    email: true,
+                    sk_pengangkatan: true,
+                    tmt_pengangkatan: true,
+                    sumber_gaji: true,
+                    pendidikan_terakhir: true,
+                    updated_at: true,
                 },
                 orderBy: { nama: 'asc' },
             }),
         ]);
-        return { total, data };
+        const appUrl = process.env.APP_URL || 'http://localhost:3000';
+        const formattedData = data.map(item => ({
+            ...item,
+            foto: item.foto ? (item.foto.startsWith('http') ? item.foto : `${appUrl}${item.foto}`) : null,
+        }));
+        return { total, data: formattedData };
     }
     async getGtkById(sekolahId, id) {
         const gtk = await this.prisma.gtk.findFirst({
