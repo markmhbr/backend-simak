@@ -891,7 +891,53 @@ model Cadisdik {
   sekolah       Sekolah[]
   pegawai       Pegawai[]
 
+  kategori_keperluan KategoriKeperluan[]
+  antrian           Antrian[]
+
   @@map("cadisdik")
+  @@schema("mandala")
+}
+
+model KategoriKeperluan {
+  kategori_keperluan_id String   @id @default(uuid()) @db.Uuid
+  cadisdik_id          String   @db.Uuid
+  nama                 String   @db.VarChar(100)
+  aktif                Boolean  @default(true)
+  created_at           DateTime @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime @updatedAt @db.Timestamptz(6)
+
+  cadisdik             Cadisdik  @relation(fields: [cadisdik_id], references: [cadisdik_id], onDelete: Cascade)
+  antrian              Antrian[]
+
+  @@unique([cadisdik_id, nama])
+  @@index([cadisdik_id])
+  @@map("kategori_keperluan")
+  @@schema("mandala")
+}
+
+model Antrian {
+  antrian_id            String   @id @default(uuid()) @db.Uuid
+  cadisdik_id           String   @db.Uuid
+  kategori_keperluan_id String   @db.Uuid
+  nomor_antrian         Int      @db.Integer
+  nama_lengkap          String   @db.VarChar(255)
+  jabatan               String?  @db.VarChar(100)
+  unit_instansi         String?  @db.VarChar(255)
+  nomor_hp              String?  @db.VarChar(30)
+  keperluan             String?  @db.Text
+  status                Int      @default(0) @db.SmallInt // 0 = Menunggu, 1 = Dipanggil, 2 = Sedang Dilayani, 3 = Selesai, 4 = Batal
+  created_at            DateTime @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime @updatedAt @db.Timestamptz(6)
+
+  cadisdik             Cadisdik          @relation(fields: [cadisdik_id], references: [cadisdik_id], onDelete: Cascade)
+  kategori_keperluan   KategoriKeperluan @relation(fields: [kategori_keperluan_id], references: [kategori_keperluan_id], onDelete: Restrict)
+
+  @@unique([cadisdik_id, nomor_antrian])
+  @@index([cadisdik_id])
+  @@index([kategori_keperluan_id])
+  @@index([status])
+  @@index([created_at])
+  @@map("antrian")
   @@schema("mandala")
 }
 
@@ -1309,7 +1355,7 @@ model PermohonanLayanan {
   peserta_didik_id      String?   @db.Uuid
   nomor_permohonan      String?   @db.VarChar(50)
   keterangan            String?   @db.Text
-  status                Int       @default(1) @db.SmallInt // 1 = Diajukan, ...
+  status                Int       @default(1) @db.SmallInt // 0 = Draft, 1 = Diajukan, 2 = Diverifikasi Mandala, 3 = Menunggu Perbaikan, 4 = Menunggu Persetujuan Kasubag, 5 = Disetujui, 6 = Ditolak
   tanggal_pengajuan     DateTime? @db.Timestamptz(6)
   created_at            DateTime  @default(now()) @db.Timestamptz(6)
   updated_at            DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
@@ -1335,7 +1381,7 @@ model PermohonanLayananFile {
   nama_file                  String?  @db.VarChar(255)
   file_url                   String?  @db.VarChar(500)
   catatan                    String?  @db.Text
-  status                     Int      @default(0) @db.SmallInt // 0 = Menunggu Verifikasi, ...
+  status                     Int      @default(0) @db.SmallInt // 0 = Menunggu Verifikasi, 1 = Diterima, 2 = Revisi, 3 = Ditolak
   created_at                 DateTime @default(now()) @db.Timestamptz(6)
   updated_at                 DateTime @default(now()) @updatedAt @db.Timestamptz(6)
 

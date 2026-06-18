@@ -55,14 +55,14 @@ export declare class AuthService {
     }>;
     setupSystem(apiKey: string, domain: string): Promise<{
         id: string;
+        created_at: Date;
+        updated_at: Date;
         sekolah_id: string;
         nama_app: string;
         key_api: string;
         key_webService: string | null;
         key_adminPanel: string | null;
         is_active: boolean;
-        created_at: Date;
-        updated_at: Date;
         domain: string | null;
     }>;
     refreshTokens(refreshToken: string): Promise<{

@@ -761,6 +761,27 @@ let DapodikService = class DapodikService {
             total: result[key].total
         }));
     }
+    async getCadisdiks() {
+        return await this.prisma.cadisdik.findMany({
+            where: { aktif: true },
+            orderBy: { nama_instansi: 'asc' },
+        });
+    }
+    async getLayananMaster(kategori) {
+        return await this.prisma.layanan.findMany({
+            where: {
+                aktif: true,
+                ...(kategori !== undefined ? { kategori } : {}),
+            },
+            include: {
+                syarat: {
+                    where: { aktif: true },
+                    orderBy: { urutan: 'asc' },
+                },
+            },
+            orderBy: { nama_layanan: 'asc' },
+        });
+    }
     async getRombelRekapKategori(sekolahId) {
         if (!sekolahId)
             return [];

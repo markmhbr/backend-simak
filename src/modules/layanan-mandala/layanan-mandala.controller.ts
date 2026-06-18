@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query, Patch, UseGuards, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, Patch, Delete, UseGuards, BadRequestException } from '@nestjs/common';
 import { LayananMandalaService } from './layanan-mandala.service';
 import { 
   CreateLayananDto, 
@@ -41,6 +41,15 @@ export class LayananMandalaController {
     };
   }
 
+  @Delete('master/:id')
+  async deleteLayanan(@Param('id') id: string) {
+    await this.layananMandalaService.deleteLayanan(id);
+    return {
+      status: 'success',
+      message: 'Layanan master berhasil dihapus',
+    };
+  }
+
   // --- Master Syarat ---
 
   @Post('master/:layananId/syarat')
@@ -48,6 +57,23 @@ export class LayananMandalaController {
     return {
       status: 'success',
       data: await this.layananMandalaService.createSyarat(layananId, dto),
+    };
+  }
+
+  @Patch('syarat/:syaratId')
+  async updateSyarat(@Param('syaratId') syaratId: string, @Body() dto: Partial<CreateLayananSyaratDto>) {
+    return {
+      status: 'success',
+      data: await this.layananMandalaService.updateSyarat(syaratId, dto),
+    };
+  }
+
+  @Delete('syarat/:syaratId')
+  async deleteSyarat(@Param('syaratId') syaratId: string) {
+    await this.layananMandalaService.deleteSyarat(syaratId);
+    return {
+      status: 'success',
+      message: 'Syarat layanan berhasil dihapus',
     };
   }
 

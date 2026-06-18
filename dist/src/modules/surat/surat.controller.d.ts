@@ -8,9 +8,9 @@ export declare class SuratController {
         status: string;
         message: string;
         data: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             aktif: boolean;
             kategori: number;
             pengaturan_nomor_surat_id: string;
@@ -22,9 +22,9 @@ export declare class SuratController {
     getPengaturanNomorList(req: Request): Promise<{
         status: string;
         data: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             aktif: boolean;
             kategori: number;
             pengaturan_nomor_surat_id: string;
@@ -37,9 +37,9 @@ export declare class SuratController {
         status: string;
         message: string;
         data: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             aktif: boolean;
             kategori: number;
             pengaturan_nomor_surat_id: string;
@@ -56,9 +56,9 @@ export declare class SuratController {
         status: string;
         message: string;
         data: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             aktif: boolean;
             kategori: number;
             template_surat_id: string;
@@ -74,9 +74,9 @@ export declare class SuratController {
     getTemplateList(req: Request): Promise<{
         status: string;
         data: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             aktif: boolean;
             kategori: number;
             template_surat_id: string;
@@ -92,9 +92,9 @@ export declare class SuratController {
     getTemplateDetail(id: string): Promise<{
         status: string;
         data: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             aktif: boolean;
             kategori: number;
             template_surat_id: string;
@@ -111,9 +111,9 @@ export declare class SuratController {
         status: string;
         message: string;
         data: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             aktif: boolean;
             kategori: number;
             template_surat_id: string;
@@ -134,9 +134,9 @@ export declare class SuratController {
         status: string;
         message: string;
         data: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             keterangan: string | null;
             file_url: string;
             surat_masuk_id: string;
@@ -152,9 +152,9 @@ export declare class SuratController {
     getSuratMasukList(req: Request, search?: string, limit?: string, page?: string): Promise<{
         status: string;
         data: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             keterangan: string | null;
             file_url: string;
             surat_masuk_id: string;
@@ -176,9 +176,9 @@ export declare class SuratController {
         status: string;
         message: string;
         data: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             keterangan: string | null;
             file_url: string;
             surat_masuk_id: string;
@@ -199,9 +199,9 @@ export declare class SuratController {
         status: string;
         message: string;
         data: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             ptk_id: string | null;
             peserta_didik_id: string | null;
             status: number;
@@ -230,9 +230,9 @@ export declare class SuratController {
                 nama_template: string;
             };
         } & {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             ptk_id: string | null;
             peserta_didik_id: string | null;
             status: number;
@@ -256,9 +256,9 @@ export declare class SuratController {
         status: string;
         data: {
             peserta_didik: {
-                sekolah_id: string | null;
                 created_at: Date;
                 updated_at: Date;
+                sekolah_id: string | null;
                 nama: string;
                 email: string | null;
                 peserta_didik_id: string;
@@ -406,9 +406,9 @@ export declare class SuratController {
                 waktu_tempuh_menit: string | null;
             };
             gtk: {
-                sekolah_id: string | null;
                 created_at: Date;
                 updated_at: Date;
+                sekolah_id: string | null;
                 nama: string;
                 email: string | null;
                 no_hp: string | null;
@@ -483,9 +483,9 @@ export declare class SuratController {
                 rekening_atas_nama: string | null;
             };
             template_surat: {
-                sekolah_id: string;
                 created_at: Date;
                 updated_at: Date;
+                sekolah_id: string;
                 aktif: boolean;
                 kategori: number;
                 template_surat_id: string;
@@ -498,9 +498,9 @@ export declare class SuratController {
                 konten_html: string;
             };
         } & {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             ptk_id: string | null;
             peserta_didik_id: string | null;
             status: number;
@@ -519,9 +519,9 @@ export declare class SuratController {
         status: string;
         message: string;
         data: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             ptk_id: string | null;
             peserta_didik_id: string | null;
             status: number;
@@ -540,9 +540,9 @@ export declare class SuratController {
         status: string;
         message: string;
         data: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             ptk_id: string | null;
             peserta_didik_id: string | null;
             status: number;

@@ -27,6 +27,24 @@ export class DapodikController {
     };
   }
 
+  @Get('cadisdik')
+  async getCadisdikList() {
+    const data = await this.dapodikService.getCadisdiks();
+    return {
+      status: 'success',
+      data,
+    };
+  }
+
+  @Get('master-layanan')
+  async getLayananMaster(@Query('kategori') kategori?: string) {
+    const data = await this.dapodikService.getLayananMaster(kategori ? parseInt(kategori, 10) : undefined);
+    return {
+      status: 'success',
+      data,
+    };
+  }
+
   @Get('summary')
   async getSummarySummary(@Req() req: Request) {
     const { sekolahId, namaApp } = this.getSekolahInfo(req);

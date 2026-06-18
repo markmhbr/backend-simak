@@ -16,15 +16,22 @@ export class LayananMandalaService {
 
   async createLayanan(dto: CreateLayananDto) {
     return await this.prisma.layanan.create({
-      data: dto,
+      data: {
+        nama_layanan: dto.nama_layanan,
+        kategori: dto.kategori,
+        aktif: dto.aktif ?? true,
+      },
     });
   }
 
   async getLayanan(kategori?: number) {
+    const where: any = {};
+    if (kategori !== undefined) where.kategori = kategori;
+    
     return await this.prisma.layanan.findMany({
-      where: kategori !== undefined ? { kategori, aktif: true } : { aktif: true },
-      include: { syarat: true },
-      orderBy: { nama_layanan: 'asc' },
+      where,
+      include: { syarat: { orderBy: { urutan: 'asc' } } },
+      orderBy: { created_at: 'desc' },
     });
   }
 
@@ -35,14 +42,36 @@ export class LayananMandalaService {
     });
   }
 
+  async deleteLayanan(id: string) {
+    return await this.prisma.layanan.delete({
+      where: { layanan_id: id },
+    });
+  }
+
   // --- Master Syarat ---
 
   async createSyarat(layananId: string, dto: CreateLayananSyaratDto) {
     return await this.prisma.layananSyarat.create({
       data: {
-        ...dto,
         layanan_id: layananId,
+        nama_syarat: dto.nama_syarat,
+        wajib: dto.wajib ?? true,
+        urutan: dto.urutan,
+        aktif: dto.aktif ?? true,
       },
+    });
+  }
+
+  async updateSyarat(id: string, dto: Partial<CreateLayananSyaratDto>) {
+    return await this.prisma.layananSyarat.update({
+      where: { layanan_syarat_id: id },
+      data: dto,
+    });
+  }
+
+  async deleteSyarat(id: string) {
+    return await this.prisma.layananSyarat.delete({
+      where: { layanan_syarat_id: id },
     });
   }
 
@@ -56,22 +85,29 @@ export class LayananMandalaService {
   // --- Permohonan Layanan ---
 
   async createPermohonan(dto: CreatePermohonanLayananDto) {
-    // Validasi Backend
+    // Validasi kategori & IDs
     if (dto.kategori === 0) { // GTK
-      if (!dto.ptk_id) throw new BadRequestException('ptk_id wajib terisi untuk kategori GTK');
-      if (dto.peserta_didik_id) throw new BadRequestException('peserta_didik_id harus NULL untuk kategori GTK');
+      if (!dto.ptk_id) throw new BadRequestException('ptk_id wajib diisi untuk kategori GTK');
+      dto.peserta_didik_id = null;
     } else if (dto.kategori === 1) { // Peserta Didik
-      if (!dto.peserta_didik_id) throw new BadRequestException('peserta_didik_id wajib terisi untuk kategori Peserta Didik');
-      if (dto.ptk_id) throw new BadRequestException('ptk_id harus NULL untuk kategori Peserta Didik');
+      if (!dto.peserta_didik_id) throw new BadRequestException('peserta_didik_id wajib diisi untuk kategori Peserta Didik');
+      dto.ptk_id = null;
     } else if (dto.kategori === 2) { // Sekolah
-      if (dto.ptk_id || dto.peserta_didik_id) throw new BadRequestException('ptk_id dan peserta_didik_id harus NULL for kategori Sekolah');
-    } else {
-      throw new BadRequestException('Kategori tidak valid');
+      dto.ptk_id = null;
+      dto.peserta_didik_id = null;
     }
+
+    const nomorPermohonan = `REQ-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
     return await this.prisma.permohonanLayanan.create({
       data: {
-        ...dto,
+        sekolah_id: dto.sekolah_id,
+        layanan_id: dto.layanan_id,
+        kategori: dto.kategori,
+        ptk_id: dto.ptk_id,
+        peserta_didik_id: dto.peserta_didik_id,
+        nomor_permohonan: nomorPermohonan,
+        keterangan: dto.keterangan,
         status: 1, // Diajukan
         tanggal_pengajuan: new Date(),
       },
@@ -79,11 +115,22 @@ export class LayananMandalaService {
   }
 
   async getPermohonan(filters: { sekolah_id?: string; status?: number; kategori?: number }) {
+    const where: any = {};
+    if (filters.sekolah_id) where.sekolah_id = filters.sekolah_id;
+    if (filters.status !== undefined) where.status = filters.status;
+    if (filters.kategori !== undefined) where.kategori = filters.kategori;
+
     return await this.prisma.permohonanLayanan.findMany({
-      where: filters,
+      where,
       include: {
         layanan: true,
-        permohonan_layanan_file: true,
+        permohonan_layanan_file: {
+          include: { layanan_syarat: true }
+        },
+        permohonan_layanan_log: {
+          orderBy: { created_at: 'desc' },
+          include: { pegawai: { select: { nama_lengkap: true } } }
+        }
       },
       orderBy: { created_at: 'desc' },
     });
@@ -93,18 +140,20 @@ export class LayananMandalaService {
     const permohonan = await this.prisma.permohonanLayanan.findUnique({
       where: { permohonan_layanan_id: id },
       include: {
-        layanan: {
-          include: { syarat: true }
-        },
-        permohonan_layanan_file: true,
+        layanan: { include: { syarat: true } },
+        permohonan_layanan_file: { include: { layanan_syarat: true } },
         permohonan_layanan_log: {
-          include: { pegawai: true },
-          orderBy: { created_at: 'desc' }
+          orderBy: { created_at: 'desc' },
+          include: { pegawai: { select: { nama_lengkap: true } } }
         }
       },
     });
 
     if (!permohonan) throw new NotFoundException('Permohonan tidak ditemukan');
+
+    // Fetch details school/ptk/pd from other schemas manually if needed
+    // In this generic implementation, we'll return as is.
+    
     return permohonan;
   }
 
@@ -112,7 +161,10 @@ export class LayananMandalaService {
     return await this.prisma.$transaction(async (tx) => {
       const permohonan = await tx.permohonanLayanan.update({
         where: { permohonan_layanan_id: id },
-        data: { status: dto.status },
+        data: { 
+          status: dto.status,
+          updated_at: new Date()
+        },
       });
 
       await tx.permohonanLayananLog.create({
@@ -130,11 +182,14 @@ export class LayananMandalaService {
 
   // --- Permohonan File ---
 
-  async uploadFile(permohonanId: string, dto: CreatePermohonanLayananFileDto) {
+  async uploadFile(id: string, dto: CreatePermohonanLayananFileDto) {
     return await this.prisma.permohonanLayananFile.create({
       data: {
-        ...dto,
-        permohonan_layanan_id: permohonanId,
+        permohonan_layanan_id: id,
+        layanan_syarat_id: dto.layanan_syarat_id,
+        jenis_file: dto.jenis_file,
+        nama_file: dto.nama_file,
+        file_url: dto.file_url,
         status: 0, // Menunggu Verifikasi
       },
     });

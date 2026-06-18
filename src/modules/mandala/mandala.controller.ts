@@ -102,6 +102,113 @@ export class MandalaController {
     };
   }
 
+  // --- KATEGORI KEPERLUAN ENDPOINTS ---
+
+  @Get('kategori-keperluan')
+  @UseGuards(MandalaKeyGuard)
+  async getKategoriKeperluan(@Query('cadisdik_id') cadisdikId?: string) {
+    const data = await this.mandalaService.getKategoriKeperluan(cadisdikId);
+    return {
+      status: 'success',
+      data,
+    };
+  }
+
+  @Post('kategori-keperluan')
+  @UseGuards(MandalaKeyGuard)
+  async createKategoriKeperluan(@Body() body: any) {
+    if (!body.cadisdik_id || !body.nama) {
+      throw new BadRequestException('cadisdik_id and nama are required.');
+    }
+    const data = await this.mandalaService.createKategoriKeperluan(body);
+    return {
+      status: 'success',
+      message: 'Kategori keperluan successfully created.',
+      data,
+    };
+  }
+
+  @Patch('kategori-keperluan/:id')
+  @UseGuards(MandalaKeyGuard)
+  async updateKategoriKeperluan(@Param('id') id: string, @Body() body: any) {
+    const data = await this.mandalaService.updateKategoriKeperluan(id, body);
+    return {
+      status: 'success',
+      message: 'Kategori keperluan successfully updated.',
+      data,
+    };
+  }
+
+  @Delete('kategori-keperluan/:id')
+  @UseGuards(MandalaKeyGuard)
+  async deleteKategoriKeperluan(@Param('id') id: string) {
+    await this.mandalaService.deleteKategoriKeperluan(id);
+    return {
+      status: 'success',
+      message: 'Kategori keperluan successfully deleted.',
+    };
+  }
+
+  // --- ANTRIAN ENDPOINTS ---
+
+  @Get('antrian')
+  @UseGuards(MandalaKeyGuard)
+  async getAntrian(
+    @Query('cadisdik_id') cadisdikId?: string,
+    @Query('status') status?: string,
+    @Query('start_date') startDate?: string,
+    @Query('end_date') endDate?: string,
+  ) {
+    const data = await this.mandalaService.getAntrian({
+      cadisdik_id: cadisdikId,
+      status: status !== undefined ? parseInt(status, 10) : undefined,
+      start_date: startDate,
+      end_date: endDate,
+    });
+    return {
+      status: 'success',
+      data,
+    };
+  }
+
+  @Post('antrian')
+  @UseGuards(MandalaKeyGuard)
+  async createAntrian(@Body() body: any) {
+    if (!body.cadisdik_id || !body.kategori_keperluan_id || !body.nama_lengkap) {
+      throw new BadRequestException('cadisdik_id, kategori_keperluan_id, and nama_lengkap are required.');
+    }
+    const data = await this.mandalaService.createAntrian(body);
+    return {
+      status: 'success',
+      message: 'Antrian successfully created.',
+      data,
+    };
+  }
+
+  @Patch('antrian/:id/status')
+  @UseGuards(MandalaKeyGuard)
+  async updateAntrianStatus(@Param('id') id: string, @Body('status') status: number) {
+    if (status === undefined) {
+      throw new BadRequestException('status is required.');
+    }
+    const data = await this.mandalaService.updateAntrianStatus(id, status);
+    return {
+      status: 'success',
+      message: 'Antrian status successfully updated.',
+      data,
+    };
+  }
+
+  @Get('antrian/rekap')
+  @UseGuards(MandalaKeyGuard)
+  async getAntrianRekap(@Query('cadisdik_id') cadisdikId?: string) {
+    const data = await this.mandalaService.getAntrianSummary(cadisdikId);
+    return {
+      status: 'success',
+      data,
+    };
+  }
+
   // --- PEGAWAI ENDPOINTS ---
 
   @Post('auth/login')

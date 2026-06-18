@@ -6,9 +6,9 @@ export declare class SuratService {
     private readonly indonesianMonths;
     private formatIndonesianDate;
     createPengaturanNomor(sekolahId: string, dto: any): Promise<{
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         aktif: boolean;
         kategori: number;
         pengaturan_nomor_surat_id: string;
@@ -17,9 +17,9 @@ export declare class SuratService {
         counter: number;
     }>;
     getPengaturanNomorList(sekolahId: string): Promise<{
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         aktif: boolean;
         kategori: number;
         pengaturan_nomor_surat_id: string;
@@ -28,9 +28,9 @@ export declare class SuratService {
         counter: number;
     }[]>;
     updatePengaturanNomor(id: string, dto: any): Promise<{
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         aktif: boolean;
         kategori: number;
         pengaturan_nomor_surat_id: string;
@@ -40,9 +40,9 @@ export declare class SuratService {
     }>;
     deletePengaturanNomor(id: string): Promise<void>;
     createTemplate(sekolahId: string, dto: any): Promise<{
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         aktif: boolean;
         kategori: number;
         template_surat_id: string;
@@ -55,9 +55,9 @@ export declare class SuratService {
         konten_html: string;
     }>;
     getTemplateList(sekolahId: string): Promise<{
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         aktif: boolean;
         kategori: number;
         template_surat_id: string;
@@ -70,9 +70,9 @@ export declare class SuratService {
         konten_html: string;
     }[]>;
     getTemplateDetail(id: string): Promise<{
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         aktif: boolean;
         kategori: number;
         template_surat_id: string;
@@ -85,9 +85,9 @@ export declare class SuratService {
         konten_html: string;
     }>;
     updateTemplate(id: string, dto: any): Promise<{
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         aktif: boolean;
         kategori: number;
         template_surat_id: string;
@@ -101,9 +101,9 @@ export declare class SuratService {
     }>;
     deleteTemplate(id: string): Promise<void>;
     createSuratMasuk(sekolahId: string, dto: any): Promise<{
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         keterangan: string | null;
         file_url: string;
         surat_masuk_id: string;
@@ -118,9 +118,9 @@ export declare class SuratService {
     getSuratMasukList(sekolahId: string, query: any): Promise<{
         status: string;
         data: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             keterangan: string | null;
             file_url: string;
             surat_masuk_id: string;
@@ -139,9 +139,9 @@ export declare class SuratService {
         };
     }>;
     updateSuratMasuk(id: string, dto: any): Promise<{
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         keterangan: string | null;
         file_url: string;
         surat_masuk_id: string;
@@ -155,9 +155,9 @@ export declare class SuratService {
     }>;
     deleteSuratMasuk(id: string): Promise<void>;
     createSuratKeluar(sekolahId: string, dto: any): Promise<{
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         ptk_id: string | null;
         peserta_didik_id: string | null;
         status: number;
@@ -185,9 +185,9 @@ export declare class SuratService {
                 nama_template: string;
             };
         } & {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             ptk_id: string | null;
             peserta_didik_id: string | null;
             status: number;
@@ -209,9 +209,9 @@ export declare class SuratService {
     }>;
     getSuratKeluarDetail(id: string): Promise<{
         peserta_didik: {
-            sekolah_id: string | null;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string | null;
             nama: string;
             email: string | null;
             peserta_didik_id: string;
@@ -359,9 +359,9 @@ export declare class SuratService {
             waktu_tempuh_menit: string | null;
         };
         gtk: {
-            sekolah_id: string | null;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string | null;
             nama: string;
             email: string | null;
             no_hp: string | null;
@@ -436,9 +436,9 @@ export declare class SuratService {
             rekening_atas_nama: string | null;
         };
         template_surat: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             aktif: boolean;
             kategori: number;
             template_surat_id: string;
@@ -451,9 +451,9 @@ export declare class SuratService {
             konten_html: string;
         };
     } & {
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         ptk_id: string | null;
         peserta_didik_id: string | null;
         status: number;
@@ -468,9 +468,9 @@ export declare class SuratService {
         file_pdf: string | null;
     }>;
     updateSuratKeluar(id: string, dto: any): Promise<{
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         ptk_id: string | null;
         peserta_didik_id: string | null;
         status: number;
@@ -485,9 +485,9 @@ export declare class SuratService {
         file_pdf: string | null;
     }>;
     terbitkanSurat(id: string): Promise<{
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         ptk_id: string | null;
         peserta_didik_id: string | null;
         status: number;

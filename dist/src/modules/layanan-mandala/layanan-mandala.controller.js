@@ -41,10 +41,30 @@ let LayananMandalaController = class LayananMandalaController {
             data: await this.layananMandalaService.updateLayanan(id, dto),
         };
     }
+    async deleteLayanan(id) {
+        await this.layananMandalaService.deleteLayanan(id);
+        return {
+            status: 'success',
+            message: 'Layanan master berhasil dihapus',
+        };
+    }
     async createSyarat(layananId, dto) {
         return {
             status: 'success',
             data: await this.layananMandalaService.createSyarat(layananId, dto),
+        };
+    }
+    async updateSyarat(syaratId, dto) {
+        return {
+            status: 'success',
+            data: await this.layananMandalaService.updateSyarat(syaratId, dto),
+        };
+    }
+    async deleteSyarat(syaratId) {
+        await this.layananMandalaService.deleteSyarat(syaratId);
+        return {
+            status: 'success',
+            message: 'Syarat layanan berhasil dihapus',
         };
     }
     async getSyarat(layananId) {
@@ -125,6 +145,13 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], LayananMandalaController.prototype, "updateLayanan", null);
 __decorate([
+    (0, common_1.Delete)('master/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], LayananMandalaController.prototype, "deleteLayanan", null);
+__decorate([
     (0, common_1.Post)('master/:layananId/syarat'),
     __param(0, (0, common_1.Param)('layananId')),
     __param(1, (0, common_1.Body)()),
@@ -132,6 +159,21 @@ __decorate([
     __metadata("design:paramtypes", [String, layanan_mandala_dto_1.CreateLayananSyaratDto]),
     __metadata("design:returntype", Promise)
 ], LayananMandalaController.prototype, "createSyarat", null);
+__decorate([
+    (0, common_1.Patch)('syarat/:syaratId'),
+    __param(0, (0, common_1.Param)('syaratId')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], LayananMandalaController.prototype, "updateSyarat", null);
+__decorate([
+    (0, common_1.Delete)('syarat/:syaratId'),
+    __param(0, (0, common_1.Param)('syaratId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], LayananMandalaController.prototype, "deleteSyarat", null);
 __decorate([
     (0, common_1.Get)('master/:layananId/syarat'),
     __param(0, (0, common_1.Param)('layananId')),

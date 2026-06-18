@@ -92,6 +92,80 @@ let MandalaController = class MandalaController {
             message: 'Cadisdik successfully deleted.',
         };
     }
+    async getKategoriKeperluan(cadisdikId) {
+        const data = await this.mandalaService.getKategoriKeperluan(cadisdikId);
+        return {
+            status: 'success',
+            data,
+        };
+    }
+    async createKategoriKeperluan(body) {
+        if (!body.cadisdik_id || !body.nama) {
+            throw new common_1.BadRequestException('cadisdik_id and nama are required.');
+        }
+        const data = await this.mandalaService.createKategoriKeperluan(body);
+        return {
+            status: 'success',
+            message: 'Kategori keperluan successfully created.',
+            data,
+        };
+    }
+    async updateKategoriKeperluan(id, body) {
+        const data = await this.mandalaService.updateKategoriKeperluan(id, body);
+        return {
+            status: 'success',
+            message: 'Kategori keperluan successfully updated.',
+            data,
+        };
+    }
+    async deleteKategoriKeperluan(id) {
+        await this.mandalaService.deleteKategoriKeperluan(id);
+        return {
+            status: 'success',
+            message: 'Kategori keperluan successfully deleted.',
+        };
+    }
+    async getAntrian(cadisdikId, status, startDate, endDate) {
+        const data = await this.mandalaService.getAntrian({
+            cadisdik_id: cadisdikId,
+            status: status !== undefined ? parseInt(status, 10) : undefined,
+            start_date: startDate,
+            end_date: endDate,
+        });
+        return {
+            status: 'success',
+            data,
+        };
+    }
+    async createAntrian(body) {
+        if (!body.cadisdik_id || !body.kategori_keperluan_id || !body.nama_lengkap) {
+            throw new common_1.BadRequestException('cadisdik_id, kategori_keperluan_id, and nama_lengkap are required.');
+        }
+        const data = await this.mandalaService.createAntrian(body);
+        return {
+            status: 'success',
+            message: 'Antrian successfully created.',
+            data,
+        };
+    }
+    async updateAntrianStatus(id, status) {
+        if (status === undefined) {
+            throw new common_1.BadRequestException('status is required.');
+        }
+        const data = await this.mandalaService.updateAntrianStatus(id, status);
+        return {
+            status: 'success',
+            message: 'Antrian status successfully updated.',
+            data,
+        };
+    }
+    async getAntrianRekap(cadisdikId) {
+        const data = await this.mandalaService.getAntrianSummary(cadisdikId);
+        return {
+            status: 'success',
+            data,
+        };
+    }
     async loginPegawai(body) {
         if (!body.identifier || !body.password) {
             throw new common_1.BadRequestException('identifier (NIP/Email) and password are required.');
@@ -336,6 +410,75 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], MandalaController.prototype, "deleteCadisdik", null);
+__decorate([
+    (0, common_1.Get)('kategori-keperluan'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Query)('cadisdik_id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "getKategoriKeperluan", null);
+__decorate([
+    (0, common_1.Post)('kategori-keperluan'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "createKategoriKeperluan", null);
+__decorate([
+    (0, common_1.Patch)('kategori-keperluan/:id'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "updateKategoriKeperluan", null);
+__decorate([
+    (0, common_1.Delete)('kategori-keperluan/:id'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "deleteKategoriKeperluan", null);
+__decorate([
+    (0, common_1.Get)('antrian'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Query)('cadisdik_id')),
+    __param(1, (0, common_1.Query)('status')),
+    __param(2, (0, common_1.Query)('start_date')),
+    __param(3, (0, common_1.Query)('end_date')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String, String]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "getAntrian", null);
+__decorate([
+    (0, common_1.Post)('antrian'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "createAntrian", null);
+__decorate([
+    (0, common_1.Patch)('antrian/:id/status'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)('status')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Number]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "updateAntrianStatus", null);
+__decorate([
+    (0, common_1.Get)('antrian/rekap'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Query)('cadisdik_id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "getAntrianRekap", null);
 __decorate([
     (0, common_1.Post)('auth/login'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),

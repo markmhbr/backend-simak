@@ -4,6 +4,42 @@ export declare class DapodikController {
     private readonly dapodikService;
     constructor(dapodikService: DapodikService);
     private getSekolahInfo;
+    getCadisdikList(): Promise<{
+        status: string;
+        data: {
+            created_at: Date;
+            updated_at: Date;
+            email: string | null;
+            alamat: string | null;
+            nomor_telepon: string | null;
+            website: string | null;
+            cadisdik_id: string;
+            aktif: boolean;
+            nama_instansi: string;
+        }[];
+    }>;
+    getLayananMaster(kategori?: string): Promise<{
+        status: string;
+        data: ({
+            syarat: {
+                created_at: Date;
+                updated_at: Date;
+                aktif: boolean;
+                layanan_id: string;
+                urutan: number;
+                layanan_syarat_id: string;
+                nama_syarat: string;
+                wajib: boolean;
+            }[];
+        } & {
+            created_at: Date;
+            updated_at: Date;
+            aktif: boolean;
+            layanan_id: string;
+            nama_layanan: string;
+            kategori: number;
+        })[];
+    }>;
     getSummarySummary(req: Request): Promise<{
         status: string;
         klien: any;
@@ -25,9 +61,9 @@ export declare class DapodikController {
             logo: string;
             nama_kepala_sekolah: string;
             nama_operator: string;
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             nama: string;
             email: string | null;
             nss: string | null;
@@ -65,9 +101,9 @@ export declare class DapodikController {
         status: string;
         klien: any;
         data: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             nama: string;
             email: string | null;
             nss: string | null;
@@ -106,9 +142,9 @@ export declare class DapodikController {
         status: string;
         klien: any;
         data: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             nama: string;
             email: string | null;
             nss: string | null;
@@ -675,9 +711,9 @@ export declare class DapodikController {
             }[];
             rwy_sertifikasi: ({
                 bidang_studi: {
-                    sekolah_id: string | null;
                     created_at: Date;
                     updated_at: Date;
+                    sekolah_id: string | null;
                     kode: string | null;
                     create_date: Date | null;
                     last_update: Date | null;
@@ -697,9 +733,9 @@ export declare class DapodikController {
                     expired_date: Date | null;
                 };
                 lemb_sertifikasi: {
-                    sekolah_id: string | null;
                     created_at: Date;
                     updated_at: Date;
+                    sekolah_id: string | null;
                     nama: string | null;
                     email: string | null;
                     alamat_jalan: string | null;
@@ -724,9 +760,9 @@ export declare class DapodikController {
                     ket_lemb_sert: string | null;
                 };
             } & {
-                sekolah_id: string | null;
                 created_at: Date;
                 updated_at: Date;
+                sekolah_id: string | null;
                 ptk_id: string | null;
                 ptk_id_str: string | null;
                 vld_count: number;
@@ -768,9 +804,9 @@ export declare class DapodikController {
                 jenjang_pendidikan_id_str: string | null;
                 gelar_akademik_id_str: string | null;
             }[];
-            sekolah_id: string | null;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string | null;
             nama: string;
             email: string | null;
             no_hp: string | null;
@@ -848,9 +884,9 @@ export declare class DapodikController {
     updateGtkDetail(req: Request, id: string, body: any): Promise<{
         status: string;
         data: {
-            sekolah_id: string | null;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string | null;
             nama: string;
             email: string | null;
             no_hp: string | null;
@@ -932,9 +968,9 @@ export declare class DapodikController {
             penggunas: {
                 email: string;
             }[];
-            sekolah_id: string | null;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string | null;
             nama: string;
             email: string | null;
             peserta_didik_id: string;
@@ -1085,9 +1121,9 @@ export declare class DapodikController {
     updatePesertaDidikDetail(req: Request, id: string, body: any): Promise<{
         status: string;
         data: {
-            sekolah_id: string | null;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string | null;
             nama: string;
             email: string | null;
             peserta_didik_id: string;

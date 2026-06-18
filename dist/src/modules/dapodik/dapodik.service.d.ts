@@ -18,9 +18,9 @@ export declare class DapodikService {
         logo: string;
         nama_kepala_sekolah: string;
         nama_operator: string;
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         nama: string;
         email: string | null;
         nss: string | null;
@@ -54,9 +54,9 @@ export declare class DapodikService {
         cadisdik_id: string | null;
     }>;
     updateSekolah(sekolahId: string, data: any): Promise<{
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         nama: string;
         email: string | null;
         nss: string | null;
@@ -91,9 +91,9 @@ export declare class DapodikService {
         cadisdik_id: string | null;
     }>;
     uploadLogo(sekolahId: string, file: Express.Multer.File): Promise<{
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         nama: string;
         email: string | null;
         nss: string | null;
@@ -384,6 +384,36 @@ export declare class DapodikService {
         p: any;
         total: any;
     }[]>;
+    getCadisdiks(): Promise<{
+        created_at: Date;
+        updated_at: Date;
+        email: string | null;
+        alamat: string | null;
+        nomor_telepon: string | null;
+        website: string | null;
+        cadisdik_id: string;
+        aktif: boolean;
+        nama_instansi: string;
+    }[]>;
+    getLayananMaster(kategori?: number): Promise<({
+        syarat: {
+            created_at: Date;
+            updated_at: Date;
+            aktif: boolean;
+            layanan_id: string;
+            urutan: number;
+            layanan_syarat_id: string;
+            nama_syarat: string;
+            wajib: boolean;
+        }[];
+    } & {
+        created_at: Date;
+        updated_at: Date;
+        aktif: boolean;
+        layanan_id: string;
+        nama_layanan: string;
+        kategori: number;
+    })[]>;
     getRombelRekapKategori(sekolahId: string | null): Promise<{
         id: number;
         kategori: string;
@@ -512,9 +542,9 @@ export declare class DapodikService {
         }[];
         rwy_sertifikasi: ({
             bidang_studi: {
-                sekolah_id: string | null;
                 created_at: Date;
                 updated_at: Date;
+                sekolah_id: string | null;
                 kode: string | null;
                 create_date: Date | null;
                 last_update: Date | null;
@@ -534,9 +564,9 @@ export declare class DapodikService {
                 expired_date: Date | null;
             };
             lemb_sertifikasi: {
-                sekolah_id: string | null;
                 created_at: Date;
                 updated_at: Date;
+                sekolah_id: string | null;
                 nama: string | null;
                 email: string | null;
                 alamat_jalan: string | null;
@@ -561,9 +591,9 @@ export declare class DapodikService {
                 ket_lemb_sert: string | null;
             };
         } & {
-            sekolah_id: string | null;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string | null;
             ptk_id: string | null;
             ptk_id_str: string | null;
             vld_count: number;
@@ -605,9 +635,9 @@ export declare class DapodikService {
             jenjang_pendidikan_id_str: string | null;
             gelar_akademik_id_str: string | null;
         }[];
-        sekolah_id: string | null;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string | null;
         nama: string;
         email: string | null;
         no_hp: string | null;
@@ -682,9 +712,9 @@ export declare class DapodikService {
         rekening_atas_nama: string | null;
     }>;
     updateGtk(sekolahId: string, id: string, data: any): Promise<{
-        sekolah_id: string | null;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string | null;
         nama: string;
         email: string | null;
         no_hp: string | null;
@@ -763,9 +793,9 @@ export declare class DapodikService {
         penggunas: {
             email: string;
         }[];
-        sekolah_id: string | null;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string | null;
         nama: string;
         email: string | null;
         peserta_didik_id: string;
@@ -913,9 +943,9 @@ export declare class DapodikService {
         waktu_tempuh_menit: string | null;
     }>;
     updatePesertaDidik(sekolahId: string, id: string, data: any): Promise<{
-        sekolah_id: string | null;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string | null;
         nama: string;
         email: string | null;
         peserta_didik_id: string;

@@ -172,6 +172,141 @@ export class MandalaService implements OnModuleInit {
     });
   }
 
+  // --- KATEGORI KEPERLUAN ---
+
+  async getKategoriKeperluan(cadisdikId?: string) {
+    return await this.prisma.kategoriKeperluan.findMany({
+      where: cadisdikId ? { cadisdik_id: cadisdikId } : {},
+      orderBy: { nama: 'asc' },
+    });
+  }
+
+  async createKategoriKeperluan(data: { cadisdik_id: string; nama: string; aktif?: boolean }) {
+    return await this.prisma.kategoriKeperluan.create({
+      data,
+    });
+  }
+
+  async updateKategoriKeperluan(id: string, data: any) {
+    return await this.prisma.kategoriKeperluan.update({
+      where: { kategori_keperluan_id: id },
+      data,
+    });
+  }
+
+  async deleteKategoriKeperluan(id: string) {
+    return await this.prisma.kategoriKeperluan.delete({
+      where: { kategori_keperluan_id: id },
+    });
+  }
+
+  // --- ANTRIAN ---
+
+  async getAntrian(filters: { cadisdik_id?: string; status?: number; start_date?: string; end_date?: string }) {
+    const { cadisdik_id, status, start_date, end_date } = filters;
+    const where: any = {};
+
+    if (cadisdik_id) where.cadisdik_id = cadisdik_id;
+    if (status !== undefined) where.status = status;
+    
+    if (start_date || end_date) {
+      where.created_at = {};
+      if (start_date) where.created_at.gte = new Date(start_date);
+      if (end_date) {
+        const endDate = new Date(end_date);
+        endDate.setHours(23, 59, 59, 999);
+        where.created_at.lte = endDate;
+      }
+    }
+
+    return await this.prisma.antrian.findMany({
+      where,
+      include: {
+        kategori_keperluan: true,
+      },
+      orderBy: { created_at: 'asc' },
+    });
+  }
+
+  async createAntrian(data: {
+    cadisdik_id: string;
+    kategori_keperluan_id: string;
+    nama_lengkap: string;
+    jabatan?: string;
+    unit_instansi?: string;
+    nomor_hp?: string;
+    keperluan?: string;
+  }) {
+    // Generate nomor antrian
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const lastAntrian = await this.prisma.antrian.findFirst({
+      where: {
+        cadisdik_id: data.cadisdik_id,
+        created_at: {
+          gte: today,
+          lt: tomorrow,
+        },
+      },
+      orderBy: { nomor_antrian: 'desc' },
+    });
+
+    const nextNomor = lastAntrian ? lastAntrian.nomor_antrian + 1 : 1;
+
+    return await this.prisma.antrian.create({
+      data: {
+        ...data,
+        nomor_antrian: nextNomor,
+      },
+    });
+  }
+
+  async updateAntrianStatus(id: string, status: number) {
+    return await this.prisma.antrian.update({
+      where: { antrian_id: id },
+      data: { status },
+    });
+  }
+
+  async getAntrianSummary(cadisdikId?: string) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const baseWhere: any = {
+      created_at: {
+        gte: today,
+        lt: tomorrow,
+      },
+    };
+    if (cadisdikId) baseWhere.cadisdik_id = cadisdikId;
+
+    const [total, menunggu, dipanggil, melayani, selesai, batal] = await Promise.all([
+      this.prisma.antrian.count({ where: baseWhere }),
+      this.prisma.antrian.count({ where: { ...baseWhere, status: 0 } }),
+      this.prisma.antrian.count({ where: { ...baseWhere, status: 1 } }),
+      this.prisma.antrian.count({ where: { ...baseWhere, status: 2 } }),
+      this.prisma.antrian.count({ where: { ...baseWhere, status: 3 } }),
+      this.prisma.antrian.count({ where: { ...baseWhere, status: 4 } }),
+    ]);
+
+    return {
+      hari_ini: today.toISOString().split('T')[0],
+      total,
+      menunggu,
+      dipanggil,
+      melayani,
+      selesai,
+      batal,
+    };
+  }
+
+  // --- EXISTING METHODS ---
+
   // --- PEGAWAI CRUD ---
 
   async getPegawais(cadisdikId?: string) {

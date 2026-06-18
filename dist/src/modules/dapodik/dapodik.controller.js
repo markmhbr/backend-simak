@@ -39,6 +39,20 @@ let DapodikController = class DapodikController {
             namaApp: appKey?.nama_app || '',
         };
     }
+    async getCadisdikList() {
+        const data = await this.dapodikService.getCadisdiks();
+        return {
+            status: 'success',
+            data,
+        };
+    }
+    async getLayananMaster(kategori) {
+        const data = await this.dapodikService.getLayananMaster(kategori ? parseInt(kategori, 10) : undefined);
+        return {
+            status: 'success',
+            data,
+        };
+    }
     async getSummarySummary(req) {
         const { sekolahId, namaApp } = this.getSekolahInfo(req);
         const data = await this.dapodikService.getSummary(sekolahId);
@@ -422,6 +436,19 @@ let DapodikController = class DapodikController {
     }
 };
 exports.DapodikController = DapodikController;
+__decorate([
+    (0, common_1.Get)('cadisdik'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "getCadisdikList", null);
+__decorate([
+    (0, common_1.Get)('master-layanan'),
+    __param(0, (0, common_1.Query)('kategori')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "getLayananMaster", null);
 __decorate([
     (0, common_1.Get)('summary'),
     __param(0, (0, common_1.Req)()),

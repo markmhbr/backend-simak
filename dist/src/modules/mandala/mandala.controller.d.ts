@@ -6,10 +6,10 @@ export declare class MandalaController {
         status: string;
         data: {
             id: string;
-            created_at: Date;
-            updated_at: Date;
             key: string;
             url_mandala: string;
+            created_at: Date;
+            updated_at: Date;
         };
     }>;
     updateConnection(body: {
@@ -24,10 +24,10 @@ export declare class MandalaController {
         message: string;
         data: {
             id: string;
-            created_at: Date;
-            updated_at: Date;
             key: string;
             url_mandala: string;
+            created_at: Date;
+            updated_at: Date;
         };
     }>;
     getSchools(): Promise<{
@@ -125,6 +125,119 @@ export declare class MandalaController {
         status: string;
         message: string;
     }>;
+    getKategoriKeperluan(cadisdikId?: string): Promise<{
+        status: string;
+        data: {
+            created_at: Date;
+            updated_at: Date;
+            nama: string;
+            cadisdik_id: string;
+            aktif: boolean;
+            kategori_keperluan_id: string;
+        }[];
+    }>;
+    createKategoriKeperluan(body: any): Promise<{
+        status: string;
+        message: string;
+        data: {
+            created_at: Date;
+            updated_at: Date;
+            nama: string;
+            cadisdik_id: string;
+            aktif: boolean;
+            kategori_keperluan_id: string;
+        };
+    }>;
+    updateKategoriKeperluan(id: string, body: any): Promise<{
+        status: string;
+        message: string;
+        data: {
+            created_at: Date;
+            updated_at: Date;
+            nama: string;
+            cadisdik_id: string;
+            aktif: boolean;
+            kategori_keperluan_id: string;
+        };
+    }>;
+    deleteKategoriKeperluan(id: string): Promise<{
+        status: string;
+        message: string;
+    }>;
+    getAntrian(cadisdikId?: string, status?: string, startDate?: string, endDate?: string): Promise<{
+        status: string;
+        data: ({
+            kategori_keperluan: {
+                created_at: Date;
+                updated_at: Date;
+                nama: string;
+                cadisdik_id: string;
+                aktif: boolean;
+                kategori_keperluan_id: string;
+            };
+        } & {
+            created_at: Date;
+            updated_at: Date;
+            cadisdik_id: string;
+            status: number;
+            kategori_keperluan_id: string;
+            antrian_id: string;
+            nomor_antrian: number;
+            nama_lengkap: string;
+            jabatan: string | null;
+            unit_instansi: string | null;
+            nomor_hp: string | null;
+            keperluan: string | null;
+        })[];
+    }>;
+    createAntrian(body: any): Promise<{
+        status: string;
+        message: string;
+        data: {
+            created_at: Date;
+            updated_at: Date;
+            cadisdik_id: string;
+            status: number;
+            kategori_keperluan_id: string;
+            antrian_id: string;
+            nomor_antrian: number;
+            nama_lengkap: string;
+            jabatan: string | null;
+            unit_instansi: string | null;
+            nomor_hp: string | null;
+            keperluan: string | null;
+        };
+    }>;
+    updateAntrianStatus(id: string, status: number): Promise<{
+        status: string;
+        message: string;
+        data: {
+            created_at: Date;
+            updated_at: Date;
+            cadisdik_id: string;
+            status: number;
+            kategori_keperluan_id: string;
+            antrian_id: string;
+            nomor_antrian: number;
+            nama_lengkap: string;
+            jabatan: string | null;
+            unit_instansi: string | null;
+            nomor_hp: string | null;
+            keperluan: string | null;
+        };
+    }>;
+    getAntrianRekap(cadisdikId?: string): Promise<{
+        status: string;
+        data: {
+            hari_ini: string;
+            total: number;
+            menunggu: number;
+            dipanggil: number;
+            melayani: number;
+            selesai: number;
+            batal: number;
+        };
+    }>;
     loginPegawai(body: any): Promise<{
         status: string;
         requires2FA: boolean;
@@ -180,11 +293,11 @@ export declare class MandalaController {
             nip: string;
             foto: string | null;
             aktif: boolean;
-            pegawai_id: string;
             nama_lengkap: string;
+            jabatan: number;
+            pegawai_id: string;
             alamat_lengkap: string | null;
             authenticator_secret: string | null;
-            jabatan: number;
         })[];
     }>;
     getPegawaiDetail(id: string): Promise<{
@@ -215,11 +328,11 @@ export declare class MandalaController {
             nip: string;
             foto: string | null;
             aktif: boolean;
-            pegawai_id: string;
             nama_lengkap: string;
+            jabatan: number;
+            pegawai_id: string;
             alamat_lengkap: string | null;
             authenticator_secret: string | null;
-            jabatan: number;
         };
     }>;
     createPegawai(body: any): Promise<{
@@ -239,11 +352,11 @@ export declare class MandalaController {
             nip: string;
             foto: string | null;
             aktif: boolean;
-            pegawai_id: string;
             nama_lengkap: string;
+            jabatan: number;
+            pegawai_id: string;
             alamat_lengkap: string | null;
             authenticator_secret: string | null;
-            jabatan: number;
         };
     }>;
     updatePegawai(id: string, body: any): Promise<{
@@ -263,11 +376,11 @@ export declare class MandalaController {
             nip: string;
             foto: string | null;
             aktif: boolean;
-            pegawai_id: string;
             nama_lengkap: string;
+            jabatan: number;
+            pegawai_id: string;
             alamat_lengkap: string | null;
             authenticator_secret: string | null;
-            jabatan: number;
         };
     }>;
     deletePegawai(id: string): Promise<{
@@ -286,9 +399,9 @@ export declare class MandalaController {
                 nama_lengkap: string;
             };
         } & {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             pegawai_id: string;
             mapping_pengawas_id: string;
         })[];
@@ -297,9 +410,9 @@ export declare class MandalaController {
         status: string;
         message: string;
         data: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             pegawai_id: string;
             mapping_pengawas_id: string;
         };
@@ -312,9 +425,9 @@ export declare class MandalaController {
         status: string;
         data: {
             nama_kepala_sekolah: string;
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             nama: string;
             email: string | null;
             nss: string | null;
@@ -483,9 +596,9 @@ export declare class MandalaController {
                     tingkat_pendidikan_id_str: string;
                 };
             };
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             peserta_didik_id: string;
             jam_masuk: Date | null;
             jam_pulang: Date | null;
@@ -506,9 +619,9 @@ export declare class MandalaController {
                 nip: string;
                 foto: string;
             };
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             ptk_id: string;
             jam_masuk: Date | null;
             jam_pulang: Date | null;
