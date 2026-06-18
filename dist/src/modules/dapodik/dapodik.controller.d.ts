@@ -40,6 +40,86 @@ export declare class DapodikController {
             kategori: number;
         })[];
     }>;
+    getPermohonanLayanan(req: Request, status?: string, kategori?: string): Promise<{
+        status: string;
+        data: {
+            ptk: any;
+            peserta_didik: any;
+            layanan: {
+                created_at: Date;
+                updated_at: Date;
+                aktif: boolean;
+                layanan_id: string;
+                nama_layanan: string;
+                kategori: number;
+            };
+            permohonan_layanan_file: ({
+                layanan_syarat: {
+                    created_at: Date;
+                    updated_at: Date;
+                    aktif: boolean;
+                    layanan_id: string;
+                    urutan: number;
+                    layanan_syarat_id: string;
+                    nama_syarat: string;
+                    wajib: boolean;
+                };
+            } & {
+                created_at: Date;
+                updated_at: Date;
+                status: number;
+                layanan_syarat_id: string | null;
+                permohonan_layanan_id: string;
+                catatan: string | null;
+                permohonan_layanan_file_id: string;
+                jenis_file: number;
+                nama_file: string | null;
+                file_url: string | null;
+            })[];
+            permohonan_layanan_log: ({
+                pegawai: {
+                    nama_lengkap: string;
+                };
+            } & {
+                created_at: Date;
+                status: number;
+                permohonan_layanan_id: string;
+                permohonan_layanan_log_id: string;
+                pegawai_id: string;
+                catatan: string | null;
+            })[];
+            created_at: Date;
+            updated_at: Date;
+            sekolah_id: string;
+            ptk_id: string | null;
+            peserta_didik_id: string | null;
+            status: number;
+            keterangan: string | null;
+            layanan_id: string;
+            kategori: number;
+            permohonan_layanan_id: string;
+            nomor_permohonan: string | null;
+            tanggal_pengajuan: Date | null;
+        }[];
+    }>;
+    createPermohonanLayanan(req: Request, body: any): Promise<{
+        status: string;
+        message: string;
+        data: {
+            created_at: Date;
+            updated_at: Date;
+            sekolah_id: string;
+            ptk_id: string | null;
+            peserta_didik_id: string | null;
+            status: number;
+            keterangan: string | null;
+            layanan_id: string;
+            kategori: number;
+            permohonan_layanan_id: string;
+            nomor_permohonan: string | null;
+            tanggal_pengajuan: Date | null;
+        };
+    }>;
     getSummarySummary(req: Request): Promise<{
         status: string;
         klien: any;

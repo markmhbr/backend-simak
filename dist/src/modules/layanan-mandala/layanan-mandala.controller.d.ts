@@ -107,8 +107,8 @@ export declare class LayananMandalaController {
             keterangan: string | null;
             layanan_id: string;
             kategori: number;
-            nomor_permohonan: string | null;
             permohonan_layanan_id: string;
+            nomor_permohonan: string | null;
             tanggal_pengajuan: Date | null;
         };
     }>;
@@ -139,12 +139,12 @@ export declare class LayananMandalaController {
                 updated_at: Date;
                 status: number;
                 layanan_syarat_id: string | null;
+                permohonan_layanan_id: string;
+                catatan: string | null;
+                permohonan_layanan_file_id: string;
                 jenis_file: number;
                 nama_file: string | null;
                 file_url: string | null;
-                catatan: string | null;
-                permohonan_layanan_id: string;
-                permohonan_layanan_file_id: string;
             })[];
             permohonan_layanan_log: ({
                 pegawai: {
@@ -153,10 +153,10 @@ export declare class LayananMandalaController {
             } & {
                 created_at: Date;
                 status: number;
-                pegawai_id: string;
-                catatan: string | null;
                 permohonan_layanan_id: string;
                 permohonan_layanan_log_id: string;
+                pegawai_id: string;
+                catatan: string | null;
             })[];
         } & {
             created_at: Date;
@@ -168,8 +168,8 @@ export declare class LayananMandalaController {
             keterangan: string | null;
             layanan_id: string;
             kategori: number;
-            nomor_permohonan: string | null;
             permohonan_layanan_id: string;
+            nomor_permohonan: string | null;
             tanggal_pengajuan: Date | null;
         })[];
     }>;
@@ -211,12 +211,12 @@ export declare class LayananMandalaController {
                 updated_at: Date;
                 status: number;
                 layanan_syarat_id: string | null;
+                permohonan_layanan_id: string;
+                catatan: string | null;
+                permohonan_layanan_file_id: string;
                 jenis_file: number;
                 nama_file: string | null;
                 file_url: string | null;
-                catatan: string | null;
-                permohonan_layanan_id: string;
-                permohonan_layanan_file_id: string;
             })[];
             permohonan_layanan_log: ({
                 pegawai: {
@@ -225,10 +225,10 @@ export declare class LayananMandalaController {
             } & {
                 created_at: Date;
                 status: number;
-                pegawai_id: string;
-                catatan: string | null;
                 permohonan_layanan_id: string;
                 permohonan_layanan_log_id: string;
+                pegawai_id: string;
+                catatan: string | null;
             })[];
         } & {
             created_at: Date;
@@ -240,8 +240,8 @@ export declare class LayananMandalaController {
             keterangan: string | null;
             layanan_id: string;
             kategori: number;
-            nomor_permohonan: string | null;
             permohonan_layanan_id: string;
+            nomor_permohonan: string | null;
             tanggal_pengajuan: Date | null;
         };
     }>;
@@ -258,8 +258,8 @@ export declare class LayananMandalaController {
             keterangan: string | null;
             layanan_id: string;
             kategori: number;
-            nomor_permohonan: string | null;
             permohonan_layanan_id: string;
+            nomor_permohonan: string | null;
             tanggal_pengajuan: Date | null;
         };
     }>;
@@ -271,12 +271,12 @@ export declare class LayananMandalaController {
             updated_at: Date;
             status: number;
             layanan_syarat_id: string | null;
+            permohonan_layanan_id: string;
+            catatan: string | null;
+            permohonan_layanan_file_id: string;
             jenis_file: number;
             nama_file: string | null;
             file_url: string | null;
-            catatan: string | null;
-            permohonan_layanan_id: string;
-            permohonan_layanan_file_id: string;
         };
     }>;
     updateFileStatus(fileId: string, body: {
@@ -290,12 +290,12 @@ export declare class LayananMandalaController {
             updated_at: Date;
             status: number;
             layanan_syarat_id: string | null;
+            permohonan_layanan_id: string;
+            catatan: string | null;
+            permohonan_layanan_file_id: string;
             jenis_file: number;
             nama_file: string | null;
             file_url: string | null;
-            catatan: string | null;
-            permohonan_layanan_id: string;
-            permohonan_layanan_file_id: string;
         };
     }>;
 }

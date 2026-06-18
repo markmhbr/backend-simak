@@ -53,6 +53,28 @@ let DapodikController = class DapodikController {
             data,
         };
     }
+    async getPermohonanLayanan(req, status, kategori) {
+        const { sekolahId } = this.getSekolahInfo(req);
+        const filters = {
+            sekolah_id: sekolahId,
+            status: status !== undefined ? parseInt(status, 10) : undefined,
+            kategori: kategori !== undefined ? parseInt(kategori, 10) : undefined,
+        };
+        const data = await this.dapodikService.getPermohonanLayanan(filters);
+        return {
+            status: 'success',
+            data,
+        };
+    }
+    async createPermohonanLayanan(req, body) {
+        const { sekolahId } = this.getSekolahInfo(req);
+        const data = await this.dapodikService.createPermohonanLayanan({ ...body, sekolah_id: sekolahId });
+        return {
+            status: 'success',
+            message: 'Permohonan layanan berhasil diajukan',
+            data,
+        };
+    }
     async getSummarySummary(req) {
         const { sekolahId, namaApp } = this.getSekolahInfo(req);
         const data = await this.dapodikService.getSummary(sekolahId);
@@ -449,6 +471,23 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], DapodikController.prototype, "getLayananMaster", null);
+__decorate([
+    (0, common_1.Get)('permohonan-layanan'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('status')),
+    __param(2, (0, common_1.Query)('kategori')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "getPermohonanLayanan", null);
+__decorate([
+    (0, common_1.Post)('permohonan-layanan'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "createPermohonanLayanan", null);
 __decorate([
     (0, common_1.Get)('summary'),
     __param(0, (0, common_1.Req)()),

@@ -180,11 +180,11 @@ export declare class MandalaController {
             updated_at: Date;
             cadisdik_id: string;
             status: number;
+            nama_lengkap: string;
+            jabatan: string | null;
             kategori_keperluan_id: string;
             antrian_id: string;
             nomor_antrian: number;
-            nama_lengkap: string;
-            jabatan: string | null;
             unit_instansi: string | null;
             nomor_hp: string | null;
             keperluan: string | null;
@@ -198,11 +198,11 @@ export declare class MandalaController {
             updated_at: Date;
             cadisdik_id: string;
             status: number;
+            nama_lengkap: string;
+            jabatan: string | null;
             kategori_keperluan_id: string;
             antrian_id: string;
             nomor_antrian: number;
-            nama_lengkap: string;
-            jabatan: string | null;
             unit_instansi: string | null;
             nomor_hp: string | null;
             keperluan: string | null;
@@ -216,11 +216,11 @@ export declare class MandalaController {
             updated_at: Date;
             cadisdik_id: string;
             status: number;
+            nama_lengkap: string;
+            jabatan: string | null;
             kategori_keperluan_id: string;
             antrian_id: string;
             nomor_antrian: number;
-            nama_lengkap: string;
-            jabatan: string | null;
             unit_instansi: string | null;
             nomor_hp: string | null;
             keperluan: string | null;
@@ -293,11 +293,11 @@ export declare class MandalaController {
             nip: string;
             foto: string | null;
             aktif: boolean;
-            nama_lengkap: string;
-            jabatan: number;
             pegawai_id: string;
+            nama_lengkap: string;
             alamat_lengkap: string | null;
             authenticator_secret: string | null;
+            jabatan: number;
         })[];
     }>;
     getPegawaiDetail(id: string): Promise<{
@@ -328,11 +328,11 @@ export declare class MandalaController {
             nip: string;
             foto: string | null;
             aktif: boolean;
-            nama_lengkap: string;
-            jabatan: number;
             pegawai_id: string;
+            nama_lengkap: string;
             alamat_lengkap: string | null;
             authenticator_secret: string | null;
+            jabatan: number;
         };
     }>;
     createPegawai(body: any): Promise<{
@@ -352,11 +352,11 @@ export declare class MandalaController {
             nip: string;
             foto: string | null;
             aktif: boolean;
-            nama_lengkap: string;
-            jabatan: number;
             pegawai_id: string;
+            nama_lengkap: string;
             alamat_lengkap: string | null;
             authenticator_secret: string | null;
+            jabatan: number;
         };
     }>;
     updatePegawai(id: string, body: any): Promise<{
@@ -376,11 +376,11 @@ export declare class MandalaController {
             nip: string;
             foto: string | null;
             aktif: boolean;
-            nama_lengkap: string;
-            jabatan: number;
             pegawai_id: string;
+            nama_lengkap: string;
             alamat_lengkap: string | null;
             authenticator_secret: string | null;
+            jabatan: number;
         };
     }>;
     deletePegawai(id: string): Promise<{

@@ -894,6 +894,78 @@ export class DapodikService {
     });
   }
 
+  async getPermohonanLayanan(filters: { sekolah_id?: string; status?: number; kategori?: number }) {
+    const where: any = {};
+    if (filters.sekolah_id) where.sekolah_id = filters.sekolah_id;
+    if (filters.status !== undefined) where.status = filters.status;
+    if (filters.kategori !== undefined) where.kategori = filters.kategori;
+
+    const results = await this.prisma.permohonanLayanan.findMany({
+      where,
+      include: {
+        layanan: true,
+        permohonan_layanan_file: {
+          include: { layanan_syarat: true }
+        },
+        permohonan_layanan_log: {
+          orderBy: { created_at: 'desc' },
+          include: { pegawai: { select: { nama_lengkap: true } } }
+        },
+      },
+      orderBy: { created_at: 'desc' },
+    });
+
+    // Manually enrich with ptk and peserta_didik data if needed since cross-schema relations might be missing or tricky
+    const enrichedResults = await Promise.all(results.map(async (item) => {
+      let ptk = null;
+      let peserta_didik = null;
+
+      if (item.ptk_id) {
+        ptk = await this.prisma.gtk.findUnique({ where: { ptk_id: item.ptk_id } });
+      }
+      if (item.peserta_didik_id) {
+        peserta_didik = await this.prisma.pesertaDidik.findUnique({ where: { peserta_didik_id: item.peserta_didik_id } });
+      }
+
+      return {
+        ...item,
+        ptk,
+        peserta_didik,
+      };
+    }));
+
+    return enrichedResults;
+  }
+
+  async createPermohonanLayanan(dto: any) {
+    if (dto.kategori === 0) {
+      if (!dto.ptk_id) throw new Error('ptk_id wajib diisi untuk kategori GTK');
+      dto.peserta_didik_id = null;
+    } else if (dto.kategori === 1) {
+      if (!dto.peserta_didik_id) throw new Error('peserta_didik_id wajib diisi untuk kategori Peserta Didik');
+      dto.ptk_id = null;
+    } else if (dto.kategori === 2) {
+      dto.ptk_id = null;
+      dto.peserta_didik_id = null;
+    }
+
+    const nomorPermohonan = `REQ-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
+    return await this.prisma.permohonanLayanan.create({
+      data: {
+        sekolah_id: dto.sekolah_id,
+        layanan_id: dto.layanan_id,
+        kategori: dto.kategori,
+        ptk_id: dto.ptk_id,
+        peserta_didik_id: dto.peserta_didik_id,
+        nomor_permohonan: nomorPermohonan,
+        keterangan: dto.keterangan,
+        status: 1, // Diajukan
+        tanggal_pengajuan: new Date(),
+      },
+    });
+  }
+
   async getRombelRekapKategori(sekolahId: string | null) {
     if (!sekolahId) return [];
     const semesterId = await this.getLatestSemesterId(sekolahId);

@@ -45,6 +45,36 @@ export class DapodikController {
     };
   }
 
+  @Get('permohonan-layanan')
+  async getPermohonanLayanan(
+    @Req() req: Request,
+    @Query('status') status?: string,
+    @Query('kategori') kategori?: string,
+  ) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    const filters = {
+      sekolah_id: sekolahId,
+      status: status !== undefined ? parseInt(status, 10) : undefined,
+      kategori: kategori !== undefined ? parseInt(kategori, 10) : undefined,
+    };
+    const data = await this.dapodikService.getPermohonanLayanan(filters);
+    return {
+      status: 'success',
+      data,
+    };
+  }
+
+  @Post('permohonan-layanan')
+  async createPermohonanLayanan(@Req() req: Request, @Body() body: any) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.createPermohonanLayanan({ ...body, sekolah_id: sekolahId });
+    return {
+      status: 'success',
+      message: 'Permohonan layanan berhasil diajukan',
+      data,
+    };
+  }
+
   @Get('summary')
   async getSummarySummary(@Req() req: Request) {
     const { sekolahId, namaApp } = this.getSekolahInfo(req);
