@@ -9,9 +9,9 @@ export declare class JadwalController {
         klien: any;
         data: ({
             pengaturan_jadwal: {
+                sekolah_id: string;
                 created_at: Date;
                 updated_at: Date;
-                sekolah_id: string;
                 aktif: boolean;
                 jenis_jadwal_id: string;
                 urutan: number;
@@ -21,9 +21,9 @@ export declare class JadwalController {
                 durasi_menit: number;
             }[];
             pengaturan_hari: {
+                sekolah_id: string;
                 created_at: Date;
                 updated_at: Date;
-                sekolah_id: string;
                 aktif: boolean;
                 jenis_jadwal_id: string;
                 hari: number;
@@ -32,10 +32,10 @@ export declare class JadwalController {
                 jam_pulang: Date;
             }[];
         } & {
-            nama: string;
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
-            sekolah_id: string;
+            nama: string;
             aktif: boolean;
             jenis_jadwal_id: string;
             custom_mapel: boolean;
@@ -50,10 +50,10 @@ export declare class JadwalController {
         status: string;
         klien: any;
         data: {
-            nama: string;
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
-            sekolah_id: string;
+            nama: string;
             aktif: boolean;
             jenis_jadwal_id: string;
             custom_mapel: boolean;
@@ -69,10 +69,10 @@ export declare class JadwalController {
         status: string;
         klien: any;
         data: {
-            nama: string;
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
-            sekolah_id: string;
+            nama: string;
             aktif: boolean;
             jenis_jadwal_id: string;
             custom_mapel: boolean;
@@ -82,10 +82,10 @@ export declare class JadwalController {
         status: string;
         klien: any;
         data: {
-            nama: string;
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
-            sekolah_id: string;
+            nama: string;
             aktif: boolean;
             jenis_jadwal_id: string;
             custom_mapel: boolean;
@@ -97,10 +97,10 @@ export declare class JadwalController {
         status: string;
         klien: any;
         data: {
-            nama: string;
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
-            sekolah_id: string;
+            nama: string;
             aktif: boolean;
             jenis_jadwal_id: string;
             custom_mapel: boolean;
@@ -116,9 +116,9 @@ export declare class JadwalController {
         status: string;
         klien: any;
         data: {
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
-            sekolah_id: string;
             aktif: boolean;
             jenis_jadwal_id: string;
             hari: number;
@@ -131,9 +131,9 @@ export declare class JadwalController {
         status: string;
         klien: any;
         data: {
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
-            sekolah_id: string;
             aktif: boolean;
             jenis_jadwal_id: string;
             urutan: number;
@@ -154,9 +154,9 @@ export declare class JadwalController {
         status: string;
         klien: any;
         data: {
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
-            sekolah_id: string;
             aktif: boolean;
             jenis_jadwal_id: string;
             urutan: number;
@@ -170,9 +170,9 @@ export declare class JadwalController {
         status: string;
         klien: any;
         data: {
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
-            sekolah_id: string;
             aktif: boolean;
             jenis_jadwal_id: string;
             urutan: number;
@@ -188,13 +188,13 @@ export declare class JadwalController {
         data: ({
             pembelajaran: {
                 gtk: {
-                    nama: string;
-                    ptk_id: string;
+                    sekolah_id: string | null;
                     created_at: Date;
                     updated_at: Date;
-                    sekolah_id: string | null;
+                    nama: string;
                     email: string | null;
                     no_hp: string | null;
+                    ptk_id: string;
                     alamat_jalan: string | null;
                     rt: string | null;
                     rw: string | null;
@@ -265,13 +265,13 @@ export declare class JadwalController {
                     rekening_atas_nama: string | null;
                 };
             } & {
-                rombongan_belajar_id: string;
-                ptk_id: string | null;
-                ptk_id_str: string | null;
+                sekolah_id: string | null;
                 created_at: Date;
                 updated_at: Date;
-                sekolah_id: string | null;
+                ptk_id: string | null;
                 ptk_terdaftar_id: string | null;
+                rombongan_belajar_id: string;
+                ptk_id_str: string | null;
                 pembelajaran_id: string;
                 mata_pelajaran_id: string | null;
                 mata_pelajaran_id_str: string | null;
@@ -282,10 +282,10 @@ export declare class JadwalController {
                 status_di_kurikulum_str: string | null;
             };
         } & {
-            rombongan_belajar_id: string;
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
-            sekolah_id: string;
+            rombongan_belajar_id: string;
             aktif: boolean;
             pembelajaran_id: string;
             jenis_jadwal_id: string;
@@ -304,10 +304,10 @@ export declare class JadwalController {
         status: string;
         klien: any;
         data: {
-            rombongan_belajar_id: string;
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
-            sekolah_id: string;
+            rombongan_belajar_id: string;
             aktif: boolean;
             pembelajaran_id: string;
             jenis_jadwal_id: string;
@@ -320,10 +320,10 @@ export declare class JadwalController {
         status: string;
         klien: any;
         data: {
-            rombongan_belajar_id: string;
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
-            sekolah_id: string;
+            rombongan_belajar_id: string;
             aktif: boolean;
             pembelajaran_id: string;
             jenis_jadwal_id: string;

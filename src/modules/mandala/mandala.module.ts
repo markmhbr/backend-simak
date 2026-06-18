@@ -4,10 +4,12 @@ import { MandalaController } from './mandala.controller';
 import { PrismaModule } from '../../core/prisma/prisma.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { CryptoModule } from '../../core/crypto/crypto.module';
 
 @Module({
   imports: [
     PrismaModule,
+    CryptoModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

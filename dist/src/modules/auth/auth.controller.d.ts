@@ -60,15 +60,15 @@ export declare class AuthController {
         registeredDomain: string;
     }>;
     systemSetup(apiKey: string, request: Request): Promise<{
-        created_at: Date;
-        updated_at: Date;
-        sekolah_id: string;
         id: string;
+        sekolah_id: string;
         nama_app: string;
         key_api: string;
         key_webService: string | null;
         key_adminPanel: string | null;
         is_active: boolean;
+        created_at: Date;
+        updated_at: Date;
         domain: string | null;
     }>;
     private getRequestDomain;

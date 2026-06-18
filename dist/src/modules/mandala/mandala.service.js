@@ -48,16 +48,20 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../core/prisma/prisma.service");
 const jwt_1 = require("@nestjs/jwt");
 const config_1 = require("@nestjs/config");
+const crypto_service_1 = require("../../core/crypto/crypto.service");
 const bcrypt = __importStar(require("bcryptjs"));
+const { generateSecret, generateURI, verify } = require('otplib');
 let MandalaService = MandalaService_1 = class MandalaService {
     prisma;
     jwtService;
     configService;
+    cryptoService;
     logger = new common_1.Logger(MandalaService_1.name);
-    constructor(prisma, jwtService, configService) {
+    constructor(prisma, jwtService, configService, cryptoService) {
         this.prisma = prisma;
         this.jwtService = jwtService;
         this.configService = configService;
+        this.cryptoService = cryptoService;
     }
     async onModuleInit() {
         const urlMandala = process.env.URL_MANDALA;
@@ -362,37 +366,111 @@ let MandalaService = MandalaService_1 = class MandalaService {
         }
         const payload = {
             sub: pegawai.pegawai_id,
-            email: pegawai.email,
-            nip: pegawai.nip,
-            nik: pegawai.nik,
-            role: 'Mandala Pegawai',
-            cadisdik_id: pegawai.cadisdik_id,
-            cadisdik_nama: pegawai.cadisdik?.nama_instansi,
+            type: '2fa_pending_mandala'
         };
-        const accessToken = this.jwtService.sign(payload);
-        const refreshToken = this.jwtService.sign(payload, {
-            secret: this.configService.get('JWT_REFRESH_SECRET'),
-            expiresIn: this.configService.get('JWT_REFRESH_EXPIRATION') || '7d',
+        const tempToken = this.jwtService.sign(payload, {
+            secret: this.configService.get('JWT_SECRET'),
+            expiresIn: '10m'
         });
+        if (!pegawai.authenticator_secret) {
+            const secret = generateSecret();
+            const otpauthUrl = generateURI({
+                label: pegawai.nip,
+                issuer: 'MANDALA',
+                secret
+            });
+            return {
+                status: 'success',
+                requires2FA: true,
+                is2FASetup: false,
+                tempToken,
+                qrCodeUrl: otpauthUrl,
+                secret: secret
+            };
+        }
         return {
             status: 'success',
-            data: {
-                accessToken,
-                refreshToken,
-                pegawai: {
-                    id: pegawai.pegawai_id,
-                    nama: pegawai.nama_lengkap,
-                    nip: pegawai.nip,
-                    nik: pegawai.nik || '',
-                    tempat_lahir: pegawai.tempat_lahir || '',
-                    tanggal_lahir: pegawai.tanggal_lahir || null,
-                    alamat_lengkap: pegawai.alamat_lengkap || '',
-                    email: pegawai.email,
-                    role: 'Mandala Pegawai',
-                    cadisdik: pegawai.cadisdik?.nama_instansi,
-                },
-            },
+            requires2FA: true,
+            is2FASetup: true,
+            tempToken
         };
+    }
+    async verify2FAPegawai(tempToken, code, secretToSave) {
+        try {
+            const payload = this.jwtService.verify(tempToken, {
+                secret: this.configService.get('JWT_SECRET')
+            });
+            if (payload.type !== '2fa_pending_mandala') {
+                throw new common_1.UnauthorizedException('Token tidak valid');
+            }
+            const pegawai = await this.prisma.pegawai.findUnique({
+                where: { pegawai_id: payload.sub },
+                include: { cadisdik: true }
+            });
+            if (!pegawai)
+                throw new common_1.UnauthorizedException('Pegawai tidak ditemukan');
+            let secret;
+            if (!pegawai.authenticator_secret) {
+                if (!secretToSave) {
+                    throw new common_1.UnauthorizedException('Setup 2FA belum selesai');
+                }
+                secret = secretToSave;
+            }
+            else {
+                secret = this.cryptoService.decrypt(pegawai.authenticator_secret);
+            }
+            const isValid = verify({
+                token: code,
+                secret: secret,
+                window: 1,
+            });
+            if (!isValid) {
+                throw new common_1.UnauthorizedException('Kode 2FA tidak valid');
+            }
+            if (!pegawai.authenticator_secret && secretToSave) {
+                const encryptedSecret = this.cryptoService.encrypt(secretToSave);
+                await this.prisma.pegawai.update({
+                    where: { pegawai_id: pegawai.pegawai_id },
+                    data: { authenticator_secret: encryptedSecret }
+                });
+            }
+            const finalPayload = {
+                sub: pegawai.pegawai_id,
+                email: pegawai.email,
+                nip: pegawai.nip,
+                nik: pegawai.nik,
+                role: 'Mandala Pegawai',
+                cadisdik_id: pegawai.cadisdik_id,
+                cadisdik_nama: pegawai.cadisdik?.nama_instansi,
+            };
+            const accessToken = this.jwtService.sign(finalPayload);
+            const refreshToken = this.jwtService.sign(finalPayload, {
+                secret: this.configService.get('JWT_REFRESH_SECRET'),
+                expiresIn: this.configService.get('JWT_REFRESH_EXPIRATION') || '7d',
+            });
+            return {
+                status: 'success',
+                data: {
+                    accessToken,
+                    refreshToken,
+                    pegawai: {
+                        id: pegawai.pegawai_id,
+                        nama: pegawai.nama_lengkap,
+                        nip: pegawai.nip,
+                        nik: pegawai.nik || '',
+                        email: pegawai.email,
+                        role: 'Mandala Pegawai',
+                        cadisdik: pegawai.cadisdik?.nama_instansi,
+                    },
+                },
+            };
+        }
+        catch (error) {
+            if (error instanceof common_1.UnauthorizedException)
+                throw error;
+            console.error('2FA Error Mandala:', error);
+            throw new common_1.UnauthorizedException('Verifikasi 2FA gagal');
+        }
     }
     async getSchoolDetail(sekolahId) {
         const school = await this.prisma.sekolah.findUnique({
@@ -876,6 +954,7 @@ exports.MandalaService = MandalaService = MandalaService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         jwt_1.JwtService,
-        config_1.ConfigService])
+        config_1.ConfigService,
+        crypto_service_1.CryptoService])
 ], MandalaService);
 //# sourceMappingURL=mandala.service.js.map

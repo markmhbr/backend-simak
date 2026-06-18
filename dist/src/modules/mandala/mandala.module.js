@@ -13,6 +13,7 @@ const mandala_controller_1 = require("./mandala.controller");
 const prisma_module_1 = require("../../core/prisma/prisma.module");
 const jwt_1 = require("@nestjs/jwt");
 const config_1 = require("@nestjs/config");
+const crypto_module_1 = require("../../core/crypto/crypto.module");
 let MandalaModule = class MandalaModule {
 };
 exports.MandalaModule = MandalaModule;
@@ -20,6 +21,7 @@ exports.MandalaModule = MandalaModule = __decorate([
     (0, common_1.Module)({
         imports: [
             prisma_module_1.PrismaModule,
+            crypto_module_1.CryptoModule,
             jwt_1.JwtModule.registerAsync({
                 imports: [config_1.ConfigModule],
                 useFactory: async (configService) => ({

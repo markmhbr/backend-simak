@@ -2,24 +2,26 @@ import { OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../../core/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { CryptoService } from '../../core/crypto/crypto.service';
 export declare class MandalaService implements OnModuleInit {
     private readonly prisma;
     private readonly jwtService;
     private readonly configService;
+    private readonly cryptoService;
     private readonly logger;
-    constructor(prisma: PrismaService, jwtService: JwtService, configService: ConfigService);
+    constructor(prisma: PrismaService, jwtService: JwtService, configService: ConfigService, cryptoService: CryptoService);
     onModuleInit(): Promise<void>;
     getConnection(): Promise<{
+        id: string;
         created_at: Date;
         updated_at: Date;
-        id: string;
         key: string;
         url_mandala: string;
     }>;
     saveOrUpdateConnection(key: string, urlMandala: string): Promise<{
+        id: string;
         created_at: Date;
         updated_at: Date;
-        id: string;
         key: string;
         url_mandala: string;
     }>;
@@ -60,8 +62,8 @@ export declare class MandalaService implements OnModuleInit {
     }[]>;
     getCadisdikById(id: string): Promise<{
         sekolah: {
-            nama: string;
             sekolah_id: string;
+            nama: string;
             npsn: string;
         }[];
     } & {
@@ -120,15 +122,15 @@ export declare class MandalaService implements OnModuleInit {
         nomor_telepon: string | null;
         cadisdik_id: string;
         jenis_kelamin: number;
-        tempat_lahir: string;
-        tanggal_lahir: Date;
-        nik: string;
+        tempat_lahir: string | null;
+        tanggal_lahir: Date | null;
+        nik: string | null;
         nip: string;
         foto: string | null;
         aktif: boolean;
         pegawai_id: string;
         nama_lengkap: string;
-        alamat_lengkap: string;
+        alamat_lengkap: string | null;
         authenticator_secret: string | null;
         jabatan: number;
     })[]>;
@@ -152,15 +154,15 @@ export declare class MandalaService implements OnModuleInit {
         nomor_telepon: string | null;
         cadisdik_id: string;
         jenis_kelamin: number;
-        tempat_lahir: string;
-        tanggal_lahir: Date;
-        nik: string;
+        tempat_lahir: string | null;
+        tanggal_lahir: Date | null;
+        nik: string | null;
         nip: string;
         foto: string | null;
         aktif: boolean;
         pegawai_id: string;
         nama_lengkap: string;
-        alamat_lengkap: string;
+        alamat_lengkap: string | null;
         authenticator_secret: string | null;
         jabatan: number;
     }>;
@@ -172,15 +174,15 @@ export declare class MandalaService implements OnModuleInit {
         nomor_telepon: string | null;
         cadisdik_id: string;
         jenis_kelamin: number;
-        tempat_lahir: string;
-        tanggal_lahir: Date;
-        nik: string;
+        tempat_lahir: string | null;
+        tanggal_lahir: Date | null;
+        nik: string | null;
         nip: string;
         foto: string | null;
         aktif: boolean;
         pegawai_id: string;
         nama_lengkap: string;
-        alamat_lengkap: string;
+        alamat_lengkap: string | null;
         authenticator_secret: string | null;
         jabatan: number;
     }>;
@@ -192,15 +194,15 @@ export declare class MandalaService implements OnModuleInit {
         nomor_telepon: string | null;
         cadisdik_id: string;
         jenis_kelamin: number;
-        tempat_lahir: string;
-        tanggal_lahir: Date;
-        nik: string;
+        tempat_lahir: string | null;
+        tanggal_lahir: Date | null;
+        nik: string | null;
         nip: string;
         foto: string | null;
         aktif: boolean;
         pegawai_id: string;
         nama_lengkap: string;
-        alamat_lengkap: string;
+        alamat_lengkap: string | null;
         authenticator_secret: string | null;
         jabatan: number;
     }>;
@@ -212,15 +214,15 @@ export declare class MandalaService implements OnModuleInit {
         nomor_telepon: string | null;
         cadisdik_id: string;
         jenis_kelamin: number;
-        tempat_lahir: string;
-        tanggal_lahir: Date;
-        nik: string;
+        tempat_lahir: string | null;
+        tanggal_lahir: Date | null;
+        nik: string | null;
         nip: string;
         foto: string | null;
         aktif: boolean;
         pegawai_id: string;
         nama_lengkap: string;
-        alamat_lengkap: string;
+        alamat_lengkap: string | null;
         authenticator_secret: string | null;
         jabatan: number;
     }>;
@@ -234,23 +236,23 @@ export declare class MandalaService implements OnModuleInit {
             nama_lengkap: string;
         };
     } & {
+        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        sekolah_id: string;
         pegawai_id: string;
         mapping_pengawas_id: string;
     })[]>;
     createMappingPengawas(data: any): Promise<{
+        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        sekolah_id: string;
         pegawai_id: string;
         mapping_pengawas_id: string;
     }>;
     deleteMappingPengawas(id: string): Promise<{
+        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        sekolah_id: string;
         pegawai_id: string;
         mapping_pengawas_id: string;
     }>;
@@ -258,6 +260,21 @@ export declare class MandalaService implements OnModuleInit {
         identifier: string;
         password: any;
     }): Promise<{
+        status: string;
+        requires2FA: boolean;
+        is2FASetup: boolean;
+        tempToken: string;
+        qrCodeUrl: any;
+        secret: any;
+    } | {
+        status: string;
+        requires2FA: boolean;
+        is2FASetup: boolean;
+        tempToken: string;
+        qrCodeUrl?: undefined;
+        secret?: undefined;
+    }>;
+    verify2FAPegawai(tempToken: string, code: string, secretToSave?: string): Promise<{
         status: string;
         data: {
             accessToken: string;
@@ -267,9 +284,6 @@ export declare class MandalaService implements OnModuleInit {
                 nama: string;
                 nip: string;
                 nik: string;
-                tempat_lahir: string;
-                tanggal_lahir: Date;
-                alamat_lengkap: string;
                 email: string;
                 role: string;
                 cadisdik: string;
@@ -278,10 +292,10 @@ export declare class MandalaService implements OnModuleInit {
     }>;
     getSchoolDetail(sekolahId: string): Promise<{
         nama_kepala_sekolah: string;
-        nama: string;
+        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        sekolah_id: string;
+        nama: string;
         email: string | null;
         nss: string | null;
         npsn: string | null;
@@ -455,9 +469,9 @@ export declare class MandalaService implements OnModuleInit {
                 tingkat_pendidikan_id_str: string;
             };
         };
+        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        sekolah_id: string;
         peserta_didik_id: string;
         jam_masuk: Date | null;
         jam_pulang: Date | null;
@@ -475,10 +489,10 @@ export declare class MandalaService implements OnModuleInit {
             nip: string;
             foto: string;
         };
-        ptk_id: string;
+        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        sekolah_id: string;
+        ptk_id: string;
         jam_masuk: Date | null;
         jam_pulang: Date | null;
         tanggal: Date;

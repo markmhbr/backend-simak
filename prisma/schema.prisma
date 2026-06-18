@@ -920,6 +920,7 @@ model Pegawai {
 
   cadisdik Cadisdik @relation(fields: [cadisdik_id], references: [cadisdik_id], onDelete: Restrict)
   mapping_pengawas MappingPengawas[]
+  permohonan_layanan_log PermohonanLayananLog[]
 
   @@index([cadisdik_id])
   @@index([nik]) // Menambahkan index pada NIK untuk mempercepat query pencarian data pegawai
@@ -1259,4 +1260,109 @@ model RiwayatPendidikanFormal {
   @@map("riwayat_pendidikan_formal")
   @@schema("dapodik")
   @@index([ptk_id])
+}
+
+model Layanan {
+  layanan_id   String   @id @default(uuid()) @db.Uuid
+  nama_layanan String   @db.VarChar(150)
+  kategori     Int      @db.SmallInt // 0 = GTK, 1 = Peserta Didik, 2 = Sekolah
+  aktif        Boolean  @default(true)
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  syarat             LayananSyarat[]
+  permohonan_layanan PermohonanLayanan[]
+
+  @@unique([nama_layanan, kategori])
+  @@index([kategori])
+  @@index([aktif])
+  @@map("layanan")
+  @@schema("mandala")
+}
+
+model LayananSyarat {
+  layanan_syarat_id String   @id @default(uuid()) @db.Uuid
+  layanan_id        String   @db.Uuid
+  nama_syarat       String   @db.VarChar(150)
+  wajib             Boolean  @default(true)
+  urutan            Int      @db.SmallInt
+  aktif             Boolean  @default(true)
+  created_at        DateTime @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  layanan                Layanan                  @relation(fields: [layanan_id], references: [layanan_id], onDelete: Cascade)
+  permohonan_layanan_file PermohonanLayananFile[]
+
+  @@unique([layanan_id, nama_syarat])
+  @@index([layanan_id])
+  @@index([aktif])
+  @@map("layanan_syarat")
+  @@schema("mandala")
+}
+
+model PermohonanLayanan {
+  permohonan_layanan_id String    @id @default(uuid()) @db.Uuid
+  sekolah_id            String    @db.Uuid
+  layanan_id            String    @db.Uuid
+  kategori              Int       @db.SmallInt // 0 = GTK, 1 = Peserta Didik, 2 = Sekolah
+  ptk_id                String?   @db.Uuid
+  peserta_didik_id      String?   @db.Uuid
+  nomor_permohonan      String?   @db.VarChar(50)
+  keterangan            String?   @db.Text
+  status                Int       @default(1) @db.SmallInt // 1 = Diajukan, ...
+  tanggal_pengajuan     DateTime? @db.Timestamptz(6)
+  created_at            DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+
+  layanan                Layanan                 @relation(fields: [layanan_id], references: [layanan_id], onDelete: Restrict)
+  permohonan_layanan_file PermohonanLayananFile[]
+  permohonan_layanan_log  PermohonanLayananLog[]
+
+  @@index([sekolah_id])
+  @@index([layanan_id])
+  @@index([status])
+  @@index([kategori])
+  @@index([tanggal_pengajuan])
+  @@map("permohonan_layanan")
+  @@schema("mandala")
+}
+
+model PermohonanLayananFile {
+  permohonan_layanan_file_id String   @id @default(uuid()) @db.Uuid
+  permohonan_layanan_id      String   @db.Uuid
+  layanan_syarat_id          String?  @db.Uuid
+  jenis_file                 Int      @db.SmallInt // 0 = Surat Permohonan Awal, 1 = Dokumen Persyaratan
+  nama_file                  String?  @db.VarChar(255)
+  file_url                   String?  @db.VarChar(500)
+  catatan                    String?  @db.Text
+  status                     Int      @default(0) @db.SmallInt // 0 = Menunggu Verifikasi, ...
+  created_at                 DateTime @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  permohonan_layanan PermohonanLayanan @relation(fields: [permohonan_layanan_id], references: [permohonan_layanan_id], onDelete: Cascade)
+  layanan_syarat     LayananSyarat?    @relation(fields: [layanan_syarat_id], references: [layanan_syarat_id], onDelete: SetNull)
+
+  @@index([permohonan_layanan_id])
+  @@index([layanan_syarat_id])
+  @@index([status])
+  @@map("permohonan_layanan_file")
+  @@schema("mandala")
+}
+
+model PermohonanLayananLog {
+  permohonan_layanan_log_id String   @id @default(uuid()) @db.Uuid
+  permohonan_layanan_id     String   @db.Uuid
+  pegawai_id                String   @db.Uuid
+  status                    Int      @db.SmallInt
+  catatan                   String?  @db.Text
+  created_at                DateTime @default(now()) @db.Timestamptz(6)
+
+  permohonan_layanan PermohonanLayanan @relation(fields: [permohonan_layanan_id], references: [permohonan_layanan_id], onDelete: Cascade)
+  pegawai            Pegawai           @relation(fields: [pegawai_id], references: [pegawai_id], onDelete: Restrict)
+
+  @@index([permohonan_layanan_id])
+  @@index([pegawai_id])
+  @@index([status])
+  @@map("permohonan_layanan_log")
+  @@schema("mandala")
 }

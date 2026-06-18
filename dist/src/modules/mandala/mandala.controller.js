@@ -98,6 +98,12 @@ let MandalaController = class MandalaController {
         }
         return await this.mandalaService.loginPegawai(body);
     }
+    async verify2FA(body) {
+        if (!body.tempToken || !body.code) {
+            throw new common_1.BadRequestException('tempToken and code are required.');
+        }
+        return await this.mandalaService.verify2FAPegawai(body.tempToken, body.code, body.secretToSave);
+    }
     async getPegawais(cadisdikId) {
         const data = await this.mandalaService.getPegawais(cadisdikId);
         return {
@@ -338,6 +344,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], MandalaController.prototype, "loginPegawai", null);
+__decorate([
+    (0, common_1.Post)('auth/verify-2fa'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "verify2FA", null);
 __decorate([
     (0, common_1.Get)('pegawai'),
     (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),

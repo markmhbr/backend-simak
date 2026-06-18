@@ -113,6 +113,15 @@ export class MandalaController {
     return await this.mandalaService.loginPegawai(body);
   }
 
+  @Post('auth/verify-2fa')
+  @HttpCode(HttpStatus.OK)
+  async verify2FA(@Body() body: { tempToken: string; code: string; secretToSave?: string }) {
+    if (!body.tempToken || !body.code) {
+      throw new BadRequestException('tempToken and code are required.');
+    }
+    return await this.mandalaService.verify2FAPegawai(body.tempToken, body.code, body.secretToSave);
+  }
+
   @Get('pegawai')
   @UseGuards(MandalaKeyGuard)
   async getPegawais(@Query('cadisdik_id') cadisdikId?: string) {
