@@ -586,13 +586,13 @@ export class MandalaService implements OnModuleInit {
         secret = this.cryptoService.decrypt(pegawai.authenticator_secret);
       }
 
-      const isValid = verify({
+      const result = await verify({
         token: code,
         secret: secret,
         window: 1,
       });
 
-      if (!isValid) {
+      if (!result || !result.valid) {
         throw new UnauthorizedException('Kode 2FA tidak valid');
       }
 

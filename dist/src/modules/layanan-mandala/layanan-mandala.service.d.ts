@@ -110,7 +110,10 @@ export declare class LayananMandalaService {
         sekolah_id?: string;
         status?: number;
         kategori?: number;
-    }): Promise<({
+    }): Promise<{
+        sekolah: any;
+        ptk: any;
+        peserta_didik: any;
         layanan: {
             created_at: Date;
             updated_at: Date;
@@ -155,7 +158,6 @@ export declare class LayananMandalaService {
             pegawai_id: string;
             catatan: string | null;
         })[];
-    } & {
         created_at: Date;
         updated_at: Date;
         sekolah_id: string;
@@ -169,8 +171,11 @@ export declare class LayananMandalaService {
         permohonan_layanan_id: string;
         nomor_permohonan: string | null;
         tanggal_pengajuan: Date | null;
-    })[]>;
+    }[]>;
     getPermohonanById(id: string): Promise<{
+        sekolah: any;
+        ptk: any;
+        peserta_didik: any;
         layanan: {
             syarat: {
                 created_at: Date;
@@ -226,7 +231,6 @@ export declare class LayananMandalaService {
             pegawai_id: string;
             catatan: string | null;
         })[];
-    } & {
         created_at: Date;
         updated_at: Date;
         sekolah_id: string;
@@ -256,7 +260,7 @@ export declare class LayananMandalaService {
         nomor_permohonan: string | null;
         tanggal_pengajuan: Date | null;
     }>;
-    uploadFile(id: string, dto: CreatePermohonanLayananFileDto): Promise<{
+    uploadFile(id: string, dto: CreatePermohonanLayananFileDto, file: Express.Multer.File): Promise<{
         created_at: Date;
         updated_at: Date;
         status: number;

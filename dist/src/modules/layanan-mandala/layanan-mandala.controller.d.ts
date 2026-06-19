@@ -1,5 +1,5 @@
 import { LayananMandalaService } from './layanan-mandala.service';
-import { CreateLayananDto, CreateLayananSyaratDto, CreatePermohonanLayananDto, CreatePermohonanLayananFileDto, UpdatePermohonanStatusDto } from './dto/layanan-mandala.dto';
+import { CreateLayananDto, CreateLayananSyaratDto, CreatePermohonanLayananDto, UpdatePermohonanStatusDto } from './dto/layanan-mandala.dto';
 import type { Request } from 'express';
 export declare class LayananMandalaController {
     private readonly layananMandalaService;
@@ -119,7 +119,10 @@ export declare class LayananMandalaController {
     }>;
     getPermohonan(req: Request, sekolahId?: string, status?: string, kategori?: string): Promise<{
         status: string;
-        data: ({
+        data: {
+            sekolah: any;
+            ptk: any;
+            peserta_didik: any;
             layanan: {
                 created_at: Date;
                 updated_at: Date;
@@ -164,7 +167,6 @@ export declare class LayananMandalaController {
                 pegawai_id: string;
                 catatan: string | null;
             })[];
-        } & {
             created_at: Date;
             updated_at: Date;
             sekolah_id: string;
@@ -178,11 +180,14 @@ export declare class LayananMandalaController {
             permohonan_layanan_id: string;
             nomor_permohonan: string | null;
             tanggal_pengajuan: Date | null;
-        })[];
+        }[];
     }>;
     getPermohonanById(id: string): Promise<{
         status: string;
         data: {
+            sekolah: any;
+            ptk: any;
+            peserta_didik: any;
             layanan: {
                 syarat: {
                     created_at: Date;
@@ -238,7 +243,6 @@ export declare class LayananMandalaController {
                 pegawai_id: string;
                 catatan: string | null;
             })[];
-        } & {
             created_at: Date;
             updated_at: Date;
             sekolah_id: string;
@@ -273,7 +277,7 @@ export declare class LayananMandalaController {
             tanggal_pengajuan: Date | null;
         };
     }>;
-    uploadFile(id: string, dto: CreatePermohonanLayananFileDto): Promise<{
+    uploadFile(id: string, file: Express.Multer.File, body: any): Promise<{
         status: string;
         message: string;
         data: {

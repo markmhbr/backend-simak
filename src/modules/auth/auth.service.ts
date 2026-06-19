@@ -135,13 +135,13 @@ export class AuthService {
       // Verifikasi kode TOTP
       // Kita tambahkan window: 1 (mengizinkan kode dari 30 detik sebelum/sesudah) 
       // untuk toleransi perbedaan waktu antara server dan HP
-      const isValid = verify({
+      const result = await verify({
         token: code,
         secret: secret,
         window: 1,
       });
 
-      if (!isValid) {
+      if (!result || !result.valid) {
         console.log(`[2FA Failed] Invalid code for user ${user.username}. Code: ${code}`);
         throw new UnauthorizedException('Kode 2FA tidak valid');
       }

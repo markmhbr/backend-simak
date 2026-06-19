@@ -153,12 +153,12 @@ let AuthService = class AuthService {
             else {
                 secret = this.cryptoService.decrypt(user.google2fa_secret);
             }
-            const isValid = verify({
+            const result = await verify({
                 token: code,
                 secret: secret,
                 window: 1,
             });
-            if (!isValid) {
+            if (!result || !result.valid) {
                 console.log(`[2FA Failed] Invalid code for user ${user.username}. Code: ${code}`);
                 throw new common_1.UnauthorizedException('Kode 2FA tidak valid');
             }

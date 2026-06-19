@@ -545,12 +545,12 @@ let MandalaService = MandalaService_1 = class MandalaService {
             else {
                 secret = this.cryptoService.decrypt(pegawai.authenticator_secret);
             }
-            const isValid = verify({
+            const result = await verify({
                 token: code,
                 secret: secret,
                 window: 1,
             });
-            if (!isValid) {
+            if (!result || !result.valid) {
                 throw new common_1.UnauthorizedException('Kode 2FA tidak valid');
             }
             if (!pegawai.authenticator_secret && secretToSave) {

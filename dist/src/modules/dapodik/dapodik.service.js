@@ -802,7 +802,13 @@ let DapodikService = class DapodikService {
         const results = await this.prisma.permohonanLayanan.findMany({
             where,
             include: {
-                layanan: true,
+                layanan: {
+                    include: {
+                        syarat: {
+                            orderBy: { urutan: 'asc' }
+                        }
+                    }
+                },
                 permohonan_layanan_file: {
                     include: { layanan_syarat: true }
                 },
@@ -1334,8 +1340,11 @@ let DapodikService = class DapodikService {
                     console.error('Error reading GTK documents directory:', e);
                 }
             }
+            const appUrl = process.env.APP_URL || 'http://localhost:3000';
+            const formattedFoto = gtk.foto ? (gtk.foto.startsWith('http') ? gtk.foto : `${appUrl}${gtk.foto}`) : null;
             return {
                 ...gtk,
+                foto: formattedFoto,
                 foto_dokumen: fotoDokumen
             };
         }
@@ -1347,6 +1356,14 @@ let DapodikService = class DapodikService {
         delete updateData.sekolah_id;
         const emailAkun = updateData.email_akun;
         delete updateData.email_akun;
+        if (updateData.foto && updateData.foto.startsWith('http')) {
+            try {
+                const url = new URL(updateData.foto);
+                updateData.foto = url.pathname;
+            }
+            catch (e) {
+            }
+        }
         if (updateData.tmt_pengangkatan) {
             updateData.tmt_pengangkatan = new Date(updateData.tmt_pengangkatan);
         }
@@ -1395,8 +1412,11 @@ let DapodikService = class DapodikService {
                     console.error('Error reading student documents directory:', e);
                 }
             }
+            const appUrl = process.env.APP_URL || 'http://localhost:3000';
+            const formattedFoto = student.foto ? (student.foto.startsWith('http') ? student.foto : `${appUrl}${student.foto}`) : null;
             return {
                 ...student,
+                foto: formattedFoto,
                 uploaded_docs: uploadedDocs
             };
         }
@@ -1408,6 +1428,14 @@ let DapodikService = class DapodikService {
         delete updateData.sekolah_id;
         const emailAkun = updateData.email_akun;
         delete updateData.email_akun;
+        if (updateData.foto && updateData.foto.startsWith('http')) {
+            try {
+                const url = new URL(updateData.foto);
+                updateData.foto = url.pathname;
+            }
+            catch (e) {
+            }
+        }
         if (updateData.tanggal_lahir) {
             updateData.tanggal_lahir = new Date(updateData.tanggal_lahir);
         }

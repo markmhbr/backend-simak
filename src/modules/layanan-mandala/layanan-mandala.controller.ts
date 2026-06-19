@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query, Patch, Delete, UseGuards, BadRequestException, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, Patch, Delete, UseGuards, BadRequestException, Req, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { LayananMandalaService } from './layanan-mandala.service';
 import { 
   CreateLayananDto, 
@@ -8,6 +8,7 @@ import {
   UpdatePermohonanStatusDto
 } from './dto/layanan-mandala.dto';
 import { MandalaKeyGuard } from '../../core/mandala/mandala-key.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
 import type { Request } from 'express';
 
 @Controller('layanan-mandala')
@@ -142,11 +143,27 @@ export class LayananMandalaController {
   // --- Permohonan File ---
 
   @Post('permohonan/:id/file')
-  async uploadFile(@Param('id') id: string, @Body() dto: CreatePermohonanLayananFileDto) {
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadFile(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() body: any,
+  ) {
+    if (!file) {
+      throw new BadRequestException('Berkas file wajib disertakan.');
+    }
+
+    const dto: CreatePermohonanLayananFileDto = {
+      layanan_syarat_id: body.layanan_syarat_id || null,
+      jenis_file: body.jenis_file !== undefined ? parseInt(body.jenis_file, 10) : 1,
+      nama_file: body.nama_file || file.originalname,
+      catatan: body.catatan || null,
+    };
+
     return {
       status: 'success',
       message: 'File berhasil diunggah',
-      data: await this.layananMandalaService.uploadFile(id, dto),
+      data: await this.layananMandalaService.uploadFile(id, dto, file),
     };
   }
 

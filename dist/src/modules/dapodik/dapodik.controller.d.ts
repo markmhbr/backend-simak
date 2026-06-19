@@ -47,6 +47,17 @@ export declare class DapodikController {
             ptk: any;
             peserta_didik: any;
             layanan: {
+                syarat: {
+                    created_at: Date;
+                    updated_at: Date;
+                    aktif: boolean;
+                    layanan_id: string;
+                    urutan: number;
+                    layanan_syarat_id: string;
+                    nama_syarat: string;
+                    wajib: boolean;
+                }[];
+            } & {
                 created_at: Date;
                 updated_at: Date;
                 cadisdik_id: string | null;
@@ -789,6 +800,7 @@ export declare class DapodikController {
     getGtkDetail(req: Request, id: string): Promise<{
         status: string;
         data: {
+            foto: string;
             foto_dokumen: any[];
             penggunas: {
                 email: string;
@@ -957,7 +969,6 @@ export declare class DapodikController {
             rwy_kepangkatan: import("@prisma/client/runtime/client").JsonValue | null;
             no_telepon_rumah: string | null;
             no_wa: string | null;
-            foto: string | null;
             tandatangan: string | null;
             id_bank: string | null;
             nama_kcp: string | null;
@@ -1048,6 +1059,7 @@ export declare class DapodikController {
     getPesertaDidikDetail(req: Request, id: string): Promise<{
         status: string;
         data: {
+            foto: string;
             uploaded_docs: string[];
             penggunas: {
                 email: string;
@@ -1081,7 +1093,6 @@ export declare class DapodikController {
             no_kk: string | null;
             kewarganegaraan: string | null;
             no_wa: string | null;
-            foto: string | null;
             id_bank: string | null;
             nama_kcp: string | null;
             rekening_bank: string | null;

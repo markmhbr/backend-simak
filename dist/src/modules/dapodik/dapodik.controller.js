@@ -666,7 +666,7 @@ __decorate([
     __param(1, (0, common_1.Query)('limit')),
     __param(2, (0, common_1.Query)('search')),
     __param(3, (0, common_1.Query)('page')),
-    __param(4, (0, common_1.Query)('rombelName')),
+    __param(4, (0, common_1.Query)('rombel')),
     __param(5, (0, common_1.Query)('status')),
     __param(6, (0, common_1.Query)('tingkat')),
     __param(7, (0, common_1.Query)('sekolah_id')),

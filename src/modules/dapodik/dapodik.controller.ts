@@ -397,7 +397,7 @@ export class DapodikController {
     @Query('limit') limit?: string,
     @Query('search') search?: string,
     @Query('page') page?: string,
-    @Query('rombelName') rombelName?: string,
+    @Query('rombel') rombelName?: string,
     @Query('status') status?: 'aktif' | 'non-aktif',
     @Query('tingkat') tingkat?: string,
     @Query('sekolah_id') sekolahIdQuery?: string

@@ -128,7 +128,7 @@ let LayananMandalaService = class LayananMandalaService {
             where.status = filters.status;
         if (filters.kategori !== undefined)
             where.kategori = filters.kategori;
-        return await this.prisma.permohonanLayanan.findMany({
+        const results = await this.prisma.permohonanLayanan.findMany({
             where,
             include: {
                 layanan: true,
@@ -142,6 +142,30 @@ let LayananMandalaService = class LayananMandalaService {
             },
             orderBy: { created_at: 'desc' },
         });
+        const enrichedResults = await Promise.all(results.map(async (item) => {
+            let sekolah = null;
+            let ptk = null;
+            let peserta_didik = null;
+            if (item.sekolah_id) {
+                sekolah = await this.prisma.sekolah.findUnique({
+                    where: { sekolah_id: item.sekolah_id },
+                    select: { nama: true, npsn: true }
+                });
+            }
+            if (item.ptk_id) {
+                ptk = await this.prisma.gtk.findUnique({ where: { ptk_id: item.ptk_id } });
+            }
+            if (item.peserta_didik_id) {
+                peserta_didik = await this.prisma.pesertaDidik.findUnique({ where: { peserta_didik_id: item.peserta_didik_id } });
+            }
+            return {
+                ...item,
+                sekolah,
+                ptk,
+                peserta_didik,
+            };
+        }));
+        return enrichedResults;
     }
     async getPermohonanById(id) {
         const permohonan = await this.prisma.permohonanLayanan.findUnique({
@@ -157,7 +181,27 @@ let LayananMandalaService = class LayananMandalaService {
         });
         if (!permohonan)
             throw new common_1.NotFoundException('Permohonan tidak ditemukan');
-        return permohonan;
+        let sekolah = null;
+        let ptk = null;
+        let peserta_didik = null;
+        if (permohonan.sekolah_id) {
+            sekolah = await this.prisma.sekolah.findUnique({
+                where: { sekolah_id: permohonan.sekolah_id },
+                select: { nama: true, npsn: true }
+            });
+        }
+        if (permohonan.ptk_id) {
+            ptk = await this.prisma.gtk.findUnique({ where: { ptk_id: permohonan.ptk_id } });
+        }
+        if (permohonan.peserta_didik_id) {
+            peserta_didik = await this.prisma.pesertaDidik.findUnique({ where: { peserta_didik_id: permohonan.peserta_didik_id } });
+        }
+        return {
+            ...permohonan,
+            sekolah,
+            ptk,
+            peserta_didik,
+        };
     }
     async updatePermohonanStatus(id, dto) {
         return await this.prisma.$transaction(async (tx) => {
@@ -179,14 +223,79 @@ let LayananMandalaService = class LayananMandalaService {
             return permohonan;
         });
     }
-    async uploadFile(id, dto) {
+    async uploadFile(id, dto, file) {
+        const path = require('path');
+        const { compressAndSaveImage, saveDocument } = require('../../common/utils/upload.util');
+        const permohonan = await this.prisma.permohonanLayanan.findUnique({
+            where: { permohonan_layanan_id: id },
+        });
+        if (!permohonan)
+            throw new common_1.NotFoundException('Permohonan tidak ditemukan');
+        const destDir = path.join(process.cwd(), 'storage', permohonan.sekolah_id, 'layanan', id);
+        const fileExt = path.extname(file.originalname).toLowerCase();
+        const timestamp = Date.now();
+        const cleanName = (dto.nama_file || file.originalname)
+            .replace(path.extname(dto.nama_file || file.originalname), '')
+            .replace(/[^a-zA-Z0-9_-]/g, '_')
+            .toLowerCase();
+        const finalFileName = `${cleanName}_${timestamp}${fileExt}`;
+        let savedPath = '';
+        if (['.jpg', '.jpeg', '.png', '.webp'].includes(fileExt)) {
+            savedPath = await compressAndSaveImage(file.buffer, destDir, finalFileName);
+        }
+        else if (fileExt === '.pdf') {
+            savedPath = saveDocument(file.buffer, destDir, finalFileName, 5 * 1024 * 1024);
+        }
+        else {
+            throw new common_1.BadRequestException('Format file tidak didukung. Gunakan PDF atau Gambar (JPG, PNG, WebP).');
+        }
+        const relativePath = `/storage/${permohonan.sekolah_id}/layanan/${id}/${finalFileName}`;
+        let existingFile = null;
+        if (dto.layanan_syarat_id) {
+            existingFile = await this.prisma.permohonanLayananFile.findFirst({
+                where: {
+                    permohonan_layanan_id: id,
+                    layanan_syarat_id: dto.layanan_syarat_id,
+                },
+            });
+        }
+        else if (dto.jenis_file === 0) {
+            existingFile = await this.prisma.permohonanLayananFile.findFirst({
+                where: {
+                    permohonan_layanan_id: id,
+                    jenis_file: 0,
+                },
+            });
+        }
+        if (existingFile) {
+            if (existingFile.file_url) {
+                const oldFullPath = path.join(process.cwd(), existingFile.file_url.replace(/^\//, ''));
+                if (require('fs').existsSync(oldFullPath)) {
+                    try {
+                        require('fs').unlinkSync(oldFullPath);
+                    }
+                    catch (err) {
+                    }
+                }
+            }
+            return await this.prisma.permohonanLayananFile.update({
+                where: { permohonan_layanan_file_id: existingFile.permohonan_layanan_file_id },
+                data: {
+                    nama_file: finalFileName,
+                    file_url: relativePath,
+                    status: 0,
+                    catatan: null,
+                    updated_at: new Date(),
+                },
+            });
+        }
         return await this.prisma.permohonanLayananFile.create({
             data: {
                 permohonan_layanan_id: id,
                 layanan_syarat_id: dto.layanan_syarat_id,
                 jenis_file: dto.jenis_file,
-                nama_file: dto.nama_file,
-                file_url: dto.file_url,
+                nama_file: finalFileName,
+                file_url: relativePath,
                 status: 0,
             },
         });

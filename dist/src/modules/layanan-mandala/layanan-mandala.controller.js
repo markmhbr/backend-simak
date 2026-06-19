@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const layanan_mandala_service_1 = require("./layanan-mandala.service");
 const layanan_mandala_dto_1 = require("./dto/layanan-mandala.dto");
 const mandala_key_guard_1 = require("../../core/mandala/mandala-key.guard");
+const platform_express_1 = require("@nestjs/platform-express");
 let LayananMandalaController = class LayananMandalaController {
     layananMandalaService;
     constructor(layananMandalaService) {
@@ -111,11 +112,20 @@ let LayananMandalaController = class LayananMandalaController {
             data: await this.layananMandalaService.updatePermohonanStatus(id, dto),
         };
     }
-    async uploadFile(id, dto) {
+    async uploadFile(id, file, body) {
+        if (!file) {
+            throw new common_1.BadRequestException('Berkas file wajib disertakan.');
+        }
+        const dto = {
+            layanan_syarat_id: body.layanan_syarat_id || null,
+            jenis_file: body.jenis_file !== undefined ? parseInt(body.jenis_file, 10) : 1,
+            nama_file: body.nama_file || file.originalname,
+            catatan: body.catatan || null,
+        };
         return {
             status: 'success',
             message: 'File berhasil diunggah',
-            data: await this.layananMandalaService.uploadFile(id, dto),
+            data: await this.layananMandalaService.uploadFile(id, dto, file),
         };
     }
     async updateFileStatus(fileId, body) {
@@ -224,10 +234,12 @@ __decorate([
 ], LayananMandalaController.prototype, "updateStatus", null);
 __decorate([
     (0, common_1.Post)('permohonan/:id/file'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
     __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
+    __param(1, (0, common_1.UploadedFile)()),
+    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, layanan_mandala_dto_1.CreatePermohonanLayananFileDto]),
+    __metadata("design:paramtypes", [String, Object, Object]),
     __metadata("design:returntype", Promise)
 ], LayananMandalaController.prototype, "uploadFile", null);
 __decorate([
