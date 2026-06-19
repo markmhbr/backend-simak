@@ -16,6 +16,7 @@ import { JadwalModule } from './modules/jadwal/jadwal.module';
 import { PresensiModule } from './modules/presensi/presensi.module';
 import { MandalaModule } from './modules/mandala/mandala.module';
 import { LayananMandalaModule } from './modules/layanan-mandala/layanan-mandala.module';
+import { PelaporanModule } from './modules/mandala/pelaporan/pelaporan.module';
 import { IndisiplinerModule } from './modules/indisipliner/indisipliner.module';
 import { SppModule } from './modules/spp/spp.module';
 import { SuratModule } from './modules/surat/surat.module';
@@ -37,6 +38,7 @@ import { SuratModule } from './modules/surat/surat.module';
     PresensiModule,
     MandalaModule,
     LayananMandalaModule,
+    PelaporanModule,
     IndisiplinerModule,
     SppModule,
     SuratModule,

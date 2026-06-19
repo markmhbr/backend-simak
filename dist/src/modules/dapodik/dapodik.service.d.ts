@@ -395,7 +395,7 @@ export declare class DapodikService {
         aktif: boolean;
         nama_instansi: string;
     }[]>;
-    getLayananMaster(kategori?: number): Promise<({
+    getLayananMaster(sekolahId: string | null, kategori?: number): Promise<({
         syarat: {
             created_at: Date;
             updated_at: Date;
@@ -409,6 +409,7 @@ export declare class DapodikService {
     } & {
         created_at: Date;
         updated_at: Date;
+        cadisdik_id: string | null;
         aktif: boolean;
         layanan_id: string;
         nama_layanan: string;
@@ -424,6 +425,7 @@ export declare class DapodikService {
         layanan: {
             created_at: Date;
             updated_at: Date;
+            cadisdik_id: string | null;
             aktif: boolean;
             layanan_id: string;
             nama_layanan: string;
@@ -469,6 +471,7 @@ export declare class DapodikService {
         sekolah_id: string;
         ptk_id: string | null;
         peserta_didik_id: string | null;
+        cadisdik_id: string | null;
         status: number;
         keterangan: string | null;
         layanan_id: string;
@@ -483,6 +486,7 @@ export declare class DapodikService {
         sekolah_id: string;
         ptk_id: string | null;
         peserta_didik_id: string | null;
+        cadisdik_id: string | null;
         status: number;
         keterangan: string | null;
         layanan_id: string;

@@ -1,4 +1,5 @@
 export declare class CreateLayananDto {
+    cadisdik_id?: string;
     nama_layanan: string;
     kategori: number;
     aktif?: boolean;
@@ -10,6 +11,7 @@ export declare class CreateLayananSyaratDto {
     aktif?: boolean;
 }
 export declare class CreatePermohonanLayananDto {
+    cadisdik_id?: string;
     sekolah_id: string;
     layanan_id: string;
     kategori: number;

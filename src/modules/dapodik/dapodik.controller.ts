@@ -37,8 +37,9 @@ export class DapodikController {
   }
 
   @Get('master-layanan')
-  async getLayananMaster(@Query('kategori') kategori?: string) {
-    const data = await this.dapodikService.getLayananMaster(kategori ? parseInt(kategori, 10) : undefined);
+  async getLayananMaster(@Req() req: Request, @Query('kategori') kategori?: string) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.getLayananMaster(sekolahId, kategori ? parseInt(kategori, 10) : undefined);
     return {
       status: 'success',
       data,

@@ -251,27 +251,48 @@ let MandalaService = MandalaService_1 = class MandalaService {
         });
     }
     async createAntrian(data) {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        const lastAntrian = await this.prisma.antrian.findFirst({
-            where: {
-                cadisdik_id: data.cadisdik_id,
-                created_at: {
-                    gte: today,
-                    lt: tomorrow,
-                },
-            },
-            orderBy: { nomor_antrian: 'desc' },
-        });
-        const nextNomor = lastAntrian ? lastAntrian.nomor_antrian + 1 : 1;
-        return await this.prisma.antrian.create({
-            data: {
-                ...data,
-                nomor_antrian: nextNomor,
-            },
-        });
+        let attempts = 0;
+        const maxAttempts = 5;
+        while (attempts < maxAttempts) {
+            try {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const tomorrow = new Date(today);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                const lastAntrian = await this.prisma.antrian.findFirst({
+                    where: {
+                        cadisdik_id: data.cadisdik_id,
+                        created_at: {
+                            gte: today,
+                            lt: tomorrow,
+                        },
+                    },
+                    orderBy: { nomor_antrian: 'desc' },
+                });
+                const nextNomor = lastAntrian ? lastAntrian.nomor_antrian + 1 : 1;
+                return await this.prisma.antrian.create({
+                    data: {
+                        ...data,
+                        nomor_antrian: nextNomor,
+                    },
+                });
+            }
+            catch (error) {
+                const isUniqueViolation = error &&
+                    (error.code === 'P2002' ||
+                        (error.message && error.message.includes('Unique constraint failed')));
+                if (isUniqueViolation) {
+                    attempts++;
+                    this.logger.warn(`Unique constraint hit when creating antrian for cadisdik ${data.cadisdik_id}. Retrying attempt ${attempts}/${maxAttempts}...`);
+                    if (attempts >= maxAttempts) {
+                        throw error;
+                    }
+                    await new Promise((resolve) => setTimeout(resolve, Math.random() * 50 + 10));
+                    continue;
+                }
+                throw error;
+            }
+        }
     }
     async updateAntrianStatus(id, status) {
         return await this.prisma.antrian.update({

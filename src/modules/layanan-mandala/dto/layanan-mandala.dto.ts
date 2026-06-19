@@ -2,6 +2,10 @@ import { IsString, IsNotEmpty, IsInt, IsBoolean, IsOptional, IsUUID, IsArray, Va
 import { Type } from 'class-transformer';
 
 export class CreateLayananDto {
+  @IsUUID()
+  @IsOptional()
+  cadisdik_id?: string;
+
   @IsString()
   @IsNotEmpty()
   nama_layanan: string;
@@ -32,6 +36,10 @@ export class CreateLayananSyaratDto {
 }
 
 export class CreatePermohonanLayananDto {
+  @IsUUID()
+  @IsOptional()
+  cadisdik_id?: string;
+
   @IsUUID()
   sekolah_id: string;
 

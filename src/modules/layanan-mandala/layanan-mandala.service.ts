@@ -14,9 +14,14 @@ export class LayananMandalaService {
 
   // --- Master Layanan ---
 
-  async createLayanan(dto: CreateLayananDto) {
+  async createLayanan(dto: CreateLayananDto, defaultCadisdikId?: string) {
+    const cadisdikId = dto.cadisdik_id || defaultCadisdikId;
+    if (!cadisdikId) {
+      throw new BadRequestException('cadisdik_id is required');
+    }
     return await this.prisma.layanan.create({
       data: {
+        cadisdik_id: cadisdikId,
         nama_layanan: dto.nama_layanan,
         kategori: dto.kategori,
         aktif: dto.aktif ?? true,
@@ -24,8 +29,8 @@ export class LayananMandalaService {
     });
   }
 
-  async getLayanan(kategori?: number) {
-    const where: any = {};
+  async getLayanan(cadisdikId: string, kategori?: number) {
+    const where: any = { cadisdik_id: cadisdikId };
     if (kategori !== undefined) where.kategori = kategori;
     
     return await this.prisma.layanan.findMany({
@@ -97,10 +102,20 @@ export class LayananMandalaService {
       dto.peserta_didik_id = null;
     }
 
+    // Resolve cadisdik_id from sekolah
+    const sekolah = await this.prisma.sekolah.findUnique({
+      where: { sekolah_id: dto.sekolah_id },
+      select: { cadisdik_id: true },
+    });
+    if (!sekolah?.cadisdik_id) {
+      throw new BadRequestException('Sekolah tidak terasosiasi dengan Cabang Dinas (Cadisdik)');
+    }
+
     const nomorPermohonan = `REQ-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
     return await this.prisma.permohonanLayanan.create({
       data: {
+        cadisdik_id: sekolah.cadisdik_id,
         sekolah_id: dto.sekolah_id,
         layanan_id: dto.layanan_id,
         kategori: dto.kategori,
@@ -114,8 +129,9 @@ export class LayananMandalaService {
     });
   }
 
-  async getPermohonan(filters: { sekolah_id?: string; status?: number; kategori?: number }) {
+  async getPermohonan(filters: { cadisdik_id?: string; sekolah_id?: string; status?: number; kategori?: number }) {
     const where: any = {};
+    if (filters.cadisdik_id) where.cadisdik_id = filters.cadisdik_id;
     if (filters.sekolah_id) where.sekolah_id = filters.sekolah_id;
     if (filters.status !== undefined) where.status = filters.status;
     if (filters.kategori !== undefined) where.kategori = filters.kategori;

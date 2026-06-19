@@ -767,9 +767,18 @@ let DapodikService = class DapodikService {
             orderBy: { nama_instansi: 'asc' },
         });
     }
-    async getLayananMaster(kategori) {
+    async getLayananMaster(sekolahId, kategori) {
+        if (!sekolahId)
+            return [];
+        const sekolah = await this.prisma.sekolah.findUnique({
+            where: { sekolah_id: sekolahId },
+            select: { cadisdik_id: true }
+        });
+        if (!sekolah?.cadisdik_id)
+            return [];
         return await this.prisma.layanan.findMany({
             where: {
+                cadisdik_id: sekolah.cadisdik_id,
                 aktif: true,
                 ...(kategori !== undefined ? { kategori } : {}),
             },
@@ -836,9 +845,17 @@ let DapodikService = class DapodikService {
             dto.ptk_id = null;
             dto.peserta_didik_id = null;
         }
+        const sekolah = await this.prisma.sekolah.findUnique({
+            where: { sekolah_id: dto.sekolah_id },
+            select: { cadisdik_id: true }
+        });
+        if (!sekolah?.cadisdik_id) {
+            throw new Error('Sekolah tidak terasosiasi dengan Cabang Dinas (Cadisdik)');
+        }
         const nomorPermohonan = `REQ-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
         return await this.prisma.permohonanLayanan.create({
             data: {
+                cadisdik_id: sekolah.cadisdik_id,
                 sekolah_id: dto.sekolah_id,
                 layanan_id: dto.layanan_id,
                 kategori: dto.kategori,

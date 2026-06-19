@@ -893,8 +893,62 @@ model Cadisdik {
 
   kategori_keperluan KategoriKeperluan[]
   antrian           Antrian[]
+  pelaporan         Pelaporan[]
+  layanan           Layanan[]
+  permohonan_layanan PermohonanLayanan[]
 
   @@map("cadisdik")
+  @@schema("mandala")
+}
+
+model Pelaporan {
+  pelaporan_id    String    @id @default(uuid()) @db.Uuid
+  cadisdik_id     String    @db.Uuid
+  judul           String    @db.VarChar(255)
+  deskripsi       String?   @db.Text
+  tanggal_mulai   DateTime? @db.Timestamptz(6)
+  tanggal_selesai DateTime? @db.Timestamptz(6)
+  aktif           Boolean   @default(true)
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime  @updatedAt @db.Timestamptz(6)
+
+  cadisdik          Cadisdik           @relation(fields: [cadisdik_id], references: [cadisdik_id], onDelete: Cascade)
+  pelaporan_sekolah PelaporanSekolah[]
+
+  @@index([cadisdik_id])
+  @@index([aktif])
+  @@map("pelaporan")
+  @@schema("mandala")
+}
+
+model PelaporanSekolah {
+  pelaporan_sekolah_id String   @id @default(uuid()) @db.Uuid
+  pelaporan_id         String   @db.Uuid
+  sekolah_id           String   @db.Uuid
+  created_at           DateTime @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime @updatedAt @db.Timestamptz(6)
+
+  pelaporan         Pelaporan          @relation(fields: [pelaporan_id], references: [pelaporan_id], onDelete: Cascade)
+  pelaporan_dokumen PelaporanDokumen[]
+
+  @@unique([pelaporan_id, sekolah_id])
+  @@index([sekolah_id])
+  @@map("pelaporan_sekolah")
+  @@schema("mandala")
+}
+
+model PelaporanDokumen {
+  pelaporan_dokumen_id String   @id @default(uuid()) @db.Uuid
+  pelaporan_sekolah_id String   @db.Uuid
+  nama_file            String   @db.VarChar(255)
+  file_url             String   @db.VarChar(500)
+  ukuran_file          BigInt?
+  created_at           DateTime @default(now()) @db.Timestamptz(6)
+
+  pelaporan_sekolah PelaporanSekolah @relation(fields: [pelaporan_sekolah_id], references: [pelaporan_sekolah_id], onDelete: Cascade)
+
+  @@index([pelaporan_sekolah_id])
+  @@map("pelaporan_dokumen")
   @@schema("mandala")
 }
 
@@ -1310,16 +1364,19 @@ model RiwayatPendidikanFormal {
 
 model Layanan {
   layanan_id   String   @id @default(uuid()) @db.Uuid
+  cadisdik_id  String?  @db.Uuid
   nama_layanan String   @db.VarChar(150)
   kategori     Int      @db.SmallInt // 0 = GTK, 1 = Peserta Didik, 2 = Sekolah
   aktif        Boolean  @default(true)
   created_at   DateTime @default(now()) @db.Timestamptz(6)
   updated_at   DateTime @default(now()) @updatedAt @db.Timestamptz(6)
 
+  cadisdik           Cadisdik?          @relation(fields: [cadisdik_id], references: [cadisdik_id], onDelete: Cascade)
   syarat             LayananSyarat[]
   permohonan_layanan PermohonanLayanan[]
 
-  @@unique([nama_layanan, kategori])
+  @@unique([cadisdik_id, nama_layanan, kategori])
+  @@index([cadisdik_id])
   @@index([kategori])
   @@index([aktif])
   @@map("layanan")
@@ -1348,6 +1405,7 @@ model LayananSyarat {
 
 model PermohonanLayanan {
   permohonan_layanan_id String    @id @default(uuid()) @db.Uuid
+  cadisdik_id           String?   @db.Uuid
   sekolah_id            String    @db.Uuid
   layanan_id            String    @db.Uuid
   kategori              Int       @db.SmallInt // 0 = GTK, 1 = Peserta Didik, 2 = Sekolah
@@ -1360,10 +1418,12 @@ model PermohonanLayanan {
   created_at            DateTime  @default(now()) @db.Timestamptz(6)
   updated_at            DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
 
+  cadisdik               Cadisdik?               @relation(fields: [cadisdik_id], references: [cadisdik_id], onDelete: Cascade)
   layanan                Layanan                 @relation(fields: [layanan_id], references: [layanan_id], onDelete: Restrict)
   permohonan_layanan_file PermohonanLayananFile[]
   permohonan_layanan_log  PermohonanLayananLog[]
 
+  @@index([cadisdik_id])
   @@index([sekolah_id])
   @@index([layanan_id])
   @@index([status])

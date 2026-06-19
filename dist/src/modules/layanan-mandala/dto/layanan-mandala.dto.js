@@ -12,11 +12,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdatePermohonanStatusDto = exports.CreatePermohonanLayananFileDto = exports.CreatePermohonanLayananDto = exports.CreateLayananSyaratDto = exports.CreateLayananDto = void 0;
 const class_validator_1 = require("class-validator");
 class CreateLayananDto {
+    cadisdik_id;
     nama_layanan;
     kategori;
     aktif;
 }
 exports.CreateLayananDto = CreateLayananDto;
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateLayananDto.prototype, "cadisdik_id", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
@@ -58,6 +64,7 @@ __decorate([
     __metadata("design:type", Boolean)
 ], CreateLayananSyaratDto.prototype, "aktif", void 0);
 class CreatePermohonanLayananDto {
+    cadisdik_id;
     sekolah_id;
     layanan_id;
     kategori;
@@ -67,6 +74,11 @@ class CreatePermohonanLayananDto {
     keterangan;
 }
 exports.CreatePermohonanLayananDto = CreatePermohonanLayananDto;
+__decorate([
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreatePermohonanLayananDto.prototype, "cadisdik_id", void 0);
 __decorate([
     (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)

@@ -3,15 +3,16 @@ import { CreateLayananDto, CreateLayananSyaratDto, CreatePermohonanLayananDto, C
 export declare class LayananMandalaService {
     private readonly prisma;
     constructor(prisma: PrismaService);
-    createLayanan(dto: CreateLayananDto): Promise<{
+    createLayanan(dto: CreateLayananDto, defaultCadisdikId?: string): Promise<{
         created_at: Date;
         updated_at: Date;
+        cadisdik_id: string | null;
         aktif: boolean;
         layanan_id: string;
         nama_layanan: string;
         kategori: number;
     }>;
-    getLayanan(kategori?: number): Promise<({
+    getLayanan(cadisdikId: string, kategori?: number): Promise<({
         syarat: {
             created_at: Date;
             updated_at: Date;
@@ -25,6 +26,7 @@ export declare class LayananMandalaService {
     } & {
         created_at: Date;
         updated_at: Date;
+        cadisdik_id: string | null;
         aktif: boolean;
         layanan_id: string;
         nama_layanan: string;
@@ -33,6 +35,7 @@ export declare class LayananMandalaService {
     updateLayanan(id: string, dto: Partial<CreateLayananDto>): Promise<{
         created_at: Date;
         updated_at: Date;
+        cadisdik_id: string | null;
         aktif: boolean;
         layanan_id: string;
         nama_layanan: string;
@@ -41,6 +44,7 @@ export declare class LayananMandalaService {
     deleteLayanan(id: string): Promise<{
         created_at: Date;
         updated_at: Date;
+        cadisdik_id: string | null;
         aktif: boolean;
         layanan_id: string;
         nama_layanan: string;
@@ -92,6 +96,7 @@ export declare class LayananMandalaService {
         sekolah_id: string;
         ptk_id: string | null;
         peserta_didik_id: string | null;
+        cadisdik_id: string | null;
         status: number;
         keterangan: string | null;
         layanan_id: string;
@@ -101,6 +106,7 @@ export declare class LayananMandalaService {
         tanggal_pengajuan: Date | null;
     }>;
     getPermohonan(filters: {
+        cadisdik_id?: string;
         sekolah_id?: string;
         status?: number;
         kategori?: number;
@@ -108,6 +114,7 @@ export declare class LayananMandalaService {
         layanan: {
             created_at: Date;
             updated_at: Date;
+            cadisdik_id: string | null;
             aktif: boolean;
             layanan_id: string;
             nama_layanan: string;
@@ -154,6 +161,7 @@ export declare class LayananMandalaService {
         sekolah_id: string;
         ptk_id: string | null;
         peserta_didik_id: string | null;
+        cadisdik_id: string | null;
         status: number;
         keterangan: string | null;
         layanan_id: string;
@@ -177,6 +185,7 @@ export declare class LayananMandalaService {
         } & {
             created_at: Date;
             updated_at: Date;
+            cadisdik_id: string | null;
             aktif: boolean;
             layanan_id: string;
             nama_layanan: string;
@@ -223,6 +232,7 @@ export declare class LayananMandalaService {
         sekolah_id: string;
         ptk_id: string | null;
         peserta_didik_id: string | null;
+        cadisdik_id: string | null;
         status: number;
         keterangan: string | null;
         layanan_id: string;
@@ -237,6 +247,7 @@ export declare class LayananMandalaService {
         sekolah_id: string;
         ptk_id: string | null;
         peserta_didik_id: string | null;
+        cadisdik_id: string | null;
         status: number;
         keterangan: string | null;
         layanan_id: string;

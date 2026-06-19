@@ -1,20 +1,22 @@
 import { LayananMandalaService } from './layanan-mandala.service';
 import { CreateLayananDto, CreateLayananSyaratDto, CreatePermohonanLayananDto, CreatePermohonanLayananFileDto, UpdatePermohonanStatusDto } from './dto/layanan-mandala.dto';
+import type { Request } from 'express';
 export declare class LayananMandalaController {
     private readonly layananMandalaService;
     constructor(layananMandalaService: LayananMandalaService);
-    createLayanan(dto: CreateLayananDto): Promise<{
+    createLayanan(req: Request, dto: CreateLayananDto): Promise<{
         status: string;
         data: {
             created_at: Date;
             updated_at: Date;
+            cadisdik_id: string | null;
             aktif: boolean;
             layanan_id: string;
             nama_layanan: string;
             kategori: number;
         };
     }>;
-    getLayanan(kategori?: string): Promise<{
+    getLayanan(req: Request, kategori?: string): Promise<{
         status: string;
         data: ({
             syarat: {
@@ -30,6 +32,7 @@ export declare class LayananMandalaController {
         } & {
             created_at: Date;
             updated_at: Date;
+            cadisdik_id: string | null;
             aktif: boolean;
             layanan_id: string;
             nama_layanan: string;
@@ -41,6 +44,7 @@ export declare class LayananMandalaController {
         data: {
             created_at: Date;
             updated_at: Date;
+            cadisdik_id: string | null;
             aktif: boolean;
             layanan_id: string;
             nama_layanan: string;
@@ -103,6 +107,7 @@ export declare class LayananMandalaController {
             sekolah_id: string;
             ptk_id: string | null;
             peserta_didik_id: string | null;
+            cadisdik_id: string | null;
             status: number;
             keterangan: string | null;
             layanan_id: string;
@@ -112,12 +117,13 @@ export declare class LayananMandalaController {
             tanggal_pengajuan: Date | null;
         };
     }>;
-    getPermohonan(sekolahId?: string, status?: string, kategori?: string): Promise<{
+    getPermohonan(req: Request, sekolahId?: string, status?: string, kategori?: string): Promise<{
         status: string;
         data: ({
             layanan: {
                 created_at: Date;
                 updated_at: Date;
+                cadisdik_id: string | null;
                 aktif: boolean;
                 layanan_id: string;
                 nama_layanan: string;
@@ -164,6 +170,7 @@ export declare class LayananMandalaController {
             sekolah_id: string;
             ptk_id: string | null;
             peserta_didik_id: string | null;
+            cadisdik_id: string | null;
             status: number;
             keterangan: string | null;
             layanan_id: string;
@@ -190,6 +197,7 @@ export declare class LayananMandalaController {
             } & {
                 created_at: Date;
                 updated_at: Date;
+                cadisdik_id: string | null;
                 aktif: boolean;
                 layanan_id: string;
                 nama_layanan: string;
@@ -236,6 +244,7 @@ export declare class LayananMandalaController {
             sekolah_id: string;
             ptk_id: string | null;
             peserta_didik_id: string | null;
+            cadisdik_id: string | null;
             status: number;
             keterangan: string | null;
             layanan_id: string;
@@ -254,6 +263,7 @@ export declare class LayananMandalaController {
             sekolah_id: string;
             ptk_id: string | null;
             peserta_didik_id: string | null;
+            cadisdik_id: string | null;
             status: number;
             keterangan: string | null;
             layanan_id: string;

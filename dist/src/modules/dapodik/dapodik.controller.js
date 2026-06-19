@@ -46,8 +46,9 @@ let DapodikController = class DapodikController {
             data,
         };
     }
-    async getLayananMaster(kategori) {
-        const data = await this.dapodikService.getLayananMaster(kategori ? parseInt(kategori, 10) : undefined);
+    async getLayananMaster(req, kategori) {
+        const { sekolahId } = this.getSekolahInfo(req);
+        const data = await this.dapodikService.getLayananMaster(sekolahId, kategori ? parseInt(kategori, 10) : undefined);
         return {
             status: 'success',
             data,
@@ -466,9 +467,10 @@ __decorate([
 ], DapodikController.prototype, "getCadisdikList", null);
 __decorate([
     (0, common_1.Get)('master-layanan'),
-    __param(0, (0, common_1.Query)('kategori')),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('kategori')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], DapodikController.prototype, "getLayananMaster", null);
 __decorate([

@@ -25,6 +25,7 @@ const jadwal_module_1 = require("./modules/jadwal/jadwal.module");
 const presensi_module_1 = require("./modules/presensi/presensi.module");
 const mandala_module_1 = require("./modules/mandala/mandala.module");
 const layanan_mandala_module_1 = require("./modules/layanan-mandala/layanan-mandala.module");
+const pelaporan_module_1 = require("./modules/mandala/pelaporan/pelaporan.module");
 const indisipliner_module_1 = require("./modules/indisipliner/indisipliner.module");
 const spp_module_1 = require("./modules/spp/spp.module");
 const surat_module_1 = require("./modules/surat/surat.module");
@@ -49,6 +50,7 @@ exports.AppModule = AppModule = __decorate([
             presensi_module_1.PresensiModule,
             mandala_module_1.MandalaModule,
             layanan_mandala_module_1.LayananMandalaModule,
+            pelaporan_module_1.PelaporanModule,
             indisipliner_module_1.IndisiplinerModule,
             spp_module_1.SppModule,
             surat_module_1.SuratModule,

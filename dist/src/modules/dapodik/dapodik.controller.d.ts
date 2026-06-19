@@ -18,7 +18,7 @@ export declare class DapodikController {
             nama_instansi: string;
         }[];
     }>;
-    getLayananMaster(kategori?: string): Promise<{
+    getLayananMaster(req: Request, kategori?: string): Promise<{
         status: string;
         data: ({
             syarat: {
@@ -34,6 +34,7 @@ export declare class DapodikController {
         } & {
             created_at: Date;
             updated_at: Date;
+            cadisdik_id: string | null;
             aktif: boolean;
             layanan_id: string;
             nama_layanan: string;
@@ -48,6 +49,7 @@ export declare class DapodikController {
             layanan: {
                 created_at: Date;
                 updated_at: Date;
+                cadisdik_id: string | null;
                 aktif: boolean;
                 layanan_id: string;
                 nama_layanan: string;
@@ -93,6 +95,7 @@ export declare class DapodikController {
             sekolah_id: string;
             ptk_id: string | null;
             peserta_didik_id: string | null;
+            cadisdik_id: string | null;
             status: number;
             keterangan: string | null;
             layanan_id: string;
@@ -111,6 +114,7 @@ export declare class DapodikController {
             sekolah_id: string;
             ptk_id: string | null;
             peserta_didik_id: string | null;
+            cadisdik_id: string | null;
             status: number;
             keterangan: string | null;
             layanan_id: string;

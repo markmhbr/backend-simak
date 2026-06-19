@@ -22,17 +22,22 @@ let LayananMandalaController = class LayananMandalaController {
     constructor(layananMandalaService) {
         this.layananMandalaService = layananMandalaService;
     }
-    async createLayanan(dto) {
+    async createLayanan(req, dto) {
+        const defaultCadisdikId = req['user']?.cadisdik_id;
         return {
             status: 'success',
-            data: await this.layananMandalaService.createLayanan(dto),
+            data: await this.layananMandalaService.createLayanan(dto, defaultCadisdikId),
         };
     }
-    async getLayanan(kategori) {
+    async getLayanan(req, kategori) {
+        const cadisdikId = req['user']?.cadisdik_id || req.query?.cadisdik_id;
+        if (!cadisdikId) {
+            throw new common_1.BadRequestException('cadisdik_id is required');
+        }
         const cat = kategori !== undefined ? parseInt(kategori, 10) : undefined;
         return {
             status: 'success',
-            data: await this.layananMandalaService.getLayanan(cat),
+            data: await this.layananMandalaService.getLayanan(cadisdikId, cat),
         };
     }
     async updateLayanan(id, dto) {
@@ -80,8 +85,10 @@ let LayananMandalaController = class LayananMandalaController {
             data: await this.layananMandalaService.createPermohonan(dto),
         };
     }
-    async getPermohonan(sekolahId, status, kategori) {
+    async getPermohonan(req, sekolahId, status, kategori) {
+        const cadisdikId = req['user']?.cadisdik_id || req.query?.cadisdik_id;
         const filters = {
+            cadisdik_id: cadisdikId,
             sekolah_id: sekolahId,
             status: status !== undefined ? parseInt(status, 10) : undefined,
             kategori: kategori !== undefined ? parseInt(kategori, 10) : undefined,
@@ -124,16 +131,18 @@ let LayananMandalaController = class LayananMandalaController {
 exports.LayananMandalaController = LayananMandalaController;
 __decorate([
     (0, common_1.Post)('master'),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [layanan_mandala_dto_1.CreateLayananDto]),
+    __metadata("design:paramtypes", [Object, layanan_mandala_dto_1.CreateLayananDto]),
     __metadata("design:returntype", Promise)
 ], LayananMandalaController.prototype, "createLayanan", null);
 __decorate([
     (0, common_1.Get)('master'),
-    __param(0, (0, common_1.Query)('kategori')),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('kategori')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], LayananMandalaController.prototype, "getLayanan", null);
 __decorate([
@@ -190,11 +199,12 @@ __decorate([
 ], LayananMandalaController.prototype, "createPermohonan", null);
 __decorate([
     (0, common_1.Get)('permohonan'),
-    __param(0, (0, common_1.Query)('sekolah_id')),
-    __param(1, (0, common_1.Query)('status')),
-    __param(2, (0, common_1.Query)('kategori')),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('sekolah_id')),
+    __param(2, (0, common_1.Query)('status')),
+    __param(3, (0, common_1.Query)('kategori')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:paramtypes", [Object, String, String, String]),
     __metadata("design:returntype", Promise)
 ], LayananMandalaController.prototype, "getPermohonan", null);
 __decorate([

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query, Patch, Delete, UseGuards, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, Patch, Delete, UseGuards, BadRequestException, Req } from '@nestjs/common';
 import { LayananMandalaService } from './layanan-mandala.service';
 import { 
   CreateLayananDto, 
@@ -8,6 +8,7 @@ import {
   UpdatePermohonanStatusDto
 } from './dto/layanan-mandala.dto';
 import { MandalaKeyGuard } from '../../core/mandala/mandala-key.guard';
+import type { Request } from 'express';
 
 @Controller('layanan-mandala')
 @UseGuards(MandalaKeyGuard)
@@ -17,19 +18,24 @@ export class LayananMandalaController {
   // --- Master Layanan ---
 
   @Post('master')
-  async createLayanan(@Body() dto: CreateLayananDto) {
+  async createLayanan(@Req() req: Request, @Body() dto: CreateLayananDto) {
+    const defaultCadisdikId = (req['user'] as any)?.cadisdik_id;
     return {
       status: 'success',
-      data: await this.layananMandalaService.createLayanan(dto),
+      data: await this.layananMandalaService.createLayanan(dto, defaultCadisdikId),
     };
   }
 
   @Get('master')
-  async getLayanan(@Query('kategori') kategori?: string) {
+  async getLayanan(@Req() req: Request, @Query('kategori') kategori?: string) {
+    const cadisdikId = (req['user'] as any)?.cadisdik_id || (req.query?.cadisdik_id as string);
+    if (!cadisdikId) {
+      throw new BadRequestException('cadisdik_id is required');
+    }
     const cat = kategori !== undefined ? parseInt(kategori, 10) : undefined;
     return {
       status: 'success',
-      data: await this.layananMandalaService.getLayanan(cat),
+      data: await this.layananMandalaService.getLayanan(cadisdikId, cat),
     };
   }
 
@@ -98,11 +104,14 @@ export class LayananMandalaController {
 
   @Get('permohonan')
   async getPermohonan(
+    @Req() req: Request,
     @Query('sekolah_id') sekolahId?: string,
     @Query('status') status?: string,
     @Query('kategori') kategori?: string,
   ) {
+    const cadisdikId = (req['user'] as any)?.cadisdik_id || (req.query?.cadisdik_id as string);
     const filters = {
+      cadisdik_id: cadisdikId,
       sekolah_id: sekolahId,
       status: status !== undefined ? parseInt(status, 10) : undefined,
       kategori: kategori !== undefined ? parseInt(kategori, 10) : undefined,
