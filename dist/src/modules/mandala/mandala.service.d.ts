@@ -167,6 +167,7 @@ export declare class MandalaService implements OnModuleInit {
         status: number;
         nama_lengkap: string;
         jabatan: string | null;
+        tanggal: Date;
         kategori_keperluan_id: string;
         antrian_id: string;
         nomor_antrian: number;
@@ -189,6 +190,7 @@ export declare class MandalaService implements OnModuleInit {
         status: number;
         nama_lengkap: string;
         jabatan: string | null;
+        tanggal: Date;
         kategori_keperluan_id: string;
         antrian_id: string;
         nomor_antrian: number;
@@ -203,6 +205,7 @@ export declare class MandalaService implements OnModuleInit {
         status: number;
         nama_lengkap: string;
         jabatan: string | null;
+        tanggal: Date;
         kategori_keperluan_id: string;
         antrian_id: string;
         nomor_antrian: number;

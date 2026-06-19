@@ -255,26 +255,24 @@ let MandalaService = MandalaService_1 = class MandalaService {
         const maxAttempts = 5;
         while (attempts < maxAttempts) {
             try {
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                const tomorrow = new Date(today);
-                tomorrow.setDate(tomorrow.getDate() + 1);
-                const lastAntrian = await this.prisma.antrian.findFirst({
-                    where: {
-                        cadisdik_id: data.cadisdik_id,
-                        created_at: {
-                            gte: today,
-                            lt: tomorrow,
+                return await this.prisma.$transaction(async (tx) => {
+                    await tx.$executeRaw `
+            SELECT pg_advisory_xact_lock(hashtext(${data.cadisdik_id}))
+          `;
+                    const result = await tx.$queryRaw `
+            SELECT COALESCE(MAX(nomor_antrian), 0) as max_nomor
+            FROM "mandala"."antrian"
+            WHERE cadisdik_id = ${data.cadisdik_id}::uuid
+              AND tanggal = CURRENT_DATE
+          `;
+                    const maxNomor = result[0]?.max_nomor ?? 0;
+                    const nextNomor = Number(maxNomor) + 1;
+                    return await tx.antrian.create({
+                        data: {
+                            ...data,
+                            nomor_antrian: nextNomor,
                         },
-                    },
-                    orderBy: { nomor_antrian: 'desc' },
-                });
-                const nextNomor = lastAntrian ? lastAntrian.nomor_antrian + 1 : 1;
-                return await this.prisma.antrian.create({
-                    data: {
-                        ...data,
-                        nomor_antrian: nextNomor,
-                    },
+                    });
                 });
             }
             catch (error) {
@@ -283,7 +281,7 @@ let MandalaService = MandalaService_1 = class MandalaService {
                         (error.message && error.message.includes('Unique constraint failed')));
                 if (isUniqueViolation) {
                     attempts++;
-                    this.logger.warn(`Unique constraint hit when creating antrian for cadisdik ${data.cadisdik_id}. Retrying attempt ${attempts}/${maxAttempts}...`);
+                    this.logger.warn(`Unique constraint hit when creating antrian for cadisdik ${data.cadisdik_id}. Retrying transaction attempt ${attempts}/${maxAttempts}...`);
                     if (attempts >= maxAttempts) {
                         throw error;
                     }

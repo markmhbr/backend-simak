@@ -972,6 +972,7 @@ model KategoriKeperluan {
 model Antrian {
   antrian_id            String   @id @default(uuid()) @db.Uuid
   cadisdik_id           String   @db.Uuid
+  tanggal               DateTime @default(now()) @db.Date
   kategori_keperluan_id String   @db.Uuid
   nomor_antrian         Int      @db.Integer
   nama_lengkap          String   @db.VarChar(255)
@@ -986,7 +987,7 @@ model Antrian {
   cadisdik             Cadisdik          @relation(fields: [cadisdik_id], references: [cadisdik_id], onDelete: Cascade)
   kategori_keperluan   KategoriKeperluan @relation(fields: [kategori_keperluan_id], references: [kategori_keperluan_id], onDelete: Restrict)
 
-  @@unique([cadisdik_id, nomor_antrian])
+  @@unique([cadisdik_id, tanggal, nomor_antrian])
   @@index([cadisdik_id])
   @@index([kategori_keperluan_id])
   @@index([status])

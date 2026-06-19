@@ -242,30 +242,29 @@ export class MandalaService implements OnModuleInit {
 
     while (attempts < maxAttempts) {
       try {
-        // Generate nomor antrian
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
+        return await this.prisma.$transaction(async (tx) => {
+          // Lock using PostgreSQL advisory lock to prevent concurrent queue generation for this cadisdik
+          await tx.$executeRaw`
+            SELECT pg_advisory_xact_lock(hashtext(${data.cadisdik_id}))
+          `;
 
-        const lastAntrian = await this.prisma.antrian.findFirst({
-          where: {
-            cadisdik_id: data.cadisdik_id,
-            created_at: {
-              gte: today,
-              lt: tomorrow,
+          // Fetch the latest queue number for today using the new "tanggal" column
+          const result = await tx.$queryRaw<any[]>`
+            SELECT COALESCE(MAX(nomor_antrian), 0) as max_nomor
+            FROM "mandala"."antrian"
+            WHERE cadisdik_id = ${data.cadisdik_id}::uuid
+              AND tanggal = CURRENT_DATE
+          `;
+
+          const maxNomor = result[0]?.max_nomor ?? 0;
+          const nextNomor = Number(maxNomor) + 1;
+
+          return await tx.antrian.create({
+            data: {
+              ...data,
+              nomor_antrian: nextNomor,
             },
-          },
-          orderBy: { nomor_antrian: 'desc' },
-        });
-
-        const nextNomor = lastAntrian ? lastAntrian.nomor_antrian + 1 : 1;
-
-        return await this.prisma.antrian.create({
-          data: {
-            ...data,
-            nomor_antrian: nextNomor,
-          },
+          });
         });
       } catch (error) {
         const isUniqueViolation =
@@ -276,7 +275,7 @@ export class MandalaService implements OnModuleInit {
         if (isUniqueViolation) {
           attempts++;
           this.logger.warn(
-            `Unique constraint hit when creating antrian for cadisdik ${data.cadisdik_id}. Retrying attempt ${attempts}/${maxAttempts}...`,
+            `Unique constraint hit when creating antrian for cadisdik ${data.cadisdik_id}. Retrying transaction attempt ${attempts}/${maxAttempts}...`,
           );
           if (attempts >= maxAttempts) {
             throw error;
