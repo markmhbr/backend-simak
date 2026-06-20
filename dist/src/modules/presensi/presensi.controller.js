@@ -61,7 +61,7 @@ let PresensiController = class PresensiController {
     }
     scanQr(req, data) {
         const appKey = req['appKey'];
-        return this.presensiService.scanQr(appKey.sekolah_id, data.token);
+        return this.presensiService.scanQr(appKey.sekolah_id, data.token, data.latitude, data.longitude);
     }
     lookupUser(req, data) {
         const appKey = req['appKey'];

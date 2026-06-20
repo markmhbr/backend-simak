@@ -145,7 +145,8 @@ export class DapodikService {
         spmb: data.spmb,
         peta: data.peta,
         social_media: data.social_media,
-        cadisdik_id: data.cadisdik_id,
+        cadisdik_id: data.cadisdik_id !== undefined ? (data.cadisdik_id !== "" && data.cadisdik_id !== null ? data.cadisdik_id : null) : undefined,
+        radius: data.radius !== undefined ? (data.radius !== null && data.radius !== "" ? Number(data.radius) : null) : undefined,
       },
     });
   }

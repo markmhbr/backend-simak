@@ -136,7 +136,7 @@ export declare class PresensiService {
             disetujui: boolean;
         };
     }>;
-    scanQr(sekolahId: string, token: string): Promise<{
+    scanQr(sekolahId: string, token: string, latitude?: number, longitude?: number): Promise<{
         peserta_didik: {
             nama: string;
             foto: string;
@@ -206,4 +206,5 @@ export declare class PresensiService {
         nuptk: string;
         jenis_ptk_id_str: string;
     }[]>;
+    private getDistance;
 }

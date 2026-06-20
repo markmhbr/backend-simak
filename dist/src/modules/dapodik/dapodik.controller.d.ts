@@ -190,6 +190,7 @@ export declare class DapodikController {
             background_kartu_pesertadidik: string | null;
             peta: string | null;
             social_media: import("@prisma/client/runtime/client").JsonValue | null;
+            radius: number | null;
         };
     }>;
     updateSekolahInfoDetail(req: Request, body: any): Promise<{
@@ -231,6 +232,7 @@ export declare class DapodikController {
             background_kartu_pesertadidik: string | null;
             peta: string | null;
             social_media: import("@prisma/client/runtime/client").JsonValue | null;
+            radius: number | null;
         };
     }>;
     uploadSekolahLogo(req: Request, file: Express.Multer.File): Promise<{
@@ -272,6 +274,7 @@ export declare class DapodikController {
             background_kartu_pesertadidik: string | null;
             peta: string | null;
             social_media: import("@prisma/client/runtime/client").JsonValue | null;
+            radius: number | null;
         };
     }>;
     uploadSiswaFoto(req: Request, uuid: string, file: Express.Multer.File): Promise<{

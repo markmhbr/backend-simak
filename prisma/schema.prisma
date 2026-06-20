@@ -41,6 +41,7 @@ model Sekolah {
   background_kartu_pesertadidik String?
   peta                          String?
   social_media                  Json?
+  radius                        Int?                  @default(100)
   created_at                    DateTime              @default(now())
   updated_at                    DateTime              @updatedAt
   cadisdik_id                   String?               @db.Uuid

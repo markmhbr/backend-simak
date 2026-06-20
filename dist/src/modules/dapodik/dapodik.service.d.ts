@@ -52,6 +52,7 @@ export declare class DapodikService {
         background_kartu_pesertadidik: string | null;
         peta: string | null;
         social_media: import("@prisma/client/runtime/client").JsonValue | null;
+        radius: number | null;
     }>;
     updateSekolah(sekolahId: string, data: any): Promise<{
         created_at: Date;
@@ -89,6 +90,7 @@ export declare class DapodikService {
         background_kartu_pesertadidik: string | null;
         peta: string | null;
         social_media: import("@prisma/client/runtime/client").JsonValue | null;
+        radius: number | null;
     }>;
     uploadLogo(sekolahId: string, file: Express.Multer.File): Promise<{
         created_at: Date;
@@ -126,6 +128,7 @@ export declare class DapodikService {
         background_kartu_pesertadidik: string | null;
         peta: string | null;
         social_media: import("@prisma/client/runtime/client").JsonValue | null;
+        radius: number | null;
     }>;
     uploadSiswaFoto(sekolahId: string, uuidSiswa: string, file: Express.Multer.File): Promise<{
         filePath: string;

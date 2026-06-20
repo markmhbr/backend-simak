@@ -10,6 +10,8 @@ export declare class PresensiController {
     }>;
     scanQr(req: express.Request, data: {
         token: string;
+        latitude?: number;
+        longitude?: number;
     }): Promise<{
         peserta_didik: {
             nama: string;

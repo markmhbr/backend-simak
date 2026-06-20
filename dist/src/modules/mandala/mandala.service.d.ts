@@ -452,6 +452,7 @@ export declare class MandalaService implements OnModuleInit {
         background_kartu_pesertadidik: string | null;
         peta: string | null;
         social_media: import("@prisma/client/runtime/client").JsonValue | null;
+        radius: number | null;
     }>;
     getSchoolSummary(sekolahId: string): Promise<{
         sekolah_id: string;

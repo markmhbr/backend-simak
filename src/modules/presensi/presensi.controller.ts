@@ -16,9 +16,9 @@ export class PresensiController {
 
   @UseGuards(ApiKeyGuard)
   @Post('scan')
-  scanQr(@Req() req: express.Request, @Body() data: { token: string }) {
+  scanQr(@Req() req: express.Request, @Body() data: { token: string; latitude?: number; longitude?: number }) {
     const appKey = req['appKey'];
-    return this.presensiService.scanQr(appKey.sekolah_id, data.token);
+    return this.presensiService.scanQr(appKey.sekolah_id, data.token, data.latitude, data.longitude);
   }
 
   @UseGuards(ApiKeyGuard)

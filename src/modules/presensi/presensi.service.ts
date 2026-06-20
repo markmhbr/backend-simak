@@ -548,7 +548,33 @@ export class PresensiService {
     throw new NotFoundException('Data QR Token tidak ditemukan');
   }
 
-  async scanQr(sekolahId: string, token: string) {
+  async scanQr(sekolahId: string, token: string, latitude?: number, longitude?: number) {
+    const sekolah = await this.prisma.sekolah.findUnique({
+      where: { sekolah_id: sekolahId },
+      select: { lintang: true, bujur: true, radius: true },
+    });
+
+    if (sekolah && sekolah.lintang && sekolah.bujur && sekolah.radius !== null && sekolah.radius > 0) {
+      if (latitude === undefined || longitude === undefined || latitude === null || longitude === null) {
+        throw new BadRequestException(
+          'Lokasi perangkat tidak terdeteksi. Silakan aktifkan GPS/Layanan Lokasi pada browser.',
+        );
+      }
+
+      const distance = this.getDistance(
+        Number(latitude),
+        Number(longitude),
+        Number(sekolah.lintang),
+        Number(sekolah.bujur),
+      );
+
+      if (distance > sekolah.radius) {
+        throw new BadRequestException(
+          `Presensi gagal. Anda berada di luar area scan sekolah. Jarak Anda: ${Math.round(distance)} meter, Radius maksimal: ${sekolah.radius} meter.`,
+        );
+      }
+    }
+
     const wibDate = new Date(new Date().getTime() + 7 * 60 * 60 * 1000);
     const dateOnly = new Date(wibDate.toISOString().split('T')[0]);
 
@@ -752,5 +778,19 @@ export class PresensiService {
         presensi: att || null,
       };
     });
+  }
+
+  private getDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 6371000; // Radius bumi dalam meter
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
   }
 }
