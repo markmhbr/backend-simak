@@ -178,6 +178,12 @@ let MandalaController = class MandalaController {
         }
         return await this.mandalaService.verify2FAPegawai(body.tempToken, body.code, body.secretToSave);
     }
+    async refresh(refreshToken) {
+        if (!refreshToken) {
+            throw new common_1.BadRequestException('refreshToken is required.');
+        }
+        return await this.mandalaService.refreshTokensPegawai(refreshToken);
+    }
     async getPegawais(cadisdikId) {
         const data = await this.mandalaService.getPegawais(cadisdikId);
         return {
@@ -495,6 +501,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], MandalaController.prototype, "verify2FA", null);
+__decorate([
+    (0, common_1.Post)('auth/refresh'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, common_1.Body)('refreshToken')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "refresh", null);
 __decorate([
     (0, common_1.Get)('pegawai'),
     (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),

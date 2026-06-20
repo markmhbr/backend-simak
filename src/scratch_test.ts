@@ -19,26 +19,25 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  const layanans = await prisma.layanan.findMany({
-    include: {
-      syarat: true,
-    },
-  });
-  console.log("=== LAYANAN MASTER ===");
-  console.log(JSON.stringify(layanans, null, 2));
-
-  const permohonans = await prisma.permohonanLayanan.findMany({
-    include: {
-      layanan: {
-        include: {
-          syarat: true,
-        },
+  try {
+    const student = await prisma.pesertaDidik.findFirst({
+      where: {
+        AND: [
+          { peserta_didik_id: '53586a6a-2227-11e4-8102-4f35510c698d' },
+          { sekolah_id: '8f7c90fd-3517-46f7-98a7-56df1b5bf2c3' }
+        ]
       },
-      permohonan_layanan_file: true,
-    },
-  });
-  console.log("=== PERMOHONAN LAYANAN ===");
-  console.log(JSON.stringify(permohonans, null, 2));
+      include: {
+        penggunas: {
+          select: { email: true }
+        }
+      }
+    });
+    console.log("=== DB QUERY TEST ===");
+    console.log(student);
+  } catch (err) {
+    console.error("Prisma query failed:", err);
+  }
 }
 
 main()

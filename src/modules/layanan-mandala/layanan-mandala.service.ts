@@ -279,7 +279,8 @@ export class LayananMandalaService {
       throw new BadRequestException('Format file tidak didukung. Gunakan PDF atau Gambar (JPG, PNG, WebP).');
     }
 
-    const relativePath = `/storage/${permohonan.sekolah_id}/layanan/${id}/${finalFileName}`;
+    const savedFileName = path.basename(savedPath);
+    const relativePath = `/storage/${permohonan.sekolah_id}/layanan/${id}/${savedFileName}`;
 
     // If it's a specific requirement (layanan_syarat_id) or Surat Permohonan Awal (jenis_file == 0) and we already have a file, overwrite it
     let existingFile = null;
@@ -316,7 +317,7 @@ export class LayananMandalaService {
       return await this.prisma.permohonanLayananFile.update({
         where: { permohonan_layanan_file_id: existingFile.permohonan_layanan_file_id },
         data: {
-          nama_file: finalFileName,
+          nama_file: savedFileName,
           file_url: relativePath,
           status: 0, // Reset to Menunggu Verifikasi
           catatan: null, // Clear any previous notes
@@ -331,7 +332,7 @@ export class LayananMandalaService {
         permohonan_layanan_id: id,
         layanan_syarat_id: dto.layanan_syarat_id,
         jenis_file: dto.jenis_file,
-        nama_file: finalFileName,
+        nama_file: savedFileName,
         file_url: relativePath,
         status: 0, // Menunggu Verifikasi
       },

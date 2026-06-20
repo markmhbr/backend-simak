@@ -49,26 +49,40 @@ const pool = new pg_1.Pool({ connectionString: dbUrl });
 const adapter = new adapter_pg_1.PrismaPg(pool);
 const prisma = new client_1.PrismaClient({ adapter });
 async function main() {
-    try {
-        const student = await prisma.pesertaDidik.findFirst({
-            where: {
-                AND: [
-                    { peserta_didik_id: '53586a6a-2227-11e4-8102-4f35510c698d' },
-                    { sekolah_id: '8f7c90fd-3517-46f7-98a7-56df1b5bf2c3' }
-                ]
-            },
-            include: {
-                penggunas: {
-                    select: { email: true }
+    console.log("=== MEMULAI KOREKSI EKSTENSI FILE DATABASE ===");
+    const files = await prisma.permohonanLayananFile.findMany();
+    console.log(`Menemukan ${files.length} record permohonan file.`);
+    let updatedFilesCount = 0;
+    for (const f of files) {
+        if (!f.file_url)
+            continue;
+        const fileExt = path.extname(f.file_url).toLowerCase();
+        if (fileExt !== '.jpg' && fileExt !== '.pdf') {
+            const fullPath = path.join(process.cwd(), f.file_url.replace(/^\//, ''));
+            if (!fs.existsSync(fullPath)) {
+                const baseName = path.parse(fullPath).name;
+                const dirName = path.dirname(fullPath);
+                const jpgFullPath = path.join(dirName, `${baseName}.jpg`);
+                if (fs.existsSync(jpgFullPath)) {
+                    const newUrl = f.file_url.replace(new RegExp(`\\${fileExt}$`, 'i'), '.jpg');
+                    const newName = f.nama_file.replace(new RegExp(`\\${fileExt}$`, 'i'), '.jpg');
+                    console.log(`Mengoreksi permohonan file id: ${f.permohonan_layanan_file_id}`);
+                    console.log(`  Dari: ${f.file_url}`);
+                    console.log(`  Ke  : ${newUrl}`);
+                    await prisma.permohonanLayananFile.update({
+                        where: { permohonan_layanan_file_id: f.permohonan_layanan_file_id },
+                        data: {
+                            nama_file: newName,
+                            file_url: newUrl,
+                        }
+                    });
+                    updatedFilesCount++;
                 }
             }
-        });
-        console.log("=== DB QUERY TEST ===");
-        console.log(student);
+        }
     }
-    catch (err) {
-        console.error("Prisma query failed:", err);
-    }
+    console.log(`Selesai memproses permohonan file. Terkoreksi: ${updatedFilesCount} file.`);
+    console.log("=== KOREKSI SELESAI ===");
 }
 main()
     .catch((e) => console.error(e))
@@ -76,4 +90,4 @@ main()
     await prisma.$disconnect();
     await pool.end();
 });
-//# sourceMappingURL=scratch_test.js.map
+//# sourceMappingURL=correct_db_extensions.js.map

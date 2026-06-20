@@ -76,6 +76,7 @@ let ApiKeyGuard = class ApiKeyGuard {
                 }
             }
             catch (err) {
+                throw new common_1.UnauthorizedException('Token kedaluwarsa atau tidak valid. Silakan login kembali.');
             }
         }
         let apiKey = (request.headers['x-api-key'] || request.headers['x-sync-token']);

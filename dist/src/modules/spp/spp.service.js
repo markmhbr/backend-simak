@@ -197,85 +197,95 @@ let SppService = class SppService {
                 count: 0,
             };
         }
+        const siswaIds = siswaList.map((s) => s.peserta_didik_id);
+        const existingSpps = await this.prisma.spp.findMany({
+            where: {
+                peserta_didik_id: { in: siswaIds },
+                pengaturan_tagihan_id: pengaturanTagihanId,
+            },
+            select: {
+                peserta_didik_id: true,
+            },
+        });
+        const existingSiswaIds = new Set(existingSpps.map((s) => s.peserta_didik_id));
+        const siswaBelumAdaTagihan = siswaList.filter((s) => !existingSiswaIds.has(s.peserta_didik_id));
+        if (siswaBelumAdaTagihan.length === 0) {
+            return {
+                message: 'Semua peserta didik di kelas terpilih sudah memiliki tagihan ini.',
+                count: 0,
+            };
+        }
         let createdCount = 0;
         await this.prisma.$transaction(async (tx) => {
-            for (const siswa of siswaList) {
-                const existingSpp = await tx.spp.findFirst({
-                    where: {
+            for (const siswa of siswaBelumAdaTagihan) {
+                const newSpp = await tx.spp.create({
+                    data: {
+                        sekolah_id: sekolahId,
                         peserta_didik_id: siswa.peserta_didik_id,
                         pengaturan_tagihan_id: pengaturanTagihanId,
+                        nominal_tagihan: tagihan.nominal,
+                        nominal_terbayar: BigInt(0),
+                        status: 1,
                     },
                 });
-                if (!existingSpp) {
-                    const newSpp = await tx.spp.create({
-                        data: {
-                            sekolah_id: sekolahId,
-                            peserta_didik_id: siswa.peserta_didik_id,
-                            pengaturan_tagihan_id: pengaturanTagihanId,
-                            nominal_tagihan: tagihan.nominal,
-                            nominal_terbayar: BigInt(0),
-                            status: 1,
-                        },
-                    });
-                    createdCount++;
-                    const unlinkedSpps = await tx.spp.findMany({
-                        where: {
-                            peserta_didik_id: siswa.peserta_didik_id,
-                            nominal_terbayar: { gt: 0 },
-                            pengaturan_tagihan: {
-                                pengaturan_rombel: {
-                                    none: {
-                                        rombongan_belajar_id: siswa.rombongan_belajar_id,
-                                    },
+                createdCount++;
+                const unlinkedSpps = await tx.spp.findMany({
+                    where: {
+                        peserta_didik_id: siswa.peserta_didik_id,
+                        nominal_terbayar: { gt: 0 },
+                        pengaturan_tagihan: {
+                            pengaturan_rombel: {
+                                none: {
+                                    rombongan_belajar_id: siswa.rombongan_belajar_id,
                                 },
                             },
                         },
-                    });
-                    if (unlinkedSpps.length > 0) {
-                        let totalTransferredPaid = BigInt(0);
-                        const oldSppIdsToDelete = [];
-                        for (const oldSpp of unlinkedSpps) {
-                            const oldTransactions = await tx.riwayatTransaksiSpp.findMany({
+                    },
+                });
+                if (unlinkedSpps.length > 0) {
+                    let totalTransferredPaid = BigInt(0);
+                    const oldSppIdsToDelete = [];
+                    for (const oldSpp of unlinkedSpps) {
+                        const oldTransactions = await tx.riwayatTransaksiSpp.findMany({
+                            where: { spp_id: oldSpp.spp_id },
+                        });
+                        if (oldTransactions.length > 0) {
+                            await tx.riwayatTransaksiSpp.updateMany({
                                 where: { spp_id: oldSpp.spp_id },
+                                data: {
+                                    spp_id: newSpp.spp_id,
+                                },
                             });
-                            if (oldTransactions.length > 0) {
-                                await tx.riwayatTransaksiSpp.updateMany({
-                                    where: { spp_id: oldSpp.spp_id },
-                                    data: {
-                                        spp_id: newSpp.spp_id,
-                                    },
-                                });
-                                for (const t of oldTransactions) {
-                                    if (t.jenis_transaksi === 1 || t.jenis_transaksi === 2 || t.jenis_transaksi === 4) {
-                                        totalTransferredPaid += t.nominal;
-                                    }
-                                    else if (t.jenis_transaksi === 5) {
-                                        totalTransferredPaid -= t.nominal;
-                                    }
+                            for (const t of oldTransactions) {
+                                if (t.jenis_transaksi === 1 || t.jenis_transaksi === 2 || t.jenis_transaksi === 4) {
+                                    totalTransferredPaid += t.nominal;
+                                }
+                                else if (t.jenis_transaksi === 5) {
+                                    totalTransferredPaid -= t.nominal;
                                 }
                             }
-                            oldSppIdsToDelete.push(oldSpp.spp_id);
                         }
-                        if (oldSppIdsToDelete.length > 0) {
-                            await tx.spp.deleteMany({
-                                where: { spp_id: { in: oldSppIdsToDelete } },
-                            });
-                        }
-                        let newStatus = 1;
-                        if (totalTransferredPaid >= tagihan.nominal) {
-                            newStatus = 3;
-                        }
-                        else if (totalTransferredPaid > 0) {
-                            newStatus = 2;
-                        }
-                        await tx.spp.update({
-                            where: { spp_id: newSpp.spp_id },
-                            data: {
-                                nominal_terbayar: totalTransferredPaid,
-                                status: newStatus,
-                            },
+                        oldSppIdsToDelete.push(oldSpp.spp_id);
+                    }
+                    if (oldSppIdsToDelete.length > 0) {
+                        await tx.spp.deleteMany({
+                            where: { spp_id: { in: oldSppIdsToDelete } },
                         });
                     }
+                    let newStatus = 1;
+                    if (totalTransferredPaid >= tagihan.nominal) {
+                        newStatus = 3;
+                    }
+                    else if (totalTransferredPaid > 0) {
+                        newStatus = 2;
+                    }
+                    await tx.spp.update({
+                        where: { spp_id: newSpp.spp_id },
+                        data: {
+                            nominal_terbayar: totalTransferredPaid,
+                            status: newStatus,
+                        },
+                    });
                 }
             }
         });

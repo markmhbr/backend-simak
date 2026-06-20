@@ -75,9 +75,9 @@ export declare class PresensiController {
         data: {
             nama: string;
             ptk_id: string;
+            foto: string;
             nuptk: string;
             jenis_ptk_id_str: string;
-            foto: string;
         };
         activeIzinKeluar: {
             created_at: Date;
@@ -99,8 +99,8 @@ export declare class PresensiController {
         updated_at: Date;
         sekolah_id: string;
         nama: string;
-        keterangan: string | null;
         aktif: boolean;
+        keterangan: string | null;
         hari_libur_id: string;
         tanggal_mulai: Date;
         tanggal_selesai: Date;
@@ -115,8 +115,8 @@ export declare class PresensiController {
         updated_at: Date;
         sekolah_id: string;
         nama: string;
-        keterangan: string | null;
         aktif: boolean;
+        keterangan: string | null;
         hari_libur_id: string;
         tanggal_mulai: Date;
         tanggal_selesai: Date;
@@ -205,8 +205,8 @@ export declare class PresensiController {
         };
         nama: string;
         ptk_id: string;
+        foto: string;
         nuptk: string;
         jenis_ptk_id_str: string;
-        foto: string;
     }[]>;
 }

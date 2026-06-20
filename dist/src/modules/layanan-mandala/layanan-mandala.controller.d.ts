@@ -132,6 +132,18 @@ export declare class LayananMandalaController {
                 nama_layanan: string;
                 kategori: number;
             };
+            permohonan_layanan_log: ({
+                pegawai: {
+                    nama_lengkap: string;
+                };
+            } & {
+                created_at: Date;
+                pegawai_id: string;
+                status: number;
+                permohonan_layanan_id: string;
+                permohonan_layanan_log_id: string;
+                catatan: string | null;
+            })[];
             permohonan_layanan_file: ({
                 layanan_syarat: {
                     created_at: Date;
@@ -154,18 +166,6 @@ export declare class LayananMandalaController {
                 jenis_file: number;
                 nama_file: string | null;
                 file_url: string | null;
-            })[];
-            permohonan_layanan_log: ({
-                pegawai: {
-                    nama_lengkap: string;
-                };
-            } & {
-                created_at: Date;
-                status: number;
-                permohonan_layanan_id: string;
-                permohonan_layanan_log_id: string;
-                pegawai_id: string;
-                catatan: string | null;
             })[];
             created_at: Date;
             updated_at: Date;
@@ -208,6 +208,18 @@ export declare class LayananMandalaController {
                 nama_layanan: string;
                 kategori: number;
             };
+            permohonan_layanan_log: ({
+                pegawai: {
+                    nama_lengkap: string;
+                };
+            } & {
+                created_at: Date;
+                pegawai_id: string;
+                status: number;
+                permohonan_layanan_id: string;
+                permohonan_layanan_log_id: string;
+                catatan: string | null;
+            })[];
             permohonan_layanan_file: ({
                 layanan_syarat: {
                     created_at: Date;
@@ -230,18 +242,6 @@ export declare class LayananMandalaController {
                 jenis_file: number;
                 nama_file: string | null;
                 file_url: string | null;
-            })[];
-            permohonan_layanan_log: ({
-                pegawai: {
-                    nama_lengkap: string;
-                };
-            } & {
-                created_at: Date;
-                status: number;
-                permohonan_layanan_id: string;
-                permohonan_layanan_log_id: string;
-                pegawai_id: string;
-                catatan: string | null;
             })[];
             created_at: Date;
             updated_at: Date;

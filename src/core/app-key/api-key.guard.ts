@@ -75,7 +75,8 @@ export class ApiKeyGuard implements CanActivate {
           }
         }
       } catch (err) {
-        // Token tidak valid atau kedaluwarsa, abaikan dan biarkan mengalir ke pengecekan API Key standar
+        // Token tidak valid atau kedaluwarsa, lemparkan UnauthorizedException agar Axios interceptor di frontend dapat memicu refresh token!
+        throw new UnauthorizedException('Token kedaluwarsa atau tidak valid. Silakan login kembali.');
       }
     }
     

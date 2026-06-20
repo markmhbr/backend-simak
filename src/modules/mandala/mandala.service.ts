@@ -645,6 +645,55 @@ export class MandalaService implements OnModuleInit {
     }
   }
 
+  async refreshTokensPegawai(refreshToken: string) {
+    try {
+      const payload = this.jwtService.verify(refreshToken, {
+        secret: this.configService.get('JWT_REFRESH_SECRET'),
+      });
+
+      const pegawai = await this.prisma.pegawai.findUnique({
+        where: { pegawai_id: payload.sub },
+        include: { cadisdik: true }
+      });
+
+      if (!pegawai) throw new UnauthorizedException('Pegawai tidak ditemukan');
+      if (!pegawai.aktif) throw new ForbiddenException('Akun Anda telah dinonaktifkan.');
+
+      // Generate final tokens
+      const finalPayload = {
+        sub: pegawai.pegawai_id,
+        email: pegawai.email,
+        nip: pegawai.nip,
+        nik: pegawai.nik,
+        role: 'Mandala Pegawai',
+        cadisdik_id: pegawai.cadisdik_id,
+        cadisdik_nama: pegawai.cadisdik?.nama_instansi,
+      };
+
+      const accessToken = this.jwtService.sign(finalPayload);
+      const newRefreshToken = this.jwtService.sign(finalPayload, {
+        secret: this.configService.get('JWT_REFRESH_SECRET'),
+        expiresIn: this.configService.get('JWT_REFRESH_EXPIRATION') || '7d',
+      });
+
+      return {
+        accessToken,
+        refreshToken: newRefreshToken,
+        pegawai: {
+          id: pegawai.pegawai_id,
+          nama: pegawai.nama_lengkap,
+          nip: pegawai.nip,
+          nik: pegawai.nik || '',
+          email: pegawai.email,
+          role: 'Mandala Pegawai',
+          cadisdik: pegawai.cadisdik?.nama_instansi,
+        },
+      };
+    } catch (e) {
+      throw new UnauthorizedException('Sesi telah berakhir, silakan login kembali');
+    }
+  }
+
   async getSchoolDetail(sekolahId: string) {
     const school = await this.prisma.sekolah.findUnique({
       where: { sekolah_id: sekolahId },

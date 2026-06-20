@@ -150,6 +150,12 @@ export declare class JadwalService {
                 email: string | null;
                 no_hp: string | null;
                 ptk_id: string;
+                nik: string | null;
+                tempat_lahir: string | null;
+                tanggal_lahir: Date | null;
+                nip: string | null;
+                jenis_kelamin: string | null;
+                foto: string | null;
                 alamat_jalan: string | null;
                 rt: string | null;
                 rw: string | null;
@@ -168,14 +174,10 @@ export declare class JadwalService {
                 status: string;
                 sk_mengajar: string | null;
                 qr_token: string | null;
-                jenis_kelamin: string | null;
-                tempat_lahir: string | null;
-                tanggal_lahir: Date | null;
                 nama_ibu_kandung: string | null;
                 agama_id: string | null;
                 agama_id_str: string | null;
                 nuptk: string | null;
-                nik: string | null;
                 no_kk: string | null;
                 npwp: string | null;
                 nama_wajib_pajak: string | null;
@@ -189,7 +191,6 @@ export declare class JadwalService {
                 jabatan_ptk_id_str: string | null;
                 status_kepegawaian_id: string | null;
                 status_kepegawaian_id_str: string | null;
-                nip: string | null;
                 niy_nigk: string | null;
                 nrg: string | null;
                 sk_pengangkatan: string | null;
@@ -212,7 +213,6 @@ export declare class JadwalService {
                 rwy_kepangkatan: import("@prisma/client/runtime/client").JsonValue | null;
                 no_telepon_rumah: string | null;
                 no_wa: string | null;
-                foto: string | null;
                 tandatangan: string | null;
                 id_bank: string | null;
                 nama_kcp: string | null;
@@ -240,8 +240,8 @@ export declare class JadwalService {
         created_at: Date;
         updated_at: Date;
         sekolah_id: string;
-        rombongan_belajar_id: string;
         aktif: boolean;
+        rombongan_belajar_id: string;
         urutan: number;
         pembelajaran_id: string;
         jenis_jadwal_id: string;
@@ -258,8 +258,8 @@ export declare class JadwalService {
         created_at: Date;
         updated_at: Date;
         sekolah_id: string;
-        rombongan_belajar_id: string;
         aktif: boolean;
+        rombongan_belajar_id: string;
         urutan: number;
         pembelajaran_id: string;
         jenis_jadwal_id: string;
@@ -270,8 +270,8 @@ export declare class JadwalService {
         created_at: Date;
         updated_at: Date;
         sekolah_id: string;
-        rombongan_belajar_id: string;
         aktif: boolean;
+        rombongan_belajar_id: string;
         urutan: number;
         pembelajaran_id: string;
         jenis_jadwal_id: string;

@@ -71,9 +71,9 @@ export declare class IndisiplinerController {
             gtk: {
                 nama: string;
                 ptk_id: string;
+                foto: string;
                 nuptk: string;
                 jenis_ptk_id_str: string;
-                foto: string;
             };
             tindak_lanjut: ({
                 jenis_tindak_lanjut: {

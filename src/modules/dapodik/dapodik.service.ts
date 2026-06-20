@@ -264,10 +264,11 @@ export class DapodikService {
       throw new Error('Format dokumen tidak didukung. Gunakan PDF atau Gambar (JPG, PNG, WebP).');
     }
 
-    const relativePath = `/storage/${sekolahId}/siswa/${uuidSiswa}/dokumen/${finalFileName}`;
+    const savedFileName = path.basename(savedPath);
+    const relativePath = `/storage/${sekolahId}/siswa/${uuidSiswa}/dokumen/${savedFileName}`;
 
     return {
-      fileName: finalFileName,
+      fileName: savedFileName,
       filePath: relativePath,
       isCompressed,
       sizeBytes: file.buffer.length
@@ -303,10 +304,11 @@ export class DapodikService {
       throw new Error('Format dokumen tidak didukung. Gunakan PDF atau Gambar (JPG, PNG, WebP).');
     }
 
-    const relativePath = `/storage/${sekolahId}/gtk/${uuidGtk}/dokumen/${finalFileName}`;
+    const savedFileName = path.basename(savedPath);
+    const relativePath = `/storage/${sekolahId}/gtk/${uuidGtk}/dokumen/${savedFileName}`;
 
     return {
-      fileName: finalFileName,
+      fileName: savedFileName,
       filePath: relativePath,
       isCompressed,
       sizeBytes: file.buffer.length
@@ -1490,6 +1492,11 @@ export class DapodikService {
           }
         },
         riwayat_pendidikan_formal: true,
+        pembelajaran: {
+          include: {
+            rombongan_belajar: true,
+          }
+        }
       },
     });
 

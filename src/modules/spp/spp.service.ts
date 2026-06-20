@@ -236,100 +236,118 @@ export class SppService {
       };
     }
 
+    const siswaIds = siswaList.map((s) => s.peserta_didik_id);
+
+    // Ambil semua tagihan yang sudah ada untuk siswa-siswa tersebut dalam sekali query
+    const existingSpps = await this.prisma.spp.findMany({
+      where: {
+        peserta_didik_id: { in: siswaIds },
+        pengaturan_tagihan_id: pengaturanTagihanId,
+      },
+      select: {
+        peserta_didik_id: true,
+      },
+    });
+
+    // Buat Set berisi ID siswa yang sudah memiliki tagihan agar pencarian O(1) cepat
+    const existingSiswaIds = new Set(existingSpps.map((s) => s.peserta_didik_id));
+
+    // Filter daftar siswa yang BENAR-BENAR belum punya tagihan ini
+    const siswaBelumAdaTagihan = siswaList.filter(
+      (s) => !existingSiswaIds.has(s.peserta_didik_id),
+    );
+
+    if (siswaBelumAdaTagihan.length === 0) {
+      return {
+        message: 'Semua peserta didik di kelas terpilih sudah memiliki tagihan ini.',
+        count: 0,
+      };
+    }
+
     let createdCount = 0;
 
-    // 3. Generate tagihan SPP untuk masing-masing siswa (cek duplikasi)
+    // 3. Generate tagihan SPP untuk masing-masing siswa yang belum memiliki tagihan
     await this.prisma.$transaction(async (tx) => {
-      for (const siswa of siswaList) {
-        // Cek apakah siswa sudah memiliki tagihan ini
-        const existingSpp = await tx.spp.findFirst({
-          where: {
+      for (const siswa of siswaBelumAdaTagihan) {
+        const newSpp = await tx.spp.create({
+          data: {
+            sekolah_id: sekolahId,
             peserta_didik_id: siswa.peserta_didik_id,
             pengaturan_tagihan_id: pengaturanTagihanId,
+            nominal_tagihan: tagihan.nominal,
+            nominal_terbayar: BigInt(0),
+            status: 1, // Belum Bayar
           },
         });
+        createdCount++;
 
-        if (!existingSpp) {
-          const newSpp = await tx.spp.create({
-            data: {
-              sekolah_id: sekolahId,
-              peserta_didik_id: siswa.peserta_didik_id,
-              pengaturan_tagihan_id: pengaturanTagihanId,
-              nominal_tagihan: tagihan.nominal,
-              nominal_terbayar: BigInt(0),
-              status: 1, // Belum Bayar
-            },
-          });
-          createdCount++;
-
-          // Cari jika siswa ini memiliki tagihan unlinked yang memiliki dana terbayar
-          const unlinkedSpps = await tx.spp.findMany({
-            where: {
-              peserta_didik_id: siswa.peserta_didik_id,
-              nominal_terbayar: { gt: 0 },
-              pengaturan_tagihan: {
-                pengaturan_rombel: {
-                  none: {
-                    rombongan_belajar_id: siswa.rombongan_belajar_id,
-                  },
+        // Cari jika siswa ini memiliki tagihan unlinked yang memiliki dana terbayar
+        const unlinkedSpps = await tx.spp.findMany({
+          where: {
+            peserta_didik_id: siswa.peserta_didik_id,
+            nominal_terbayar: { gt: 0 },
+            pengaturan_tagihan: {
+              pengaturan_rombel: {
+                none: {
+                  rombongan_belajar_id: siswa.rombongan_belajar_id,
                 },
               },
             },
-          });
+          },
+        });
 
-          if (unlinkedSpps.length > 0) {
-            let totalTransferredPaid = BigInt(0);
-            const oldSppIdsToDelete = [];
+        if (unlinkedSpps.length > 0) {
+          let totalTransferredPaid = BigInt(0);
+          const oldSppIdsToDelete = [];
 
-            for (const oldSpp of unlinkedSpps) {
-              const oldTransactions = await tx.riwayatTransaksiSpp.findMany({
+          for (const oldSpp of unlinkedSpps) {
+            const oldTransactions = await tx.riwayatTransaksiSpp.findMany({
+              where: { spp_id: oldSpp.spp_id },
+            });
+
+            if (oldTransactions.length > 0) {
+              // Alihkan semua transaksi riwayat pembayaran ke newSpp
+              await tx.riwayatTransaksiSpp.updateMany({
                 where: { spp_id: oldSpp.spp_id },
+                data: {
+                  spp_id: newSpp.spp_id,
+                },
               });
 
-              if (oldTransactions.length > 0) {
-                // Alihkan semua transaksi riwayat pembayaran ke newSpp
-                await tx.riwayatTransaksiSpp.updateMany({
-                  where: { spp_id: oldSpp.spp_id },
-                  data: {
-                    spp_id: newSpp.spp_id,
-                  },
-                });
-
-                // Hitung total dana yang dialihkan
-                for (const t of oldTransactions) {
-                  if (t.jenis_transaksi === 1 || t.jenis_transaksi === 2 || t.jenis_transaksi === 4) {
-                    totalTransferredPaid += t.nominal;
-                  } else if (t.jenis_transaksi === 5) {
-                    totalTransferredPaid -= t.nominal;
-                  }
+              // Hitung total dana yang dialihkan
+              for (const t of oldTransactions) {
+                if (t.jenis_transaksi === 1 || t.jenis_transaksi === 2 || t.jenis_transaksi === 4) {
+                  totalTransferredPaid += t.nominal;
+                } else if (t.jenis_transaksi === 5) {
+                  totalTransferredPaid -= t.nominal;
                 }
               }
-              oldSppIdsToDelete.push(oldSpp.spp_id);
             }
+            oldSppIdsToDelete.push(oldSpp.spp_id);
+          }
 
-            // Hapus tagihan unlinked yang sudah kosong/tidak berlaku
-            if (oldSppIdsToDelete.length > 0) {
-              await tx.spp.deleteMany({
-                where: { spp_id: { in: oldSppIdsToDelete } },
-              });
-            }
-
-            // Update nominal terbayar dan status pada tagihan baru
-            let newStatus = 1; // Belum Bayar
-            if (totalTransferredPaid >= tagihan.nominal) {
-              newStatus = 3; // Lunas
-            } else if (totalTransferredPaid > 0) {
-              newStatus = 2; // Sebagian
-            }
-
-            await tx.spp.update({
-              where: { spp_id: newSpp.spp_id },
-              data: {
-                nominal_terbayar: totalTransferredPaid,
-                status: newStatus,
-              },
+          // Hapus tagihan unlinked yang sudah kosong/tidak berlaku
+          if (oldSppIdsToDelete.length > 0) {
+            await tx.spp.deleteMany({
+              where: { spp_id: { in: oldSppIdsToDelete } },
             });
           }
+
+          // Update nominal terbayar dan status pada tagihan baru
+          let newStatus = 1; // Belum Bayar
+          if (totalTransferredPaid >= tagihan.nominal) {
+            newStatus = 3; // Lunas
+          } else if (totalTransferredPaid > 0) {
+            newStatus = 2; // Sebagian
+          }
+
+          await tx.spp.update({
+            where: { spp_id: newSpp.spp_id },
+            data: {
+              nominal_terbayar: totalTransferredPaid,
+              status: newStatus,
+            },
+          });
         }
       }
     });

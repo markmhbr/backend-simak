@@ -7,8 +7,8 @@ export declare class PresensiService {
         updated_at: Date;
         sekolah_id: string;
         nama: string;
-        keterangan: string | null;
         aktif: boolean;
+        keterangan: string | null;
         hari_libur_id: string;
         tanggal_mulai: Date;
         tanggal_selesai: Date;
@@ -23,8 +23,8 @@ export declare class PresensiService {
         updated_at: Date;
         sekolah_id: string;
         nama: string;
-        keterangan: string | null;
         aktif: boolean;
+        keterangan: string | null;
         hari_libur_id: string;
         tanggal_mulai: Date;
         tanggal_selesai: Date;
@@ -117,9 +117,9 @@ export declare class PresensiService {
         data: {
             nama: string;
             ptk_id: string;
+            foto: string;
             nuptk: string;
             jenis_ptk_id_str: string;
-            foto: string;
         };
         activeIzinKeluar: {
             created_at: Date;
@@ -202,8 +202,8 @@ export declare class PresensiService {
         };
         nama: string;
         ptk_id: string;
+        foto: string;
         nuptk: string;
         jenis_ptk_id_str: string;
-        foto: string;
     }[]>;
 }

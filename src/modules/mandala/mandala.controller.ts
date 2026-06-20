@@ -229,6 +229,15 @@ export class MandalaController {
     return await this.mandalaService.verify2FAPegawai(body.tempToken, body.code, body.secretToSave);
   }
 
+  @Post('auth/refresh')
+  @HttpCode(HttpStatus.OK)
+  async refresh(@Body('refreshToken') refreshToken: string) {
+    if (!refreshToken) {
+      throw new BadRequestException('refreshToken is required.');
+    }
+    return await this.mandalaService.refreshTokensPegawai(refreshToken);
+  }
+
   @Get('pegawai')
   @UseGuards(MandalaKeyGuard)
   async getPegawais(@Query('cadisdik_id') cadisdikId?: string) {
