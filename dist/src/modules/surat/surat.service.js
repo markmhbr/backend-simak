@@ -371,7 +371,7 @@ let SuratService = class SuratService {
                 throw new common_1.NotFoundException('Konfigurasi nomor surat tidak ditemukan.');
             const nextCounter = numberConfig.counter + 1;
             const officialNumber = this.generateOfficialNumber(numberConfig.format_nomor, {
-                no: nextCounter.toString(),
+                no: nextCounter.toString().padStart(3, '0'),
                 label: numberConfig.nama_label,
                 date: new Date(surat.tanggal_surat),
             });
@@ -428,12 +428,29 @@ let SuratService = class SuratService {
         const month = context.tanggal_surat.getMonth() + 1;
         const doubleDigitMonth = month < 10 ? `0${month}` : `${month}`;
         const romawi = this.romanMonths[month - 1];
+        let activeYear = context.tanggal_surat.getFullYear().toString();
+        try {
+            const activeRombel = await tx.rombonganBelajar.findFirst({
+                where: { sekolah_id: sekolahId },
+                select: { semester_id: true },
+                orderBy: { semester_id: 'desc' },
+            });
+            if (activeRombel && activeRombel.semester_id) {
+                const yearPrefix = activeRombel.semester_id.substring(0, 4);
+                const yearStart = parseInt(yearPrefix, 10);
+                const yearEnd = yearStart + 1;
+                activeYear = `${yearStart}/${yearEnd}`;
+            }
+        }
+        catch (e) {
+            console.error('Error fetching active year:', e);
+        }
         html = html
             .replace(/{{nomor_surat}}/g, context.nomor_surat)
             .replace(/{{tanggal_surat}}/g, this.formatIndonesianDate(context.tanggal_surat))
             .replace(/{{bulan}}/g, doubleDigitMonth)
             .replace(/{{bulan_romawi}}/g, romawi)
-            .replace(/{{tahun}}/g, context.tanggal_surat.getFullYear().toString());
+            .replace(/{{tahun}}/g, activeYear);
         const school = await tx.sekolah.findUnique({ where: { sekolah_id: sekolahId } });
         if (school) {
             html = html
@@ -461,6 +478,7 @@ let SuratService = class SuratService {
                 html = html
                     .replace(/{{nama_lengkap}}/g, student.nama || '')
                     .replace(/{{nisn}}/g, student.nisn || '')
+                    .replace(/{{nipd}}/g, student.nipd || '')
                     .replace(/{{nik}}/g, student.nik || '')
                     .replace(/{{tempat_lahir}}/g, student.tempat_lahir || '')
                     .replace(/{{tanggal_lahir}}/g, student.tanggal_lahir ? this.formatIndonesianDate(new Date(student.tanggal_lahir)) : '')

@@ -70,6 +70,7 @@ export declare class PresensiController {
             jenis: number;
             jam_keluar: Date | null;
             jam_kembali: Date | null;
+            jam_kembali_estimasi: Date | null;
             disetujui: boolean;
         };
     } | {
@@ -93,6 +94,7 @@ export declare class PresensiController {
             jenis: number;
             jam_keluar: Date | null;
             jam_kembali: Date | null;
+            jam_kembali_estimasi: Date | null;
             disetujui: boolean;
         };
     }>;
@@ -174,7 +176,68 @@ export declare class PresensiController {
         jenis: number;
         tanggal: string;
         keterangan: string;
+        jam_keluar?: string;
+        jam_kembali_estimasi?: string;
     }): Promise<any>;
+    getIzinKeluar(sekolahId: string, tanggal?: string): Promise<({
+        peserta_didik: {
+            nama: string;
+            nisn: string;
+            nama_rombel: string;
+        };
+        gtk: {
+            nama: string;
+            nuptk: string;
+            jenis_ptk_id_str: string;
+        };
+    } & {
+        created_at: Date;
+        updated_at: Date;
+        sekolah_id: string;
+        ptk_id: string | null;
+        peserta_didik_id: string | null;
+        keterangan: string;
+        tanggal: Date;
+        izin_id: string;
+        jenis: number;
+        jam_keluar: Date | null;
+        jam_kembali: Date | null;
+        jam_kembali_estimasi: Date | null;
+        disetujui: boolean;
+    })[]>;
+    catatKembali(sekolahId: string, izinId: string): Promise<{
+        created_at: Date;
+        updated_at: Date;
+        sekolah_id: string;
+        ptk_id: string | null;
+        peserta_didik_id: string | null;
+        keterangan: string;
+        tanggal: Date;
+        izin_id: string;
+        jenis: number;
+        jam_keluar: Date | null;
+        jam_kembali: Date | null;
+        jam_kembali_estimasi: Date | null;
+        disetujui: boolean;
+    }>;
+    setujuiIzin(sekolahId: string, izinId: string): Promise<{
+        created_at: Date;
+        updated_at: Date;
+        sekolah_id: string;
+        ptk_id: string | null;
+        peserta_didik_id: string | null;
+        keterangan: string;
+        tanggal: Date;
+        izin_id: string;
+        jenis: number;
+        jam_keluar: Date | null;
+        jam_kembali: Date | null;
+        jam_kembali_estimasi: Date | null;
+        disetujui: boolean;
+    }>;
+    deleteIzin(sekolahId: string, izinId: string): Promise<{
+        success: boolean;
+    }>;
     getRekapPesertaDidik(sekolahId: string, tanggal?: string): Promise<{
         presensi: {
             created_at: Date;
@@ -186,6 +249,21 @@ export declare class PresensiController {
             tanggal: Date;
             status_masuk: number | null;
             status_pulang: number | null;
+        };
+        izin: {
+            created_at: Date;
+            updated_at: Date;
+            sekolah_id: string;
+            ptk_id: string | null;
+            peserta_didik_id: string | null;
+            keterangan: string;
+            tanggal: Date;
+            izin_id: string;
+            jenis: number;
+            jam_keluar: Date | null;
+            jam_kembali: Date | null;
+            jam_kembali_estimasi: Date | null;
+            disetujui: boolean;
         };
         nama: string;
         peserta_didik_id: string;
@@ -204,6 +282,21 @@ export declare class PresensiController {
             tanggal: Date;
             status_masuk: number | null;
             status_pulang: number | null;
+        };
+        izin: {
+            created_at: Date;
+            updated_at: Date;
+            sekolah_id: string;
+            ptk_id: string | null;
+            peserta_didik_id: string | null;
+            keterangan: string;
+            tanggal: Date;
+            izin_id: string;
+            jenis: number;
+            jam_keluar: Date | null;
+            jam_kembali: Date | null;
+            jam_kembali_estimasi: Date | null;
+            disetujui: boolean;
         };
         nama: string;
         ptk_id: string;

@@ -265,15 +265,57 @@ export class PresensiService {
   async createIzin(sekolahId: string, data: {
     peserta_didik_id?: string;
     ptk_id?: string;
-    jenis: number; // 1=Terlambat, 2=Keluar, 3=Pulang Awal, 4=Tidak Masuk, 5=Sakit
+    jenis: number; // 1=Terlambat, 2=Keluar, 3=Pulang Awal, 4=Tidak Masuk, 5=Sakit, 6=Alpha, 7=Hadir
     tanggal: string;
     keterangan: string;
+    jam_keluar?: string;
+    jam_kembali_estimasi?: string;
   }) {
     const dateObj = new Date(data.tanggal);
     const dateOnly = new Date(dateObj.toISOString().split('T')[0]);
     const currentTimestamp = new Date();
 
+    // Validasi: Izin Keluar (jenis = 2) & Izin Pulang Awal (jenis = 3) mewajibkan subjek sudah presensi masuk / terlambat hari ini
+    if (data.jenis === 2 || data.jenis === 3) {
+      if (data.peserta_didik_id) {
+        const checkin = await this.prisma.presensiPesertaDidik.findUnique({
+          where: {
+            peserta_didik_id_tanggal: {
+              peserta_didik_id: data.peserta_didik_id,
+              tanggal: dateOnly,
+            },
+          },
+        });
+        if (!checkin || !checkin.jam_masuk) {
+          throw new BadRequestException('Subjek belum melakukan presensi masuk hari ini. Tidak dapat memberikan izin.');
+        }
+      } else if (data.ptk_id) {
+        const checkin = await this.prisma.presensiGtk.findUnique({
+          where: {
+            ptk_id_tanggal: {
+              ptk_id: data.ptk_id,
+              tanggal: dateOnly,
+            },
+          },
+        });
+        if (!checkin || !checkin.jam_masuk) {
+          throw new BadRequestException('Subjek belum melakukan presensi masuk hari ini. Tidak dapat memberikan izin.');
+        }
+      }
+    }
+
     let izin: any;
+
+    // Helper to parse time string HH:mm
+    const parseTime = (timeStr: string) => {
+      const [h, m] = timeStr.split(':').map(Number);
+      const d = new Date(dateOnly);
+      d.setHours(h, m, 0, 0);
+      return d;
+    };
+
+    const jamKeluarDate = data.jam_keluar ? parseTime(data.jam_keluar) : currentTimestamp;
+    const jamKembaliEstimasiDate = data.jam_kembali_estimasi ? parseTime(data.jam_kembali_estimasi) : null;
 
     // 1. Buat / update record Izin
     if (data.jenis === 2) {
@@ -308,22 +350,56 @@ export class PresensiService {
             jenis: 2,
             tanggal: dateOnly,
             keterangan: data.keterangan,
-            jam_keluar: currentTimestamp,
+            jam_keluar: jamKeluarDate,
+            jam_kembali_estimasi: jamKembaliEstimasiDate,
+            disetujui: false,
           },
         });
       }
-    } else {
-      // Buat record Izin biasa
-      izin = await this.prisma.izin.create({
-        data: {
+    } else if (data.jenis === 7) {
+      // Hadir: hapus record izin biasa jika ada
+      await this.prisma.izin.deleteMany({
+        where: {
           sekolah_id: sekolahId,
-          peserta_didik_id: data.peserta_didik_id,
-          ptk_id: data.ptk_id,
-          jenis: data.jenis,
+          peserta_didik_id: data.peserta_didik_id || null,
+          ptk_id: data.ptk_id || null,
           tanggal: dateOnly,
-          keterangan: data.keterangan,
+          jenis: { not: 2 }, // kecuali izin keluar
         },
       });
+      izin = null;
+    } else {
+      // Buat atau update record Izin biasa untuk mencegah duplikasi
+      const existingIzin = await this.prisma.izin.findFirst({
+        where: {
+          sekolah_id: sekolahId,
+          peserta_didik_id: data.peserta_didik_id || null,
+          ptk_id: data.ptk_id || null,
+          tanggal: dateOnly,
+          jenis: { not: 2 }, // Kecuali izin keluar
+        },
+      });
+
+      if (existingIzin) {
+        izin = await this.prisma.izin.update({
+          where: { izin_id: existingIzin.izin_id },
+          data: {
+            jenis: data.jenis,
+            keterangan: data.keterangan,
+          },
+        });
+      } else {
+        izin = await this.prisma.izin.create({
+          data: {
+            sekolah_id: sekolahId,
+            peserta_didik_id: data.peserta_didik_id,
+            ptk_id: data.ptk_id,
+            jenis: data.jenis,
+            tanggal: dateOnly,
+            keterangan: data.keterangan,
+          },
+        });
+      }
     }
 
     // 2. Jika jenisnya adalah Terlambat (jenis = 1), sinkronisasi ke presensi masuk sebagai Terlambat
@@ -420,9 +496,9 @@ export class PresensiService {
       }
     }
 
-    // 4. Jika jenisnya adalah Tidak Masuk (4) atau Sakit (5), tandai di presensi agar sinkron
-    if (data.jenis === 4 || data.jenis === 5) {
-      const statusAbsen = data.jenis === 4 ? 3 : 4; // Di PresensiPesertaDidik: 3=Izin, 4=Sakit
+    // 4. Jika jenisnya adalah Tidak Masuk (4), Sakit (5), Alpha (6), atau Hadir (7), tandai di presensi agar sinkron
+    if (data.jenis === 4 || data.jenis === 5 || data.jenis === 6 || data.jenis === 7) {
+      const statusAbsen = data.jenis === 4 ? 3 : (data.jenis === 5 ? 4 : (data.jenis === 6 ? 5 : 1)); // Di PresensiPesertaDidik: 3=Izin, 4=Sakit, 5=Alpha, 1=Hadir
       
       if (data.peserta_didik_id) {
         await this.prisma.presensiPesertaDidik.upsert({
@@ -434,12 +510,14 @@ export class PresensiService {
           },
           update: {
             status_masuk: statusAbsen,
+            jam_masuk: data.jenis === 7 ? currentTimestamp : null,
             sekolah_id: sekolahId,
           },
           create: {
             peserta_didik_id: data.peserta_didik_id,
             tanggal: dateOnly,
             status_masuk: statusAbsen,
+            jam_masuk: data.jenis === 7 ? currentTimestamp : null,
             sekolah_id: sekolahId,
           },
         });
@@ -453,12 +531,14 @@ export class PresensiService {
           },
           update: {
             status_masuk: statusAbsen,
+            jam_masuk: data.jenis === 7 ? currentTimestamp : null,
             sekolah_id: sekolahId,
           },
           create: {
             ptk_id: data.ptk_id,
             tanggal: dateOnly,
             status_masuk: statusAbsen,
+            jam_masuk: data.jenis === 7 ? currentTimestamp : null,
             sekolah_id: sekolahId,
           },
         });
@@ -606,14 +686,36 @@ export class PresensiService {
             peserta_didik_id: pd.peserta_didik_id,
             jenis: 2,
             tanggal: dateOnly,
-            jam_kembali: null,
           },
+          orderBy: { created_at: 'desc' },
         });
+
         if (activeIzin) {
-          throw new BadRequestException('Anda tidak bisa presensi pulang karena belum dicatat kembali dari izin keluar. Harap lapor ke Guru Piket.');
+          const now = new Date();
+          const isReturned = activeIzin.jam_kembali !== null;
+          const isLate = activeIzin.jam_kembali_estimasi && (
+            isReturned
+              ? activeIzin.jam_kembali > activeIzin.jam_kembali_estimasi
+              : now > activeIzin.jam_kembali_estimasi
+          );
+
+          if (!isReturned) {
+            if (isLate) {
+              if (!activeIzin.disetujui) {
+                throw new BadRequestException('Anda tidak bisa presensi pulang karena terlambat kembali dari izin keluar. Harap lapor ke Guru Piket.');
+              }
+            } else {
+              if (!activeIzin.disetujui) {
+                throw new BadRequestException('Anda tidak bisa presensi pulang karena belum dicatat kembali dari izin keluar. Harap lapor ke Guru Piket.');
+              }
+            }
+          } else {
+            if (isLate && !activeIzin.disetujui) {
+              throw new BadRequestException('Anda tidak bisa presensi pulang karena terlambat kembali dari izin keluar. Harap lapor ke Guru Piket.');
+            }
+          }
         }
       }
-      
       const attendance = await this.presensiPesertaDidik(sekolahId, {
         peserta_didik_id: pd.peserta_didik_id,
         waktu: new Date().toISOString(),
@@ -660,11 +762,34 @@ export class PresensiService {
             ptk_id: gtk.ptk_id,
             jenis: 2,
             tanggal: dateOnly,
-            jam_kembali: null,
           },
+          orderBy: { created_at: 'desc' },
         });
+
         if (activeIzin) {
-          throw new BadRequestException('Anda tidak bisa presensi pulang karena belum dicatat kembali dari izin keluar. Harap lapor ke Guru Piket.');
+          const now = new Date();
+          const isReturned = activeIzin.jam_kembali !== null;
+          const isLate = activeIzin.jam_kembali_estimasi && (
+            isReturned
+              ? activeIzin.jam_kembali > activeIzin.jam_kembali_estimasi
+              : now > activeIzin.jam_kembali_estimasi
+          );
+
+          if (!isReturned) {
+            if (isLate) {
+              if (!activeIzin.disetujui) {
+                throw new BadRequestException('Anda tidak bisa presensi pulang karena terlambat kembali dari izin keluar. Harap lapor ke Guru Piket.');
+              }
+            } else {
+              if (!activeIzin.disetujui) {
+                throw new BadRequestException('Anda tidak bisa presensi pulang karena belum dicatat kembali dari izin keluar. Harap lapor ke Guru Piket.');
+              }
+            }
+          } else {
+            if (isLate && !activeIzin.disetujui) {
+              throw new BadRequestException('Anda tidak bisa presensi pulang karena terlambat kembali dari izin keluar. Harap lapor ke Guru Piket.');
+            }
+          }
         }
       }
 
@@ -725,13 +850,27 @@ export class PresensiService {
       },
     });
 
+    const izins = await this.prisma.izin.findMany({
+      where: {
+        sekolah_id: sekolahId,
+        tanggal: dateOnly,
+      },
+    });
+
     const attendanceMap = new Map(attendance.map(a => [a.peserta_didik_id, a]));
+    const izinMap = new Map(
+      izins
+        .filter(i => i.peserta_didik_id)
+        .map(i => [i.peserta_didik_id!, i])
+    );
 
     return students.map(student => {
       const att = attendanceMap.get(student.peserta_didik_id);
+      const iz = izinMap.get(student.peserta_didik_id);
       return {
         ...student,
         presensi: att || null,
+        izin: iz || null,
       };
     });
   }
@@ -769,13 +908,27 @@ export class PresensiService {
       },
     });
 
+    const izins = await this.prisma.izin.findMany({
+      where: {
+        sekolah_id: sekolahId,
+        tanggal: dateOnly,
+      },
+    });
+
     const attendanceMap = new Map(attendance.map(a => [a.ptk_id, a]));
+    const izinMap = new Map(
+      izins
+        .filter(i => i.ptk_id)
+        .map(i => [i.ptk_id!, i])
+    );
 
     return gtks.map(gtk => {
       const att = attendanceMap.get(gtk.ptk_id);
+      const iz = izinMap.get(gtk.ptk_id);
       return {
         ...gtk,
         presensi: att || null,
+        izin: iz || null,
       };
     });
   }
@@ -792,5 +945,82 @@ export class PresensiService {
         Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
+  }
+
+  async getIzinKeluarHariIni(sekolahId: string, dateStr?: string) {
+    let dateOnly: Date;
+    if (dateStr) {
+      dateOnly = new Date(new Date(dateStr).toISOString().split('T')[0]);
+    } else {
+      const wibDate = new Date(new Date().getTime() + 7 * 60 * 60 * 1000);
+      dateOnly = new Date(wibDate.toISOString().split('T')[0]);
+    }
+
+    return this.prisma.izin.findMany({
+      where: {
+        sekolah_id: sekolahId,
+        jenis: 2, // Keluar
+        tanggal: dateOnly,
+      },
+      include: {
+        peserta_didik: {
+          select: {
+            nama: true,
+            nama_rombel: true,
+            nisn: true,
+          },
+        },
+        gtk: {
+          select: {
+            nama: true,
+            nuptk: true,
+            jenis_ptk_id_str: true,
+          },
+        },
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    });
+  }
+
+  async catatKembali(sekolahId: string, izinId: string) {
+    const izin = await this.prisma.izin.findFirst({
+      where: { izin_id: izinId, sekolah_id: sekolahId },
+    });
+    if (!izin) throw new NotFoundException('Data izin tidak ditemukan');
+
+    return this.prisma.izin.update({
+      where: { izin_id: izinId },
+      data: {
+        jam_kembali: new Date(),
+      },
+    });
+  }
+
+  async setujuiIzin(sekolahId: string, izinId: string) {
+    const izin = await this.prisma.izin.findFirst({
+      where: { izin_id: izinId, sekolah_id: sekolahId },
+    });
+    if (!izin) throw new NotFoundException('Data izin tidak ditemukan');
+
+    return this.prisma.izin.update({
+      where: { izin_id: izinId },
+      data: {
+        disetujui: true,
+      },
+    });
+  }
+
+  async deleteIzin(sekolahId: string, izinId: string) {
+    const izin = await this.prisma.izin.findFirst({
+      where: { izin_id: izinId, sekolah_id: sekolahId },
+    });
+    if (!izin) throw new NotFoundException('Data izin tidak ditemukan');
+
+    await this.prisma.izin.delete({
+      where: { izin_id: izinId },
+    });
+    return { success: true };
   }
 }

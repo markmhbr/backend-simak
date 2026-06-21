@@ -73,9 +73,49 @@ export class PresensiController {
   @Post('izin/:sekolahId')
   createIzin(
     @Param('sekolahId') sekolahId: string,
-    @Body() data: { peserta_didik_id?: string; ptk_id?: string; jenis: number; tanggal: string; keterangan: string },
+    @Body() data: { 
+      peserta_didik_id?: string; 
+      ptk_id?: string; 
+      jenis: number; 
+      tanggal: string; 
+      keterangan: string;
+      jam_keluar?: string;
+      jam_kembali_estimasi?: string;
+    },
   ) {
     return this.presensiService.createIzin(sekolahId, data);
+  }
+
+  @Get('izin-keluar/:sekolahId')
+  getIzinKeluar(
+    @Param('sekolahId') sekolahId: string,
+    @Query('tanggal') tanggal?: string,
+  ) {
+    return this.presensiService.getIzinKeluarHariIni(sekolahId, tanggal);
+  }
+
+  @Post('izin-keluar/kembali/:sekolahId/:izinId')
+  catatKembali(
+    @Param('sekolahId') sekolahId: string,
+    @Param('izinId') izinId: string,
+  ) {
+    return this.presensiService.catatKembali(sekolahId, izinId);
+  }
+
+  @Post('izin-keluar/setujui/:sekolahId/:izinId')
+  setujuiIzin(
+    @Param('sekolahId') sekolahId: string,
+    @Param('izinId') izinId: string,
+  ) {
+    return this.presensiService.setujuiIzin(sekolahId, izinId);
+  }
+
+  @Delete('izin-keluar/:sekolahId/:izinId')
+  deleteIzin(
+    @Param('sekolahId') sekolahId: string,
+    @Param('izinId') izinId: string,
+  ) {
+    return this.presensiService.deleteIzin(sekolahId, izinId);
   }
 
   @Get('rekap-pd/:sekolahId')

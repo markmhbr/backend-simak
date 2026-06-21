@@ -88,6 +88,18 @@ let PresensiController = class PresensiController {
     createIzin(sekolahId, data) {
         return this.presensiService.createIzin(sekolahId, data);
     }
+    getIzinKeluar(sekolahId, tanggal) {
+        return this.presensiService.getIzinKeluarHariIni(sekolahId, tanggal);
+    }
+    catatKembali(sekolahId, izinId) {
+        return this.presensiService.catatKembali(sekolahId, izinId);
+    }
+    setujuiIzin(sekolahId, izinId) {
+        return this.presensiService.setujuiIzin(sekolahId, izinId);
+    }
+    deleteIzin(sekolahId, izinId) {
+        return this.presensiService.deleteIzin(sekolahId, izinId);
+    }
     getRekapPesertaDidik(sekolahId, tanggal) {
         return this.presensiService.getPresensiPesertaDidik(sekolahId, tanggal);
     }
@@ -177,6 +189,38 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], PresensiController.prototype, "createIzin", null);
+__decorate([
+    (0, common_1.Get)('izin-keluar/:sekolahId'),
+    __param(0, (0, common_1.Param)('sekolahId')),
+    __param(1, (0, common_1.Query)('tanggal')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], PresensiController.prototype, "getIzinKeluar", null);
+__decorate([
+    (0, common_1.Post)('izin-keluar/kembali/:sekolahId/:izinId'),
+    __param(0, (0, common_1.Param)('sekolahId')),
+    __param(1, (0, common_1.Param)('izinId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], PresensiController.prototype, "catatKembali", null);
+__decorate([
+    (0, common_1.Post)('izin-keluar/setujui/:sekolahId/:izinId'),
+    __param(0, (0, common_1.Param)('sekolahId')),
+    __param(1, (0, common_1.Param)('izinId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], PresensiController.prototype, "setujuiIzin", null);
+__decorate([
+    (0, common_1.Delete)('izin-keluar/:sekolahId/:izinId'),
+    __param(0, (0, common_1.Param)('sekolahId')),
+    __param(1, (0, common_1.Param)('izinId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], PresensiController.prototype, "deleteIzin", null);
 __decorate([
     (0, common_1.Get)('rekap-pd/:sekolahId'),
     __param(0, (0, common_1.Param)('sekolahId')),
