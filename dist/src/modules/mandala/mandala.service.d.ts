@@ -236,15 +236,15 @@ export declare class MandalaService implements OnModuleInit {
         aktif: boolean;
         pegawai_id: string;
         nama_lengkap: string;
-        nik: string | null;
-        tempat_lahir: string | null;
-        tanggal_lahir: Date | null;
-        alamat_lengkap: string | null;
         nip: string;
         authenticator_secret: string | null;
         jabatan: number;
         jenis_kelamin: number;
         foto: string | null;
+        alamat_lengkap: string | null;
+        nik: string | null;
+        tanggal_lahir: Date | null;
+        tempat_lahir: string | null;
     })[]>;
     getPegawaiById(id: string): Promise<{
         cadisdik: {
@@ -268,15 +268,15 @@ export declare class MandalaService implements OnModuleInit {
         aktif: boolean;
         pegawai_id: string;
         nama_lengkap: string;
-        nik: string | null;
-        tempat_lahir: string | null;
-        tanggal_lahir: Date | null;
-        alamat_lengkap: string | null;
         nip: string;
         authenticator_secret: string | null;
         jabatan: number;
         jenis_kelamin: number;
         foto: string | null;
+        alamat_lengkap: string | null;
+        nik: string | null;
+        tanggal_lahir: Date | null;
+        tempat_lahir: string | null;
     }>;
     createPegawai(data: any): Promise<{
         nomor_telepon: string | null;
@@ -288,15 +288,15 @@ export declare class MandalaService implements OnModuleInit {
         aktif: boolean;
         pegawai_id: string;
         nama_lengkap: string;
-        nik: string | null;
-        tempat_lahir: string | null;
-        tanggal_lahir: Date | null;
-        alamat_lengkap: string | null;
         nip: string;
         authenticator_secret: string | null;
         jabatan: number;
         jenis_kelamin: number;
         foto: string | null;
+        alamat_lengkap: string | null;
+        nik: string | null;
+        tanggal_lahir: Date | null;
+        tempat_lahir: string | null;
     }>;
     updatePegawai(id: string, data: any): Promise<{
         nomor_telepon: string | null;
@@ -308,15 +308,15 @@ export declare class MandalaService implements OnModuleInit {
         aktif: boolean;
         pegawai_id: string;
         nama_lengkap: string;
-        nik: string | null;
-        tempat_lahir: string | null;
-        tanggal_lahir: Date | null;
-        alamat_lengkap: string | null;
         nip: string;
         authenticator_secret: string | null;
         jabatan: number;
         jenis_kelamin: number;
         foto: string | null;
+        alamat_lengkap: string | null;
+        nik: string | null;
+        tanggal_lahir: Date | null;
+        tempat_lahir: string | null;
     }>;
     deletePegawai(id: string): Promise<{
         nomor_telepon: string | null;
@@ -328,15 +328,15 @@ export declare class MandalaService implements OnModuleInit {
         aktif: boolean;
         pegawai_id: string;
         nama_lengkap: string;
-        nik: string | null;
-        tempat_lahir: string | null;
-        tanggal_lahir: Date | null;
-        alamat_lengkap: string | null;
         nip: string;
         authenticator_secret: string | null;
         jabatan: number;
         jenis_kelamin: number;
         foto: string | null;
+        alamat_lengkap: string | null;
+        nik: string | null;
+        tanggal_lahir: Date | null;
+        tempat_lahir: string | null;
     }>;
     getMappingPengawas(pegawaiId?: string, sekolahId?: string): Promise<({
         sekolah: {
@@ -449,10 +449,10 @@ export declare class MandalaService implements OnModuleInit {
         background_kartu_pesertadidik: string | null;
         peta: string | null;
         social_media: import("@prisma/client/runtime/client").JsonValue | null;
-        radius: number | null;
         created_at: Date;
         updated_at: Date;
         cadisdik_id: string | null;
+        radius: number | null;
     }>;
     getSchoolSummary(sekolahId: string): Promise<{
         sekolah_id: string;

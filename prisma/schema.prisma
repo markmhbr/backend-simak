@@ -5,14 +5,14 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  schemas  = ["dapodik", "simak", "mandala"]
+  schemas  = ["dapodik", "mandala", "ref", "simak"]
 }
 
 model Sekolah {
-  sekolah_id                    String                @id @default(uuid()) @db.Uuid
+  sekolah_id                    String                 @id @default(uuid()) @db.Uuid
   nama                          String
   nss                           String?
-  npsn                          String?               @unique
+  npsn                          String?                @unique
   bentuk_pendidikan_id          Int?
   bentuk_pendidikan_id_str      String?
   status_sekolah                String?
@@ -26,7 +26,7 @@ model Sekolah {
   nomor_fax                     String?
   email                         String?
   website                       String?
-  is_sks                        Boolean?              @default(false)
+  is_sks                        Boolean?               @default(false)
   lintang                       Decimal?
   bujur                         Decimal?
   dusun                         String?
@@ -34,40 +34,40 @@ model Sekolah {
   kecamatan                     String?
   kabupaten_kota                String?
   provinsi                      String?
-  cadisdik_edit_count           Int                   @default(0)
+  cadisdik_edit_count           Int                    @default(0)
   spmb                          String?
   logo                          String?
   background_kartu_gtk          String?
   background_kartu_pesertadidik String?
   peta                          String?
   social_media                  Json?
-  radius                        Int?                  @default(100)
-  created_at                    DateTime              @default(now())
-  updated_at                    DateTime              @updatedAt
-  cadisdik_id                   String?               @db.Uuid
-  cadisdik                      Cadisdik?             @relation(fields: [cadisdik_id], references: [cadisdik_id])
+  created_at                    DateTime               @default(now())
+  updated_at                    DateTime               @updatedAt
+  cadisdik_id                   String?                @db.Uuid
+  radius                        Int?                   @default(100)
+  cadisdik                      Cadisdik?              @relation(fields: [cadisdik_id], references: [cadisdik_id])
+  mapping_pengawas              MappingPengawas[]
+  hari_libur                    HariLibur[]
+  izin                          Izin[]
   jadwal_pelajaran              JadwalPelajaran[]
   jenis_jadwal                  JenisJadwal[]
-  hari_libur                    HariLibur[]
-  presensi_pd                    PresensiPesertaDidik[]
-  presensi_gtk                   PresensiGtk[]
-  izin                          Izin[]
-  presensi_mapel                 PresensiMapel[]
-  pengaturan_tagihan    PengaturanTagihan[]
-  spp                   Spp[]
-  riwayat_transaksi_spp RiwayatTransaksiSpp[]
-  pengaturan_nomor_surat PengaturanNomorSurat[]
-  template_surat         TemplateSurat[]
-  surat_masuk            SuratMasuk[]
-  surat_keluar           SuratKeluar[]
-  mapping_pengawas       MappingPengawas[]
+  pengaturan_nomor_surat        PengaturanNomorSurat[]
+  pengaturan_tagihan            PengaturanTagihan[]
+  presensi_gtk                  PresensiGtk[]
+  presensi_mapel                PresensiMapel[]
+  presensi_pd                   PresensiPesertaDidik[]
+  riwayat_transaksi_spp         RiwayatTransaksiSpp[]
+  spp                           Spp[]
+  surat_keluar                  SuratKeluar[]
+  surat_masuk                   SuratMasuk[]
+  template_surat                TemplateSurat[]
 
   @@map("sekolah")
   @@schema("dapodik")
 }
 
 model RombonganBelajar {
-  rombongan_belajar_id      String            @id @default(uuid()) @db.Uuid
+  rombongan_belajar_id      String                    @id @default(uuid()) @db.Uuid
   nama                      String
   tingkat_pendidikan_id     String?
   tingkat_pendidikan_id_str String?
@@ -76,25 +76,25 @@ model RombonganBelajar {
   jenis_rombel_str          String?
   kurikulum_id              Int?
   kurikulum_id_str          String?
-  id_ruang                  String?           @db.Uuid
+  id_ruang                  String?                   @db.Uuid
   id_ruang_str              String?
   moving_class              String?
-  ptk_id                    String?           @db.Uuid
+  ptk_id                    String?                   @db.Uuid
   ptk_id_str                String?
   jurusan_id                String?
   jurusan_id_str            String?
-  created_at                DateTime          @default(now())
-  updated_at                DateTime          @updatedAt
-  sekolah_id                String?           @db.Uuid
+  created_at                DateTime                  @default(now())
+  updated_at                DateTime                  @updatedAt
+  sekolah_id                String?                   @db.Uuid
   id_ekskul                 String?
   id_kelas_ekskul           String?
   nm_ekskul                 String?
   sk_ekskul                 String?
   anggota_rombel            AnggotaRombel[]
   pembelajaran              Pembelajaran[]
+  peserta_didik             PesertaDidik[]            @relation("RombelPesertaDidik")
   jadwal_pelajaran          JadwalPelajaran[]
-  peserta_didik         PesertaDidik[]            @relation("RombelPesertaDidik")
-  pengaturan_rombel     PengaturanTagihanRombel[]
+  pengaturan_rombel         PengaturanTagihanRombel[]
 
   @@index([sekolah_id])
   @@map("rombongan_belajar")
@@ -145,21 +145,21 @@ model Pembelajaran {
 }
 
 model PesertaDidik {
-  peserta_didik_id          String                @id @default(uuid()) @db.Uuid
-  sekolah_id                String?               @db.Uuid
-  registrasi_id             String?               @db.Uuid
-  anggota_rombel_id         String?               @db.Uuid
-  rombongan_belajar_id      String?               @db.Uuid
+  peserta_didik_id          String                 @id @default(uuid()) @db.Uuid
+  sekolah_id                String?                @db.Uuid
+  registrasi_id             String?                @db.Uuid
+  anggota_rombel_id         String?                @db.Uuid
+  rombongan_belajar_id      String?                @db.Uuid
   nama                      String
   jenis_kelamin             String?
   nisn                      String?
   nik                       String?
   no_kk                     String?
   tempat_lahir              String?
-  tanggal_lahir             DateTime?             @db.Date
+  tanggal_lahir             DateTime?              @db.Date
   agama_id                  String?
   agama_id_str              String?
-  kewarganegaraan           String?               @default("Indonesia")
+  kewarganegaraan           String?                @default("Indonesia")
   kebutuhan_khusus_id       Int?
   kebutuhan_khusus          String?
   alamat_jalan              String?
@@ -223,7 +223,7 @@ model PesertaDidik {
   nomor_induk_pd            String?
   jenis_pendaftaran_id      String?
   jenis_pendaftaran_id_str  String?
-  tanggal_masuk_sekolah     DateTime?             @db.Date
+  tanggal_masuk_sekolah     DateTime?              @db.Date
   sekolah_asal              String?
   jurusan_sp_id             String?
   semester_id               String?
@@ -233,7 +233,7 @@ model PesertaDidik {
   kurikulum_id_str          String?
   jenis_keluar_id           String?
   ket_keluar                String?
-  tanggal_keluar            DateTime?             @db.Date
+  tanggal_keluar            DateTime?              @db.Date
   keterangan                String?
   no_skhun                  String?
   no_peserta_ujian          String?
@@ -245,18 +245,18 @@ model PesertaDidik {
   pekerjaan_id              Int?
   status_data               Int?
   konfirmasi_mutasi         Int?
-  vld_count                 Int                   @default(0)
+  vld_count                 Int                    @default(0)
   asal_data                 String?
-  create_date               DateTime              @default(now())
-  last_update               DateTime              @updatedAt
+  create_date               DateTime               @default(now())
+  last_update               DateTime               @updatedAt
   soft_delete               String?
   last_sync                 DateTime?
-  updater_id                String?               @db.Uuid
+  updater_id                String?                @db.Uuid
   alasan_layak_pip          String?
   alasan_menolak_kip        String?
   alat_transportasi_id_str  String?
   cita_cita                 String?
-  created_at                DateTime              @default(now())
+  created_at                DateTime               @default(now())
   dusun                     String?
   foto                      String?
   hobi                      String?
@@ -287,21 +287,21 @@ model PesertaDidik {
   penghasilan_wali_id_str   String?
   provinsi                  String?
   qr_token                  String?
-  status                    String                @default("Aktif")
-  status_wali               String                @default("Tidak")
+  status                    String                 @default("Aktif")
+  status_wali               String                 @default("Tidak")
   telegram_chat_id          String?
   telegram_token            String?
-  updated_at                DateTime              @updatedAt
+  updated_at                DateTime               @updatedAt
   waktu_tempuh_menit        String?
   penggunas                 Pengguna[]
-  presensi_pd                PresensiPesertaDidik[]
-  presensi_mapel             PresensiMapel[]
+  rombongan_belajar         RombonganBelajar?      @relation("RombelPesertaDidik", fields: [rombongan_belajar_id], references: [rombongan_belajar_id])
   izin                      Izin[]
-  pelanggaran               Pelanggaran[]         @relation("PesertaDidikPelanggaran")
-  rombongan_belajar     RombonganBelajar?         @relation("RombelPesertaDidik", fields: [rombongan_belajar_id], references: [rombongan_belajar_id], onDelete: SetNull)
-  spp                   Spp[]
-  riwayat_transaksi_spp RiwayatTransaksiSpp[]
-  surat_keluar           SuratKeluar[]
+  pelanggaran               Pelanggaran[]          @relation("PesertaDidikPelanggaran")
+  presensi_mapel            PresensiMapel[]
+  presensi_pd               PresensiPesertaDidik[]
+  riwayat_transaksi_spp     RiwayatTransaksiSpp[]
+  spp                       Spp[]
+  surat_keluar              SuratKeluar[]
 
   @@index([sekolah_id])
   @@index([rombongan_belajar_id])
@@ -311,19 +311,19 @@ model PesertaDidik {
 }
 
 model Gtk {
-  ptk_id                           String           @id @default(uuid()) @db.Uuid
-  ptk_terdaftar_id                 String?          @db.Uuid
+  ptk_id                           String                    @id @default(uuid()) @db.Uuid
+  ptk_terdaftar_id                 String?                   @db.Uuid
   tahun_ajaran_id                  String?
-  sekolah_id                       String?          @db.Uuid
+  sekolah_id                       String?                   @db.Uuid
   ptk_induk                        String?
   kode                             String?
-  status                           String           @default("Aktif")
+  status                           String                    @default("Aktif")
   sk_mengajar                      String?
   qr_token                         String?
   nama                             String
   jenis_kelamin                    String?
   tempat_lahir                     String?
-  tanggal_lahir                    DateTime?        @db.Date
+  tanggal_lahir                    DateTime?                 @db.Date
   nama_ibu_kandung                 String?
   agama_id                         String?
   agama_id_str                     String?
@@ -332,7 +332,7 @@ model Gtk {
   no_kk                            String?
   npwp                             String?
   nama_wajib_pajak                 String?
-  kewarganegaraan                  String?          @default("ID")
+  kewarganegaraan                  String?                   @default("ID")
   status_perkawinan                String?
   nama_suami_istri                 String?
   pekerjaan_suami_istri            String?
@@ -346,19 +346,19 @@ model Gtk {
   niy_nigk                         String?
   nrg                              String?
   sk_pengangkatan                  String?
-  tanggal_surat_tugas              DateTime?        @db.Date
-  tmt_pengangkatan                 DateTime?        @db.Date
+  tanggal_surat_tugas              DateTime?                 @db.Date
+  tmt_pengangkatan                 DateTime?                 @db.Date
   lembaga_pengangkat               String?
   sk_cpns                          String?
-  tmt_cpns                         DateTime?        @db.Date
-  tmt_pns                          DateTime?        @db.Date
+  tmt_cpns                         DateTime?                 @db.Date
+  tmt_pns                          DateTime?                 @db.Date
   sumber_gaji                      String?
-  lisensi_kepsek                   Boolean          @default(false)
+  lisensi_kepsek                   Boolean                   @default(false)
   nuks                             String?
   keahlian_laboratorium            String?
   mampu_menangani_kebutuhan_khusus String?
-  keahlian_braille                 Boolean          @default(false)
-  keahlian_bahasa_isyarat          Boolean          @default(false)
+  keahlian_braille                 Boolean                   @default(false)
+  keahlian_bahasa_isyarat          Boolean                   @default(false)
   pendidikan_terakhir              String?
   bidang_studi_terakhir            String?
   pangkat_golongan_terakhir        String?
@@ -378,24 +378,24 @@ model Gtk {
   email                            String?
   foto                             String?
   tandatangan                      String?
-  id_bank                          String?
-  nama_kcp                         String?
-  rekening_bank                    String?
-  rekening_atas_nama               String?
-  created_at                       DateTime         @default(now())
-  updated_at                       DateTime         @updatedAt
+  created_at                       DateTime                  @default(now())
+  updated_at                       DateTime                  @updatedAt
   kabupaten_kota                   String?
   provinsi                         String?
+  id_bank                          String?
+  nama_kcp                         String?
+  rekening_atas_nama               String?
+  rekening_bank                    String?
   pembelajaran                     Pembelajaran[]
   penggunas                        Pengguna[]
+  riwayat_pendidikan_formal        RiwayatPendidikanFormal[]
   rwy_sertifikasi                  RwySertifikasi[]
   izins                            Izin[]
-  presensiGtks                      PresensiGtk[]
-  pelanggaran             Pelanggaran[]    @relation("GtkPelanggaran")
-  pelanggaran_dilaporkan  Pelanggaran[]    @relation("PelaporGtk")
-  tindak_lanjut_petugas   TindakLanjut[]   @relation("PetugasTindakLanjut")
-  surat_keluar            SuratKeluar[]
-  riwayat_pendidikan_formal RiwayatPendidikanFormal[]
+  pelanggaran_dilaporkan           Pelanggaran[]             @relation("PelaporGtk")
+  pelanggaran                      Pelanggaran[]             @relation("GtkPelanggaran")
+  presensiGtks                     PresensiGtk[]
+  surat_keluar                     SuratKeluar[]
+  tindak_lanjut_petugas            TindakLanjut[]            @relation("PetugasTindakLanjut")
 
   @@index([sekolah_id])
   @@index([qr_token])
@@ -689,9 +689,9 @@ model JenisJadwal {
   aktif             Boolean                @default(true)
   created_at        DateTime               @default(now()) @db.Timestamptz(6)
   updated_at        DateTime               @default(now()) @updatedAt @db.Timestamptz(6)
+  jadwal_pelajaran  JadwalPelajaran[]
   sekolah           Sekolah                @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
   pengaturan_jadwal PengaturanJadwal[]
-  jadwal_pelajaran  JadwalPelajaran[]
   pengaturan_hari   PengaturanJadwalHari[]
 
   @@index([sekolah_id])
@@ -741,19 +741,19 @@ model PengaturanJadwal {
 model JadwalPelajaran {
   jadwal_pelajaran_id  String           @id @default(uuid()) @db.Uuid
   sekolah_id           String           @db.Uuid
-  jenis_jadwal_id      String           @db.Uuid
   rombongan_belajar_id String           @db.Uuid
   pembelajaran_id      String           @db.Uuid
   hari                 Int              @db.SmallInt
   urutan               Int              @db.SmallInt
-  aktif                Boolean          @default(true)
   created_at           DateTime         @default(now()) @db.Timestamptz(6)
   updated_at           DateTime         @default(now()) @updatedAt @db.Timestamptz(6)
+  aktif                Boolean          @default(true)
+  jenis_jadwal_id      String           @db.Uuid
   jenis_jadwal         JenisJadwal      @relation(fields: [jenis_jadwal_id], references: [jenis_jadwal_id], onDelete: Cascade)
   pembelajaran         Pembelajaran     @relation(fields: [pembelajaran_id], references: [pembelajaran_id], onDelete: Cascade)
   rombongan_belajar    RombonganBelajar @relation(fields: [rombongan_belajar_id], references: [rombongan_belajar_id], onDelete: Cascade)
   sekolah              Sekolah          @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
-  presensi_mapel        PresensiMapel[]
+  presensi_mapel       PresensiMapel[]
 
   @@unique([sekolah_id, jenis_jadwal_id, rombongan_belajar_id, hari, urutan])
   @@index([sekolah_id])
@@ -771,12 +771,11 @@ model HariLibur {
   tanggal_mulai   DateTime @db.Date
   tanggal_selesai DateTime @db.Date
   nama            String   @db.VarChar(150)
-  keterangan      String?  @db.Text
+  keterangan      String?
   aktif           Boolean  @default(true)
   created_at      DateTime @default(now()) @db.Timestamptz(6)
   updated_at      DateTime @default(now()) @updatedAt @db.Timestamptz(6)
-
-  sekolah Sekolah @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
+  sekolah         Sekolah  @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
 
   @@index([sekolah_id])
   @@index([tanggal_mulai, tanggal_selesai])
@@ -785,23 +784,22 @@ model HariLibur {
 }
 
 model Izin {
-  izin_id          String    @id @default(uuid()) @db.Uuid
-  sekolah_id       String    @db.Uuid
-  peserta_didik_id String?   @db.Uuid
-  ptk_id           String?   @db.Uuid
-  jenis            Int       @db.SmallInt // 1=Terlambat, 2=Keluar, 3=Pulang Awal, 4=Tidak Masuk, 5=Sakit
-  tanggal          DateTime  @db.Date
-  keterangan       String    @db.VarChar(255)
-  jam_keluar       DateTime? @db.Timestamptz(6)
-  jam_kembali      DateTime? @db.Timestamptz(6)
-  jam_kembali_estimasi DateTime? @db.Timestamptz(6)
-  disetujui        Boolean   @default(false)
-  created_at       DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at       DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
-
-  sekolah       Sekolah       @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
-  peserta_didik PesertaDidik? @relation(fields: [peserta_didik_id], references: [peserta_didik_id], onDelete: Cascade)
-  gtk           Gtk?          @relation(fields: [ptk_id], references: [ptk_id], onDelete: Cascade)
+  izin_id              String        @id @default(uuid()) @db.Uuid
+  sekolah_id           String        @db.Uuid
+  peserta_didik_id     String?       @db.Uuid
+  ptk_id               String?       @db.Uuid
+  jenis                Int           @db.SmallInt
+  tanggal              DateTime      @db.Date
+  keterangan           String        @db.VarChar(255)
+  disetujui            Boolean       @default(false)
+  created_at           DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime      @default(now()) @updatedAt @db.Timestamptz(6)
+  jam_keluar           DateTime?     @db.Timestamptz(6)
+  jam_kembali          DateTime?     @db.Timestamptz(6)
+  jam_kembali_estimasi DateTime?     @db.Timestamptz(6)
+  peserta_didik        PesertaDidik? @relation(fields: [peserta_didik_id], references: [peserta_didik_id], onDelete: Cascade)
+  gtk                  Gtk?          @relation(fields: [ptk_id], references: [ptk_id], onDelete: Cascade)
+  sekolah              Sekolah       @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
 
   @@index([sekolah_id])
   @@index([peserta_didik_id])
@@ -811,18 +809,17 @@ model Izin {
 }
 
 model PresensiPesertaDidik {
-  peserta_didik_id String    @db.Uuid
-  tanggal          DateTime  @db.Date
-  sekolah_id       String    @db.Uuid
-  jam_masuk        DateTime? @db.Timestamptz(6)
-  jam_pulang       DateTime? @db.Timestamptz(6)
-  status_masuk     Int?      @db.SmallInt // 1=Hadir, 2=Terlambat, 3=Izin, 4=Sakit, 5=Alpha
-  status_pulang    Int?      @db.SmallInt // 1=Normal, 2=Pulang Awal, 3=Izin Pulang
-  created_at       DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at       DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
-
-  sekolah       Sekolah      @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
-  peserta_didik PesertaDidik @relation(fields: [peserta_didik_id], references: [peserta_didik_id], onDelete: Cascade)
+  peserta_didik_id String       @db.Uuid
+  tanggal          DateTime     @db.Date
+  sekolah_id       String       @db.Uuid
+  jam_masuk        DateTime?    @db.Timestamptz(6)
+  jam_pulang       DateTime?    @db.Timestamptz(6)
+  status_masuk     Int?         @db.SmallInt
+  status_pulang    Int?         @db.SmallInt
+  created_at       DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime     @default(now()) @updatedAt @db.Timestamptz(6)
+  peserta_didik    PesertaDidik @relation(fields: [peserta_didik_id], references: [peserta_didik_id], onDelete: Cascade)
+  sekolah          Sekolah      @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
 
   @@id([peserta_didik_id, tanggal])
   @@index([sekolah_id, tanggal])
@@ -840,9 +837,8 @@ model PresensiGtk {
   status_pulang Int?      @db.SmallInt
   created_at    DateTime  @default(now()) @db.Timestamptz(6)
   updated_at    DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
-
-  sekolah Sekolah @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
-  gtk     Gtk     @relation(fields: [ptk_id], references: [ptk_id], onDelete: Cascade)
+  gtk           Gtk       @relation(fields: [ptk_id], references: [ptk_id], onDelete: Cascade)
+  sekolah       Sekolah   @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
 
   @@id([ptk_id, tanggal])
   @@index([sekolah_id, tanggal])
@@ -851,17 +847,16 @@ model PresensiGtk {
 }
 
 model PresensiMapel {
-  jadwal_pelajaran_id String   @db.Uuid
-  peserta_didik_id    String   @db.Uuid
-  tanggal             DateTime @db.Date
-  sekolah_id          String   @db.Uuid
-  status              Int      @db.SmallInt // 1=Hadir, 2=Izin, 3=Sakit, 4=Alpha, 5=Terlambat
-  waktu_absen         DateTime @db.Timestamptz(6)
-  created_at          DateTime @default(now()) @db.Timestamptz(6)
-
-  sekolah          Sekolah         @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
-  jadwal_pelajaran JadwalPelajaran @relation(fields: [jadwal_pelajaran_id], references: [jadwal_pelajaran_id], onDelete: Cascade)
-  peserta_didik    PesertaDidik    @relation(fields: [peserta_didik_id], references: [peserta_didik_id], onDelete: Cascade)
+  jadwal_pelajaran_id String          @db.Uuid
+  peserta_didik_id    String          @db.Uuid
+  tanggal             DateTime        @db.Date
+  sekolah_id          String          @db.Uuid
+  status              Int             @db.SmallInt
+  waktu_absen         DateTime        @db.Timestamptz(6)
+  created_at          DateTime        @default(now()) @db.Timestamptz(6)
+  jadwal_pelajaran    JadwalPelajaran @relation(fields: [jadwal_pelajaran_id], references: [jadwal_pelajaran_id], onDelete: Cascade)
+  peserta_didik       PesertaDidik    @relation(fields: [peserta_didik_id], references: [peserta_didik_id], onDelete: Cascade)
+  sekolah             Sekolah         @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
 
   @@id([jadwal_pelajaran_id, peserta_didik_id, tanggal])
   @@index([sekolah_id])
@@ -881,22 +876,21 @@ model Mandala {
 }
 
 model Cadisdik {
-  cadisdik_id   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  nama_instansi String   @db.VarChar(255)
-  alamat        String?  @db.Text
-  email         String?  @db.VarChar(255)
-  nomor_telepon String?  @db.VarChar(50)
-  website       String?  @db.VarChar(255)
-  aktif         Boolean  @default(true)
-  created_at    DateTime @default(now()) @db.Timestamptz(6)
-  updated_at    DateTime @default(now()) @updatedAt @db.Timestamptz(6)
-  sekolah       Sekolah[]
-  pegawai       Pegawai[]
-
+  cadisdik_id        String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nama_instansi      String              @db.VarChar(255)
+  alamat             String?
+  email              String?             @db.VarChar(255)
+  nomor_telepon      String?             @db.VarChar(50)
+  website            String?             @db.VarChar(255)
+  aktif              Boolean             @default(true)
+  created_at         DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime            @default(now()) @updatedAt @db.Timestamptz(6)
+  sekolah            Sekolah[]
+  antrian            Antrian[]
   kategori_keperluan KategoriKeperluan[]
-  antrian           Antrian[]
-  pelaporan         Pelaporan[]
-  layanan           Layanan[]
+  layanan            Layanan[]
+  pegawai            Pegawai[]
+  pelaporan          Pelaporan[]
   permohonan_layanan PermohonanLayanan[]
 
   @@map("cadisdik")
@@ -904,16 +898,15 @@ model Cadisdik {
 }
 
 model Pelaporan {
-  pelaporan_id    String    @id @default(uuid()) @db.Uuid
-  cadisdik_id     String    @db.Uuid
-  judul           String    @db.VarChar(255)
-  deskripsi       String?   @db.Text
-  tanggal_mulai   DateTime? @db.Timestamptz(6)
-  tanggal_selesai DateTime? @db.Timestamptz(6)
-  aktif           Boolean   @default(true)
-  created_at      DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at      DateTime  @updatedAt @db.Timestamptz(6)
-
+  pelaporan_id      String             @id @default(uuid()) @db.Uuid
+  cadisdik_id       String             @db.Uuid
+  judul             String             @db.VarChar(255)
+  deskripsi         String?
+  tanggal_mulai     DateTime?          @db.Timestamptz(6)
+  tanggal_selesai   DateTime?          @db.Timestamptz(6)
+  aktif             Boolean            @default(true)
+  created_at        DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime           @updatedAt @db.Timestamptz(6)
   cadisdik          Cadisdik           @relation(fields: [cadisdik_id], references: [cadisdik_id], onDelete: Cascade)
   pelaporan_sekolah PelaporanSekolah[]
 
@@ -924,14 +917,13 @@ model Pelaporan {
 }
 
 model PelaporanSekolah {
-  pelaporan_sekolah_id String   @id @default(uuid()) @db.Uuid
-  pelaporan_id         String   @db.Uuid
-  sekolah_id           String   @db.Uuid
-  created_at           DateTime @default(now()) @db.Timestamptz(6)
-  updated_at           DateTime @updatedAt @db.Timestamptz(6)
-
-  pelaporan         Pelaporan          @relation(fields: [pelaporan_id], references: [pelaporan_id], onDelete: Cascade)
-  pelaporan_dokumen PelaporanDokumen[]
+  pelaporan_sekolah_id String             @id @default(uuid()) @db.Uuid
+  pelaporan_id         String             @db.Uuid
+  sekolah_id           String             @db.Uuid
+  created_at           DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime           @updatedAt @db.Timestamptz(6)
+  pelaporan_dokumen    PelaporanDokumen[]
+  pelaporan            Pelaporan          @relation(fields: [pelaporan_id], references: [pelaporan_id], onDelete: Cascade)
 
   @@unique([pelaporan_id, sekolah_id])
   @@index([sekolah_id])
@@ -940,14 +932,13 @@ model PelaporanSekolah {
 }
 
 model PelaporanDokumen {
-  pelaporan_dokumen_id String   @id @default(uuid()) @db.Uuid
-  pelaporan_sekolah_id String   @db.Uuid
-  nama_file            String   @db.VarChar(255)
-  file_url             String   @db.VarChar(500)
+  pelaporan_dokumen_id String           @id @default(uuid()) @db.Uuid
+  pelaporan_sekolah_id String           @db.Uuid
+  nama_file            String           @db.VarChar(255)
+  file_url             String           @db.VarChar(500)
   ukuran_file          BigInt?
-  created_at           DateTime @default(now()) @db.Timestamptz(6)
-
-  pelaporan_sekolah PelaporanSekolah @relation(fields: [pelaporan_sekolah_id], references: [pelaporan_sekolah_id], onDelete: Cascade)
+  created_at           DateTime         @default(now()) @db.Timestamptz(6)
+  pelaporan_sekolah    PelaporanSekolah @relation(fields: [pelaporan_sekolah_id], references: [pelaporan_sekolah_id], onDelete: Cascade)
 
   @@index([pelaporan_sekolah_id])
   @@map("pelaporan_dokumen")
@@ -955,15 +946,14 @@ model PelaporanDokumen {
 }
 
 model KategoriKeperluan {
-  kategori_keperluan_id String   @id @default(uuid()) @db.Uuid
-  cadisdik_id          String   @db.Uuid
-  nama                 String   @db.VarChar(100)
-  aktif                Boolean  @default(true)
-  created_at           DateTime @default(now()) @db.Timestamptz(6)
-  updated_at           DateTime @updatedAt @db.Timestamptz(6)
-
-  cadisdik             Cadisdik  @relation(fields: [cadisdik_id], references: [cadisdik_id], onDelete: Cascade)
-  antrian              Antrian[]
+  kategori_keperluan_id String    @id @default(uuid()) @db.Uuid
+  cadisdik_id           String    @db.Uuid
+  nama                  String    @db.VarChar(100)
+  aktif                 Boolean   @default(true)
+  created_at            DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime  @updatedAt @db.Timestamptz(6)
+  antrian               Antrian[]
+  cadisdik              Cadisdik  @relation(fields: [cadisdik_id], references: [cadisdik_id], onDelete: Cascade)
 
   @@unique([cadisdik_id, nama])
   @@index([cadisdik_id])
@@ -972,22 +962,21 @@ model KategoriKeperluan {
 }
 
 model Antrian {
-  antrian_id            String   @id @default(uuid()) @db.Uuid
-  cadisdik_id           String   @db.Uuid
-  tanggal               DateTime @default(now()) @db.Date
-  kategori_keperluan_id String   @db.Uuid
-  nomor_antrian         Int      @db.Integer
-  nama_lengkap          String   @db.VarChar(255)
-  jabatan               String?  @db.VarChar(100)
-  unit_instansi         String?  @db.VarChar(255)
-  nomor_hp              String?  @db.VarChar(30)
-  keperluan             String?  @db.Text
-  status                Int      @default(0) @db.SmallInt // 0 = Menunggu, 1 = Dipanggil, 2 = Sedang Dilayani, 3 = Selesai, 4 = Batal
-  created_at            DateTime @default(now()) @db.Timestamptz(6)
-  updated_at            DateTime @updatedAt @db.Timestamptz(6)
-
-  cadisdik             Cadisdik          @relation(fields: [cadisdik_id], references: [cadisdik_id], onDelete: Cascade)
-  kategori_keperluan   KategoriKeperluan @relation(fields: [kategori_keperluan_id], references: [kategori_keperluan_id], onDelete: Restrict)
+  antrian_id            String            @id @default(uuid()) @db.Uuid
+  cadisdik_id           String            @db.Uuid
+  kategori_keperluan_id String            @db.Uuid
+  nomor_antrian         Int
+  nama_lengkap          String            @db.VarChar(255)
+  jabatan               String?           @db.VarChar(100)
+  unit_instansi         String?           @db.VarChar(255)
+  nomor_hp              String?           @db.VarChar(30)
+  keperluan             String?
+  status                Int               @default(0) @db.SmallInt
+  created_at            DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime          @updatedAt @db.Timestamptz(6)
+  tanggal               DateTime          @default(now()) @db.Date
+  cadisdik              Cadisdik          @relation(fields: [cadisdik_id], references: [cadisdik_id], onDelete: Cascade)
+  kategori_keperluan    KategoriKeperluan @relation(fields: [kategori_keperluan_id], references: [kategori_keperluan_id])
 
   @@unique([cadisdik_id, tanggal, nomor_antrian])
   @@index([cadisdik_id])
@@ -999,34 +988,30 @@ model Antrian {
 }
 
 model Pegawai {
-  pegawai_id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  cadisdik_id          String   @db.Uuid
-  nama_lengkap         String   @db.VarChar(255)
-  
-  // Kolom Tambahan Baru
-  nik                  String?  @unique @db.VarChar(16) // NIK standar 16 digit dan bersifat unik
-  tempat_lahir         String?  @db.VarChar(100)
-  tanggal_lahir        DateTime? @db.Date                // Menggunakan tipe DATE di PostgreSQL (tanpa jam/timezone)
-  alamat_lengkap       String?  @db.Text                // Menggunakan TEXT untuk mengakomodasi alamat yang panjang
-  
-  nip                  String   @unique @db.VarChar(30)
-  email                String   @unique @db.VarChar(255)
-  password             String   @db.VarChar(255)
-  authenticator_secret String?  @db.VarChar(255)
-  jabatan              Int      @db.SmallInt
-  jenis_kelamin        Int      @db.SmallInt
-  nomor_telepon        String?  @db.VarChar(30)
-  foto                 String?  @db.VarChar(500)
-  aktif                Boolean  @default(true)
-  created_at           DateTime @default(now()) @db.Timestamptz(6)
-  updated_at           DateTime @default(now()) @updatedAt @db.Timestamptz(6)
-
-  cadisdik Cadisdik @relation(fields: [cadisdik_id], references: [cadisdik_id], onDelete: Restrict)
-  mapping_pengawas MappingPengawas[]
+  pegawai_id             String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cadisdik_id            String                 @db.Uuid
+  nama_lengkap           String                 @db.VarChar(255)
+  nip                    String                 @unique @db.VarChar(30)
+  email                  String                 @unique @db.VarChar(255)
+  password               String                 @db.VarChar(255)
+  authenticator_secret   String?                @db.VarChar(255)
+  jabatan                Int                    @db.SmallInt
+  jenis_kelamin          Int                    @db.SmallInt
+  nomor_telepon          String?                @db.VarChar(30)
+  foto                   String?                @db.VarChar(500)
+  aktif                  Boolean                @default(true)
+  created_at             DateTime               @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime               @default(now()) @updatedAt @db.Timestamptz(6)
+  alamat_lengkap         String?
+  nik                    String?                @unique @db.VarChar(16)
+  tanggal_lahir          DateTime?              @db.Date
+  tempat_lahir           String?                @db.VarChar(100)
+  mapping_pengawas       MappingPengawas[]
+  cadisdik               Cadisdik               @relation(fields: [cadisdik_id], references: [cadisdik_id])
   permohonan_layanan_log PermohonanLayananLog[]
 
   @@index([cadisdik_id])
-  @@index([nik]) // Menambahkan index pada NIK untuk mempercepat query pencarian data pegawai
+  @@index([nik])
   @@index([nip])
   @@index([email])
   @@map("pegawai")
@@ -1039,13 +1024,12 @@ model MappingPengawas {
   sekolah_id          String   @db.Uuid
   created_at          DateTime @default(now()) @db.Timestamptz(6)
   updated_at          DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+  pegawai             Pegawai  @relation(fields: [pegawai_id], references: [pegawai_id], onDelete: Cascade)
+  sekolah             Sekolah  @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
 
-  pegawai Pegawai @relation(fields: [pegawai_id], references: [pegawai_id], onDelete: Cascade)
-  sekolah Sekolah @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
-
+  @@unique([pegawai_id, sekolah_id])
   @@index([pegawai_id])
   @@index([sekolah_id])
-  @@unique([pegawai_id, sekolah_id])
   @@map("mapping_pengawas")
   @@schema("mandala")
 }
@@ -1054,7 +1038,7 @@ model JenisPelanggaran {
   jenis_pelanggaran_id String        @id @default(uuid()) @db.Uuid
   sekolah_id           String        @db.Uuid
   nama                 String        @db.VarChar(150)
-  target               Int           @db.SmallInt // 0 = GTK, 1 = Peserta Didik, 2 = Keduanya
+  target               Int           @db.SmallInt
   poin                 Int           @db.SmallInt
   aktif                Boolean       @default(true)
   created_at           DateTime      @default(now()) @db.Timestamptz(6)
@@ -1068,13 +1052,13 @@ model JenisPelanggaran {
 }
 
 model JenisTindakLanjut {
-  jenis_tindak_lanjut_id String        @id @default(uuid()) @db.Uuid
-  sekolah_id             String        @db.Uuid
-  nama                 String        @db.VarChar(150)
-  target                 Int           @db.SmallInt // 0 = GTK, 1 = Peserta Didik, 2 = Keduanya
-  aktif                  Boolean       @default(true)
-  created_at             DateTime      @default(now()) @db.Timestamptz(6)
-  updated_at             DateTime      @updatedAt @db.Timestamptz(6)
+  jenis_tindak_lanjut_id String         @id @default(uuid()) @db.Uuid
+  sekolah_id             String         @db.Uuid
+  nama                   String         @db.VarChar(150)
+  target                 Int            @db.SmallInt
+  aktif                  Boolean        @default(true)
+  created_at             DateTime       @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime       @updatedAt @db.Timestamptz(6)
   tindak_lanjut          TindakLanjut[]
 
   @@index([sekolah_id])
@@ -1084,24 +1068,23 @@ model JenisTindakLanjut {
 }
 
 model Pelanggaran {
-  pelanggaran_id       String            @id @default(uuid()) @db.Uuid
-  sekolah_id           String            @db.Uuid
-  peserta_didik_id     String?           @db.Uuid
-  ptk_id               String?           @db.Uuid
-  jenis_pelanggaran_id String            @db.Uuid
-  tanggal              DateTime          @db.Date
-  waktu                DateTime          @db.Timestamptz(6)
-  keterangan           String?           @db.Text
-  poin                 Int               @db.SmallInt
-  status               Int               @default(1) @db.SmallInt // 1 = Draft, 2 = Diproses, 3 = Selesai, 4 = Dibatalkan
-  pelapor_ptk_id       String?           @db.Uuid
-  created_at           DateTime          @default(now()) @db.Timestamptz(6)
-  updated_at           DateTime          @updatedAt @db.Timestamptz(6)
-
-  jenis_pelanggaran    JenisPelanggaran  @relation(fields: [jenis_pelanggaran_id], references: [jenis_pelanggaran_id], onDelete: Cascade)
-  peserta_didik        PesertaDidik?     @relation("PesertaDidikPelanggaran", fields: [peserta_didik_id], references: [peserta_didik_id], onDelete: Cascade)
-  gtk                  Gtk?              @relation("GtkPelanggaran", fields: [ptk_id], references: [ptk_id], onDelete: Cascade)
-  pelapor              Gtk?              @relation("PelaporGtk", fields: [pelapor_ptk_id], references: [ptk_id], onDelete: SetNull)
+  pelanggaran_id       String           @id @default(uuid()) @db.Uuid
+  sekolah_id           String           @db.Uuid
+  peserta_didik_id     String?          @db.Uuid
+  ptk_id               String?          @db.Uuid
+  jenis_pelanggaran_id String           @db.Uuid
+  tanggal              DateTime         @db.Date
+  waktu                DateTime         @db.Timestamptz(6)
+  keterangan           String?
+  poin                 Int              @db.SmallInt
+  status               Int              @default(1) @db.SmallInt
+  pelapor_ptk_id       String?          @db.Uuid
+  created_at           DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime         @updatedAt @db.Timestamptz(6)
+  jenis_pelanggaran    JenisPelanggaran @relation(fields: [jenis_pelanggaran_id], references: [jenis_pelanggaran_id], onDelete: Cascade)
+  pelapor              Gtk?             @relation("PelaporGtk", fields: [pelapor_ptk_id], references: [ptk_id])
+  peserta_didik        PesertaDidik?    @relation("PesertaDidikPelanggaran", fields: [peserta_didik_id], references: [peserta_didik_id], onDelete: Cascade)
+  gtk                  Gtk?             @relation("GtkPelanggaran", fields: [ptk_id], references: [ptk_id], onDelete: Cascade)
   tindak_lanjut        TindakLanjut[]
 
   @@index([sekolah_id])
@@ -1118,14 +1101,13 @@ model TindakLanjut {
   pelanggaran_id         String            @db.Uuid
   jenis_tindak_lanjut_id String            @db.Uuid
   tanggal                DateTime          @db.Date
-  keterangan             String?           @db.Text
+  keterangan             String?
   petugas_ptk_id         String?           @db.Uuid
   created_at             DateTime          @default(now()) @db.Timestamptz(6)
   updated_at             DateTime          @updatedAt @db.Timestamptz(6)
-
-  pelanggaran            Pelanggaran       @relation(fields: [pelanggaran_id], references: [pelanggaran_id], onDelete: Cascade)
   jenis_tindak_lanjut    JenisTindakLanjut @relation(fields: [jenis_tindak_lanjut_id], references: [jenis_tindak_lanjut_id], onDelete: Cascade)
-  petugas                Gtk?              @relation("PetugasTindakLanjut", fields: [petugas_ptk_id], references: [ptk_id], onDelete: SetNull)
+  pelanggaran            Pelanggaran       @relation(fields: [pelanggaran_id], references: [pelanggaran_id], onDelete: Cascade)
+  petugas                Gtk?              @relation("PetugasTindakLanjut", fields: [petugas_ptk_id], references: [ptk_id])
 
   @@index([pelanggaran_id])
   @@index([jenis_tindak_lanjut_id])
@@ -1139,12 +1121,10 @@ model PengaturanTagihan {
   sekolah_id            String                    @db.Uuid
   nama_tagihan          String                    @db.VarChar(150)
   nominal               BigInt
-  tipe                  Int                       @db.SmallInt // 1 = Bulanan, 2 = Tahunan, 3 = Sekali Bayar
+  tipe                  Int                       @db.SmallInt
   aktif                 Boolean                   @default(true)
   created_at            DateTime                  @default(now()) @db.Timestamptz(6)
   updated_at            DateTime                  @updatedAt @db.Timestamptz(6)
-
-  // Relations
   sekolah               Sekolah                   @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
   pengaturan_rombel     PengaturanTagihanRombel[]
   spp                   Spp[]
@@ -1161,8 +1141,6 @@ model PengaturanTagihanRombel {
   pengaturan_tagihan_id        String            @db.Uuid
   rombongan_belajar_id         String            @db.Uuid
   created_at                   DateTime          @default(now()) @db.Timestamptz(6)
-
-  // Relations
   pengaturan_tagihan           PengaturanTagihan @relation(fields: [pengaturan_tagihan_id], references: [pengaturan_tagihan_id], onDelete: Cascade)
   rombongan_belajar            RombonganBelajar  @relation(fields: [rombongan_belajar_id], references: [rombongan_belajar_id], onDelete: Cascade)
 
@@ -1180,16 +1158,14 @@ model Spp {
   pengaturan_tagihan_id String                @db.Uuid
   nominal_tagihan       BigInt
   nominal_terbayar      BigInt                @default(0)
-  status                Int                   @default(1) @db.SmallInt // 1 = Belum Bayar, 2 = Sebagian, 3 = Lunas
+  status                Int                   @default(1) @db.SmallInt
   jatuh_tempo           DateTime?             @db.Date
   created_at            DateTime              @default(now()) @db.Timestamptz(6)
   updated_at            DateTime              @updatedAt @db.Timestamptz(6)
-
-  // Relations
-  sekolah               Sekolah               @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
-  peserta_didik         PesertaDidik          @relation(fields: [peserta_didik_id], references: [peserta_didik_id], onDelete: Cascade)
-  pengaturan_tagihan    PengaturanTagihan     @relation(fields: [pengaturan_tagihan_id], references: [pengaturan_tagihan_id], onDelete: Cascade)
   riwayat_transaksi     RiwayatTransaksiSpp[]
+  pengaturan_tagihan    PengaturanTagihan     @relation(fields: [pengaturan_tagihan_id], references: [pengaturan_tagihan_id], onDelete: Cascade)
+  peserta_didik         PesertaDidik          @relation(fields: [peserta_didik_id], references: [peserta_didik_id], onDelete: Cascade)
+  sekolah               Sekolah               @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
 
   @@index([sekolah_id])
   @@index([peserta_didik_id])
@@ -1200,21 +1176,19 @@ model Spp {
 }
 
 model RiwayatTransaksiSpp {
-  riwayat_transaksi_spp_id String   @id @default(uuid()) @db.Uuid
-  spp_id                   String   @db.Uuid
-  sekolah_id               String   @db.Uuid
-  peserta_didik_id         String   @db.Uuid
-  jenis_transaksi          Int      @db.SmallInt // 1 = Pembayaran, 2 = Beasiswa, 3 = Denda, 4 = Pengurangan, 5 = Pengembalian Dana
+  riwayat_transaksi_spp_id String       @id @default(uuid()) @db.Uuid
+  spp_id                   String       @db.Uuid
+  sekolah_id               String       @db.Uuid
+  peserta_didik_id         String       @db.Uuid
+  jenis_transaksi          Int          @db.SmallInt
   nominal                  BigInt
-  tanggal_transaksi        DateTime @db.Timestamptz(6)
-  metode_pembayaran        Int?     @db.SmallInt // 1 = Tunai, 2 = Transfer, 3 = QRIS, 4 = Virtual Account
-  keterangan               String?  @db.VarChar(255)
-  created_at               DateTime @default(now()) @db.Timestamptz(6)
-
-  // Relations
-  spp                      Spp          @relation(fields: [spp_id], references: [spp_id], onDelete: Cascade)
-  sekolah                  Sekolah      @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
+  tanggal_transaksi        DateTime     @db.Timestamptz(6)
+  metode_pembayaran        Int?         @db.SmallInt
+  keterangan               String?      @db.VarChar(255)
+  created_at               DateTime     @default(now()) @db.Timestamptz(6)
   peserta_didik            PesertaDidik @relation(fields: [peserta_didik_id], references: [peserta_didik_id], onDelete: Cascade)
+  sekolah                  Sekolah      @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
+  spp                      Spp          @relation(fields: [spp_id], references: [spp_id], onDelete: Cascade)
 
   @@index([spp_id])
   @@index([sekolah_id])
@@ -1226,18 +1200,16 @@ model RiwayatTransaksiSpp {
 }
 
 model PengaturanNomorSurat {
-  pengaturan_nomor_surat_id String   @id @default(uuid()) @db.Uuid
-  sekolah_id                String   @db.Uuid
-  kategori                  Int      @db.SmallInt // 0 = Peserta Didik, 1 = GTK, 2 = SK Sekolah
-  nama_label                String   @db.VarChar(100) // SK, SKL, SPT, SPD, SKB
-  format_nomor              String   @db.VarChar(255) // e.g. {NO}/SMKN1/{LABEL}/{ROMAWI}/{TAHUN}
-  counter                   Int      @default(0)
-  aktif                     Boolean  @default(true)
-  created_at                DateTime @default(now()) @db.Timestamptz(6)
-  updated_at                DateTime @updatedAt @db.Timestamptz(6)
-
-  // Relations
-  sekolah                   Sekolah  @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
+  pengaturan_nomor_surat_id String        @id @default(uuid()) @db.Uuid
+  sekolah_id                String        @db.Uuid
+  kategori                  Int           @db.SmallInt
+  nama_label                String        @db.VarChar(100)
+  format_nomor              String        @db.VarChar(255)
+  counter                   Int           @default(0)
+  aktif                     Boolean       @default(true)
+  created_at                DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime      @updatedAt @db.Timestamptz(6)
+  sekolah                   Sekolah       @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
   surat_keluar              SuratKeluar[]
 
   @@unique([sekolah_id, kategori, nama_label])
@@ -1249,23 +1221,21 @@ model PengaturanNomorSurat {
 }
 
 model TemplateSurat {
-  template_surat_id String   @id @default(uuid()) @db.Uuid
-  sekolah_id        String   @db.Uuid
-  nama_template     String   @db.VarChar(150)
-  kategori          Int      @db.SmallInt // 0 = Peserta Didik, 1 = GTK, 2 = SK Sekolah
-  ukuran_kertas     Int      @db.SmallInt // 1 = A4, 2 = F4, 3 = Letter, 4 = Legal
-  margin_atas       Int      @default(20) @db.SmallInt
-  margin_bawah      Int      @default(20) @db.SmallInt
-  margin_kiri       Int      @default(20) @db.SmallInt
-  margin_kanan      Int      @default(20) @db.SmallInt
-  konten_html       String   @db.Text
-  aktif             Boolean  @default(true)
-  created_at        DateTime @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime @updatedAt @db.Timestamptz(6)
-
-  // Relations
-  sekolah           Sekolah  @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
+  template_surat_id String        @id @default(uuid()) @db.Uuid
+  sekolah_id        String        @db.Uuid
+  nama_template     String        @db.VarChar(150)
+  kategori          Int           @db.SmallInt
+  ukuran_kertas     Int           @db.SmallInt
+  margin_atas       Int           @default(20) @db.SmallInt
+  margin_bawah      Int           @default(20) @db.SmallInt
+  margin_kiri       Int           @default(20) @db.SmallInt
+  margin_kanan      Int           @default(20) @db.SmallInt
+  konten_html       String
+  aktif             Boolean       @default(true)
+  created_at        DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime      @updatedAt @db.Timestamptz(6)
   surat_keluar      SuratKeluar[]
+  sekolah           Sekolah       @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
 
   @@index([sekolah_id])
   @@index([kategori])
@@ -1284,12 +1254,10 @@ model SuratMasuk {
   asal_surat       String   @db.VarChar(255)
   tujuan_disposisi String   @db.VarChar(255)
   perihal          String   @db.VarChar(255)
-  keterangan       String?  @db.Text
+  keterangan       String?
   file_url         String   @db.VarChar(500)
   created_at       DateTime @default(now()) @db.Timestamptz(6)
   updated_at       DateTime @updatedAt @db.Timestamptz(6)
-
-  // Relations
   sekolah          Sekolah  @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
 
   @@unique([sekolah_id, nomor_agenda])
@@ -1307,24 +1275,22 @@ model SuratKeluar {
   sekolah_id                String               @db.Uuid
   template_surat_id         String               @db.Uuid
   pengaturan_nomor_surat_id String               @db.Uuid
-  kategori                  Int                  @db.SmallInt // 0 = Peserta Didik, 1 = GTK, 2 = SK Sekolah
+  kategori                  Int                  @db.SmallInt
   peserta_didik_id          String?              @db.Uuid
   ptk_id                    String?              @db.Uuid
-  nomor_surat               String?              @db.VarChar(255) // Nullable for drafts/previews
+  nomor_surat               String?              @db.VarChar(255)
   tanggal_surat             DateTime             @db.Date
   perihal                   String               @db.VarChar(255)
-  isi_final_html            String               @db.Text
+  isi_final_html            String
   file_pdf                  String?              @db.VarChar(500)
-  status                    Int                  @default(1) @db.SmallInt // 1 = Draft, 2 = Terbit, 3 = Dibatalkan
+  status                    Int                  @default(1) @db.SmallInt
   created_at                DateTime             @default(now()) @db.Timestamptz(6)
   updated_at                DateTime             @updatedAt @db.Timestamptz(6)
-
-  // Relations
-  sekolah                   Sekolah              @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
-  template_surat            TemplateSurat        @relation(fields: [template_surat_id], references: [template_surat_id])
   pengaturan_nomor_surat    PengaturanNomorSurat @relation(fields: [pengaturan_nomor_surat_id], references: [pengaturan_nomor_surat_id])
   peserta_didik             PesertaDidik?        @relation(fields: [peserta_didik_id], references: [peserta_didik_id])
   gtk                       Gtk?                 @relation(fields: [ptk_id], references: [ptk_id])
+  sekolah                   Sekolah              @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
+  template_surat            TemplateSurat        @relation(fields: [template_surat_id], references: [template_surat_id])
 
   @@unique([sekolah_id, nomor_surat])
   @@index([sekolah_id])
@@ -1357,24 +1323,22 @@ model RiwayatPendidikanFormal {
   gelar_akademik_id_str        String?
   created_at                   DateTime @default(now())
   updated_at                   DateTime @updatedAt
+  gtk                          Gtk      @relation(fields: [ptk_id], references: [ptk_id], onDelete: Cascade)
 
-  gtk Gtk @relation(fields: [ptk_id], references: [ptk_id], onDelete: Cascade)
-
+  @@index([ptk_id])
   @@map("riwayat_pendidikan_formal")
   @@schema("dapodik")
-  @@index([ptk_id])
 }
 
 model Layanan {
-  layanan_id   String   @id @default(uuid()) @db.Uuid
-  cadisdik_id  String?  @db.Uuid
-  nama_layanan String   @db.VarChar(150)
-  kategori     Int      @db.SmallInt // 0 = GTK, 1 = Peserta Didik, 2 = Sekolah
-  aktif        Boolean  @default(true)
-  created_at   DateTime @default(now()) @db.Timestamptz(6)
-  updated_at   DateTime @default(now()) @updatedAt @db.Timestamptz(6)
-
-  cadisdik           Cadisdik?          @relation(fields: [cadisdik_id], references: [cadisdik_id], onDelete: Cascade)
+  layanan_id         String              @id @default(uuid()) @db.Uuid
+  nama_layanan       String              @db.VarChar(150)
+  kategori           Int                 @db.SmallInt
+  aktif              Boolean             @default(true)
+  created_at         DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime            @default(now()) @updatedAt @db.Timestamptz(6)
+  cadisdik_id        String?             @db.Uuid
+  cadisdik           Cadisdik?           @relation(fields: [cadisdik_id], references: [cadisdik_id], onDelete: Cascade)
   syarat             LayananSyarat[]
   permohonan_layanan PermohonanLayanan[]
 
@@ -1387,16 +1351,15 @@ model Layanan {
 }
 
 model LayananSyarat {
-  layanan_syarat_id String   @id @default(uuid()) @db.Uuid
-  layanan_id        String   @db.Uuid
-  nama_syarat       String   @db.VarChar(150)
-  wajib             Boolean  @default(true)
-  urutan            Int      @db.SmallInt
-  aktif             Boolean  @default(true)
-  created_at        DateTime @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime @default(now()) @updatedAt @db.Timestamptz(6)
-
-  layanan                Layanan                  @relation(fields: [layanan_id], references: [layanan_id], onDelete: Cascade)
+  layanan_syarat_id       String                  @id @default(uuid()) @db.Uuid
+  layanan_id              String                  @db.Uuid
+  nama_syarat             String                  @db.VarChar(150)
+  wajib                   Boolean                 @default(true)
+  urutan                  Int                     @db.SmallInt
+  aktif                   Boolean                 @default(true)
+  created_at              DateTime                @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime                @default(now()) @updatedAt @db.Timestamptz(6)
+  layanan                 Layanan                 @relation(fields: [layanan_id], references: [layanan_id], onDelete: Cascade)
   permohonan_layanan_file PermohonanLayananFile[]
 
   @@unique([layanan_id, nama_syarat])
@@ -1407,22 +1370,21 @@ model LayananSyarat {
 }
 
 model PermohonanLayanan {
-  permohonan_layanan_id String    @id @default(uuid()) @db.Uuid
-  cadisdik_id           String?   @db.Uuid
-  sekolah_id            String    @db.Uuid
-  layanan_id            String    @db.Uuid
-  kategori              Int       @db.SmallInt // 0 = GTK, 1 = Peserta Didik, 2 = Sekolah
-  ptk_id                String?   @db.Uuid
-  peserta_didik_id      String?   @db.Uuid
-  nomor_permohonan      String?   @db.VarChar(50)
-  keterangan            String?   @db.Text
-  status                Int       @default(1) @db.SmallInt // 0 = Draft, 1 = Diajukan, 2 = Diverifikasi Mandala, 3 = Menunggu Perbaikan, 4 = Menunggu Persetujuan Kasubag, 5 = Disetujui, 6 = Ditolak
-  tanggal_pengajuan     DateTime? @db.Timestamptz(6)
-  created_at            DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at            DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
-
-  cadisdik               Cadisdik?               @relation(fields: [cadisdik_id], references: [cadisdik_id], onDelete: Cascade)
-  layanan                Layanan                 @relation(fields: [layanan_id], references: [layanan_id], onDelete: Restrict)
+  permohonan_layanan_id   String                  @id @default(uuid()) @db.Uuid
+  sekolah_id              String                  @db.Uuid
+  layanan_id              String                  @db.Uuid
+  kategori                Int                     @db.SmallInt
+  ptk_id                  String?                 @db.Uuid
+  peserta_didik_id        String?                 @db.Uuid
+  nomor_permohonan        String?                 @db.VarChar(50)
+  keterangan              String?
+  status                  Int                     @default(1) @db.SmallInt
+  tanggal_pengajuan       DateTime?               @db.Timestamptz(6)
+  created_at              DateTime                @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime                @default(now()) @updatedAt @db.Timestamptz(6)
+  cadisdik_id             String?                 @db.Uuid
+  cadisdik                Cadisdik?               @relation(fields: [cadisdik_id], references: [cadisdik_id], onDelete: Cascade)
+  layanan                 Layanan                 @relation(fields: [layanan_id], references: [layanan_id])
   permohonan_layanan_file PermohonanLayananFile[]
   permohonan_layanan_log  PermohonanLayananLog[]
 
@@ -1437,19 +1399,18 @@ model PermohonanLayanan {
 }
 
 model PermohonanLayananFile {
-  permohonan_layanan_file_id String   @id @default(uuid()) @db.Uuid
-  permohonan_layanan_id      String   @db.Uuid
-  layanan_syarat_id          String?  @db.Uuid
-  jenis_file                 Int      @db.SmallInt // 0 = Surat Permohonan Awal, 1 = Dokumen Persyaratan
-  nama_file                  String?  @db.VarChar(255)
-  file_url                   String?  @db.VarChar(500)
-  catatan                    String?  @db.Text
-  status                     Int      @default(0) @db.SmallInt // 0 = Menunggu Verifikasi, 1 = Diterima, 2 = Revisi, 3 = Ditolak
-  created_at                 DateTime @default(now()) @db.Timestamptz(6)
-  updated_at                 DateTime @default(now()) @updatedAt @db.Timestamptz(6)
-
-  permohonan_layanan PermohonanLayanan @relation(fields: [permohonan_layanan_id], references: [permohonan_layanan_id], onDelete: Cascade)
-  layanan_syarat     LayananSyarat?    @relation(fields: [layanan_syarat_id], references: [layanan_syarat_id], onDelete: SetNull)
+  permohonan_layanan_file_id String            @id @default(uuid()) @db.Uuid
+  permohonan_layanan_id      String            @db.Uuid
+  layanan_syarat_id          String?           @db.Uuid
+  jenis_file                 Int               @db.SmallInt
+  nama_file                  String?           @db.VarChar(255)
+  file_url                   String?           @db.VarChar(500)
+  catatan                    String?
+  status                     Int               @default(0) @db.SmallInt
+  created_at                 DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime          @default(now()) @updatedAt @db.Timestamptz(6)
+  layanan_syarat             LayananSyarat?    @relation(fields: [layanan_syarat_id], references: [layanan_syarat_id])
+  permohonan_layanan         PermohonanLayanan @relation(fields: [permohonan_layanan_id], references: [permohonan_layanan_id], onDelete: Cascade)
 
   @@index([permohonan_layanan_id])
   @@index([layanan_syarat_id])
@@ -1459,19 +1420,1632 @@ model PermohonanLayananFile {
 }
 
 model PermohonanLayananLog {
-  permohonan_layanan_log_id String   @id @default(uuid()) @db.Uuid
-  permohonan_layanan_id     String   @db.Uuid
-  pegawai_id                String   @db.Uuid
-  status                    Int      @db.SmallInt
-  catatan                   String?  @db.Text
-  created_at                DateTime @default(now()) @db.Timestamptz(6)
-
-  permohonan_layanan PermohonanLayanan @relation(fields: [permohonan_layanan_id], references: [permohonan_layanan_id], onDelete: Cascade)
-  pegawai            Pegawai           @relation(fields: [pegawai_id], references: [pegawai_id], onDelete: Restrict)
+  permohonan_layanan_log_id String            @id @default(uuid()) @db.Uuid
+  permohonan_layanan_id     String            @db.Uuid
+  pegawai_id                String            @db.Uuid
+  status                    Int               @db.SmallInt
+  catatan                   String?
+  created_at                DateTime          @default(now()) @db.Timestamptz(6)
+  pegawai                   Pegawai           @relation(fields: [pegawai_id], references: [pegawai_id])
+  permohonan_layanan        PermohonanLayanan @relation(fields: [permohonan_layanan_id], references: [permohonan_layanan_id], onDelete: Cascade)
 
   @@index([permohonan_layanan_id])
   @@index([pegawai_id])
   @@index([status])
   @@map("permohonan_layanan_log")
   @@schema("mandala")
+}
+
+model agama {
+  agama_id     Int       @id(map: "pk_agama") @unique(map: "agama_pk") @db.SmallInt
+  nama         String    @db.VarChar(25)
+  create_date  DateTime  @default(dbgenerated("'2019-09-10 14:29:54.336888'::timestamp without time zone")) @db.Timestamp(6)
+  last_update  DateTime  @default(dbgenerated("'2019-09-10 14:29:54.336888'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date DateTime? @db.Timestamp(6)
+  last_sync    DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model akreditasi {
+  akreditasi_id Decimal   @id(map: "pk_akreditasi") @unique(map: "akreditasi_pk") @db.Decimal(1, 0)
+  nama          String    @db.VarChar(30)
+  create_date   DateTime  @default(dbgenerated("'2019-09-10 14:29:54.38847'::timestamp without time zone")) @db.Timestamp(6)
+  last_update   DateTime  @default(dbgenerated("'2019-09-10 14:29:54.38847'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date  DateTime? @db.Timestamp(6)
+  last_sync     DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model akses_internet {
+  akses_internet_id Int       @id(map: "pk_akses_internet") @unique(map: "akses_internet_pk") @db.SmallInt
+  nama              String    @db.VarChar(50)
+  media             Decimal   @db.Decimal(1, 0)
+  create_date       DateTime  @default(dbgenerated("'2019-09-10 14:29:54.451329'::timestamp without time zone")) @db.Timestamp(6)
+  last_update       DateTime  @default(dbgenerated("'2019-09-10 14:29:54.451329'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date      DateTime? @db.Timestamp(6)
+  last_sync         DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model alasan_layak_pip {
+  id_layak_pip     Decimal   @id(map: "pk_alasan_layak_pip") @unique(map: "alasan_layak_pip_pk") @db.Decimal(2, 0)
+  alasan_layak_pip String    @db.VarChar(100)
+  create_date      DateTime  @default(dbgenerated("'2019-09-10 14:29:54.544241'::timestamp without time zone")) @db.Timestamp(6)
+  last_update      DateTime  @default(dbgenerated("'2019-09-10 14:29:54.544241'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date     DateTime? @db.Timestamp(6)
+  last_sync        DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model alat_transportasi {
+  alat_transportasi_id Decimal   @id(map: "pk_alat_transportasi") @unique(map: "alat_transportasi_pk") @db.Decimal(2, 0)
+  nama                 String    @db.VarChar(40)
+  create_date          DateTime  @default(dbgenerated("'2019-09-10 14:29:54.662591'::timestamp without time zone")) @db.Timestamp(6)
+  last_update          DateTime  @default(dbgenerated("'2019-09-10 14:29:54.662591'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date         DateTime? @db.Timestamp(6)
+  last_sync            DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model bank {
+  id_bank      String    @id(map: "pk_bank") @unique(map: "bank_pk") @db.Char(3)
+  nm_bank      String    @db.VarChar(30)
+  create_date  DateTime  @default(dbgenerated("'2019-09-10 14:29:55.050256'::timestamp without time zone")) @db.Timestamp(6)
+  last_update  DateTime  @default(dbgenerated("'2019-09-10 14:29:55.050256'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date DateTime? @db.Timestamp(6)
+  last_sync    DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model batas_waktu_rapor {
+  semester_id       String    @id(map: "pk_batas_waktu_rapor") @unique(map: "batas_waktu_rapor_pk") @db.Char(5)
+  tgl_rapor_mulai   DateTime  @db.Date
+  tgl_rapor_selesai DateTime  @db.Date
+  tgl_usm_mulai     DateTime? @db.Date
+  tgl_usm_selesai   DateTime? @db.Date
+  create_date       DateTime  @default(dbgenerated("'2019-09-10 14:29:55.089602'::timestamp without time zone")) @db.Timestamp(6)
+  last_update       DateTime  @default(dbgenerated("'2019-09-10 14:29:55.089602'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date      DateTime? @db.Timestamp(6)
+  last_sync         DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  semester          semester  @relation(fields: [semester_id], references: [semester_id], onUpdate: Restrict, map: "fk_batas_wa_batas_wak_semester")
+
+  @@schema("ref")
+}
+
+model bentuk_lembaga {
+  bentuk_lembaga_id Decimal   @id(map: "pk_bentuk_lembaga") @unique(map: "bentuk_lembaga_pk") @db.Decimal(2, 0)
+  nama              String    @db.VarChar(100)
+  create_date       DateTime  @db.Timestamp(6)
+  last_update       DateTime  @default(dbgenerated("'2020-04-16 09:40:03.422677'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date      DateTime? @db.Timestamp(6)
+  last_sync         DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model bentuk_pendidikan {
+  bentuk_pendidikan_id  Int              @id(map: "pk_bentuk_pendidikan") @unique(map: "bentuk_pendidikan_pk") @db.SmallInt
+  nama                  String           @db.VarChar(50)
+  jenjang_paud          Decimal          @db.Decimal(1, 0)
+  jenjang_tk            Decimal          @db.Decimal(1, 0)
+  jenjang_sd            Decimal          @db.Decimal(1, 0)
+  jenjang_smp           Decimal          @db.Decimal(1, 0)
+  jenjang_sma           Decimal          @db.Decimal(1, 0)
+  jenjang_tinggi        Decimal          @db.Decimal(1, 0)
+  direktorat_pembinaan  String?          @db.VarChar(40)
+  aktif                 Decimal          @db.Decimal(1, 0)
+  formalitas_pendidikan String           @db.Char(1)
+  create_date           DateTime         @default(dbgenerated("'2020-04-16 09:40:03.422677'::timestamp without time zone")) @db.Timestamp(6)
+  last_update           DateTime         @default(dbgenerated("'2020-04-16 09:40:03.422677'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date          DateTime?        @db.Timestamp(6)
+  last_sync             DateTime         @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  standar_sarana        standar_sarana[]
+
+  @@schema("ref")
+}
+
+model bidang_studi {
+  bidang_studi_id           Int                         @id(map: "pk_bidang_studi") @unique(map: "bidang_studi_pk")
+  kelompok_bidang_studi_id  Int?
+  kode                      String?                     @db.VarChar(30)
+  bidang_studi              String                      @db.VarChar(40)
+  kelompok                  Decimal                     @db.Decimal(1, 0)
+  jenjang_paud              Decimal                     @db.Decimal(1, 0)
+  jenjang_tk                Decimal                     @db.Decimal(1, 0)
+  jenjang_sd                Decimal                     @db.Decimal(1, 0)
+  jenjang_smp               Decimal                     @db.Decimal(1, 0)
+  jenjang_sma               Decimal                     @db.Decimal(1, 0)
+  jenjang_tinggi            Decimal                     @db.Decimal(1, 0)
+  a_sert_komp               Decimal                     @default(0) @db.Decimal(1, 0)
+  a_sert_profesi            Decimal                     @default(0) @db.Decimal(1, 0)
+  create_date               DateTime                    @default(dbgenerated("'2019-09-10 14:29:55.273003'::timestamp without time zone")) @db.Timestamp(6)
+  last_update               DateTime                    @default(dbgenerated("'2019-09-10 14:29:55.273003'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date              DateTime?                   @db.Timestamp(6)
+  last_sync                 DateTime                    @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  kelompok_bidang_studi     bidang_studi?               @relation("bidang_studiTobidang_studi", fields: [kelompok_bidang_studi_id], references: [bidang_studi_id], onDelete: Restrict, onUpdate: Restrict, map: "fk_bidang_s_kelompok_bidang_s")
+  other_bidang_studi        bidang_studi[]              @relation("bidang_studiTobidang_studi")
+  map_bidang_mata_pelajaran map_bidang_mata_pelajaran[]
+
+  @@index([kelompok_bidang_studi_id], map: "kelompok_fk")
+  @@schema("ref")
+}
+
+model bidang_usaha {
+  bidang_usaha_id    String    @id(map: "pk_bidang_usaha") @unique(map: "bidang_usaha_pk") @db.Char(10)
+  nama_bidang_usaha  String    @db.VarChar(40)
+  level_bidang_usaha String?   @db.VarChar(20)
+  create_date        DateTime  @default(dbgenerated("'2021-06-07 12:49:42.393489'::timestamp without time zone")) @db.Timestamp(6)
+  last_update        DateTime  @default(dbgenerated("'2021-06-07 12:49:42.393489'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date       DateTime? @db.Timestamp(6)
+  last_sync          DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model ekstra_kurikuler {
+  id_ekskul    Int       @id(map: "pk_ekstra_kurikuler") @unique(map: "ekstra_kurikuler_pk")
+  nm_ekskul    String    @db.VarChar(80)
+  u_sd         Decimal   @default(0) @db.Decimal(1, 0)
+  u_smp        Decimal   @default(0) @db.Decimal(1, 0)
+  u_sma        Decimal   @default(0) @db.Decimal(1, 0)
+  u_smk        Decimal   @default(0) @db.Decimal(1, 0)
+  create_date  DateTime  @default(dbgenerated("'2019-09-10 14:29:55.5923'::timestamp without time zone")) @db.Timestamp(6)
+  last_update  DateTime  @default(dbgenerated("'2019-09-10 14:29:55.5923'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date DateTime? @db.Timestamp(6)
+  last_sync    DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model errortype {
+  idtype         Int       @id(map: "pk_errortype") @unique(map: "errortype_pk")
+  kategori_error Int?
+  keterangan     String?   @db.VarChar(255)
+  create_date    DateTime  @default(dbgenerated("'2019-09-10 14:29:55.609506'::timestamp without time zone")) @db.Timestamp(6)
+  last_update    DateTime  @default(dbgenerated("'2019-09-10 14:29:55.609506'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date   DateTime? @db.Timestamp(6)
+  last_sync      DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model fasilitas_layanan {
+  fasilitas_layanan_id Decimal   @id(map: "pk_fasilitas_layanan") @unique(map: "fasilitas_layanan_pk") @db.Decimal(2, 0)
+  nama                 String?   @db.VarChar(100)
+  create_date          DateTime  @default(dbgenerated("'2020-04-16 09:40:03.422677'::timestamp without time zone")) @db.Timestamp(6)
+  last_update          DateTime  @default(dbgenerated("'2020-04-16 09:40:03.422677'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date         DateTime? @db.Timestamp(6)
+  last_sync            DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model gelar_akademik {
+  gelar_akademik_id Int       @id(map: "pk_gelar_akademik") @unique(map: "gelar_akademik_pk")
+  kode              String    @db.VarChar(10)
+  nama              String    @db.VarChar(40)
+  posisi_gelar      Decimal   @db.Decimal(1, 0)
+  create_date       DateTime  @default(dbgenerated("'2019-09-10 14:29:55.639014'::timestamp without time zone")) @db.Timestamp(6)
+  last_update       DateTime  @default(dbgenerated("'2019-09-10 14:29:55.639014'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date      DateTime? @db.Timestamp(6)
+  last_sync         DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model group_matpel {
+  gmp_id                   String                     @id(map: "pk_group_matpel") @unique(map: "group_matpel_pk") @db.Uuid
+  nama_group               String                     @db.VarChar(80)
+  jumlah_jam_maksimum      Decimal                    @db.Decimal(2, 0)
+  jumlah_sks_maksimum      Decimal                    @default(0) @db.Decimal(2, 0)
+  kurikulum_id             Int                        @db.SmallInt
+  tingkat_pendidikan_id    Decimal                    @db.Decimal(2, 0)
+  create_date              DateTime                   @default(dbgenerated("'2019-09-10 14:29:55.667262'::timestamp without time zone")) @db.Timestamp(6)
+  last_update              DateTime                   @default(dbgenerated("'2019-09-10 14:29:55.667262'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date             DateTime?                  @db.Timestamp(6)
+  last_sync                DateTime                   @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  kurikulum                kurikulum                  @relation(fields: [kurikulum_id], references: [kurikulum_id], onUpdate: Restrict, map: "fk_group_ma_gmp_kurik_kurikulu")
+  tingkat_pendidikan       tingkat_pendidikan         @relation(fields: [tingkat_pendidikan_id], references: [tingkat_pendidikan_id], onUpdate: Restrict, map: "fk_group_ma_gmp_tingk_tingkat_")
+  mata_pelajaran_kurikulum mata_pelajaran_kurikulum[]
+
+  @@index([kurikulum_id], map: "gmp_kurikulum_fk")
+  @@index([tingkat_pendidikan_id], map: "gmp_tingkat_fk")
+  @@schema("ref")
+}
+
+model jabatan_fungsional {
+  jabatan_fungsional_id Decimal   @id(map: "pk_jabatan_fungsional") @unique(map: "jabatan_fungsional_pk") @db.Decimal(5, 0)
+  nama                  String    @db.VarChar(50)
+  create_date           DateTime  @default(dbgenerated("'2019-09-10 14:29:55.8868'::timestamp without time zone")) @db.Timestamp(6)
+  last_update           DateTime  @default(dbgenerated("'2019-09-10 14:29:55.8868'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date          DateTime? @db.Timestamp(6)
+  last_sync             DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model jabatan_ptk {
+  jabatan_ptk_id Decimal   @id(map: "pk_jabatan_ptk") @unique(map: "jabatan_ptk_pk1") @db.Decimal(5, 0)
+  jenis_ptk_id   Decimal   @db.Decimal(2, 0)
+  jabatan_ptk    String    @db.VarChar(100)
+  jabatan_kode   String?   @db.VarChar(20)
+  create_date    DateTime  @default(dbgenerated("'2024-07-09 17:57:03.979'::timestamp without time zone")) @db.Timestamp(6)
+  last_update    DateTime  @default(dbgenerated("'2024-07-09 17:57:03.979'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date   DateTime? @db.Timestamp(6)
+  last_sync      DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  jenis_ptk      jenis_ptk @relation(fields: [jenis_ptk_id], references: [jenis_ptk_id], onUpdate: Restrict, map: "fk_jabatan__jenis_ptk_jenis_pt")
+
+  @@index([jenis_ptk_id], map: "jenis_ptk_jabatan_fk2")
+  @@schema("ref")
+}
+
+model jabatan_tugas_ptk {
+  jabatan_ptk_id       Decimal   @id(map: "pk_jabatan_tugas_ptk") @unique(map: "jabatan_tugas_ptk_pk") @db.Decimal(5, 0)
+  nama                 String    @db.VarChar(50)
+  jabatan_utama        Decimal   @db.Decimal(1, 0)
+  tugas_tambahan_guru  Decimal   @db.Decimal(1, 0)
+  jumlah_jam_diakui    Decimal?  @db.Decimal(2, 0)
+  harus_refer_unit_org Decimal   @default(0) @db.Decimal(1, 0)
+  create_date          DateTime  @default(dbgenerated("'2019-09-10 14:29:55.919829'::timestamp without time zone")) @db.Timestamp(6)
+  last_update          DateTime  @default(dbgenerated("'2019-09-10 14:29:55.919829'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date         DateTime? @db.Timestamp(6)
+  last_sync            DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model jadwal_paud {
+  jadwal_id      Decimal   @id(map: "pk_jadwal_paud") @unique(map: "jadwal_paud_pk") @db.Decimal(2, 0)
+  nama           String    @db.VarChar(100)
+  kesehatan      Decimal   @db.Decimal(1, 0)
+  pamts          Decimal   @db.Decimal(1, 0)
+  ddtk           Decimal   @db.Decimal(1, 0)
+  freq_parenting Decimal   @db.Decimal(1, 0)
+  create_date    DateTime  @default(dbgenerated("'2020-04-16 09:40:03.422677'::timestamp without time zone")) @db.Timestamp(6)
+  last_update    DateTime  @default(dbgenerated("'2020-04-16 09:40:03.422677'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date   DateTime? @db.Timestamp(6)
+  last_sync      DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model jenis_akt_pd {
+  id_jns_akt_pd  Decimal   @id(map: "pk_jenis_akt_pd") @unique(map: "jenis_akt_pd_pk") @db.Decimal(3, 0)
+  nm_jns_akt_pd  String    @db.VarChar(40)
+  ket_jns_akt_pd String?   @db.VarChar(100)
+  create_date    DateTime  @default(dbgenerated("'2019-09-10 14:29:56.093968'::timestamp without time zone")) @db.Timestamp(6)
+  last_update    DateTime  @default(dbgenerated("'2019-09-10 14:29:56.093968'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date   DateTime? @db.Timestamp(6)
+  last_sync      DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model jenis_aktivitas_kepanitiaan {
+  id_jns_akt_pan Decimal   @id(map: "pk_jenis_aktivitas_kepanitiaan") @unique(map: "jenis_aktivitas_kepanitiaan_pk") @db.Decimal(4, 0)
+  nm_jns_akt_pan String    @db.VarChar(100)
+  create_date    DateTime  @default(dbgenerated("'2019-09-10 14:29:56.111447'::timestamp without time zone")) @db.Timestamp(6)
+  last_update    DateTime  @default(dbgenerated("'2019-09-10 14:29:56.111447'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date   DateTime? @db.Timestamp(6)
+  last_sync      DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model jenis_bantuan {
+  jenis_bantuan_id   Int                  @id(map: "pk_jenis_bantuan") @unique(map: "jenis_bantuan_pk")
+  nama               String?              @db.VarChar(50)
+  untuk_sekolah      Decimal              @db.Decimal(1, 0)
+  untuk_pd           Decimal              @db.Decimal(1, 0)
+  create_date        DateTime             @default(dbgenerated("'2019-09-10 14:29:56.126178'::timestamp without time zone")) @db.Timestamp(6)
+  last_update        DateTime             @default(dbgenerated("'2019-09-10 14:29:56.126178'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date       DateTime?            @db.Timestamp(6)
+  last_sync          DateTime             @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  sasaran_blockgrant sasaran_blockgrant[]
+
+  @@schema("ref")
+}
+
+model jenis_beasiswa {
+  jenis_beasiswa_id Int         @id(map: "pk_jenis_beasiswa") @unique(map: "jenis_beasiswa_pk")
+  sumber_dana_id    Decimal     @db.Decimal(3, 0)
+  nama              String      @db.VarChar(50)
+  untuk_pd          Decimal     @db.Decimal(1, 0)
+  untuk_ptk         Decimal     @db.Decimal(1, 0)
+  create_date       DateTime    @default(dbgenerated("'2019-09-10 14:29:56.141302'::timestamp without time zone")) @db.Timestamp(6)
+  last_update       DateTime    @default(dbgenerated("'2019-09-10 14:29:56.141302'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date      DateTime?   @db.Timestamp(6)
+  last_sync         DateTime    @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  sumber_dana       sumber_dana @relation(fields: [sumber_dana_id], references: [sumber_dana_id], onUpdate: Restrict, map: "fk_jenis_be_sumber_be_sumber_d")
+
+  @@index([sumber_dana_id], map: "sumber_beasiswa_fk")
+  @@schema("ref")
+}
+
+model jenis_cita {
+  id_cita      Decimal   @id(map: "pk_jenis_cita") @unique(map: "jenis_cita_pk") @db.Decimal(5, 0)
+  nm_cita      String    @db.VarChar(150)
+  create_date  DateTime  @default(dbgenerated("'2019-09-10 14:29:56.161066'::timestamp without time zone")) @db.Timestamp(6)
+  last_update  DateTime  @default(dbgenerated("'2019-09-10 14:29:56.161066'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date DateTime? @db.Timestamp(6)
+  last_sync    DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model jenis_diklat {
+  jenis_diklat_id Int       @id(map: "pk_jenis_diklat") @unique(map: "jenis_diklat_pk")
+  nama            String    @db.VarChar(50)
+  create_date     DateTime  @default(dbgenerated("'2019-09-10 14:29:56.179474'::timestamp without time zone")) @db.Timestamp(6)
+  last_update     DateTime  @default(dbgenerated("'2019-09-10 14:29:56.179474'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date    DateTime? @db.Timestamp(6)
+  last_sync       DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model jenis_gugus {
+  jenis_gugus_id Decimal   @id(map: "pk_jenis_gugus") @unique(map: "jenis_gugus_pk") @db.Decimal(3, 0)
+  jenis_gugus    String    @db.VarChar(30)
+  create_date    DateTime  @default(dbgenerated("'2019-09-10 14:29:56.196371'::timestamp without time zone")) @db.Timestamp(6)
+  last_update    DateTime  @default(dbgenerated("'2019-09-10 14:29:56.196371'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date   DateTime? @db.Timestamp(6)
+  last_sync      DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model jenis_hapus_buku {
+  id_hapus_buku  String    @id(map: "pk_jenis_hapus_buku") @unique(map: "jenis_hapus_buku_pk") @db.Char(1)
+  ket_hapus_buku String    @db.VarChar(80)
+  u_prasarana    Decimal   @db.Decimal(1, 0)
+  u_sarana       Decimal   @db.Decimal(1, 0)
+  create_date    DateTime  @default(dbgenerated("'2019-09-10 14:29:56.21023'::timestamp without time zone")) @db.Timestamp(6)
+  last_update    DateTime  @default(dbgenerated("'2019-09-10 14:29:56.21023'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date   DateTime? @db.Timestamp(6)
+  last_sync      DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model jenis_hobby {
+  id_hobby     Decimal   @id(map: "pk_jenis_hobby") @unique(map: "jenis_hobby_pk") @db.Decimal(5, 0)
+  nm_hobby     String    @db.VarChar(100)
+  create_date  DateTime  @default(dbgenerated("'2019-09-10 14:29:56.225744'::timestamp without time zone")) @db.Timestamp(6)
+  last_update  DateTime  @default(dbgenerated("'2019-09-10 14:29:56.225744'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date DateTime? @db.Timestamp(6)
+  last_sync    DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model jenis_ijazah {
+  jenis_ijazah_id Decimal   @id(map: "pk_jenis_ijazah") @unique(map: "jenis_ijazah_pk") @db.Decimal(2, 0)
+  nama            String    @db.VarChar(30)
+  create_date     DateTime  @default(dbgenerated("'2024-06-14 20:05:29.730438'::timestamp without time zone")) @db.Timestamp(6)
+  last_update     DateTime  @default(dbgenerated("'2024-06-14 20:05:29.730438'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date    DateTime? @db.Timestamp(6)
+  last_sync       DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model jenis_keluar {
+  jenis_keluar_id String    @id(map: "pk_jenis_keluar") @unique(map: "jenis_keluar_pk") @db.Char(1)
+  ket_keluar      String    @db.VarChar(40)
+  keluar_pd       Decimal   @db.Decimal(1, 0)
+  keluar_ptk      Decimal   @db.Decimal(1, 0)
+  create_date     DateTime  @default(dbgenerated("'2019-09-10 14:29:56.240319'::timestamp without time zone")) @db.Timestamp(6)
+  last_update     DateTime  @default(dbgenerated("'2019-09-10 14:29:56.240319'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date    DateTime? @db.Timestamp(6)
+  last_sync       DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model jenis_kepanitiaan {
+  id_jns_panitia Int       @id(map: "pk_jenis_kepanitiaan") @unique(map: "jenis_kepanitiaan_pk")
+  nm_jns_panitia String    @db.VarChar(100)
+  create_date    DateTime  @default(dbgenerated("'2019-09-10 14:29:56.258699'::timestamp without time zone")) @db.Timestamp(6)
+  last_update    DateTime  @default(dbgenerated("'2019-09-10 14:29:56.258699'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date   DateTime? @db.Timestamp(6)
+  last_sync      DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model jenis_kerusakan {
+  kerusakan_id Decimal   @id(map: "pk_jenis_kerusakan") @unique(map: "jenis_kerusakan_pk") @db.Decimal(2, 0)
+  klasifikasi  String    @db.VarChar(30)
+  u_bangunan   Decimal   @db.Decimal(1, 0)
+  u_ruang      Decimal   @db.Decimal(1, 0)
+  create_date  DateTime  @default(dbgenerated("'2022-06-28 18:43:46.097'::timestamp without time zone")) @db.Timestamp(6)
+  last_update  DateTime  @default(dbgenerated("'2022-06-28 18:43:46.097'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date DateTime? @db.Timestamp(6)
+  last_sync    DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model jenis_kesejahteraan {
+  jenis_kesejahteraan_id Int       @id(map: "pk_jenis_kesejahteraan") @unique(map: "jenis_kesejahteraan_pk")
+  nama                   String    @db.VarChar(50)
+  penyelenggara          String    @db.VarChar(100)
+  u_ptk                  Decimal   @default(1) @db.Decimal(1, 0)
+  u_pd                   Decimal   @default(0) @db.Decimal(1, 0)
+  create_date            DateTime  @default(dbgenerated("'2019-09-10 14:29:56.27441'::timestamp without time zone")) @db.Timestamp(6)
+  last_update            DateTime  @default(dbgenerated("'2019-09-10 14:29:56.27441'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date           DateTime? @db.Timestamp(6)
+  last_sync              DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model jenis_koneksi {
+  jenis_koneksi_id Decimal   @id(map: "pk_jenis_koneksi") @unique(map: "jenis_koneksi_pk") @db.Decimal(2, 0)
+  jenis_koneksi    String    @db.VarChar(30)
+  create_date      DateTime  @default(dbgenerated("'2025-12-19 10:10:33.28'::timestamp without time zone")) @db.Timestamp(6)
+  last_update      DateTime  @default(dbgenerated("'2025-12-19 10:10:33.28'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date     DateTime? @db.Timestamp(6)
+  last_sync        DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model jenis_ks {
+  id_jns_ks    Decimal   @id(map: "pk_jenis_ks") @unique(map: "jenis_ks_pk") @db.Decimal(6, 0)
+  nm_jns_ks    String    @db.VarChar(100)
+  ket_jns_ks   String?   @db.VarChar(250)
+  create_date  DateTime  @default(dbgenerated("'2019-09-10 14:29:56.295365'::timestamp without time zone")) @db.Timestamp(6)
+  last_update  DateTime  @default(dbgenerated("'2019-09-10 14:29:56.295365'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date DateTime? @db.Timestamp(6)
+  last_sync    DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model jenis_layanan_internet {
+  jenis_layanan_internet_id Decimal   @id(map: "pk_jenis_layanan_internet") @unique(map: "jenis_layanan_internet_pk") @db.Decimal(2, 0)
+  jenis_layanan             String    @db.VarChar(30)
+  create_date               DateTime  @default(dbgenerated("'2025-12-19 10:10:33.296'::timestamp without time zone")) @db.Timestamp(6)
+  last_update               DateTime  @default(dbgenerated("'2025-12-19 10:10:33.296'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date              DateTime? @db.Timestamp(6)
+  last_sync                 DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model jenis_lembaga {
+  jenis_lembaga_id Decimal   @id(map: "pk_jenis_lembaga") @unique(map: "jenis_lembaga_pk") @db.Decimal(5, 0)
+  nama             String    @db.VarChar(80)
+  tempat_pengawas  Decimal   @db.Decimal(1, 0)
+  simpul_pendataan Decimal   @db.Decimal(1, 0)
+  create_date      DateTime  @default(dbgenerated("'2019-09-10 14:29:56.310318'::timestamp without time zone")) @db.Timestamp(6)
+  last_update      DateTime  @default(dbgenerated("'2019-09-10 14:29:56.310318'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date     DateTime? @db.Timestamp(6)
+  last_sync        DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model jenis_lk {
+  id_jenis_lk  String    @id(map: "pk_jenis_lk") @unique(map: "jenis_lk_pk") @db.Char(6)
+  nm_jenis_lk  String    @db.VarChar(160)
+  ket_jenis_lk String?   @db.VarChar(200)
+  create_date  DateTime  @default(dbgenerated("'2019-09-10 14:29:56.326095'::timestamp without time zone")) @db.Timestamp(6)
+  last_update  DateTime  @default(dbgenerated("'2019-09-10 14:29:56.326095'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date DateTime? @db.Timestamp(6)
+  last_sync    DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model jenis_pendaftaran {
+  jenis_pendaftaran_id Decimal   @id(map: "pk_jenis_pendaftaran") @unique(map: "jenis_pendaftaran_pk") @db.Decimal(1, 0)
+  nama                 String    @db.VarChar(20)
+  daftar_sekolah       Decimal   @db.Decimal(1, 0)
+  daftar_rombel        Decimal   @db.Decimal(1, 0)
+  create_date          DateTime  @default(dbgenerated("'2019-09-10 14:29:56.341717'::timestamp without time zone")) @db.Timestamp(6)
+  last_update          DateTime  @default(dbgenerated("'2019-09-10 14:29:56.341717'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date         DateTime? @db.Timestamp(6)
+  last_sync            DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model jenis_penghargaan {
+  jenis_penghargaan_id Int       @id(map: "pk_jenis_penghargaan") @unique(map: "jenis_penghargaan_pk")
+  nama                 String    @db.VarChar(50)
+  create_date          DateTime  @default(dbgenerated("'2019-09-10 14:29:56.354432'::timestamp without time zone")) @db.Timestamp(6)
+  last_update          DateTime  @default(dbgenerated("'2019-09-10 14:29:56.354432'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date         DateTime? @db.Timestamp(6)
+  last_sync            DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model jenis_pesan {
+  jenis_pesan_id Int       @id(map: "pk_jenis_pesan") @unique(map: "jenis_pesan_pk") @db.SmallInt
+  kelompok       String    @db.VarChar(25)
+  nama           String    @db.VarChar(50)
+  create_date    DateTime  @default(now()) @db.Timestamp(6)
+  expired_date   DateTime? @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model jenis_prasarana {
+  jenis_prasarana_id Int                  @id(map: "pk_jenis_prasarana") @unique(map: "jenis_prasarana_pk")
+  nama               String               @db.VarChar(60)
+  a_unit_organisasi  Decimal              @default(0) @db.Decimal(1, 0)
+  a_tanah            Decimal              @default(0) @db.Decimal(1, 0)
+  a_bangunan         Decimal              @default(0) @db.Decimal(1, 0)
+  a_ruang            Decimal              @default(0) @db.Decimal(1, 0)
+  a_sub              Decimal              @db.Decimal(1, 0)
+  create_date        DateTime             @default(dbgenerated("'2021-06-07 12:49:42.393489'::timestamp without time zone")) @db.Timestamp(6)
+  last_update        DateTime             @default(dbgenerated("'2021-06-07 12:49:42.393489'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date       DateTime?            @db.Timestamp(6)
+  last_sync          DateTime             @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  pemakai_prasarana  pemakai_prasarana[]
+  sasaran_blockgrant sasaran_blockgrant[]
+  standar_sarana     standar_sarana[]
+
+  @@schema("ref")
+}
+
+model jenis_prestasi {
+  jenis_prestasi_id Int       @id(map: "pk_jenis_prestasi") @unique(map: "jenis_prestasi_pk")
+  nama              String    @db.VarChar(50)
+  create_date       DateTime  @default(dbgenerated("'2019-09-10 14:29:56.387147'::timestamp without time zone")) @db.Timestamp(6)
+  last_update       DateTime  @default(dbgenerated("'2019-09-10 14:29:56.387147'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date      DateTime? @db.Timestamp(6)
+  last_sync         DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model jenis_ptk {
+  jenis_ptk_id Decimal       @id(map: "pk_jenis_ptk") @unique(map: "jenis_ptk_pk") @db.Decimal(2, 0)
+  jenis_ptk    String        @db.VarChar(30)
+  create_date  DateTime      @default(dbgenerated("'2024-06-14 20:05:29.730438'::timestamp without time zone")) @db.Timestamp(6)
+  last_update  DateTime      @default(dbgenerated("'2024-06-14 20:05:29.730438'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date DateTime?     @db.Timestamp(6)
+  last_sync    DateTime      @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  jabatan_ptk  jabatan_ptk[]
+
+  @@schema("ref")
+}
+
+model jenis_rombel {
+  jenis_rombel    Decimal   @id(map: "pk_jenis_rombel") @unique(map: "jenis_rombel_pk") @db.Decimal(2, 0)
+  nm_jenis_rombel String    @db.VarChar(80)
+  create_date     DateTime  @default(dbgenerated("'2019-09-10 14:29:56.423206'::timestamp without time zone")) @db.Timestamp(6)
+  last_update     DateTime  @default(dbgenerated("'2019-09-10 14:29:56.423206'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date    DateTime? @db.Timestamp(6)
+  last_sync       DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model jenis_sarana {
+  jenis_sarana_id         Int                  @id(map: "pk_jenis_sarana") @unique(map: "jenis_sarana_pk")
+  nama                    String               @db.VarChar(60)
+  kelompok                String?              @db.VarChar(50)
+  perlu_penempatan        Decimal              @db.Decimal(1, 0)
+  keterangan              String?              @db.VarChar(128)
+  a_alat                  Decimal              @default(0) @db.Decimal(1, 0)
+  a_angkutan              Decimal              @default(0) @db.Decimal(1, 0)
+  spm_qty_min_per_siswa   Decimal              @default(-1) @db.Decimal(3, 1)
+  spm_qty_min_per_sekolah Decimal              @default(-1) @db.Decimal(4, 0)
+  create_date             DateTime             @default(dbgenerated("'2019-09-10 14:29:56.437048'::timestamp without time zone")) @db.Timestamp(6)
+  last_update             DateTime             @default(dbgenerated("'2019-09-10 14:29:56.437048'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date            DateTime?            @db.Timestamp(6)
+  last_sync               DateTime             @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  pemakai_sarana          pemakai_sarana[]
+  sasaran_blockgrant      sasaran_blockgrant[]
+  standar_sarana          standar_sarana[]
+
+  @@schema("ref")
+}
+
+model jenis_sertifikasi {
+  id_jenis_sertifikasi Decimal          @id(map: "pk_jenis_sertifikasi") @unique(map: "jenis_sertifikasi_pk") @db.Decimal(3, 0)
+  jenis_sertifikasi    String           @db.VarChar(30)
+  prof_guru            Decimal          @db.Decimal(1, 0)
+  kepala_sekolah       Decimal          @db.Decimal(1, 0)
+  laboran              Decimal          @db.Decimal(1, 0)
+  a_pd                 Decimal          @default(0) @db.Decimal(1, 0)
+  kebutuhan_khusus_id  Int
+  create_date          DateTime         @default(dbgenerated("'2019-09-10 14:29:56.450311'::timestamp without time zone")) @db.Timestamp(6)
+  last_update          DateTime         @default(dbgenerated("'2019-09-10 14:29:56.450311'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date         DateTime?        @db.Timestamp(6)
+  last_sync            DateTime         @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  kebutuhan_khusus     kebutuhan_khusus @relation(fields: [kebutuhan_khusus_id], references: [kebutuhan_khusus_id], onUpdate: Restrict, map: "fk_jenis_se_sertifika_kebutuha")
+
+  @@index([kebutuhan_khusus_id], map: "sertifikasi_kk_fk")
+  @@schema("ref")
+}
+
+model jenis_test {
+  jenis_test_id Decimal   @id(map: "pk_jenis_test") @unique(map: "jenis_test_pk") @db.Decimal(3, 0)
+  jenis_test    String    @db.VarChar(30)
+  keterangan    String?   @db.VarChar(80)
+  nilai_maks    Decimal   @db.Decimal(6, 2)
+  ket_skor1     String?   @db.VarChar(80)
+  ket_skor2     String?   @db.VarChar(80)
+  ket_skor3     String?   @db.VarChar(80)
+  ket_skor4     String?   @db.VarChar(80)
+  ket_skor5     String?   @db.VarChar(80)
+  create_date   DateTime  @default(dbgenerated("'2019-09-10 14:29:56.474751'::timestamp without time zone")) @db.Timestamp(6)
+  last_update   DateTime  @default(dbgenerated("'2019-09-10 14:29:56.474751'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date  DateTime? @db.Timestamp(6)
+  last_sync     DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model jenis_tinggal {
+  jenis_tinggal_id Decimal   @id(map: "pk_jenis_tinggal") @unique(map: "jenis_tinggal_pk") @db.Decimal(2, 0)
+  nama             String    @db.VarChar(30)
+  create_date      DateTime  @default(dbgenerated("'2019-09-10 14:29:56.492113'::timestamp without time zone")) @db.Timestamp(6)
+  last_update      DateTime  @default(dbgenerated("'2019-09-10 14:29:56.492113'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date     DateTime? @db.Timestamp(6)
+  last_sync        DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model jenis_tunjangan {
+  jenis_tunjangan_id Int       @id(map: "pk_jenis_tunjangan") @unique(map: "jenis_tunjangan_pk")
+  nama               String?   @db.VarChar(50)
+  create_date        DateTime  @default(dbgenerated("'2019-09-10 14:29:56.508239'::timestamp without time zone")) @db.Timestamp(6)
+  last_update        DateTime  @default(dbgenerated("'2019-09-10 14:29:56.508239'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date       DateTime? @db.Timestamp(6)
+  last_sync          DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model jenjang_kepengawasan {
+  jenjang_kepengawasan_id  Decimal   @id(map: "pk_jenjang_kepengawasan") @unique(map: "jenjang_kepengawasan_pk") @db.Decimal(2, 0)
+  nama                     String    @db.VarChar(50)
+  jenjang_kepengawasan_tk  Decimal   @db.Decimal(1, 0)
+  jenjang_kepengawasan_sd  Decimal   @db.Decimal(1, 0)
+  jenjang_kepengawasan_smp Decimal   @db.Decimal(1, 0)
+  jenjang_kepengawasan_sma Decimal   @db.Decimal(1, 0)
+  jenjang_kepengawasan_smk Decimal   @db.Decimal(1, 0)
+  jenjang_kepengawasan_slb Decimal   @db.Decimal(1, 0)
+  create_date              DateTime  @default(dbgenerated("'2019-09-10 14:29:56.524043'::timestamp without time zone")) @db.Timestamp(6)
+  last_update              DateTime  @default(dbgenerated("'2019-09-10 14:29:56.524043'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date             DateTime? @db.Timestamp(6)
+  last_sync                DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model jenjang_pendidikan {
+  jenjang_pendidikan_id Decimal              @id(map: "pk_jenjang_pendidikan") @unique(map: "jenjang_pendidikan_pk") @db.Decimal(2, 0)
+  nama                  String               @db.VarChar(25)
+  jenjang_lembaga       Decimal              @db.Decimal(1, 0)
+  jenjang_orang         Decimal              @db.Decimal(1, 0)
+  create_date           DateTime             @default(dbgenerated("'2019-09-10 14:29:56.540627'::timestamp without time zone")) @db.Timestamp(6)
+  last_update           DateTime             @default(dbgenerated("'2019-09-10 14:29:56.540627'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date          DateTime?            @db.Timestamp(6)
+  last_sync             DateTime             @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  jurusan               jurusan[]
+  kurikulum             kurikulum[]
+  template_un           template_un[]
+  tingkat_pendidikan    tingkat_pendidikan[]
+
+  @@schema("ref")
+}
+
+model jurusan {
+  jurusan_id            String              @id(map: "pk_jurusan") @unique(map: "jurusan_pk") @db.VarChar(25)
+  nama_jurusan          String              @db.VarChar(100)
+  untuk_sma             Decimal             @db.Decimal(1, 0)
+  untuk_smk             Decimal             @db.Decimal(1, 0)
+  untuk_pt              Decimal             @db.Decimal(1, 0)
+  untuk_slb             Decimal             @default(0) @db.Decimal(1, 0)
+  untuk_smklb           Decimal             @default(0) @db.Decimal(1, 0)
+  jenjang_pendidikan_id Decimal?            @db.Decimal(2, 0)
+  jurusan_induk         String?             @db.VarChar(25)
+  level_bidang_id       String              @db.VarChar(5)
+  create_date           DateTime            @default(dbgenerated("'2019-09-10 14:29:56.576787'::timestamp without time zone")) @db.Timestamp(6)
+  last_update           DateTime            @default(dbgenerated("'2019-09-10 14:29:56.576787'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date          DateTime?           @db.Timestamp(6)
+  last_sync             DateTime            @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  jurusan               jurusan?            @relation("jurusanTojurusan", fields: [jurusan_induk], references: [jurusan_id], onDelete: Restrict, onUpdate: Restrict, map: "fk_jurusan_induk_pro_jurusan")
+  other_jurusan         jurusan[]           @relation("jurusanTojurusan")
+  kelompok_bidang       kelompok_bidang     @relation(fields: [level_bidang_id], references: [level_bidang_id], onUpdate: Restrict, map: "fk_jurusan_jurusan_k_kelompok")
+  jenjang_pendidikan    jenjang_pendidikan? @relation(fields: [jenjang_pendidikan_id], references: [jenjang_pendidikan_id], onDelete: Restrict, onUpdate: Restrict, map: "fk_jurusan_jurusan_s_jenjang_")
+  kurikulum             kurikulum[]
+  mata_pelajaran        mata_pelajaran[]
+  pemakai_prasarana     pemakai_prasarana[]
+  pemakai_sarana        pemakai_sarana[]
+  standar_sarana        standar_sarana[]
+  template_un           template_un[]
+
+  @@index([jurusan_induk], map: "induk_program_fk")
+  @@index([level_bidang_id], map: "jurusan_kel_bid_fk")
+  @@index([last_sync], map: "jurusan_ls")
+  @@index([last_update], map: "jurusan_lu")
+  @@index([jenjang_pendidikan_id], map: "jurusan_std_jenjang_fk")
+  @@schema("ref")
+}
+
+model kategori_desa {
+  kategori_desa_id Decimal       @id @unique(map: "kategori_desa_pk") @db.Decimal(2, 0)
+  nama             String        @db.VarChar(30)
+  create_date      DateTime      @db.Timestamp(6)
+  last_update      DateTime      @db.Timestamp(6)
+  expired_date     DateTime?     @db.Timestamp(6)
+  last_sync        DateTime      @db.Timestamp(6)
+  mst_wilayah      mst_wilayah[]
+
+  @@schema("ref")
+}
+
+model kategori_tk {
+  kategori_tk_id Decimal   @id(map: "pk_kategori_tk") @unique(map: "kategori_tk_pk") @db.Decimal(2, 0)
+  nama           String    @db.VarChar(100)
+  create_date    DateTime  @default(dbgenerated("'2020-04-16 09:40:03.422677'::timestamp without time zone")) @db.Timestamp(6)
+  last_update    DateTime  @default(dbgenerated("'2020-04-16 09:40:03.422677'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date   DateTime? @db.Timestamp(6)
+  last_sync      DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model keahlian_laboratorium {
+  keahlian_laboratorium_id Int       @id(map: "pk_keahlian_laboratorium") @unique(map: "keahlian_laboratorium_pk") @db.SmallInt
+  nama                     String    @db.VarChar(50)
+  create_date              DateTime  @default(dbgenerated("'2019-09-10 14:29:56.699905'::timestamp without time zone")) @db.Timestamp(6)
+  last_update              DateTime  @default(dbgenerated("'2019-09-10 14:29:56.699905'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date             DateTime? @db.Timestamp(6)
+  last_sync                DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model kebutuhan_khusus {
+  kebutuhan_khusus_id Int                 @id(map: "pk_kebutuhan_khusus") @unique(map: "kebutuhan_khusus_pk")
+  kebutuhan_khusus    String              @db.VarChar(40)
+  kk_a                Decimal             @db.Decimal(1, 0)
+  kk_b                Decimal             @db.Decimal(1, 0)
+  kk_c                Decimal             @db.Decimal(1, 0)
+  kk_c1               Decimal             @db.Decimal(1, 0)
+  kk_d                Decimal             @db.Decimal(1, 0)
+  kk_d1               Decimal             @db.Decimal(1, 0)
+  kk_e                Decimal             @db.Decimal(1, 0)
+  kk_f                Decimal             @db.Decimal(1, 0)
+  kk_h                Decimal             @db.Decimal(1, 0)
+  kk_i                Decimal             @db.Decimal(1, 0)
+  kk_j                Decimal             @db.Decimal(1, 0)
+  kk_k                Decimal             @db.Decimal(1, 0)
+  kk_n                Decimal             @db.Decimal(1, 0)
+  kk_o                Decimal             @db.Decimal(1, 0)
+  kk_p                Decimal             @db.Decimal(1, 0)
+  kk_q                Decimal             @db.Decimal(1, 0)
+  untuk_lembaga       Decimal             @default(1) @db.Decimal(1, 0)
+  untuk_ptk           Decimal             @default(1) @db.Decimal(1, 0)
+  untuk_pd            Decimal             @default(1) @db.Decimal(1, 0)
+  create_date         DateTime            @default(dbgenerated("'2019-09-10 14:29:56.714414'::timestamp without time zone")) @db.Timestamp(6)
+  last_update         DateTime            @default(dbgenerated("'2019-09-10 14:29:56.714414'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date        DateTime?           @db.Timestamp(6)
+  last_sync           DateTime            @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  jenis_sertifikasi   jenis_sertifikasi[]
+
+  @@schema("ref")
+}
+
+model kelompok_bidang {
+  level_bidang_id       String            @id(map: "pk_kelompok_bidang") @unique(map: "kelompok_bidang_pk") @db.VarChar(5)
+  nama_level_bidang     String            @db.VarChar(100)
+  untuk_sma             Decimal           @db.Decimal(1, 0)
+  untuk_smk             Decimal           @db.Decimal(1, 0)
+  untuk_pt              Decimal           @db.Decimal(1, 0)
+  untuk_slb             Decimal           @default(0) @db.Decimal(1, 0)
+  untuk_smklb           Decimal           @default(0) @db.Decimal(1, 0)
+  level_bidang_induk    String?           @db.VarChar(5)
+  create_date           DateTime          @default(dbgenerated("'2019-09-10 14:29:56.763199'::timestamp without time zone")) @db.Timestamp(6)
+  last_update           DateTime          @default(dbgenerated("'2019-09-10 14:29:56.763199'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date          DateTime?         @db.Timestamp(6)
+  last_sync             DateTime          @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  jurusan               jurusan[]
+  kelompok_bidang       kelompok_bidang?  @relation("kelompok_bidangTokelompok_bidang", fields: [level_bidang_induk], references: [level_bidang_id], onDelete: Restrict, onUpdate: Restrict, map: "fk_kelompok_induk_kel_kelompok")
+  other_kelompok_bidang kelompok_bidang[] @relation("kelompok_bidangTokelompok_bidang")
+
+  @@index([level_bidang_induk], map: "induk_kelompok_fk")
+  @@schema("ref")
+}
+
+model kelompok_usaha {
+  kelompok_usaha_id   String    @id(map: "pk_kelompok_usaha") @unique(map: "kelompok_usaha_pk") @db.Char(8)
+  nama_kelompok_usaha String    @db.VarChar(60)
+  create_date         DateTime  @default(dbgenerated("'2019-09-10 14:29:56.783705'::timestamp without time zone")) @db.Timestamp(6)
+  last_update         DateTime  @default(dbgenerated("'2019-09-10 14:29:56.783705'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date        DateTime? @db.Timestamp(6)
+  last_sync           DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model klasifikasi_lembaga {
+  klasifikasi_lembaga_id Decimal   @id(map: "pk_klasifikasi_lembaga") @unique(map: "klasifikasi_lembaga_pk") @db.Decimal(2, 0)
+  nama                   String    @db.VarChar(100)
+  create_date            DateTime  @default(dbgenerated("'2020-04-16 09:40:03.422677'::timestamp without time zone")) @db.Timestamp(6)
+  last_update            DateTime  @default(dbgenerated("'2020-04-16 09:40:03.422677'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date           DateTime? @db.Timestamp(6)
+  last_sync              DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model kompetensi {
+  id_komp               String             @id(map: "pk_kompetensi") @unique(map: "kompetensi_pk") @db.Uuid
+  desk                  String
+  nmr                   String             @db.VarChar(5)
+  kelompok              String             @db.Char(1)
+  versi                 Int
+  id_inti_dasar         String?            @db.Uuid
+  level_komp            Decimal?           @db.Decimal(3, 0)
+  tingkat_pendidikan_id Decimal            @db.Decimal(2, 0)
+  kurikulum_id          Int                @db.SmallInt
+  mata_pelajaran_id     Int
+  create_date           DateTime           @default(dbgenerated("'2019-09-10 14:29:56.909326'::timestamp without time zone")) @db.Timestamp(6)
+  last_update           DateTime           @default(dbgenerated("'2019-09-10 14:29:56.909326'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date          DateTime?          @db.Timestamp(6)
+  last_sync             DateTime           @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  kompetensi            kompetensi?        @relation("kompetensiTokompetensi", fields: [id_inti_dasar], references: [id_komp], onDelete: Restrict, onUpdate: Restrict, map: "fk_kompeten_inti_dasa_kompeten")
+  other_kompetensi      kompetensi[]       @relation("kompetensiTokompetensi")
+  kurikulum             kurikulum          @relation(fields: [kurikulum_id], references: [kurikulum_id], onUpdate: Restrict, map: "fk_kompeten_kompetens_kurikulu")
+  mata_pelajaran        mata_pelajaran     @relation(fields: [mata_pelajaran_id], references: [mata_pelajaran_id], onUpdate: Restrict, map: "fk_kompeten_kompetens_mata_pel")
+  tingkat_pendidikan    tingkat_pendidikan @relation(fields: [tingkat_pendidikan_id], references: [tingkat_pendidikan_id], onUpdate: Restrict, map: "fk_kompeten_kompetens_tingkat_")
+
+  @@index([id_inti_dasar], map: "inti_dasar_fk")
+  @@index([kurikulum_id], map: "kompetensi_kurikulum_fk")
+  @@index([mata_pelajaran_id], map: "kompetensi_matpel_fk")
+  @@index([tingkat_pendidikan_id], map: "kompetensi_tingkat_fk")
+  @@schema("ref")
+}
+
+model kurikulum {
+  kurikulum_id             Int                        @id(map: "pk_kurikulum") @unique(map: "kurikulum_pk") @db.SmallInt
+  nama_kurikulum           String                     @db.VarChar(120)
+  mulai_berlaku            DateTime                   @db.Date
+  sistem_sks               Decimal                    @default(0) @db.Decimal(1, 0)
+  total_sks                Decimal                    @default(0) @db.Decimal(3, 0)
+  jenjang_pendidikan_id    Decimal                    @db.Decimal(2, 0)
+  jurusan_id               String?                    @db.VarChar(25)
+  create_date              DateTime                   @default(dbgenerated("'2019-09-10 14:29:56.948018'::timestamp without time zone")) @db.Timestamp(6)
+  last_update              DateTime                   @default(dbgenerated("'2019-09-10 14:29:56.948018'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date             DateTime?                  @db.Timestamp(6)
+  last_sync                DateTime                   @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  group_matpel             group_matpel[]
+  kompetensi               kompetensi[]
+  jenjang_pendidikan       jenjang_pendidikan         @relation(fields: [jenjang_pendidikan_id], references: [jenjang_pendidikan_id], onUpdate: Restrict, map: "fk_kurikulu_kurikulum_jenjang_")
+  jurusan                  jurusan?                   @relation(fields: [jurusan_id], references: [jurusan_id], onDelete: Restrict, onUpdate: Restrict, map: "fk_kurikulu_kurikulum_jurusan")
+  mata_pelajaran_kurikulum mata_pelajaran_kurikulum[]
+
+  @@index([jenjang_pendidikan_id], map: "kurikulum_jenjang_fk")
+  @@index([jurusan_id], map: "kurikulum_jurusan_fk")
+  @@schema("ref")
+}
+
+model lemb_sertifikasi {
+  kode_lemb_sert Decimal     @id(map: "pk_lemb_sertifikasi") @unique(map: "lemb_sertifikasi_pk") @db.Decimal(5, 0)
+  nm_lemb_sert   String      @db.VarChar(120)
+  tmt_lemb_sert  DateTime    @db.Date
+  ket_lemb_sert  String?     @db.VarChar(250)
+  alamat_jalan   String      @db.VarChar(80)
+  rt             Decimal?    @db.Decimal(2, 0)
+  rw             Decimal?    @db.Decimal(2, 0)
+  nama_dusun     String?     @db.VarChar(60)
+  desa_kelurahan String      @db.VarChar(60)
+  kode_wilayah   String      @db.Char(8)
+  kode_pos       String?     @db.Char(5)
+  lintang        Decimal?    @db.Decimal(18, 12)
+  bujur          Decimal?    @db.Decimal(18, 12)
+  nama           String      @db.VarChar(100)
+  nomor_telepon  String?     @db.VarChar(20)
+  nomor_fax      String?     @db.VarChar(20)
+  email          String?     @db.VarChar(60)
+  website        String?     @db.VarChar(100)
+  create_date    DateTime    @default(dbgenerated("'2020-04-16 09:40:03.422677'::timestamp without time zone")) @db.Timestamp(6)
+  last_update    DateTime    @default(dbgenerated("'2020-04-16 09:40:03.422677'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date   DateTime?   @db.Timestamp(6)
+  last_sync      DateTime    @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  mst_wilayah    mst_wilayah @relation(fields: [kode_wilayah], references: [kode_wilayah], onUpdate: Restrict, map: "fk_lemb_ser_alamat_ke_mst_wila")
+
+  @@index([kode_wilayah], map: "alamat_kecamatan_fk6")
+  @@schema("ref")
+}
+
+model lembaga_akreditasi {
+  la_id          String      @id(map: "pk_lembaga_akreditasi") @unique(map: "lembaga_akreditasi_pk") @db.Char(5)
+  nama           String      @db.VarChar(100)
+  la_tgl_mulai   DateTime    @db.Date
+  la_ket         String?     @db.VarChar(250)
+  alamat_jalan   String      @db.VarChar(80)
+  rt             Decimal?    @db.Decimal(2, 0)
+  rw             Decimal?    @db.Decimal(2, 0)
+  nama_dusun     String?     @db.VarChar(60)
+  desa_kelurahan String      @db.VarChar(60)
+  kode_wilayah   String      @db.Char(8)
+  kode_pos       String?     @db.Char(5)
+  lintang        Decimal?    @db.Decimal(18, 12)
+  bujur          Decimal?    @db.Decimal(18, 12)
+  nomor_telepon  String?     @db.VarChar(20)
+  nomor_fax      String?     @db.VarChar(20)
+  email          String?     @db.VarChar(60)
+  website        String?     @db.VarChar(100)
+  create_date    DateTime    @default(dbgenerated("'2020-04-16 09:40:03.422677'::timestamp without time zone")) @db.Timestamp(6)
+  last_update    DateTime    @default(dbgenerated("'2020-04-16 09:40:03.422677'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date   DateTime?   @db.Timestamp(6)
+  last_sync      DateTime    @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  mst_wilayah    mst_wilayah @relation(fields: [kode_wilayah], references: [kode_wilayah], onUpdate: Restrict, map: "fk_lembaga__alamat_ke_mst_wila")
+
+  @@index([kode_wilayah], map: "alamat_kecamatan_fk5")
+  @@schema("ref")
+}
+
+model lembaga_pengangkat {
+  lembaga_pengangkat_id Decimal   @id(map: "pk_lembaga_pengangkat") @unique(map: "lembaga_pengangkat_pk") @db.Decimal(2, 0)
+  nama                  String    @db.VarChar(100)
+  create_date           DateTime  @default(dbgenerated("'2019-09-10 14:29:57.154059'::timestamp without time zone")) @db.Timestamp(6)
+  last_update           DateTime  @default(dbgenerated("'2019-09-10 14:29:57.154059'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date          DateTime? @db.Timestamp(6)
+  last_sync             DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model level_wilayah {
+  id_level_wilayah Int           @id(map: "pk_level_wilayah") @unique(map: "level_wilayah_pk") @db.SmallInt
+  level_wilayah    String?       @db.VarChar(15)
+  create_date      DateTime      @default(dbgenerated("'2019-09-10 14:29:57.177404'::timestamp without time zone")) @db.Timestamp(6)
+  last_update      DateTime      @default(dbgenerated("'2019-09-10 14:29:57.177404'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date     DateTime?     @db.Timestamp(6)
+  last_sync        DateTime      @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  mst_wilayah      mst_wilayah[]
+
+  @@schema("ref")
+}
+
+model map_bidang_mata_pelajaran {
+  mata_pelajaran_id Int
+  bidang_studi_id   Int
+  sesuai            Decimal        @db.Decimal(1, 0)
+  create_date       DateTime       @default(dbgenerated("'2019-09-10 14:29:57.245824'::timestamp without time zone")) @db.Timestamp(6)
+  last_update       DateTime       @default(dbgenerated("'2019-09-10 14:29:57.245824'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date      DateTime?      @db.Timestamp(6)
+  last_sync         DateTime       @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  bidang_studi      bidang_studi   @relation(fields: [bidang_studi_id], references: [bidang_studi_id], onUpdate: Restrict, map: "fk_map_bida_map_bidan_bidang_s")
+  mata_pelajaran    mata_pelajaran @relation(fields: [mata_pelajaran_id], references: [mata_pelajaran_id], onUpdate: Restrict, map: "fk_map_bida_map_mata__mata_pel")
+
+  @@id([mata_pelajaran_id, bidang_studi_id], map: "pk_map_bidang_mata_pelajaran")
+  @@unique([mata_pelajaran_id, bidang_studi_id], map: "map_bidang_mata_pelajaran_pk")
+  @@index([bidang_studi_id], map: "map_bidang_studi_fk")
+  @@schema("ref")
+}
+
+model mata_pelajaran {
+  mata_pelajaran_id                              Int                         @id(map: "pk_mata_pelajaran") @unique(map: "mata_pelajaran_pk")
+  nama                                           String                      @db.VarChar(80)
+  pilihan_sekolah                                Decimal                     @db.Decimal(1, 0)
+  pilihan_buku                                   Decimal                     @db.Decimal(1, 0)
+  pilihan_kepengawasan                           Decimal                     @db.Decimal(1, 0)
+  pilihan_evaluasi                               Decimal                     @default(0) @db.Decimal(1, 0)
+  jurusan_id                                     String?                     @db.VarChar(25)
+  create_date                                    DateTime                    @default(dbgenerated("'2019-09-10 14:29:57.296154'::timestamp without time zone")) @db.Timestamp(6)
+  last_update                                    DateTime                    @default(dbgenerated("'2019-09-10 14:29:57.296154'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date                                   DateTime?                   @db.Timestamp(6)
+  last_sync                                      DateTime                    @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  kompetensi                                     kompetensi[]
+  map_bidang_mata_pelajaran                      map_bidang_mata_pelajaran[]
+  jurusan                                        jurusan?                    @relation(fields: [jurusan_id], references: [jurusan_id], onDelete: Restrict, onUpdate: Restrict, map: "fk_mata_pel_mapel_jur_jurusan")
+  mata_pelajaran_kurikulum                       mata_pelajaran_kurikulum[]
+  mulok                                          mulok[]
+  template_rapor                                 template_rapor[]
+  template_un_template_un_mp3_idTomata_pelajaran template_un[]               @relation("template_un_mp3_idTomata_pelajaran")
+  template_un_template_un_mp4_idTomata_pelajaran template_un[]               @relation("template_un_mp4_idTomata_pelajaran")
+  template_un_template_un_mp7_idTomata_pelajaran template_un[]               @relation("template_un_mp7_idTomata_pelajaran")
+  template_un_template_un_mp5_idTomata_pelajaran template_un[]               @relation("template_un_mp5_idTomata_pelajaran")
+  template_un_template_un_mp1_idTomata_pelajaran template_un[]               @relation("template_un_mp1_idTomata_pelajaran")
+  template_un_template_un_mp2_idTomata_pelajaran template_un[]               @relation("template_un_mp2_idTomata_pelajaran")
+  template_un_template_un_mp6_idTomata_pelajaran template_un[]               @relation("template_un_mp6_idTomata_pelajaran")
+
+  @@index([jurusan_id], map: "mapel_jurusan_fk")
+  @@index([last_sync], map: "matpel_ls")
+  @@index([last_update], map: "matpel_lu")
+  @@schema("ref")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model mata_pelajaran_kurikulum {
+  kurikulum_id                                                                          Int                 @db.SmallInt
+  mata_pelajaran_id                                                                     Int
+  tingkat_pendidikan_id                                                                 Decimal             @db.Decimal(2, 0)
+  jumlah_jam                                                                            Decimal             @db.Decimal(2, 0)
+  jumlah_jam_maksimum                                                                   Decimal             @db.Decimal(2, 0)
+  status_di_kurikulum                                                                   Decimal             @db.Decimal(2, 0)
+  wajib                                                                                 Decimal             @db.Decimal(1, 0)
+  sks                                                                                   Decimal             @default(0) @db.Decimal(2, 0)
+  a_peminatan                                                                           Decimal             @db.Decimal(1, 0)
+  area_kompetensi                                                                       String              @default("*") @db.Char(1)
+  gmp_id                                                                                String?             @db.Uuid
+  create_date                                                                           DateTime            @default(dbgenerated("'2022-06-28 18:45:38.08'::timestamp without time zone")) @db.Timestamp(6)
+  last_update                                                                           DateTime            @default(dbgenerated("'2022-06-28 18:45:38.08'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date                                                                          DateTime?           @db.Timestamp(6)
+  last_sync                                                                             DateTime            @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  status_di_kurikulum_mata_pelajaran_kurikulum_status_di_kurikulumTostatus_di_kurikulum status_di_kurikulum @relation("mata_pelajaran_kurikulum_status_di_kurikulumTostatus_di_kurikulum", fields: [status_di_kurikulum], references: [status_di_kurikulum], onUpdate: Restrict, map: "fk_mata_pel_mapelkur__status_d")
+  group_matpel                                                                          group_matpel?       @relation(fields: [gmp_id], references: [gmp_id], onDelete: Restrict, onUpdate: Restrict, map: "fk_mata_pel_matpel_gr_group_ma")
+  kurikulum                                                                             kurikulum           @relation(fields: [kurikulum_id], references: [kurikulum_id], onUpdate: Restrict, map: "fk_mata_pel_matpelkur_kurikulu")
+  mata_pelajaran                                                                        mata_pelajaran      @relation(fields: [mata_pelajaran_id], references: [mata_pelajaran_id], onUpdate: Restrict, map: "fk_mata_pel_matpelkur_mata_pel")
+  tingkat_pendidikan                                                                    tingkat_pendidikan  @relation(fields: [tingkat_pendidikan_id], references: [tingkat_pendidikan_id], onUpdate: Restrict, map: "fk_mata_pel_matpelkur_tingkat_")
+
+  @@id([kurikulum_id, mata_pelajaran_id, tingkat_pendidikan_id], map: "pk_mata_pelajaran_kurikulum")
+  @@unique([kurikulum_id, mata_pelajaran_id, tingkat_pendidikan_id], map: "mata_pelajaran_kurikulum_pk")
+  @@index([status_di_kurikulum], map: "mapelkur_status_kur_fk")
+  @@index([gmp_id], map: "matpel_group_fk")
+  @@index([last_sync], map: "matpel_kur_ls")
+  @@index([last_update], map: "matpel_kur_lu")
+  @@index([mata_pelajaran_id], map: "matpelkur_matpel_fk")
+  @@index([tingkat_pendidikan_id], map: "matpelkur_tingkat_fk")
+  @@schema("ref")
+}
+
+model mst_wilayah {
+  kode_wilayah                                                 String               @id(map: "pk_mst_wilayah") @unique(map: "mst_wilayah_pk") @db.Char(8)
+  nama                                                         String               @db.VarChar(60)
+  id_level_wilayah                                             Int                  @db.SmallInt
+  mst_kode_wilayah                                             String?              @db.Char(8)
+  negara_id                                                    String               @db.Char(2)
+  asal_wilayah                                                 String?              @db.Char(8)
+  kode_bps                                                     String?              @db.Char(7)
+  kode_dagri                                                   String?              @db.Char(10)
+  kode_keu                                                     String?              @db.Char(10)
+  id_prov                                                      String?              @db.Char(8)
+  id_kabkota                                                   String?              @db.Char(8)
+  id_kec                                                       String?              @db.Char(8)
+  a_desa                                                       Decimal              @default(0) @db.Decimal(1, 0)
+  a_kelurahan                                                  Decimal              @default(0) @db.Decimal(1, 0)
+  a_35                                                         Decimal              @default(0) @db.Decimal(1, 0)
+  a_urban                                                      Decimal              @default(0) @db.Decimal(1, 0)
+  kategori_desa_id                                             Decimal?             @db.Decimal(2, 0)
+  create_date                                                  DateTime             @default(dbgenerated("'2020-04-16 09:40:03.422677'::timestamp without time zone")) @db.Timestamp(6)
+  last_update                                                  DateTime             @default(dbgenerated("'2020-04-16 09:40:03.422677'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date                                                 DateTime?            @db.Timestamp(6)
+  last_sync                                                    DateTime             @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  lemb_sertifikasi                                             lemb_sertifikasi[]
+  lembaga_akreditasi                                           lembaga_akreditasi[]
+  kategori_desa                                                kategori_desa?       @relation(fields: [kategori_desa_id], references: [kategori_desa_id], onDelete: Restrict, onUpdate: Restrict, map: "fk_mst_wila_kategori__kategori")
+  level_wilayah                                                level_wilayah        @relation(fields: [id_level_wilayah], references: [id_level_wilayah], onUpdate: Restrict, map: "fk_mst_wila_level_wil_level_wi")
+  mst_wilayah                                                  mst_wilayah?         @relation("mst_wilayahTomst_wilayah", fields: [mst_kode_wilayah], references: [kode_wilayah], onDelete: Restrict, onUpdate: Restrict, map: "fk_mst_wila_parent_wi_mst_wila")
+  other_mst_wilayah                                            mst_wilayah[]        @relation("mst_wilayahTomst_wilayah")
+  negara                                                       negara               @relation(fields: [negara_id], references: [negara_id], onUpdate: Restrict, map: "fk_mst_wila_propinsi__negara")
+  mulok                                                        mulok[]
+  tetangga_kabkota_tetangga_kabkota_kode_wilayah1Tomst_wilayah tetangga_kabkota[]   @relation("tetangga_kabkota_kode_wilayah1Tomst_wilayah")
+  tetangga_kabkota_tetangga_kabkota_kode_wilayah2Tomst_wilayah tetangga_kabkota[]   @relation("tetangga_kabkota_kode_wilayah2Tomst_wilayah")
+
+  @@index([kategori_desa_id], map: "kategori_desa_fk")
+  @@index([id_level_wilayah], map: "level_wilayah_fk")
+  @@index([mst_kode_wilayah], map: "parent_wilayah_fk")
+  @@index([negara_id], map: "propinsi_negara_fk")
+  @@schema("ref")
+}
+
+model mulok {
+  kode_wilayah      String         @db.Char(8)
+  mata_pelajaran_id Int
+  sk_mulok          String         @db.VarChar(80)
+  tgl_sk_mulok      DateTime       @db.Date
+  create_date       DateTime       @default(dbgenerated("'2019-09-10 14:29:57.517159'::timestamp without time zone")) @db.Timestamp(6)
+  last_update       DateTime       @default(dbgenerated("'2019-09-10 14:29:57.517159'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date      DateTime?      @db.Timestamp(6)
+  last_sync         DateTime       @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  mata_pelajaran    mata_pelajaran @relation(fields: [mata_pelajaran_id], references: [mata_pelajaran_id], onUpdate: Restrict, map: "fk_mulok_mulok_map_mata_pel")
+  mst_wilayah       mst_wilayah    @relation(fields: [kode_wilayah], references: [kode_wilayah], onUpdate: Restrict, map: "fk_mulok_mulok_wil_mst_wila")
+
+  @@id([kode_wilayah, mata_pelajaran_id], map: "pk_mulok")
+  @@unique([kode_wilayah, mata_pelajaran_id], map: "mulok_pk")
+  @@index([mata_pelajaran_id], map: "mulok_mapel_fk")
+  @@schema("ref")
+}
+
+model negara {
+  negara_id    String        @id(map: "pk_negara") @unique(map: "negara_pk") @db.Char(2)
+  nama         String        @db.VarChar(45)
+  luar_negeri  Decimal       @db.Decimal(1, 0)
+  create_date  DateTime      @default(dbgenerated("'2019-09-10 14:29:57.541192'::timestamp without time zone")) @db.Timestamp(6)
+  last_update  DateTime      @default(dbgenerated("'2019-09-10 14:29:57.541192'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date DateTime?     @db.Timestamp(6)
+  last_sync    DateTime      @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  mst_wilayah  mst_wilayah[]
+
+  @@schema("ref")
+}
+
+model pangkat_golongan {
+  pangkat_golongan_id Decimal   @id(map: "pk_pangkat_golongan") @unique(map: "pangkat_golongan_pk") @db.Decimal(2, 0)
+  kode                String    @db.VarChar(5)
+  nama                String    @db.VarChar(20)
+  create_date         DateTime  @default(dbgenerated("'2019-09-10 14:29:57.659433'::timestamp without time zone")) @db.Timestamp(6)
+  last_update         DateTime  @default(dbgenerated("'2019-09-10 14:29:57.659433'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date        DateTime? @db.Timestamp(6)
+  last_sync           DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model pekerjaan {
+  pekerjaan_id     Int       @id(map: "pk_pekerjaan") @unique(map: "pekerjaan_pk")
+  nama             String?   @db.VarChar(25)
+  a_wirausaha      Decimal   @default(0) @db.Decimal(1, 0)
+  a_pejabat_publik Decimal   @default(0) @db.Decimal(1, 0)
+  create_date      DateTime  @default(dbgenerated("'2019-09-10 14:29:57.719291'::timestamp without time zone")) @db.Timestamp(6)
+  last_update      DateTime  @default(dbgenerated("'2019-09-10 14:29:57.719291'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date     DateTime? @db.Timestamp(6)
+  last_sync        DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model pemakai_prasarana {
+  jenis_prasarana_id Int
+  jurusan_id         String          @db.VarChar(25)
+  create_date        DateTime        @default(dbgenerated("'2019-09-10 14:29:57.737537'::timestamp without time zone")) @db.Timestamp(6)
+  last_update        DateTime        @default(dbgenerated("'2019-09-10 14:29:57.737537'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date       DateTime?       @db.Timestamp(6)
+  last_sync          DateTime        @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  jml_std_min        Decimal         @default(0) @db.Decimal(5, 0)
+  jurusan            jurusan         @relation(fields: [jurusan_id], references: [jurusan_id], onUpdate: Restrict, map: "fk_pemakai__jur_pemak_jurusan")
+  jenis_prasarana    jenis_prasarana @relation(fields: [jenis_prasarana_id], references: [jenis_prasarana_id], onUpdate: Restrict, map: "fk_pemakai__pemakai_p_jenis_pr")
+
+  @@id([jenis_prasarana_id, jurusan_id], map: "pk_pemakai_prasarana")
+  @@unique([jenis_prasarana_id, jurusan_id], map: "pemakai_prasarana_pk")
+  @@index([jurusan_id], map: "jur_pemakai_pras_fk")
+  @@schema("ref")
+}
+
+model pemakai_sarana {
+  jenis_sarana_id Int
+  jurusan_id      String       @db.VarChar(25)
+  create_date     DateTime     @default(dbgenerated("'2019-09-10 14:29:57.7689'::timestamp without time zone")) @db.Timestamp(6)
+  last_update     DateTime     @default(dbgenerated("'2019-09-10 14:29:57.7689'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date    DateTime?    @db.Timestamp(6)
+  last_sync       DateTime     @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  jurusan         jurusan      @relation(fields: [jurusan_id], references: [jurusan_id], onUpdate: Restrict, map: "fk_pemakai__jur_pemak_jurusan")
+  jenis_sarana    jenis_sarana @relation(fields: [jenis_sarana_id], references: [jenis_sarana_id], onUpdate: Restrict, map: "fk_pemakai__pemakai_s_jenis_sa")
+
+  @@id([jenis_sarana_id, jurusan_id], map: "pk_pemakai_sarana")
+  @@unique([jenis_sarana_id, jurusan_id], map: "pemakai_sarana_pk")
+  @@index([jurusan_id], map: "jur_pemakai_sar_fk")
+  @@schema("ref")
+}
+
+model penghasilan {
+  penghasilan_id Int       @id(map: "pk_penghasilan") @unique(map: "penghasilan_pk")
+  nama           String    @db.VarChar(40)
+  batas_bawah    Int
+  batas_atas     Int
+  create_date    DateTime  @default(dbgenerated("'2019-09-10 14:29:58.035529'::timestamp without time zone")) @db.Timestamp(6)
+  last_update    DateTime  @default(dbgenerated("'2019-09-10 14:29:58.035529'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date   DateTime? @db.Timestamp(6)
+  last_sync      DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model sasaran_blockgrant {
+  sasaran_blockgrant_id Int              @id(map: "pk_sasaran_blockgrant") @unique(map: "sasaran_blockgrant_pk")
+  tahun_ajaran_id       Decimal          @db.Decimal(4, 0)
+  jenis_sarana_id       Int?
+  jenis_prasarana_id    Int?
+  jenis_bantuan_id      Int
+  sumber_dana_id        Decimal          @db.Decimal(3, 0)
+  jumlah                Int
+  create_date           DateTime         @default(dbgenerated("'2025-07-08 14:22:35.382'::timestamp without time zone")) @db.Timestamp(6)
+  last_update           DateTime         @default(dbgenerated("'2025-07-08 14:22:35.382'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date          DateTime?        @db.Timestamp(6)
+  last_sync             DateTime         @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  jenis_bantuan         jenis_bantuan    @relation(fields: [jenis_bantuan_id], references: [jenis_bantuan_id], onUpdate: Restrict, map: "fk_sasaran__sasaran_j_jenis_ba")
+  jenis_prasarana       jenis_prasarana? @relation(fields: [jenis_prasarana_id], references: [jenis_prasarana_id], onDelete: Restrict, onUpdate: Restrict, map: "fk_sasaran__sasaran_p_jenis_pr")
+  jenis_sarana          jenis_sarana?    @relation(fields: [jenis_sarana_id], references: [jenis_sarana_id], onDelete: Restrict, onUpdate: Restrict, map: "fk_sasaran__sasaran_s_jenis_sa")
+  sumber_dana           sumber_dana      @relation(fields: [sumber_dana_id], references: [sumber_dana_id], onUpdate: Restrict, map: "fk_sasaran__sasaran_s_sumber_d")
+  tahun_ajaran          tahun_ajaran     @relation(fields: [tahun_ajaran_id], references: [tahun_ajaran_id], onUpdate: Restrict, map: "fk_sasaran__sasaran_t_tahun_aj")
+
+  @@index([jenis_bantuan_id], map: "sasaran_jenis_bantuan_fk")
+  @@index([jenis_prasarana_id], map: "sasaran_prasarana_fk")
+  @@index([jenis_sarana_id], map: "sasaran_sarana_fk")
+  @@index([sumber_dana_id], map: "sasaran_sumber_fk")
+  @@index([tahun_ajaran_id], map: "sasaran_tahun_fk")
+  @@schema("ref")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model semester {
+  semester_id       String             @id(map: "pk_semester") @unique(map: "semester_pk") @db.Char(5)
+  tahun_ajaran_id   Decimal            @db.Decimal(4, 0)
+  nama              String             @db.VarChar(20)
+  semester          Decimal            @db.Decimal(1, 0)
+  periode_aktif     Decimal            @db.Decimal(1, 0)
+  tanggal_mulai     DateTime           @db.Date
+  tanggal_selesai   DateTime           @db.Date
+  create_date       DateTime           @default(dbgenerated("'2019-09-10 14:29:59.238151'::timestamp without time zone")) @db.Timestamp(6)
+  last_update       DateTime           @default(dbgenerated("'2019-09-10 14:29:59.238151'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date      DateTime?          @db.Timestamp(6)
+  last_sync         DateTime           @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  batas_waktu_rapor batas_waktu_rapor?
+  tahun_ajaran      tahun_ajaran       @relation(fields: [tahun_ajaran_id], references: [tahun_ajaran_id], onUpdate: Restrict, map: "fk_semester_semester__tahun_aj")
+
+  @@index([tahun_ajaran_id], map: "semester_tahun_ajaran_fk")
+  @@schema("ref")
+}
+
+model sertifikasi_iso {
+  sertifikasi_iso_id Int       @id(map: "pk_sertifikasi_iso") @unique(map: "sertifikasi_iso_pk") @db.SmallInt
+  nama               String    @db.VarChar(20)
+  create_date        DateTime  @default(dbgenerated("'2019-09-10 14:29:59.265833'::timestamp without time zone")) @db.Timestamp(6)
+  last_update        DateTime  @default(dbgenerated("'2019-09-10 14:29:59.265833'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date       DateTime? @db.Timestamp(6)
+  last_sync          DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model standar_sarana {
+  id_std_sarana        String            @id(map: "pk_standar_sarana") @unique(map: "standar_sarana_pk") @db.Uuid
+  jenis_prasarana_id   Int
+  jenis_sarana_id      Int
+  jurusan_id           String?           @db.VarChar(25)
+  bentuk_pendidikan_id Int               @db.SmallInt
+  a_harus_ada          Decimal           @db.Decimal(1, 0)
+  create_date          DateTime          @default(dbgenerated("'2019-09-10 14:29:59.319366'::timestamp without time zone")) @db.Timestamp(6)
+  last_update          DateTime          @default(dbgenerated("'2019-09-10 14:29:59.319366'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date         DateTime?         @db.Timestamp(6)
+  last_sync            DateTime          @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  jenis_sarana         jenis_sarana      @relation(fields: [jenis_sarana_id], references: [jenis_sarana_id], onUpdate: Restrict, map: "fk_standar__sarana_st_jenis_sa")
+  bentuk_pendidikan    bentuk_pendidikan @relation(fields: [bentuk_pendidikan_id], references: [bentuk_pendidikan_id], onUpdate: Restrict, map: "fk_standar__standar_b_bentuk_p")
+  jenis_prasarana      jenis_prasarana   @relation(fields: [jenis_prasarana_id], references: [jenis_prasarana_id], onUpdate: Restrict, map: "fk_standar__standar_j_jenis_pr")
+  jurusan              jurusan?          @relation(fields: [jurusan_id], references: [jurusan_id], onDelete: Restrict, onUpdate: Restrict, map: "fk_standar__standar_j_jurusan")
+
+  @@index([jenis_sarana_id], map: "sarana_standar_fk")
+  @@index([bentuk_pendidikan_id], map: "standar_bentuk_fk")
+  @@index([jenis_prasarana_id], map: "standar_jenis_ruang_fk")
+  @@index([jurusan_id], map: "standar_jurusan_fk")
+  @@schema("ref")
+}
+
+model status_anak {
+  status_anak_id Decimal   @id(map: "pk_status_anak") @unique(map: "status_anak_pk") @db.Decimal(1, 0)
+  nama           String    @db.VarChar(20)
+  create_date    DateTime  @default(dbgenerated("'2019-09-10 14:29:59.359947'::timestamp without time zone")) @db.Timestamp(6)
+  last_update    DateTime  @default(dbgenerated("'2019-09-10 14:29:59.359947'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date   DateTime? @db.Timestamp(6)
+  last_sync      DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model status_di_kurikulum {
+  status_di_kurikulum                                                                        Decimal                    @id(map: "pk_status_di_kurikulum") @unique(map: "status_di_kurikulum_pk") @db.Decimal(2, 0)
+  ket_stat_di_kurikulum                                                                      String                     @db.VarChar(40)
+  create_date                                                                                DateTime                   @default(dbgenerated("'2019-09-10 14:29:59.378364'::timestamp without time zone")) @db.Timestamp(6)
+  last_update                                                                                DateTime                   @default(dbgenerated("'2019-09-10 14:29:59.378364'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date                                                                               DateTime?                  @db.Timestamp(6)
+  last_sync                                                                                  DateTime                   @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  mata_pelajaran_kurikulum_mata_pelajaran_kurikulum_status_di_kurikulumTostatus_di_kurikulum mata_pelajaran_kurikulum[] @relation("mata_pelajaran_kurikulum_status_di_kurikulumTostatus_di_kurikulum")
+
+  @@schema("ref")
+}
+
+model status_keaktifan_pegawai {
+  status_keaktifan_id Decimal   @id(map: "pk_status_keaktifan_pegawai") @unique(map: "status_keaktifan_pegawai_pk") @db.Decimal(2, 0)
+  nama                String    @db.VarChar(30)
+  create_date         DateTime  @default(dbgenerated("'2019-09-10 14:29:59.391749'::timestamp without time zone")) @db.Timestamp(6)
+  last_update         DateTime  @default(dbgenerated("'2019-09-10 14:29:59.391749'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date        DateTime? @db.Timestamp(6)
+  last_sync           DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model status_kepegawaian {
+  status_kepegawaian_id Int       @id(map: "pk_status_kepegawaian") @unique(map: "status_kepegawaian_pk") @db.SmallInt
+  nama                  String    @db.VarChar(30)
+  create_date           DateTime  @default(dbgenerated("'2019-09-10 14:29:59.408033'::timestamp without time zone")) @db.Timestamp(6)
+  last_update           DateTime  @default(dbgenerated("'2019-09-10 14:29:59.408033'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date          DateTime? @db.Timestamp(6)
+  last_sync             DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model status_kepemilikan {
+  status_kepemilikan_id Decimal   @id(map: "pk_status_kepemilikan") @unique(map: "status_kepemilikan_pk") @db.Decimal(1, 0)
+  nama                  String    @db.VarChar(20)
+  create_date           DateTime  @default(dbgenerated("'2019-09-10 14:29:59.426803'::timestamp without time zone")) @db.Timestamp(6)
+  last_update           DateTime  @default(dbgenerated("'2019-09-10 14:29:59.426803'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date          DateTime? @db.Timestamp(6)
+  last_sync             DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model status_kepemilikan_sarpras {
+  kepemilikan_sarpras_id Decimal   @id(map: "pk_status_kepemilikan_sarpras") @unique(map: "status_kepemilikan_sarpras_pk") @db.Decimal(1, 0)
+  nama                   String    @db.VarChar(20)
+  create_date            DateTime  @default(dbgenerated("'2019-09-10 14:29:59.444872'::timestamp without time zone")) @db.Timestamp(6)
+  last_update            DateTime  @default(dbgenerated("'2019-09-10 14:29:59.444872'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date           DateTime? @db.Timestamp(6)
+  last_sync              DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model sumber_air {
+  sumber_air_id Decimal   @id(map: "pk_sumber_air") @unique(map: "sumber_air_pk") @db.Decimal(2, 0)
+  nama          String    @db.VarChar(25)
+  sumber_air    Decimal?  @db.Decimal(1, 0)
+  sumber_minum  Decimal?  @db.Decimal(1, 0)
+  create_date   DateTime? @db.Timestamp(6)
+  last_update   DateTime? @db.Timestamp(6)
+  expired_date  DateTime? @db.Timestamp(6)
+  last_sync     DateTime? @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model sumber_dana {
+  sumber_dana_id     Decimal              @id(map: "pk_sumber_dana") @unique(map: "sumber_dana_pk") @db.Decimal(3, 0)
+  nama               String               @db.VarChar(50)
+  create_date        DateTime             @default(dbgenerated("'2019-09-10 14:29:59.482201'::timestamp without time zone")) @db.Timestamp(6)
+  last_update        DateTime             @default(dbgenerated("'2019-09-10 14:29:59.482201'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date       DateTime?            @db.Timestamp(6)
+  last_sync          DateTime             @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  jenis_beasiswa     jenis_beasiswa[]
+  sasaran_blockgrant sasaran_blockgrant[]
+
+  @@schema("ref")
+}
+
+model sumber_dana_sekolah {
+  sumber_dana_sekolah_id Decimal   @id(map: "pk_sumber_dana_sekolah") @unique(map: "sumber_dana_sekolah_pk") @db.Decimal(2, 0)
+  nama                   String    @db.VarChar(100)
+  create_date            DateTime  @default(dbgenerated("'2020-04-16 09:40:03.422677'::timestamp without time zone")) @db.Timestamp(6)
+  last_update            DateTime  @default(dbgenerated("'2020-04-16 09:40:03.422677'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date           DateTime? @db.Timestamp(6)
+  last_sync              DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model sumber_gaji {
+  sumber_gaji_id Decimal   @id(map: "pk_sumber_gaji") @unique(map: "sumber_gaji_pk") @db.Decimal(2, 0)
+  nama           String    @db.VarChar(40)
+  create_date    DateTime  @default(dbgenerated("'2019-09-10 14:29:59.50086'::timestamp without time zone")) @db.Timestamp(6)
+  last_update    DateTime  @default(dbgenerated("'2019-09-10 14:29:59.50086'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date   DateTime? @db.Timestamp(6)
+  last_sync      DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model sumber_listrik {
+  sumber_listrik_id Decimal   @id(map: "pk_sumber_listrik") @unique(map: "sumber_listrik_pk") @db.Decimal(2, 0)
+  nama              String    @db.VarChar(50)
+  create_date       DateTime  @default(dbgenerated("'2019-09-10 14:29:59.52024'::timestamp without time zone")) @db.Timestamp(6)
+  last_update       DateTime  @default(dbgenerated("'2019-09-10 14:29:59.52024'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date      DateTime? @db.Timestamp(6)
+  last_sync         DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model table_sync {
+  table_name       String  @id(map: "pk_table_sync") @unique(map: "table_sync_pk") @db.VarChar(30)
+  table_alias      String? @db.VarChar(50)
+  sync_type        String  @db.Char(1)
+  sync_seq         Decimal @db.Decimal(4, 0)
+  kolom_kecuali    String? @db.VarChar(200)
+  table_status     Int?    @db.SmallInt
+  table_ket        String? @db.VarChar(100)
+  jml_thread       Int?    @default(5) @db.SmallInt
+  baris_per_thread Int?    @default(500)
+  order_ekstra     String? @db.VarChar(100)
+  a_table_aktif    Decimal @default(1) @db.Decimal(1, 0)
+
+  @@schema("ref")
+}
+
+model tahun_ajaran {
+  tahun_ajaran_id    Decimal              @id(map: "pk_tahun_ajaran") @unique(map: "tahun_ajaran_pk") @db.Decimal(4, 0)
+  nama               String               @db.VarChar(10)
+  periode_aktif      Decimal              @db.Decimal(1, 0)
+  tanggal_mulai      DateTime             @db.Date
+  tanggal_selesai    DateTime             @db.Date
+  create_date        DateTime             @default(dbgenerated("'2019-09-10 14:29:59.628052'::timestamp without time zone")) @db.Timestamp(6)
+  last_update        DateTime             @default(dbgenerated("'2019-09-10 14:29:59.628052'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date       DateTime?            @db.Timestamp(6)
+  last_sync          DateTime             @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  sasaran_blockgrant sasaran_blockgrant[]
+  semester           semester[]
+  template_un        template_un[]
+
+  @@schema("ref")
+}
+
+model template_rapor {
+  template_id       String         @db.Uuid
+  mata_pelajaran_id Int
+  no_urut           Decimal        @db.Decimal(3, 0)
+  create_date       DateTime       @default(dbgenerated("'2019-09-10 14:29:59.73656'::timestamp without time zone")) @db.Timestamp(6)
+  last_update       DateTime       @default(dbgenerated("'2019-09-10 14:29:59.73656'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date      DateTime?      @db.Timestamp(6)
+  last_sync         DateTime       @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  mata_pelajaran    mata_pelajaran @relation(fields: [mata_pelajaran_id], references: [mata_pelajaran_id], onUpdate: Restrict, map: "fk_template_trapor_mt_mata_pel")
+  template_un       template_un    @relation(fields: [template_id], references: [template_id], onUpdate: Restrict, map: "fk_template_trapor_tu_template")
+
+  @@id([template_id, mata_pelajaran_id], map: "pk_template_rapor")
+  @@unique([template_id, mata_pelajaran_id], map: "template_rapor_pk")
+  @@index([mata_pelajaran_id], map: "trapor_mtp_fk")
+  @@schema("ref")
+}
+
+model template_un {
+  template_id                                       String             @id(map: "pk_template_un") @unique(map: "template_un_pk") @db.Uuid
+  jenjang_pendidikan_id                             Decimal            @db.Decimal(2, 0)
+  tahun_ajaran_id                                   Decimal            @db.Decimal(4, 0)
+  jurusan_id                                        String?            @db.VarChar(25)
+  template_ket                                      String?            @db.VarChar(250)
+  mp1_id                                            Int?
+  mp2_id                                            Int?
+  mp3_id                                            Int?
+  mp4_id                                            Int?
+  mp5_id                                            Int?
+  mp6_id                                            Int?
+  mp7_id                                            Int?
+  create_date                                       DateTime           @default(dbgenerated("'2019-09-10 14:29:59.768528'::timestamp without time zone")) @db.Timestamp(6)
+  last_update                                       DateTime           @default(dbgenerated("'2019-09-10 14:29:59.768528'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date                                      DateTime?          @db.Timestamp(6)
+  last_sync                                         DateTime           @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  template_rapor                                    template_rapor[]
+  jenjang_pendidikan                                jenjang_pendidikan @relation(fields: [jenjang_pendidikan_id], references: [jenjang_pendidikan_id], onUpdate: Restrict, map: "fk_template_tun_jenja_jenjang_")
+  jurusan                                           jurusan?           @relation(fields: [jurusan_id], references: [jurusan_id], onDelete: Restrict, onUpdate: Restrict, map: "fk_template_tun_jurus_jurusan")
+  mata_pelajaran_template_un_mp3_idTomata_pelajaran mata_pelajaran?    @relation("template_un_mp3_idTomata_pelajaran", fields: [mp3_id], references: [mata_pelajaran_id], onDelete: Restrict, onUpdate: Restrict, map: "fk_template_tun_mtp1_mata_pel")
+  mata_pelajaran_template_un_mp4_idTomata_pelajaran mata_pelajaran?    @relation("template_un_mp4_idTomata_pelajaran", fields: [mp4_id], references: [mata_pelajaran_id], onDelete: Restrict, onUpdate: Restrict, map: "fk_template_tun_mtp2_mata_pel")
+  mata_pelajaran_template_un_mp7_idTomata_pelajaran mata_pelajaran?    @relation("template_un_mp7_idTomata_pelajaran", fields: [mp7_id], references: [mata_pelajaran_id], onDelete: Restrict, onUpdate: Restrict, map: "fk_template_tun_mtp3_mata_pel")
+  mata_pelajaran_template_un_mp5_idTomata_pelajaran mata_pelajaran?    @relation("template_un_mp5_idTomata_pelajaran", fields: [mp5_id], references: [mata_pelajaran_id], onDelete: Restrict, onUpdate: Restrict, map: "fk_template_tun_mtp4_mata_pel")
+  mata_pelajaran_template_un_mp1_idTomata_pelajaran mata_pelajaran?    @relation("template_un_mp1_idTomata_pelajaran", fields: [mp1_id], references: [mata_pelajaran_id], onDelete: Restrict, onUpdate: Restrict, map: "fk_template_tun_mtp5_mata_pel")
+  mata_pelajaran_template_un_mp2_idTomata_pelajaran mata_pelajaran?    @relation("template_un_mp2_idTomata_pelajaran", fields: [mp2_id], references: [mata_pelajaran_id], onDelete: Restrict, onUpdate: Restrict, map: "fk_template_tun_mtp6_mata_pel")
+  mata_pelajaran_template_un_mp6_idTomata_pelajaran mata_pelajaran?    @relation("template_un_mp6_idTomata_pelajaran", fields: [mp6_id], references: [mata_pelajaran_id], onDelete: Restrict, onUpdate: Restrict, map: "fk_template_tun_mtp7_mata_pel")
+  tahun_ajaran                                      tahun_ajaran       @relation(fields: [tahun_ajaran_id], references: [tahun_ajaran_id], onUpdate: Restrict, map: "fk_template_tun_tahun_tahun_aj")
+
+  @@index([jenjang_pendidikan_id], map: "tun_jenjang_fk")
+  @@index([jurusan_id], map: "tun_jurusan_fk")
+  @@index([mp3_id], map: "tun_mtp1_fk")
+  @@index([mp4_id], map: "tun_mtp2_fk")
+  @@index([mp7_id], map: "tun_mtp3_fk")
+  @@index([mp5_id], map: "tun_mtp4_fk")
+  @@index([mp1_id], map: "tun_mtp5_fk")
+  @@index([mp2_id], map: "tun_mtp6_fk")
+  @@index([mp6_id], map: "tun_mtp7_fk")
+  @@index([tahun_ajaran_id], map: "tun_tahun_fk")
+  @@schema("ref")
+}
+
+model tetangga_kabkota {
+  kode_wilayah1                                           String      @db.Char(8)
+  kode_wilayah2                                           String      @db.Char(8)
+  create_date                                             DateTime    @default(dbgenerated("'2019-09-10 14:29:59.838962'::timestamp without time zone")) @db.Timestamp(6)
+  last_update                                             DateTime    @default(dbgenerated("'2019-09-10 14:29:59.838962'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date                                            DateTime?   @db.Timestamp(6)
+  last_sync                                               DateTime    @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  mst_wilayah_tetangga_kabkota_kode_wilayah1Tomst_wilayah mst_wilayah @relation("tetangga_kabkota_kode_wilayah1Tomst_wilayah", fields: [kode_wilayah1], references: [kode_wilayah], onUpdate: Restrict, map: "fk_tetangga_kabkota_1_mst_wila")
+  mst_wilayah_tetangga_kabkota_kode_wilayah2Tomst_wilayah mst_wilayah @relation("tetangga_kabkota_kode_wilayah2Tomst_wilayah", fields: [kode_wilayah2], references: [kode_wilayah], onUpdate: Restrict, map: "fk_tetangga_kabkota_2_mst_wila")
+
+  @@id([kode_wilayah1, kode_wilayah2], map: "pk_tetangga_kabkota")
+  @@unique([kode_wilayah1, kode_wilayah2], map: "tetangga_kabkota_pk")
+  @@index([kode_wilayah2], map: "kabkota_2_fk")
+  @@schema("ref")
+}
+
+model tingkat_pendidikan {
+  tingkat_pendidikan_id    Decimal                    @id(map: "pk_tingkat_pendidikan") @unique(map: "tingkat_pendidikan_pk") @db.Decimal(2, 0)
+  kode                     String                     @db.VarChar(5)
+  nama                     String                     @db.VarChar(20)
+  jenjang_pendidikan_id    Decimal                    @db.Decimal(2, 0)
+  create_date              DateTime                   @default(dbgenerated("'2019-09-10 14:29:59.88044'::timestamp without time zone")) @db.Timestamp(6)
+  last_update              DateTime                   @default(dbgenerated("'2019-09-10 14:29:59.88044'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date             DateTime?                  @db.Timestamp(6)
+  last_sync                DateTime                   @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  group_matpel             group_matpel[]
+  kompetensi               kompetensi[]
+  mata_pelajaran_kurikulum mata_pelajaran_kurikulum[]
+  jenjang_pendidikan       jenjang_pendidikan         @relation(fields: [jenjang_pendidikan_id], references: [jenjang_pendidikan_id], onUpdate: Restrict, map: "fk_tingkat__tingkat_j_jenjang_")
+
+  @@index([jenjang_pendidikan_id], map: "tingkat_jenjang_fk")
+  @@schema("ref")
+}
+
+model tingkat_penghargaan {
+  tingkat_penghargaan_id Int       @id(map: "pk_tingkat_penghargaan") @unique(map: "tingkat_penghargaan_pk")
+  nama                   String    @db.VarChar(50)
+  create_date            DateTime  @default(dbgenerated("'2019-09-10 14:29:59.897153'::timestamp without time zone")) @db.Timestamp(6)
+  last_update            DateTime  @default(dbgenerated("'2019-09-10 14:29:59.897153'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date           DateTime? @db.Timestamp(6)
+  last_sync              DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+model tingkat_prestasi {
+  tingkat_prestasi_id Int       @id(map: "pk_tingkat_prestasi") @unique(map: "tingkat_prestasi_pk")
+  nama                String    @db.VarChar(50)
+  create_date         DateTime  @default(dbgenerated("'2019-09-10 14:29:59.911154'::timestamp without time zone")) @db.Timestamp(6)
+  last_update         DateTime  @default(dbgenerated("'2019-09-10 14:29:59.911154'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date        DateTime? @db.Timestamp(6)
+  last_sync           DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model variabel {
+  variabel_id    String    @id(map: "pk_variabel") @db.Uuid
+  nama           String    @db.VarChar(500)
+  header         String?   @db.VarChar(500)
+  urut           Int?      @db.SmallInt
+  string_pattern String?   @db.VarChar(500)
+  keterangan     String?   @db.VarChar(500)
+  jenis_variabel String    @db.Char(1)
+  u_paud         Decimal   @db.Decimal(1, 0)
+  u_sd           Decimal   @db.Decimal(1, 0)
+  u_smp          Decimal   @db.Decimal(1, 0)
+  u_sma          Decimal   @db.Decimal(1, 0)
+  u_smk          Decimal   @db.Decimal(1, 0)
+  is_tampil      Decimal   @db.Decimal(1, 0)
+  create_date    DateTime  @default(dbgenerated("'2022-06-28 18:58:39.297'::timestamp without time zone")) @db.Timestamp(6)
+  last_update    DateTime  @default(dbgenerated("'2022-06-28 18:58:39.297'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date   DateTime? @db.Timestamp(6)
+  last_sync      DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model variabel_value {
+  variabel_id  String    @db.Char(36)
+  value_id     Int
+  value_name   String    @db.VarChar(200)
+  create_date  DateTime  @db.Timestamp(6)
+  last_update  DateTime  @db.Timestamp(6)
+  expired_date DateTime? @db.Timestamp(6)
+  last_sync    DateTime  @db.Timestamp(6)
+
+  @@ignore
+  @@schema("ref")
+}
+
+model waktu_penyelenggaraan {
+  waktu_penyelenggaraan_id Decimal   @id(map: "pk_waktu_penyelenggaraan") @unique(map: "waktu_penyelenggaraan_pk") @db.Decimal(1, 0)
+  nama                     String    @db.VarChar(20)
+  create_date              DateTime  @default(dbgenerated("'2019-09-10 14:30:01.189185'::timestamp without time zone")) @db.Timestamp(6)
+  last_update              DateTime  @default(dbgenerated("'2019-09-10 14:30:01.189185'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date             DateTime? @db.Timestamp(6)
+  last_sync                DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+
+  @@schema("ref")
 }

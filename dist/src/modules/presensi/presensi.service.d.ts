@@ -110,10 +110,10 @@ export declare class PresensiService {
             tanggal: Date;
             izin_id: string;
             jenis: number;
+            disetujui: boolean;
             jam_keluar: Date | null;
             jam_kembali: Date | null;
             jam_kembali_estimasi: Date | null;
-            disetujui: boolean;
         };
     } | {
         type: string;
@@ -134,10 +134,10 @@ export declare class PresensiService {
             tanggal: Date;
             izin_id: string;
             jenis: number;
+            disetujui: boolean;
             jam_keluar: Date | null;
             jam_kembali: Date | null;
             jam_kembali_estimasi: Date | null;
-            disetujui: boolean;
         };
     }>;
     scanQr(sekolahId: string, token: string, latitude?: number, longitude?: number): Promise<{
@@ -196,10 +196,10 @@ export declare class PresensiService {
             tanggal: Date;
             izin_id: string;
             jenis: number;
+            disetujui: boolean;
             jam_keluar: Date | null;
             jam_kembali: Date | null;
             jam_kembali_estimasi: Date | null;
-            disetujui: boolean;
         };
         nama: string;
         peserta_didik_id: string;
@@ -229,10 +229,10 @@ export declare class PresensiService {
             tanggal: Date;
             izin_id: string;
             jenis: number;
+            disetujui: boolean;
             jam_keluar: Date | null;
             jam_kembali: Date | null;
             jam_kembali_estimasi: Date | null;
-            disetujui: boolean;
         };
         nama: string;
         ptk_id: string;
@@ -262,10 +262,10 @@ export declare class PresensiService {
         tanggal: Date;
         izin_id: string;
         jenis: number;
+        disetujui: boolean;
         jam_keluar: Date | null;
         jam_kembali: Date | null;
         jam_kembali_estimasi: Date | null;
-        disetujui: boolean;
     })[]>;
     catatKembali(sekolahId: string, izinId: string): Promise<{
         sekolah_id: string;
@@ -277,10 +277,10 @@ export declare class PresensiService {
         tanggal: Date;
         izin_id: string;
         jenis: number;
+        disetujui: boolean;
         jam_keluar: Date | null;
         jam_kembali: Date | null;
         jam_kembali_estimasi: Date | null;
-        disetujui: boolean;
     }>;
     setujuiIzin(sekolahId: string, izinId: string): Promise<{
         sekolah_id: string;
@@ -292,10 +292,10 @@ export declare class PresensiService {
         tanggal: Date;
         izin_id: string;
         jenis: number;
+        disetujui: boolean;
         jam_keluar: Date | null;
         jam_kembali: Date | null;
         jam_kembali_estimasi: Date | null;
-        disetujui: boolean;
     }>;
     deleteIzin(sekolahId: string, izinId: string): Promise<{
         success: boolean;

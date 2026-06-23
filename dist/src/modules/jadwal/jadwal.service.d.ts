@@ -161,12 +161,15 @@ export declare class JadwalService {
                 updated_at: Date;
                 no_hp: string | null;
                 ptk_id: string;
-                nik: string | null;
-                tempat_lahir: string | null;
-                tanggal_lahir: Date | null;
                 nip: string | null;
                 jenis_kelamin: string | null;
                 foto: string | null;
+                nik: string | null;
+                tanggal_lahir: Date | null;
+                tempat_lahir: string | null;
+                keahlian_laboratorium: string | null;
+                lembaga_pengangkat: string | null;
+                sumber_gaji: string | null;
                 ptk_terdaftar_id: string | null;
                 tahun_ajaran_id: string | null;
                 ptk_induk: string | null;
@@ -196,14 +199,11 @@ export declare class JadwalService {
                 sk_pengangkatan: string | null;
                 tanggal_surat_tugas: Date | null;
                 tmt_pengangkatan: Date | null;
-                lembaga_pengangkat: string | null;
                 sk_cpns: string | null;
                 tmt_cpns: Date | null;
                 tmt_pns: Date | null;
-                sumber_gaji: string | null;
                 lisensi_kepsek: boolean;
                 nuks: string | null;
-                keahlian_laboratorium: string | null;
                 mampu_menangani_kebutuhan_khusus: string | null;
                 keahlian_braille: boolean;
                 keahlian_bahasa_isyarat: boolean;
@@ -216,14 +216,15 @@ export declare class JadwalService {
                 tandatangan: string | null;
                 id_bank: string | null;
                 nama_kcp: string | null;
-                rekening_bank: string | null;
                 rekening_atas_nama: string | null;
+                rekening_bank: string | null;
             };
         } & {
             sekolah_id: string | null;
             created_at: Date;
             updated_at: Date;
             ptk_id: string | null;
+            status_di_kurikulum: string | null;
             ptk_terdaftar_id: string | null;
             rombongan_belajar_id: string;
             ptk_id_str: string | null;
@@ -233,7 +234,6 @@ export declare class JadwalService {
             nama_mata_pelajaran: string | null;
             induk_pembelajaran_id: string | null;
             jam_mengajar_per_minggu: string | null;
-            status_di_kurikulum: string | null;
             status_di_kurikulum_str: string | null;
         };
     } & {

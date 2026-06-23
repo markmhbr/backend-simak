@@ -242,11 +242,13 @@ export declare class SuratService {
             created_at: Date;
             updated_at: Date;
             peserta_didik_id: string;
-            nik: string | null;
-            tempat_lahir: string | null;
-            tanggal_lahir: Date | null;
             jenis_kelamin: string | null;
             foto: string | null;
+            nik: string | null;
+            tanggal_lahir: Date | null;
+            tempat_lahir: string | null;
+            alasan_layak_pip: string | null;
+            kebutuhan_khusus: string | null;
             status: string;
             qr_token: string | null;
             agama_id: string | null;
@@ -256,8 +258,8 @@ export declare class SuratService {
             no_wa: string | null;
             id_bank: string | null;
             nama_kcp: string | null;
-            rekening_bank: string | null;
             rekening_atas_nama: string | null;
+            rekening_bank: string | null;
             rombongan_belajar_id: string | null;
             tingkat_pendidikan_id: string | null;
             semester_id: string | null;
@@ -267,7 +269,6 @@ export declare class SuratService {
             anggota_rombel_id: string | null;
             nisn: string | null;
             kebutuhan_khusus_id: number | null;
-            kebutuhan_khusus: string | null;
             nama_dusun: string | null;
             jenis_tinggal_id: string | null;
             alat_transportasi_id: string | null;
@@ -341,7 +342,6 @@ export declare class SuratService {
             soft_delete: string | null;
             last_sync: Date | null;
             updater_id: string | null;
-            alasan_layak_pip: string | null;
             alasan_menolak_kip: string | null;
             alat_transportasi_id_str: string | null;
             cita_cita: string | null;
@@ -392,12 +392,15 @@ export declare class SuratService {
             updated_at: Date;
             no_hp: string | null;
             ptk_id: string;
-            nik: string | null;
-            tempat_lahir: string | null;
-            tanggal_lahir: Date | null;
             nip: string | null;
             jenis_kelamin: string | null;
             foto: string | null;
+            nik: string | null;
+            tanggal_lahir: Date | null;
+            tempat_lahir: string | null;
+            keahlian_laboratorium: string | null;
+            lembaga_pengangkat: string | null;
+            sumber_gaji: string | null;
             ptk_terdaftar_id: string | null;
             tahun_ajaran_id: string | null;
             ptk_induk: string | null;
@@ -427,14 +430,11 @@ export declare class SuratService {
             sk_pengangkatan: string | null;
             tanggal_surat_tugas: Date | null;
             tmt_pengangkatan: Date | null;
-            lembaga_pengangkat: string | null;
             sk_cpns: string | null;
             tmt_cpns: Date | null;
             tmt_pns: Date | null;
-            sumber_gaji: string | null;
             lisensi_kepsek: boolean;
             nuks: string | null;
-            keahlian_laboratorium: string | null;
             mampu_menangani_kebutuhan_khusus: string | null;
             keahlian_braille: boolean;
             keahlian_bahasa_isyarat: boolean;
@@ -447,8 +447,8 @@ export declare class SuratService {
             tandatangan: string | null;
             id_bank: string | null;
             nama_kcp: string | null;
-            rekening_bank: string | null;
             rekening_atas_nama: string | null;
+            rekening_bank: string | null;
         };
     } & {
         sekolah_id: string;
