@@ -7,14 +7,14 @@ export declare class DapodikController {
     getCadisdikList(): Promise<{
         status: string;
         data: {
+            nomor_telepon: string | null;
+            email: string | null;
+            website: string | null;
             created_at: Date;
             updated_at: Date;
-            email: string | null;
-            alamat: string | null;
             cadisdik_id: string;
+            alamat: string | null;
             nama_instansi: string;
-            nomor_telepon: string | null;
-            website: string | null;
             aktif: boolean;
         }[];
     }>;
@@ -101,12 +101,12 @@ export declare class DapodikController {
                 nama_file: string | null;
                 file_url: string | null;
             })[];
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
-            sekolah_id: string;
+            cadisdik_id: string | null;
             ptk_id: string | null;
             peserta_didik_id: string | null;
-            cadisdik_id: string | null;
             status: number;
             keterangan: string | null;
             layanan_id: string;
@@ -120,12 +120,12 @@ export declare class DapodikController {
         status: string;
         message: string;
         data: {
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
-            sekolah_id: string;
+            cadisdik_id: string | null;
             ptk_id: string | null;
             peserta_didik_id: string | null;
-            cadisdik_id: string | null;
             status: number;
             keterangan: string | null;
             layanan_id: string;
@@ -156,14 +156,8 @@ export declare class DapodikController {
             logo: string;
             nama_kepala_sekolah: string;
             nama_operator: string;
-            created_at: Date;
-            updated_at: Date;
             sekolah_id: string;
             nama: string;
-            email: string | null;
-            cadisdik_id: string | null;
-            nomor_telepon: string | null;
-            website: string | null;
             nss: string | null;
             npsn: string | null;
             bentuk_pendidikan_id: number | null;
@@ -175,7 +169,10 @@ export declare class DapodikController {
             rw: string | null;
             kode_wilayah: string | null;
             kode_pos: string | null;
+            nomor_telepon: string | null;
             nomor_fax: string | null;
+            email: string | null;
+            website: string | null;
             is_sks: boolean | null;
             lintang: import("@prisma/client-runtime-utils").Decimal | null;
             bujur: import("@prisma/client-runtime-utils").Decimal | null;
@@ -191,20 +188,17 @@ export declare class DapodikController {
             peta: string | null;
             social_media: import("@prisma/client/runtime/client").JsonValue | null;
             radius: number | null;
+            created_at: Date;
+            updated_at: Date;
+            cadisdik_id: string | null;
         };
     }>;
     updateSekolahInfoDetail(req: Request, body: any): Promise<{
         status: string;
         klien: any;
         data: {
-            created_at: Date;
-            updated_at: Date;
             sekolah_id: string;
             nama: string;
-            email: string | null;
-            cadisdik_id: string | null;
-            nomor_telepon: string | null;
-            website: string | null;
             nss: string | null;
             npsn: string | null;
             bentuk_pendidikan_id: number | null;
@@ -216,7 +210,10 @@ export declare class DapodikController {
             rw: string | null;
             kode_wilayah: string | null;
             kode_pos: string | null;
+            nomor_telepon: string | null;
             nomor_fax: string | null;
+            email: string | null;
+            website: string | null;
             is_sks: boolean | null;
             lintang: import("@prisma/client-runtime-utils").Decimal | null;
             bujur: import("@prisma/client-runtime-utils").Decimal | null;
@@ -233,20 +230,17 @@ export declare class DapodikController {
             peta: string | null;
             social_media: import("@prisma/client/runtime/client").JsonValue | null;
             radius: number | null;
+            created_at: Date;
+            updated_at: Date;
+            cadisdik_id: string | null;
         };
     }>;
     uploadSekolahLogo(req: Request, file: Express.Multer.File): Promise<{
         status: string;
         klien: any;
         data: {
-            created_at: Date;
-            updated_at: Date;
             sekolah_id: string;
             nama: string;
-            email: string | null;
-            cadisdik_id: string | null;
-            nomor_telepon: string | null;
-            website: string | null;
             nss: string | null;
             npsn: string | null;
             bentuk_pendidikan_id: number | null;
@@ -258,7 +252,10 @@ export declare class DapodikController {
             rw: string | null;
             kode_wilayah: string | null;
             kode_pos: string | null;
+            nomor_telepon: string | null;
             nomor_fax: string | null;
+            email: string | null;
+            website: string | null;
             is_sks: boolean | null;
             lintang: import("@prisma/client-runtime-utils").Decimal | null;
             bujur: import("@prisma/client-runtime-utils").Decimal | null;
@@ -275,6 +272,9 @@ export declare class DapodikController {
             peta: string | null;
             social_media: import("@prisma/client/runtime/client").JsonValue | null;
             radius: number | null;
+            created_at: Date;
+            updated_at: Date;
+            cadisdik_id: string | null;
         };
     }>;
     uploadSiswaFoto(req: Request, uuid: string, file: Express.Multer.File): Promise<{
@@ -594,19 +594,19 @@ export declare class DapodikController {
         data: {
             foto: string;
             nama: string;
+            alamat_jalan: string;
+            rt: string;
+            rw: string;
             email: string;
+            desa_kelurahan: string;
+            kecamatan: string;
+            kabupaten_kota: string;
+            provinsi: string;
             peserta_didik_id: string;
             nik: string;
             tempat_lahir: string;
             tanggal_lahir: Date;
             jenis_kelamin: string;
-            alamat_jalan: string;
-            rt: string;
-            rw: string;
-            desa_kelurahan: string;
-            kecamatan: string;
-            kabupaten_kota: string;
-            provinsi: string;
             status: string;
             qr_token: string;
             agama_id_str: string;
@@ -767,9 +767,10 @@ export declare class DapodikController {
         klien: any;
         data: {
             foto: string;
-            updated_at: Date;
             nama: string;
+            alamat_jalan: string;
             email: string;
+            updated_at: Date;
             no_hp: string;
             ptk_id: string;
             nik: string;
@@ -777,7 +778,6 @@ export declare class DapodikController {
             tanggal_lahir: Date;
             nip: string;
             jenis_kelamin: string;
-            alamat_jalan: string;
             ptk_induk: string;
             status: string;
             qr_token: string;
@@ -807,10 +807,10 @@ export declare class DapodikController {
             foto_dokumen: any[];
             pembelajaran: ({
                 rombongan_belajar: {
-                    created_at: Date;
-                    updated_at: Date;
                     sekolah_id: string | null;
                     nama: string;
+                    created_at: Date;
+                    updated_at: Date;
                     ptk_id: string | null;
                     rombongan_belajar_id: string;
                     tingkat_pendidikan_id: string | null;
@@ -832,9 +832,9 @@ export declare class DapodikController {
                     sk_ekskul: string | null;
                 };
             } & {
+                sekolah_id: string | null;
                 created_at: Date;
                 updated_at: Date;
-                sekolah_id: string | null;
                 ptk_id: string | null;
                 ptk_terdaftar_id: string | null;
                 rombongan_belajar_id: string;
@@ -853,9 +853,9 @@ export declare class DapodikController {
             }[];
             rwy_sertifikasi: ({
                 bidang_studi: {
+                    sekolah_id: string | null;
                     created_at: Date;
                     updated_at: Date;
-                    sekolah_id: string | null;
                     kode: string | null;
                     create_date: Date | null;
                     last_update: Date | null;
@@ -875,22 +875,22 @@ export declare class DapodikController {
                     expired_date: Date | null;
                 };
                 lemb_sertifikasi: {
-                    created_at: Date;
-                    updated_at: Date;
                     sekolah_id: string | null;
                     nama: string | null;
-                    email: string | null;
-                    nomor_telepon: string | null;
-                    website: string | null;
                     alamat_jalan: string | null;
                     rt: string | null;
                     rw: string | null;
                     kode_wilayah: string | null;
                     kode_pos: string | null;
+                    nomor_telepon: string | null;
                     nomor_fax: string | null;
+                    email: string | null;
+                    website: string | null;
                     lintang: import("@prisma/client-runtime-utils").Decimal | null;
                     bujur: import("@prisma/client-runtime-utils").Decimal | null;
                     desa_kelurahan: string | null;
+                    created_at: Date;
+                    updated_at: Date;
                     nama_dusun: string | null;
                     create_date: Date | null;
                     last_update: Date | null;
@@ -902,9 +902,9 @@ export declare class DapodikController {
                     ket_lemb_sert: string | null;
                 };
             } & {
+                sekolah_id: string | null;
                 created_at: Date;
                 updated_at: Date;
-                sekolah_id: string | null;
                 ptk_id: string | null;
                 ptk_id_str: string | null;
                 vld_count: number;
@@ -946,22 +946,13 @@ export declare class DapodikController {
                 jenjang_pendidikan_id_str: string | null;
                 gelar_akademik_id_str: string | null;
             }[];
-            created_at: Date;
-            updated_at: Date;
             sekolah_id: string | null;
             nama: string;
-            email: string | null;
-            no_hp: string | null;
-            ptk_id: string;
-            nik: string | null;
-            tempat_lahir: string | null;
-            tanggal_lahir: Date | null;
-            nip: string | null;
-            jenis_kelamin: string | null;
             alamat_jalan: string | null;
             rt: string | null;
             rw: string | null;
             kode_pos: string | null;
+            email: string | null;
             lintang: import("@prisma/client-runtime-utils").Decimal | null;
             bujur: import("@prisma/client-runtime-utils").Decimal | null;
             dusun: string | null;
@@ -969,6 +960,15 @@ export declare class DapodikController {
             kecamatan: string | null;
             kabupaten_kota: string | null;
             provinsi: string | null;
+            created_at: Date;
+            updated_at: Date;
+            no_hp: string | null;
+            ptk_id: string;
+            nik: string | null;
+            tempat_lahir: string | null;
+            tanggal_lahir: Date | null;
+            nip: string | null;
+            jenis_kelamin: string | null;
             ptk_terdaftar_id: string | null;
             tahun_ajaran_id: string | null;
             ptk_induk: string | null;
@@ -1025,11 +1025,22 @@ export declare class DapodikController {
     updateGtkDetail(req: Request, id: string, body: any): Promise<{
         status: string;
         data: {
-            created_at: Date;
-            updated_at: Date;
             sekolah_id: string | null;
             nama: string;
+            alamat_jalan: string | null;
+            rt: string | null;
+            rw: string | null;
+            kode_pos: string | null;
             email: string | null;
+            lintang: import("@prisma/client-runtime-utils").Decimal | null;
+            bujur: import("@prisma/client-runtime-utils").Decimal | null;
+            dusun: string | null;
+            desa_kelurahan: string | null;
+            kecamatan: string | null;
+            kabupaten_kota: string | null;
+            provinsi: string | null;
+            created_at: Date;
+            updated_at: Date;
             no_hp: string | null;
             ptk_id: string;
             nik: string | null;
@@ -1038,17 +1049,6 @@ export declare class DapodikController {
             nip: string | null;
             jenis_kelamin: string | null;
             foto: string | null;
-            alamat_jalan: string | null;
-            rt: string | null;
-            rw: string | null;
-            kode_pos: string | null;
-            lintang: import("@prisma/client-runtime-utils").Decimal | null;
-            bujur: import("@prisma/client-runtime-utils").Decimal | null;
-            dusun: string | null;
-            desa_kelurahan: string | null;
-            kecamatan: string | null;
-            kabupaten_kota: string | null;
-            provinsi: string | null;
             ptk_terdaftar_id: string | null;
             tahun_ajaran_id: string | null;
             ptk_induk: string | null;
@@ -1110,21 +1110,14 @@ export declare class DapodikController {
             penggunas: {
                 email: string;
             }[];
-            created_at: Date;
-            updated_at: Date;
             sekolah_id: string | null;
             nama: string;
-            email: string | null;
-            peserta_didik_id: string;
-            nik: string | null;
-            tempat_lahir: string | null;
-            tanggal_lahir: Date | null;
-            jenis_kelamin: string | null;
             alamat_jalan: string | null;
             rt: string | null;
             rw: string | null;
             kode_wilayah: string | null;
             kode_pos: string | null;
+            email: string | null;
             lintang: import("@prisma/client-runtime-utils").Decimal | null;
             bujur: import("@prisma/client-runtime-utils").Decimal | null;
             dusun: string | null;
@@ -1132,6 +1125,13 @@ export declare class DapodikController {
             kecamatan: string | null;
             kabupaten_kota: string | null;
             provinsi: string | null;
+            created_at: Date;
+            updated_at: Date;
+            peserta_didik_id: string;
+            nik: string | null;
+            tempat_lahir: string | null;
+            tanggal_lahir: Date | null;
+            jenis_kelamin: string | null;
             status: string;
             qr_token: string | null;
             agama_id: string | null;
@@ -1262,22 +1262,14 @@ export declare class DapodikController {
     updatePesertaDidikDetail(req: Request, id: string, body: any): Promise<{
         status: string;
         data: {
-            created_at: Date;
-            updated_at: Date;
             sekolah_id: string | null;
             nama: string;
-            email: string | null;
-            peserta_didik_id: string;
-            nik: string | null;
-            tempat_lahir: string | null;
-            tanggal_lahir: Date | null;
-            jenis_kelamin: string | null;
-            foto: string | null;
             alamat_jalan: string | null;
             rt: string | null;
             rw: string | null;
             kode_wilayah: string | null;
             kode_pos: string | null;
+            email: string | null;
             lintang: import("@prisma/client-runtime-utils").Decimal | null;
             bujur: import("@prisma/client-runtime-utils").Decimal | null;
             dusun: string | null;
@@ -1285,6 +1277,14 @@ export declare class DapodikController {
             kecamatan: string | null;
             kabupaten_kota: string | null;
             provinsi: string | null;
+            created_at: Date;
+            updated_at: Date;
+            peserta_didik_id: string;
+            nik: string | null;
+            tempat_lahir: string | null;
+            tanggal_lahir: Date | null;
+            jenis_kelamin: string | null;
+            foto: string | null;
             status: string;
             qr_token: string | null;
             agama_id: string | null;

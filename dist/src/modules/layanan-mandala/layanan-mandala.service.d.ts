@@ -91,12 +91,12 @@ export declare class LayananMandalaService {
         wajib: boolean;
     }[]>;
     createPermohonan(dto: CreatePermohonanLayananDto): Promise<{
+        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        sekolah_id: string;
+        cadisdik_id: string | null;
         ptk_id: string | null;
         peserta_didik_id: string | null;
-        cadisdik_id: string | null;
         status: number;
         keterangan: string | null;
         layanan_id: string;
@@ -158,12 +158,12 @@ export declare class LayananMandalaService {
             nama_file: string | null;
             file_url: string | null;
         })[];
+        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        sekolah_id: string;
+        cadisdik_id: string | null;
         ptk_id: string | null;
         peserta_didik_id: string | null;
-        cadisdik_id: string | null;
         status: number;
         keterangan: string | null;
         layanan_id: string;
@@ -231,12 +231,12 @@ export declare class LayananMandalaService {
             nama_file: string | null;
             file_url: string | null;
         })[];
+        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        sekolah_id: string;
+        cadisdik_id: string | null;
         ptk_id: string | null;
         peserta_didik_id: string | null;
-        cadisdik_id: string | null;
         status: number;
         keterangan: string | null;
         layanan_id: string;
@@ -246,12 +246,12 @@ export declare class LayananMandalaService {
         tanggal_pengajuan: Date | null;
     }>;
     updatePermohonanStatus(id: string, dto: UpdatePermohonanStatusDto): Promise<{
+        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        sekolah_id: string;
+        cadisdik_id: string | null;
         ptk_id: string | null;
         peserta_didik_id: string | null;
-        cadisdik_id: string | null;
         status: number;
         keterangan: string | null;
         layanan_id: string;

@@ -20,21 +20,27 @@ const prisma = new PrismaClient({ adapter });
 
 async function main() {
   try {
-    const student = await prisma.pesertaDidik.findFirst({
-      where: {
-        AND: [
-          { peserta_didik_id: '53586a6a-2227-11e4-8102-4f35510c698d' },
-          { sekolah_id: '8f7c90fd-3517-46f7-98a7-56df1b5bf2c3' }
-        ]
-      },
+    console.log("=== DB QUERY TEST ===");
+    
+    const schoolCount = await prisma.sekolah.count();
+    console.log('Total schools:', schoolCount);
+
+    const schools = await prisma.sekolah.findMany({
       include: {
-        penggunas: {
-          select: { email: true }
-        }
+        cadisdik: true,
       }
     });
-    console.log("=== DB QUERY TEST ===");
-    console.log(student);
+    console.log('Schools detail:', JSON.stringify(schools, null, 2));
+
+    const defaultCadisdik = await prisma.cadisdik.findFirst();
+    console.log('Default Cadisdik:', defaultCadisdik);
+
+    const pegawai = await prisma.pegawai.findFirst({
+      include: {
+        cadisdik: true,
+      }
+    });
+    console.log('Pegawai detail:', JSON.stringify(pegawai, null, 2));
   } catch (err) {
     console.error("Prisma query failed:", err);
   }
@@ -46,3 +52,4 @@ main()
     await prisma.$disconnect();
     await pool.end();
   });
+
