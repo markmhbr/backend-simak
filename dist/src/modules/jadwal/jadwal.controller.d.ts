@@ -193,15 +193,13 @@ export declare class JadwalController {
                     alamat_jalan: string | null;
                     rt: string | null;
                     rw: string | null;
+                    desa_kelurahan: string | null;
                     kode_pos: string | null;
-                    email: string | null;
                     lintang: import("@prisma/client-runtime-utils").Decimal | null;
                     bujur: import("@prisma/client-runtime-utils").Decimal | null;
-                    dusun: string | null;
-                    desa_kelurahan: string | null;
-                    kecamatan: string | null;
-                    kabupaten_kota: string | null;
-                    provinsi: string | null;
+                    email: string | null;
+                    rekening_atas_nama: string | null;
+                    npwp: string | null;
                     created_at: Date;
                     updated_at: Date;
                     no_hp: string | null;
@@ -227,7 +225,6 @@ export declare class JadwalController {
                     agama_id_str: string | null;
                     nuptk: string | null;
                     no_kk: string | null;
-                    npwp: string | null;
                     nama_wajib_pajak: string | null;
                     kewarganegaraan: string | null;
                     status_perkawinan: string | null;
@@ -256,12 +253,15 @@ export declare class JadwalController {
                     bidang_studi_terakhir: string | null;
                     pangkat_golongan_terakhir: string | null;
                     rwy_kepangkatan: import("@prisma/client/runtime/client").JsonValue | null;
+                    dusun: string | null;
+                    kecamatan: string | null;
                     no_telepon_rumah: string | null;
                     no_wa: string | null;
                     tandatangan: string | null;
+                    kabupaten_kota: string | null;
+                    provinsi: string | null;
                     id_bank: string | null;
                     nama_kcp: string | null;
-                    rekening_atas_nama: string | null;
                     rekening_bank: string | null;
                 };
             } & {

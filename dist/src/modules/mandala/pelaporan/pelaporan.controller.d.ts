@@ -9,9 +9,9 @@ export declare class PelaporanController {
         status: string;
         message: string;
         data: {
+            cadisdik_id: string;
             created_at: Date;
             updated_at: Date;
-            cadisdik_id: string;
             aktif: boolean;
             tanggal_mulai: Date | null;
             tanggal_selesai: Date | null;

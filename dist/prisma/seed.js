@@ -43,9 +43,13 @@ const pool = new pg_1.Pool({ connectionString });
 const adapter = new adapter_pg_1.PrismaPg(pool);
 const prisma = new client_1.PrismaClient({ adapter });
 async function main() {
-    const adminIdentifier = 'admin';
+    console.log('Cleaning ref schema for manual dump import...');
+    await prisma.$executeRawUnsafe(`DROP SCHEMA IF EXISTS ref CASCADE;`);
+    await prisma.$executeRawUnsafe(`CREATE SCHEMA ref;`);
+    console.log('Schema ref reset successfully.');
     const rawPassword = 'simak2026';
     const hashedPassword = await bcrypt.hash(rawPassword, 10);
+    const adminIdentifier = 'admin';
     console.log('Checking for existing Super Admin...');
     const existingAdmin = await prisma.pengguna.findFirst({
         where: {
@@ -70,6 +74,51 @@ async function main() {
     }
     else {
         console.log('Super Admin already exists.');
+    }
+    const nipLogin = '199501012024011001';
+    console.log('Checking for existing Cadisdik reference...');
+    let defaultCadisdik = await prisma.cadisdik.findFirst();
+    if (!defaultCadisdik) {
+        console.log('No Cadisdik found. Creating a mock Cadisdik for relation...');
+        defaultCadisdik = await prisma.cadisdik.create({
+            data: {
+                nama_instansi: 'Wilayah Mock Kesatu',
+            }
+        });
+    }
+    const targetCadisdikId = defaultCadisdik.cadisdik_id;
+    console.log('Checking for existing Pegawai account...');
+    const existingPegawai = await prisma.pegawai.findUnique({
+        where: {
+            nip: nipLogin
+        }
+    });
+    if (!existingPegawai) {
+        console.log('Creating default Pegawai account...');
+        await prisma.pegawai.create({
+            data: {
+                cadisdik_id: targetCadisdikId,
+                nama_lengkap: 'Budi Setiawan, S.Kom',
+                nik: '3273012345670001',
+                tempat_lahir: 'Bandung',
+                tanggal_lahir: new Date('1995-01-01'),
+                alamat_lengkap: 'Jl. Diponegoro No. 22, Kota Bandung, Jawa Barat',
+                nip: nipLogin,
+                email: 'budi.setiawan@simak.go.id',
+                password: hashedPassword,
+                jabatan: 1,
+                jenis_kelamin: 1,
+                nomor_telepon: '081234567890',
+                foto: null,
+                aktif: true
+            }
+        });
+        console.log('Pegawai account created successfully!');
+        console.log(`Login NIP  : ${nipLogin}`);
+        console.log(`Password   : ${rawPassword}`);
+    }
+    else {
+        console.log(`Pegawai with NIP ${nipLogin} already exists.`);
     }
 }
 main()

@@ -9,58 +9,80 @@ datasource db {
 }
 
 model Sekolah {
-  sekolah_id                    String                 @id @default(uuid()) @db.Uuid
-  nama                          String
-  nss                           String?
-  npsn                          String?                @unique
-  bentuk_pendidikan_id          Int?
-  bentuk_pendidikan_id_str      String?
-  status_sekolah                String?
-  status_sekolah_str            String?
-  alamat_jalan                  String?
-  rt                            String?
-  rw                            String?
-  kode_wilayah                  String?
-  kode_pos                      String?
-  nomor_telepon                 String?
-  nomor_fax                     String?
-  email                         String?
-  website                       String?
-  is_sks                        Boolean?               @default(false)
-  lintang                       Decimal?
-  bujur                         Decimal?
-  dusun                         String?
-  desa_kelurahan                String?
-  kecamatan                     String?
-  kabupaten_kota                String?
-  provinsi                      String?
-  cadisdik_edit_count           Int                    @default(0)
-  spmb                          String?
-  logo                          String?
-  background_kartu_gtk          String?
-  background_kartu_pesertadidik String?
-  peta                          String?
-  social_media                  Json?
-  created_at                    DateTime               @default(now())
-  updated_at                    DateTime               @updatedAt
-  cadisdik_id                   String?                @db.Uuid
-  radius                        Int?                   @default(100)
-  cadisdik                      Cadisdik?              @relation(fields: [cadisdik_id], references: [cadisdik_id])
-  mapping_pengawas              MappingPengawas[]
-  hari_libur                    HariLibur[]
-  izin                          Izin[]
-  jadwal_pelajaran              JadwalPelajaran[]
-  jenis_jadwal                  JenisJadwal[]
-  pengaturan_nomor_surat        PengaturanNomorSurat[]
-  pengaturan_tagihan            PengaturanTagihan[]
-  presensi_gtk                  PresensiGtk[]
-  presensi_mapel                PresensiMapel[]
-  presensi_pd                   PresensiPesertaDidik[]
-  riwayat_transaksi_spp         RiwayatTransaksiSpp[]
-  spp                           Spp[]
-  surat_keluar                  SuratKeluar[]
-  surat_masuk                   SuratMasuk[]
-  template_surat                TemplateSurat[]
+  // Kolom dari data JSON Baru
+  sekolah_id                 String    @id @default(uuid()) @db.Uuid
+  nama                       String
+  nama_nomenklatur           String?
+  nss                        String?
+  npsn                       String?   @unique
+  bentuk_pendidikan_id       Int?
+  alamat_jalan               String?
+  rt                         String?
+  rw                         String?
+  nama_dusun                 String?
+  desa_kelurahan             String?
+  kode_wilayah               String?
+  kode_pos                   String?
+  lintang                    Decimal?
+  bujur                      Decimal?
+  nomor_telepon              String?
+  nomor_fax                  String?
+  email                      String?
+  website                    String?
+  kebutuhan_khusus_id        Int?
+  status_sekolah             String?
+  sk_pendirian_sekolah       String?
+  tanggal_sk_pendirian       String? // atau DateTime? tergantung kebutuhan parsing Anda
+  status_kepemilikan_id      String?
+  yayasan_id                 String?   @db.Uuid
+  sk_izin_operasional        String?
+  tanggal_sk_izin_operasional String? // atau DateTime?
+  no_rekening                String?
+  nama_bank                  String?
+  cabang_kcp_unit            String?
+  rekening_atas_nama         String?
+  mbs                        String?
+  luas_tanah_milik           String? // atau Decimal? / Float?
+  luas_tanah_bukan_milik     String? // atau Decimal? / Float?
+  kode_registrasi            String?
+  npwp                       String?
+  nm_wp                      String?
+  keaktifan                  String?
+  flag                       String?
+  create_date                DateTime  @default(now())
+  last_update                DateTime  @updatedAt
+  soft_delete                String?
+  last_sync                  DateTime?
+  updater_id                 String?   @db.Uuid
+  bentuk_pendidikan_id_str   String?
+  kode_wilayah_str           String?
+  kebutuhan_khusus_id_str    String?
+  yayasan_id_str             String?
+  vld_count                  Int?
+
+  // Kolom lama yang diinstruksikan untuk DIPERTAHANKAN
+  logo                       String?
+  cadisdik_id                String?   @db.Uuid
+  social_media               Json?
+  radius                     Int?      @default(100)
+
+  // Relasi dan Metadata Schema
+  cadisdik                   Cadisdik? @relation(fields: [cadisdik_id], references: [cadisdik_id])
+  mapping_pengawas           MappingPengawas[]
+  hari_libur                 HariLibur[]
+  izin                       Izin[]
+  jadwal_pelajaran           JadwalPelajaran[]
+  jenis_jadwal               JenisJadwal[]
+  pengaturan_nomor_surat     PengaturanNomorSurat[]
+  pengaturan_tagihan         PengaturanTagihan[]
+  presensi_gtk               PresensiGtk[]
+  presensi_mapel             PresensiMapel[]
+  presensi_pd                PresensiPesertaDidik[]
+  riwayat_transaksi_spp      RiwayatTransaksiSpp[]
+  spp                        Spp[]
+  surat_keluar               SuratKeluar[]
+  surat_masuk                SuratMasuk[]
+  template_surat             TemplateSurat[]
 
   @@map("sekolah")
   @@schema("dapodik")

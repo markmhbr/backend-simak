@@ -55,9 +55,9 @@ export declare class AuthService {
     }>;
     setupSystem(apiKey: string, domain: string): Promise<{
         sekolah_id: string;
+        id: string;
         created_at: Date;
         updated_at: Date;
-        id: string;
         nama_app: string;
         key_api: string;
         key_webService: string | null;

@@ -1,1 +1,0 @@
--- Baseline migration for ref schema

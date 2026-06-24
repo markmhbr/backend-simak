@@ -78,6 +78,45 @@ let DapodikService = class DapodikService {
         });
         if (!sekolah)
             return null;
+        let bentuk_pendidikan_id_str = sekolah.bentuk_pendidikan_id_str;
+        if (sekolah.bentuk_pendidikan_id && !bentuk_pendidikan_id_str) {
+            const bp = await this.prisma.bentuk_pendidikan.findUnique({
+                where: { bentuk_pendidikan_id: sekolah.bentuk_pendidikan_id },
+                select: { nama: true }
+            });
+            bentuk_pendidikan_id_str = bp?.nama || null;
+        }
+        let kode_wilayah_str = sekolah.kode_wilayah_str;
+        if (sekolah.kode_wilayah && !kode_wilayah_str) {
+            const wil = await this.prisma.mst_wilayah.findUnique({
+                where: { kode_wilayah: sekolah.kode_wilayah },
+                select: { nama: true }
+            });
+            kode_wilayah_str = wil?.nama || null;
+        }
+        let kebutuhan_khusus_id_str = sekolah.kebutuhan_khusus_id_str;
+        if (sekolah.kebutuhan_khusus_id && !kebutuhan_khusus_id_str) {
+            const kk = await this.prisma.kebutuhan_khusus.findUnique({
+                where: { kebutuhan_khusus_id: sekolah.kebutuhan_khusus_id },
+                select: { kebutuhan_khusus: true }
+            });
+            kebutuhan_khusus_id_str = kk?.kebutuhan_khusus || null;
+        }
+        let status_kepemilikan_id_str = null;
+        if (sekolah.status_kepemilikan_id) {
+            const sk = await this.prisma.status_kepemilikan.findUnique({
+                where: { status_kepemilikan_id: Number(sekolah.status_kepemilikan_id) },
+                select: { nama: true }
+            });
+            status_kepemilikan_id_str = sk?.nama || null;
+        }
+        let status_sekolah_str = null;
+        if (sekolah.status_sekolah) {
+            if (sekolah.status_sekolah === '1')
+                status_sekolah_str = 'Negeri';
+            else if (sekolah.status_sekolah === '2')
+                status_sekolah_str = 'Swasta';
+        }
         let kepalaSekolah = await this.prisma.pengguna.findFirst({
             where: {
                 sekolah_id: filter.sekolah_id,
@@ -115,6 +154,11 @@ let DapodikService = class DapodikService {
         const logoUrl = sekolah.logo ? (sekolah.logo.startsWith('http') ? sekolah.logo : `${appUrl}${sekolah.logo}`) : null;
         return {
             ...sekolah,
+            bentuk_pendidikan_id_str,
+            kode_wilayah_str,
+            kebutuhan_khusus_id_str,
+            status_kepemilikan_id_str,
+            status_sekolah_str,
             logo: logoUrl,
             nama_kepala_sekolah: namaKepalaSekolah,
             nama_operator: operatorSekolah?.nama || null
@@ -130,8 +174,6 @@ let DapodikService = class DapodikService {
                 nomor_fax: data.nomor_fax,
                 email: data.email,
                 website: data.website,
-                spmb: data.spmb,
-                peta: data.peta,
                 social_media: data.social_media,
                 cadisdik_id: data.cadisdik_id !== undefined ? (data.cadisdik_id !== "" && data.cadisdik_id !== null ? data.cadisdik_id : null) : undefined,
                 radius: data.radius !== undefined ? (data.radius !== null && data.radius !== "" ? Number(data.radius) : null) : undefined,

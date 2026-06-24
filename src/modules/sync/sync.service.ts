@@ -77,42 +77,94 @@ export class SyncService {
       if (!row.sekolah_id && !row.id && !row.npsn) continue;
       const targetId = row.sekolah_id || row.id || row.npsn;
       
+      const bentuk_pendidikan_id = this.parseNumber(row.bentuk_pendidikan_id);
+      let bentuk_pendidikan_id_str = row.bentuk_pendidikan_id_str || null;
+      if (bentuk_pendidikan_id && !bentuk_pendidikan_id_str) {
+        const bp = await this.prisma.bentuk_pendidikan.findUnique({
+          where: { bentuk_pendidikan_id },
+          select: { nama: true }
+        });
+        bentuk_pendidikan_id_str = bp?.nama || null;
+      }
+
+      let kode_wilayah_str = row.kode_wilayah_str || null;
+      if (row.kode_wilayah && !kode_wilayah_str) {
+        const wil = await this.prisma.mst_wilayah.findUnique({
+          where: { kode_wilayah: row.kode_wilayah },
+          select: { nama: true }
+        });
+        kode_wilayah_str = wil?.nama || null;
+      }
+
+      const kebutuhan_khusus_id = this.parseNumber(row.kebutuhan_khusus_id);
+      let kebutuhan_khusus_id_str = row.kebutuhan_khusus_id_str || null;
+      if (kebutuhan_khusus_id && !kebutuhan_khusus_id_str) {
+        const kk = await this.prisma.kebutuhan_khusus.findUnique({
+          where: { kebutuhan_khusus_id },
+          select: { kebutuhan_khusus: true }
+        });
+        kebutuhan_khusus_id_str = kk?.kebutuhan_khusus || null;
+      }
+
       const payload = {
         sekolah_id: targetId,
         nama: row.nama || 'Tanpa Nama',
+        nama_nomenklatur: row.nama_nomenklatur || null,
         nss: row.nss || null,
         npsn: row.npsn || null,
-        bentuk_pendidikan_id: this.parseNumber(row.bentuk_pendidikan_id),
-        bentuk_pendidikan_id_str: row.bentuk_pendidikan_id_str || null,
-        status_sekolah: String(row.status_sekolah || ''),
-        status_sekolah_str: row.status_sekolah_str || null,
+        bentuk_pendidikan_id,
         alamat_jalan: row.alamat_jalan || null,
         rt: row.rt || null,
         rw: row.rw || null,
+        nama_dusun: row.nama_dusun || null,
+        desa_kelurahan: row.desa_kelurahan || null,
         kode_wilayah: row.kode_wilayah || null,
         kode_pos: row.kode_pos || null,
+        lintang: this.parseNumber(row.lintang),
+        bujur: this.parseNumber(row.bujur),
         nomor_telepon: row.nomor_telepon || null,
         nomor_fax: row.nomor_fax || null,
         email: row.email || null,
         website: row.website || null,
-        is_sks: row.is_sks === true || row.is_sks === '1' || row.is_sks === 1 || row.is_sks === 'true',
-        lintang: this.parseNumber(row.lintang),
-        bujur: this.parseNumber(row.bujur),
-        dusun: row.dusun || null,
-        desa_kelurahan: row.desa_kelurahan || null,
-        kecamatan: row.kecamatan || null,
-        kabupaten_kota: row.kabupaten_kota || null,
-        provinsi: row.provinsi || null,
-        cadisdik_id: row.cadisdik_id || null,
-        spmb: row.spmb || null,
+        kebutuhan_khusus_id,
+        status_sekolah: row.status_sekolah !== null && row.status_sekolah !== undefined ? String(row.status_sekolah) : null,
+        sk_pendirian_sekolah: row.sk_pendirian_sekolah || null,
+        tanggal_sk_pendirian: row.tanggal_sk_pendirian || null,
+        status_kepemilikan_id: row.status_kepemilikan_id !== null && row.status_kepemilikan_id !== undefined ? String(row.status_kepemilikan_id) : null,
+        yayasan_id: row.yayasan_id || null,
+        sk_izin_operasional: row.sk_izin_operasional || null,
+        tanggal_sk_izin_operasional: row.tanggal_sk_izin_operasional || null,
+        no_rekening: row.no_rekening || null,
+        nama_bank: row.nama_bank || null,
+        cabang_kcp_unit: row.cabang_kcp_unit || null,
+        rekening_atas_nama: row.rekening_atas_nama || null,
+        mbs: row.mbs || null,
+        luas_tanah_milik: row.luas_tanah_milik || null,
+        luas_tanah_bukan_milik: row.luas_tanah_bukan_milik || null,
+        kode_registrasi: row.kode_registrasi || null,
+        npwp: row.npwp || null,
+        nm_wp: row.nm_wp || null,
+        keaktifan: row.keaktifan || null,
+        flag: row.flag || null,
+        soft_delete: row.soft_delete || null,
+        last_sync: this.parseDate(row.last_sync),
+        updater_id: row.updater_id || null,
+        bentuk_pendidikan_id_str,
+        kode_wilayah_str,
+        kebutuhan_khusus_id_str,
+        yayasan_id_str: row.yayasan_id_str || null,
+        vld_count: this.parseNumber(row.vld_count),
         logo: row.logo || null,
+        cadisdik_id: row.cadisdik_id || null,
+        social_media: row.social_media || null,
+        radius: this.parseNumber(row.radius) || 100,
       };
 
       try {
         await this.prisma.sekolah.upsert({
           where: { sekolah_id: targetId },
           create: payload,
-          update: { ...payload, updated_at: new Date() },
+          update: payload,
         });
         successCount++;
       } catch (err) {
