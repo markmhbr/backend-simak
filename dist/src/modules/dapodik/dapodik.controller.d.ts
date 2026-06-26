@@ -1224,24 +1224,8 @@ export declare class DapodikController {
     getDudi(req: Request): Promise<{
         status: string;
         data: {
-            jumlah_mou: number;
-            mou: {
-                sekolah_id: string | null;
-                create_date: Date | null;
-                last_update: Date | null;
-                soft_delete: import("@prisma/client-runtime-utils").Decimal | null;
-                last_sync: Date | null;
-                updater_id: string | null;
-                created_at: Date;
-                updated_at: Date;
-                tanggal_mulai: Date | null;
-                tanggal_selesai: Date | null;
-                keterangan: string | null;
-                dudi_id: string;
-                mou_id: string;
-                nomor_mou: string | null;
-                judul_mou: string | null;
-            }[];
+            jumlah_mou: any;
+            mou: never;
             sekolah_id: string | null;
             nama: string;
             alamat_jalan: string | null;
@@ -1279,80 +1263,7 @@ export declare class DapodikController {
             kabupaten: string | null;
             provinsi: string | null;
             negara: string | null;
-            mou: ({
-                akt_pd: ({
-                    bimbing_pd: ({
-                        gtk: {
-                            nama: string;
-                            ptk_id: string;
-                            nuptk: string;
-                        };
-                    } & {
-                        sekolah_id: string | null;
-                        create_date: Date | null;
-                        last_update: Date | null;
-                        soft_delete: import("@prisma/client-runtime-utils").Decimal | null;
-                        created_at: Date;
-                        updated_at: Date;
-                        ptk_id: string | null;
-                        id_akt_pd: string;
-                        bimbing_pd_id: string;
-                        urutan_pembimbing: number | null;
-                    })[];
-                    anggota_akt_pd: ({
-                        peserta_didik: {
-                            nama: string;
-                            peserta_didik_id: string;
-                            nisn: string;
-                        };
-                    } & {
-                        sekolah_id: string | null;
-                        create_date: Date | null;
-                        last_update: Date | null;
-                        soft_delete: import("@prisma/client-runtime-utils").Decimal | null;
-                        created_at: Date;
-                        updated_at: Date;
-                        peserta_didik_id: string | null;
-                        registrasi_id: string | null;
-                        id_akt_pd: string;
-                        anggota_akt_pd_id: string;
-                    })[];
-                } & {
-                    sekolah_id: string | null;
-                    create_date: Date | null;
-                    last_update: Date | null;
-                    soft_delete: import("@prisma/client-runtime-utils").Decimal | null;
-                    last_sync: Date | null;
-                    updater_id: string | null;
-                    created_at: Date;
-                    updated_at: Date;
-                    jenis_akt_pd: string | null;
-                    tanggal_mulai: Date | null;
-                    tanggal_selesai: Date | null;
-                    mou_id: string;
-                    id_akt_pd: string;
-                    judul_akt_pd: string | null;
-                    sk_tugas: string | null;
-                    tanggal_sk_tugas: Date | null;
-                    lokasi: string | null;
-                })[];
-            } & {
-                sekolah_id: string | null;
-                create_date: Date | null;
-                last_update: Date | null;
-                soft_delete: import("@prisma/client-runtime-utils").Decimal | null;
-                last_sync: Date | null;
-                updater_id: string | null;
-                created_at: Date;
-                updated_at: Date;
-                tanggal_mulai: Date | null;
-                tanggal_selesai: Date | null;
-                keterangan: string | null;
-                dudi_id: string;
-                mou_id: string;
-                nomor_mou: string | null;
-                judul_mou: string | null;
-            })[];
+            mou: never;
             sekolah_id: string | null;
             nama: string;
             alamat_jalan: string | null;
