@@ -56,25 +56,6 @@ async function main() {
             email: adminIdentifier
         }
     });
-    if (!existingAdmin) {
-        console.log('Creating Super Admin account...');
-        await prisma.pengguna.create({
-            data: {
-                username: adminIdentifier,
-                email: adminIdentifier,
-                password: hashedPassword,
-                nama: 'Super Administrator',
-                peran_id_str: 'Super Admin',
-                sekolah_id: null,
-            }
-        });
-        console.log('Super Admin created successfully!');
-        console.log(`Identifier (Email/Username): ${adminIdentifier}`);
-        console.log(`Password: ${rawPassword}`);
-    }
-    else {
-        console.log('Super Admin already exists.');
-    }
     const nipLogin = '199501012024011001';
     console.log('Checking for existing Cadisdik reference...');
     let defaultCadisdik = await prisma.cadisdik.findFirst();

@@ -52,15 +52,13 @@ async function main() {
     console.log('Checking parent tables count:');
     try {
         const gtkCount = await prisma.gtk.count();
-        const bidangStudiCount = await prisma.bidangStudi.count();
-        const lembSertifikasiCount = await prisma.lembSertifikasi.count();
+        const dudiCount = await prisma.dudi.count();
         console.log('- GTK count:', gtkCount);
-        console.log('- BidangStudi count:', bidangStudiCount);
-        console.log('- LembSertifikasi count:', lembSertifikasiCount);
+        console.log('- Dudi count:', dudiCount);
         const gtks = await prisma.gtk.findMany({ take: 5, select: { ptk_id: true, nama: true } });
         console.log('GTKs samples:', gtks);
-        const lembs = await prisma.lembSertifikasi.findMany({ take: 5, select: { kode_lemb_sert: true, nm_lemb_sert: true } });
-        console.log('LembSertifikasi samples:', lembs);
+        const dudis = await prisma.dudi.findMany({ take: 5, select: { dudi_id: true, nama: true } });
+        console.log('Dudi samples:', dudis);
     }
     catch (error) {
         console.error('Error:', error);

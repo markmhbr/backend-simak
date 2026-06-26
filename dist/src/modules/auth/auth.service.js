@@ -78,7 +78,7 @@ let AuthService = class AuthService {
             throw new common_1.UnauthorizedException('Kredensial tidak valid');
         }
         if (sekolahId) {
-            if (user.peran_id_str === 'Super Admin' || user.sekolah_id === null) {
+            if (user.peran_nama === 'Super Admin' || user.sekolah_id === null) {
                 throw new common_1.UnauthorizedException('Super Admin hanya dapat login melalui portal pusat. Silakan hapus data sekolah di browser Anda atau gunakan akun sekolah.');
             }
             if (user.sekolah_id !== sekolahId) {
@@ -87,7 +87,7 @@ let AuthService = class AuthService {
             }
         }
         else {
-            if (user.peran_id_str !== 'Super Admin' || user.sekolah_id !== null) {
+            if (user.peran_nama !== 'Super Admin' || user.sekolah_id !== null) {
                 throw new common_1.UnauthorizedException('Silakan login melalui portal sekolah Anda.');
             }
         }
@@ -96,7 +96,7 @@ let AuthService = class AuthService {
             console.log(`[Login Failed] Password mismatch for user ${username}`);
             throw new common_1.UnauthorizedException('Kredensial tidak valid');
         }
-        if (user.peran_id_str === 'Super Admin') {
+        if (user.peran_nama === 'Super Admin') {
             const role = 'Super Admin';
             const tokens = await this.generateTokens(user, role);
             return {
@@ -188,8 +188,13 @@ let AuthService = class AuthService {
             const gtk = await this.prisma.gtk.findUnique({
                 where: { ptk_id: user.ptk_id },
             });
-            if (gtk && gtk.jenis_ptk_id_str) {
-                return gtk.jenis_ptk_id_str;
+            if (gtk && gtk.jenis_ptk_id) {
+                const jPtk = await this.prisma.jenis_ptk.findUnique({
+                    where: { jenis_ptk_id: gtk.jenis_ptk_id },
+                });
+                if (jPtk) {
+                    return jPtk.jenis_ptk;
+                }
             }
             return 'Admin';
         }

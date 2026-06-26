@@ -51,12 +51,15 @@ export declare class PresensiController {
     }): Promise<{
         type: string;
         data: {
+            nama_rombel: string;
             nama: string;
             peserta_didik_id: string;
             foto: string;
             rombongan_belajar_id: string;
             nisn: string;
-            nama_rombel: string;
+            rombongan_belajar: {
+                nama: string;
+            };
         };
         activeIzinKeluar: {
             sekolah_id: string;
@@ -76,11 +79,11 @@ export declare class PresensiController {
     } | {
         type: string;
         data: {
+            jenis_ptk_id_str: string;
             nama: string;
             ptk_id: string;
             foto: string;
             nuptk: string;
-            jenis_ptk_id_str: string;
         };
         activeIzinKeluar: {
             sekolah_id: string;
@@ -104,10 +107,10 @@ export declare class PresensiController {
         created_at: Date;
         updated_at: Date;
         aktif: boolean;
-        keterangan: string | null;
-        hari_libur_id: string;
         tanggal_mulai: Date;
         tanggal_selesai: Date;
+        keterangan: string | null;
+        hari_libur_id: string;
     }[]>;
     createHariLibur(sekolahId: string, data: {
         nama: string;
@@ -120,10 +123,10 @@ export declare class PresensiController {
         created_at: Date;
         updated_at: Date;
         aktif: boolean;
-        keterangan: string | null;
-        hari_libur_id: string;
         tanggal_mulai: Date;
         tanggal_selesai: Date;
+        keterangan: string | null;
+        hari_libur_id: string;
     }>;
     deleteHariLibur(sekolahId: string, id: string): Promise<import("@prisma/client").Prisma.BatchPayload>;
     presensiPesertaDidik(sekolahId: string, data: {
@@ -179,32 +182,7 @@ export declare class PresensiController {
         jam_keluar?: string;
         jam_kembali_estimasi?: string;
     }): Promise<any>;
-    getIzinKeluar(sekolahId: string, tanggal?: string): Promise<({
-        peserta_didik: {
-            nama: string;
-            nisn: string;
-            nama_rombel: string;
-        };
-        gtk: {
-            nama: string;
-            nuptk: string;
-            jenis_ptk_id_str: string;
-        };
-    } & {
-        sekolah_id: string;
-        created_at: Date;
-        updated_at: Date;
-        ptk_id: string | null;
-        peserta_didik_id: string | null;
-        keterangan: string;
-        tanggal: Date;
-        izin_id: string;
-        jenis: number;
-        disetujui: boolean;
-        jam_keluar: Date | null;
-        jam_kembali: Date | null;
-        jam_kembali_estimasi: Date | null;
-    })[]>;
+    getIzinKeluar(sekolahId: string, tanggal?: string): Promise<any[]>;
     catatKembali(sekolahId: string, izinId: string): Promise<{
         sekolah_id: string;
         created_at: Date;
@@ -238,40 +216,9 @@ export declare class PresensiController {
     deleteIzin(sekolahId: string, izinId: string): Promise<{
         success: boolean;
     }>;
-    getRekapPesertaDidik(sekolahId: string, tanggal?: string): Promise<{
-        presensi: {
-            sekolah_id: string;
-            created_at: Date;
-            updated_at: Date;
-            peserta_didik_id: string;
-            jam_masuk: Date | null;
-            jam_pulang: Date | null;
-            tanggal: Date;
-            status_masuk: number | null;
-            status_pulang: number | null;
-        };
-        izin: {
-            sekolah_id: string;
-            created_at: Date;
-            updated_at: Date;
-            ptk_id: string | null;
-            peserta_didik_id: string | null;
-            keterangan: string;
-            tanggal: Date;
-            izin_id: string;
-            jenis: number;
-            disetujui: boolean;
-            jam_keluar: Date | null;
-            jam_kembali: Date | null;
-            jam_kembali_estimasi: Date | null;
-        };
-        nama: string;
-        peserta_didik_id: string;
-        foto: string;
-        nisn: string;
-        nama_rombel: string;
-    }[]>;
+    getRekapPesertaDidik(sekolahId: string, tanggal?: string): Promise<any[]>;
     getRekapGtk(sekolahId: string, tanggal?: string): Promise<{
+        jenis_ptk_id_str: string;
         presensi: {
             sekolah_id: string;
             created_at: Date;
@@ -302,6 +249,5 @@ export declare class PresensiController {
         ptk_id: string;
         foto: string;
         nuptk: string;
-        jenis_ptk_id_str: string;
     }[]>;
 }

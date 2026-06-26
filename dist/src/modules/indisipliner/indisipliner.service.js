@@ -63,7 +63,7 @@ let IndisiplinerService = class IndisiplinerService {
                 whereClause.status = Number(filter.status);
             }
         }
-        return this.prisma.pelanggaran.findMany({
+        const data = await this.prisma.pelanggaran.findMany({
             where: whereClause,
             include: {
                 jenis_pelanggaran: true,
@@ -73,7 +73,11 @@ let IndisiplinerService = class IndisiplinerService {
                         nama: true,
                         nisn: true,
                         foto: true,
-                        nama_rombel: true,
+                        rombongan_belajar: {
+                            select: {
+                                nama: true
+                            }
+                        },
                     },
                 },
                 gtk: {
@@ -82,7 +86,9 @@ let IndisiplinerService = class IndisiplinerService {
                         nama: true,
                         nuptk: true,
                         foto: true,
-                        jenis_ptk_id_str: true,
+                        jenis_ptk: {
+                            select: { jenis_ptk: true }
+                        },
                     },
                 },
                 pelapor: {
@@ -104,6 +110,19 @@ let IndisiplinerService = class IndisiplinerService {
                 },
             },
             orderBy: { waktu: 'desc' },
+        });
+        return data.map((item) => {
+            if (item.gtk) {
+                const { jenis_ptk, ...gtkRest } = item.gtk;
+                return {
+                    ...item,
+                    gtk: {
+                        ...gtkRest,
+                        jenis_ptk_id_str: jenis_ptk?.jenis_ptk || null
+                    }
+                };
+            }
+            return item;
         });
     }
     async createPelanggaran(dto) {
@@ -218,13 +237,13 @@ let IndisiplinerService = class IndisiplinerService {
         const richTopSiswa = await Promise.all(topSiswaPoints.map(async (item) => {
             const pd = await this.prisma.pesertaDidik.findUnique({
                 where: { peserta_didik_id: item.peserta_didik_id },
-                select: { nama: true, nisn: true, nama_rombel: true, foto: true },
+                select: { nama: true, nisn: true, rombongan_belajar: { select: { nama: true } }, foto: true },
             });
             return {
                 peserta_didik_id: item.peserta_didik_id,
                 nama: pd?.nama || 'Unknown',
                 nisn: pd?.nisn || '-',
-                rombongan_belajar: pd?.nama_rombel || '-',
+                rombongan_belajar: pd?.rombongan_belajar?.nama || '-',
                 foto: pd?.foto || null,
                 total_poin: item._sum.poin || 0,
                 total_pelanggaran: item._count.pelanggaran_id || 0,
@@ -245,13 +264,20 @@ let IndisiplinerService = class IndisiplinerService {
         const richTopGtk = await Promise.all(topGtkPoints.map(async (item) => {
             const gtk = await this.prisma.gtk.findUnique({
                 where: { ptk_id: item.ptk_id },
-                select: { nama: true, nuptk: true, jenis_ptk_id_str: true, foto: true },
+                select: {
+                    nama: true,
+                    nuptk: true,
+                    foto: true,
+                    jenis_ptk: {
+                        select: { jenis_ptk: true }
+                    }
+                },
             });
             return {
                 ptk_id: item.ptk_id,
                 nama: gtk?.nama || 'Unknown',
                 nuptk: gtk?.nuptk || '-',
-                jabatan: gtk?.jenis_ptk_id_str || 'Staff',
+                jabatan: gtk?.jenis_ptk?.jenis_ptk || 'Staff',
                 foto: gtk?.foto || null,
                 total_poin: item._sum.poin || 0,
                 total_pelanggaran: item._count.pelanggaran_id || 0,

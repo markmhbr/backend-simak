@@ -41,11 +41,7 @@ export declare class SyncController {
         status: string;
         count: number;
     }>;
-    syncBidangStudi(req: Request, data: any[]): Promise<{
-        status: string;
-        count: number;
-    }>;
-    syncLembSertifikasi(req: Request, data: any[]): Promise<{
+    syncDudi(req: Request, data: any[]): Promise<{
         status: string;
         count: number;
     }>;

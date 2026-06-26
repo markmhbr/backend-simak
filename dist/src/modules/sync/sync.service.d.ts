@@ -29,10 +29,7 @@ export declare class SyncService {
     syncSarpras(sekolahId: string, dataRows: any[]): Promise<{
         successCount: number;
     }>;
-    syncBidangStudi(sekolahId: string, dataRows: any[]): Promise<{
-        successCount: number;
-    }>;
-    syncLembSertifikasi(sekolahId: string, dataRows: any[]): Promise<{
+    syncDudi(sekolahId: string, dataRows: any[]): Promise<{
         successCount: number;
     }>;
     syncRwySertifikat(sekolahId: string, dataRows: any[]): Promise<{

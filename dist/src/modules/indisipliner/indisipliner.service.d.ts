@@ -48,74 +48,7 @@ export declare class IndisiplinerService {
         peserta_didik_id?: string;
         ptk_id?: string;
         status?: number;
-    }): Promise<({
-        peserta_didik: {
-            nama: string;
-            peserta_didik_id: string;
-            foto: string;
-            nisn: string;
-            nama_rombel: string;
-        };
-        gtk: {
-            nama: string;
-            ptk_id: string;
-            foto: string;
-            nuptk: string;
-            jenis_ptk_id_str: string;
-        };
-        tindak_lanjut: ({
-            jenis_tindak_lanjut: {
-                sekolah_id: string;
-                nama: string;
-                created_at: Date;
-                updated_at: Date;
-                aktif: boolean;
-                target: number;
-                jenis_tindak_lanjut_id: string;
-            };
-            petugas: {
-                nama: string;
-                ptk_id: string;
-            };
-        } & {
-            created_at: Date;
-            updated_at: Date;
-            keterangan: string | null;
-            tanggal: Date;
-            pelanggaran_id: string;
-            jenis_tindak_lanjut_id: string;
-            petugas_ptk_id: string | null;
-            tindak_lanjut_id: string;
-        })[];
-        jenis_pelanggaran: {
-            sekolah_id: string;
-            nama: string;
-            created_at: Date;
-            updated_at: Date;
-            aktif: boolean;
-            target: number;
-            poin: number;
-            jenis_pelanggaran_id: string;
-        };
-        pelapor: {
-            nama: string;
-            ptk_id: string;
-        };
-    } & {
-        sekolah_id: string;
-        created_at: Date;
-        updated_at: Date;
-        ptk_id: string | null;
-        peserta_didik_id: string | null;
-        status: number;
-        keterangan: string | null;
-        tanggal: Date;
-        poin: number;
-        jenis_pelanggaran_id: string;
-        waktu: Date;
-        pelapor_ptk_id: string | null;
-        pelanggaran_id: string;
-    })[]>;
+    }): Promise<any[]>;
     createPelanggaran(dto: CreatePelanggaranDto): Promise<{
         sekolah_id: string;
         created_at: Date;

@@ -142,32 +142,17 @@ export class SyncController {
     });
   }
 
-  @Post('bidang_studi')
+  @Post('dudi')
   @UseGuards(ApiKeyGuard)
   @HttpCode(HttpStatus.OK)
-  async syncBidangStudi(@Req() req: Request, @Body() data: any[]) {
+  async syncDudi(@Req() req: Request, @Body() data: any[]) {
     const sekolahId = this.getSekolahId(req);
     if (!sekolahId) {
       throw new NotFoundException('sekolah_id tidak ditemukan.');
     }
     return this.getLock(sekolahId).run(async () => {
       const rows = Array.isArray(data) ? data : [data];
-      const result = await this.syncService.syncBidangStudi(sekolahId, rows);
-      return { status: 'success', count: result.successCount };
-    });
-  }
-
-  @Post('lemb_sertifikasi')
-  @UseGuards(ApiKeyGuard)
-  @HttpCode(HttpStatus.OK)
-  async syncLembSertifikasi(@Req() req: Request, @Body() data: any[]) {
-    const sekolahId = this.getSekolahId(req);
-    if (!sekolahId) {
-      throw new NotFoundException('sekolah_id tidak ditemukan.');
-    }
-    return this.getLock(sekolahId).run(async () => {
-      const rows = Array.isArray(data) ? data : [data];
-      const result = await this.syncService.syncLembSertifikasi(sekolahId, rows);
+      const result = await this.syncService.syncDudi(sekolahId, rows);
       return { status: 'success', count: result.successCount };
     });
   }

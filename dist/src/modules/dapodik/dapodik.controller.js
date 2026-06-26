@@ -457,6 +457,16 @@ let DapodikController = class DapodikController {
         const data = await this.dapodikService.updatePesertaDidik(sekolahId, id, body);
         return { status: 'success', data };
     }
+    async getDudi(req) {
+        const { sekolahId } = this.getSekolahInfo(req);
+        const data = await this.dapodikService.getDudi(sekolahId);
+        return { status: 'success', data };
+    }
+    async getDudiDetail(req, id) {
+        const { sekolahId } = this.getSekolahInfo(req);
+        const data = await this.dapodikService.getDudiById(sekolahId, id);
+        return { status: 'success', data };
+    }
 };
 exports.DapodikController = DapodikController;
 __decorate([
@@ -792,6 +802,21 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Promise)
 ], DapodikController.prototype, "updatePesertaDidikDetail", null);
+__decorate([
+    (0, common_1.Get)('dudi'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "getDudi", null);
+__decorate([
+    (0, common_1.Get)('dudi/:id'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "getDudiDetail", null);
 exports.DapodikController = DapodikController = __decorate([
     (0, common_1.Controller)('dapodik'),
     (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),

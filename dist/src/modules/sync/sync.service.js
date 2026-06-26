@@ -81,31 +81,7 @@ let SyncService = SyncService_1 = class SyncService {
                 continue;
             const targetId = row.sekolah_id || row.id || row.npsn;
             const bentuk_pendidikan_id = this.parseNumber(row.bentuk_pendidikan_id);
-            let bentuk_pendidikan_id_str = row.bentuk_pendidikan_id_str || null;
-            if (bentuk_pendidikan_id && !bentuk_pendidikan_id_str) {
-                const bp = await this.prisma.bentuk_pendidikan.findUnique({
-                    where: { bentuk_pendidikan_id },
-                    select: { nama: true }
-                });
-                bentuk_pendidikan_id_str = bp?.nama || null;
-            }
-            let kode_wilayah_str = row.kode_wilayah_str || null;
-            if (row.kode_wilayah && !kode_wilayah_str) {
-                const wil = await this.prisma.mst_wilayah.findUnique({
-                    where: { kode_wilayah: row.kode_wilayah },
-                    select: { nama: true }
-                });
-                kode_wilayah_str = wil?.nama || null;
-            }
             const kebutuhan_khusus_id = this.parseNumber(row.kebutuhan_khusus_id);
-            let kebutuhan_khusus_id_str = row.kebutuhan_khusus_id_str || null;
-            if (kebutuhan_khusus_id && !kebutuhan_khusus_id_str) {
-                const kk = await this.prisma.kebutuhan_khusus.findUnique({
-                    where: { kebutuhan_khusus_id },
-                    select: { kebutuhan_khusus: true }
-                });
-                kebutuhan_khusus_id_str = kk?.kebutuhan_khusus || null;
-            }
             const payload = {
                 sekolah_id: targetId,
                 nama: row.nama || 'Tanpa Nama',
@@ -149,11 +125,6 @@ let SyncService = SyncService_1 = class SyncService {
                 soft_delete: row.soft_delete || null,
                 last_sync: this.parseDate(row.last_sync),
                 updater_id: row.updater_id || null,
-                bentuk_pendidikan_id_str,
-                kode_wilayah_str,
-                kebutuhan_khusus_id_str,
-                yayasan_id_str: row.yayasan_id_str || null,
-                vld_count: this.parseNumber(row.vld_count),
                 logo: row.logo || null,
                 cadisdik_id: row.cadisdik_id || null,
                 social_media: row.social_media || null,
@@ -181,31 +152,28 @@ let SyncService = SyncService_1 = class SyncService {
             const payload = {
                 rombongan_belajar_id: r.rombongan_belajar_id,
                 sekolah_id: sekolahId,
-                nama: r.nama || 'Tanpa Nama',
-                tingkat_pendidikan_id: String(r.tingkat_pendidikan_id || ''),
-                tingkat_pendidikan_id_str: r.tingkat_pendidikan_id_str || null,
-                semester_id: String(r.semester_id || ''),
-                jenis_rombel: String(r.jenis_rombel || ''),
-                jenis_rombel_str: r.jenis_rombel_str || null,
-                kurikulum_id: this.parseNumber(r.kurikulum_id),
-                kurikulum_id_str: r.kurikulum_id_str || null,
+                semester_id: r.semester_id ? String(r.semester_id).trim() : null,
                 id_ruang: r.id_ruang || null,
-                id_ruang_str: r.id_ruang_str || null,
-                moving_class: String(r.moving_class || ''),
+                tingkat_pendidikan_id: this.parseNumber(r.tingkat_pendidikan_id),
+                jurusan_sp_id: r.jurusan_sp_id || null,
+                kurikulum_id: this.parseNumber(r.kurikulum_id),
+                nama: r.nama || 'Tanpa Nama',
                 ptk_id: r.ptk_id || null,
-                ptk_id_str: r.ptk_id_str || null,
-                jurusan_id: String(r.jurusan_id || ''),
-                jurusan_id_str: r.jurusan_id_str || null,
-                id_kelas_ekskul: r.id_kelas_ekskul || null,
-                id_ekskul: r.id_ekskul || null,
-                nm_ekskul: r.nm_ekskul || null,
-                sk_ekskul: r.sk_ekskul || null,
+                moving_class: this.parseNumber(r.moving_class),
+                jenis_rombel: this.parseNumber(r.jenis_rombel),
+                sks: this.parseNumber(r.sks),
+                tanggal_mulai: this.parseDate(r.tanggal_mulai),
+                tanggal_selesai: this.parseDate(r.tanggal_selesai),
+                kebutuhan_khusus_id: this.parseNumber(r.kebutuhan_khusus_id),
+                soft_delete: this.parseNumber(r.soft_delete),
+                last_sync: this.parseDate(r.last_sync),
+                updater_id: r.updater_id || null,
             };
             try {
                 await this.prisma.rombonganBelajar.upsert({
                     where: { rombongan_belajar_id: r.rombongan_belajar_id },
                     create: payload,
-                    update: { ...payload, updated_at: new Date() },
+                    update: payload,
                 });
                 const anggotaRows = r.anggota_rombel || r.AnggotaRombel || r.anggota_rombels || [];
                 if (Array.isArray(anggotaRows) && anggotaRows.length > 0) {
@@ -214,16 +182,18 @@ let SyncService = SyncService_1 = class SyncService {
                             continue;
                         const aPayload = {
                             anggota_rombel_id: a.anggota_rombel_id,
-                            sekolah_id: sekolahId,
                             rombongan_belajar_id: r.rombongan_belajar_id,
                             peserta_didik_id: a.peserta_didik_id,
-                            jenis_pendaftaran_id: String(a.jenis_pendaftaran_id || ''),
-                            jenis_pendaftaran_id_str: a.jenis_pendaftaran_id_str || null,
+                            jenis_pendaftaran_id: this.parseNumber(a.jenis_pendaftaran_id),
+                            sekolah_id: sekolahId,
+                            soft_delete: this.parseNumber(a.soft_delete),
+                            last_sync: this.parseDate(a.last_sync),
+                            updater_id: a.updater_id || null,
                         };
                         await this.prisma.anggotaRombel.upsert({
                             where: { anggota_rombel_id: a.anggota_rombel_id },
                             create: aPayload,
-                            update: { ...aPayload, updated_at: new Date() },
+                            update: aPayload,
                         });
                     }
                 }
@@ -234,22 +204,26 @@ let SyncService = SyncService_1 = class SyncService {
                             continue;
                         const pPayload = {
                             pembelajaran_id: p.pembelajaran_id,
-                            sekolah_id: sekolahId,
                             rombongan_belajar_id: r.rombongan_belajar_id,
-                            mata_pelajaran_id: String(p.mata_pelajaran_id || ''),
-                            mata_pelajaran_id_str: p.mata_pelajaran_id_str || null,
+                            semester_id: p.semester_id ? String(p.semester_id).trim() : null,
+                            mata_pelajaran_id: this.parseNumber(p.mata_pelajaran_id),
                             ptk_terdaftar_id: p.ptk_terdaftar_id || null,
                             ptk_id: p.ptk_id || null,
+                            sk_mengajar: p.sk_mengajar || null,
+                            tanggal_sk_mengajar: this.parseDate(p.tanggal_sk_mengajar),
+                            jam_mengajar_per_minggu: this.parseNumber(p.jam_mengajar_per_minggu),
+                            status_di_kurikulum: this.parseNumber(p.status_di_kurikulum),
                             nama_mata_pelajaran: p.nama_mata_pelajaran || null,
                             induk_pembelajaran_id: p.induk_pembelajaran_id || null,
-                            jam_mengajar_per_minggu: String(p.jam_mengajar_per_minggu || ''),
-                            status_di_kurikulum: String(p.status_di_kurikulum || ''),
-                            status_di_kurikulum_str: p.status_di_kurikulum_str || null,
+                            sekolah_id: sekolahId,
+                            soft_delete: this.parseNumber(p.soft_delete),
+                            last_sync: this.parseDate(p.last_sync),
+                            updater_id: p.updater_id || null,
                         };
                         await this.prisma.pembelajaran.upsert({
                             where: { pembelajaran_id: p.pembelajaran_id },
                             create: pPayload,
-                            update: { ...pPayload, updated_at: new Date() },
+                            update: pPayload,
                         });
                     }
                 }
@@ -272,16 +246,8 @@ let SyncService = SyncService_1 = class SyncService {
             if (!qr_token && domain) {
                 qr_token = `${domain}/${p.peserta_didik_id}`;
             }
+            const rpd = p.registrasi_peserta_didik || {};
             const payload = {
-                sekolah_id: sekolahId,
-                registrasi_id: p.registrasi_id || null,
-                anggota_rombel_id: p.anggota_rombel_id || null,
-                rombongan_belajar_id: p.rombongan_belajar_id || null,
-                qr_token,
-                status: p.status || 'Aktif',
-                foto: p.foto || null,
-                telegram_chat_id: p.telegram_chat_id || null,
-                telegram_token: p.telegram_token || null,
                 nama: p.nama || 'Tanpa Nama',
                 jenis_kelamin: p.jenis_kelamin || null,
                 nisn: p.nisn || null,
@@ -289,111 +255,83 @@ let SyncService = SyncService_1 = class SyncService {
                 no_kk: p.no_kk || null,
                 tempat_lahir: p.tempat_lahir || null,
                 tanggal_lahir: this.parseDate(p.tanggal_lahir),
-                agama_id: String(p.agama_id || ''),
-                agama_id_str: p.agama_id_str || null,
-                kewarganegaraan: p.kewarganegaraan || 'Indonesia',
+                agama_id: p.agama_id ? Number(p.agama_id) : null,
                 kebutuhan_khusus_id: this.parseNumber(p.kebutuhan_khusus_id),
-                kebutuhan_khusus: p.kebutuhan_khusus || null,
                 alamat_jalan: p.alamat_jalan || null,
-                rt: p.rt || null,
-                rw: p.rw || null,
-                dusun: p.dusun || null,
+                rt: this.parseNumber(p.rt),
+                rw: this.parseNumber(p.rw),
                 nama_dusun: p.nama_dusun || null,
                 desa_kelurahan: p.desa_kelurahan || null,
-                kecamatan: p.kecamatan || null,
-                kabupaten_kota: p.kabupaten_kota || null,
-                provinsi: p.provinsi || null,
                 kode_wilayah: p.kode_wilayah || null,
                 kode_pos: p.kode_pos || null,
                 lintang: this.parseNumber(p.lintang),
                 bujur: this.parseNumber(p.bujur),
-                jenis_tinggal_id: String(p.jenis_tinggal_id || ''),
-                jenis_tinggal_id_str: p.jenis_tinggal_id_str || null,
-                alat_transportasi_id: String(p.alat_transportasi_id || ''),
-                alat_transportasi_id_str: p.alat_transportasi_id_str || null,
-                jarak_rumah_ke_sekolah_km: String(p.jarak_rumah_ke_sekolah_km || ''),
-                waktu_tempuh_menit: String(p.waktu_tempuh_menit || ''),
+                jenis_tinggal_id: this.parseNumber(p.jenis_tinggal_id),
+                alat_transportasi_id: this.parseNumber(p.alat_transportasi_id),
+                nik_ayah: p.nik_ayah || null,
+                nik_ibu: p.nik_ibu || null,
+                anak_keberapa: this.parseNumber(p.anak_keberapa),
+                nik_wali: p.nik_wali || null,
                 nomor_telepon_rumah: p.nomor_telepon_rumah || null,
                 nomor_telepon_seluler: p.nomor_telepon_seluler || null,
-                no_wa: p.no_wa || null,
                 email: p.email || null,
-                tinggi_badan: String(p.tinggi_badan || ''),
-                berat_badan: String(p.berat_badan || ''),
-                lingkar_kepala: this.parseNumber(p.lingkar_kepala),
-                anak_keberapa: String(p.anak_keberapa || ''),
-                jumlah_saudara_kandung: this.parseNumber(p.jumlah_saudara_kandung),
-                yatim_piatu: this.parseNumber(p.yatim_piatu),
-                paud_formal: String(p.paud_formal || ''),
-                paud_non_formal: String(p.paud_non_formal || ''),
-                hobi: p.hobi || null,
-                cita_cita: p.cita_cita || null,
-                nik_ayah: p.nik_ayah || null,
-                nama_ayah: p.nama_ayah || null,
-                tahun_lahir_ayah: String(p.tahun_lahir_ayah || ''),
-                jenjang_pendidikan_ayah: p.jenjang_pendidikan_ayah || null,
-                pendidikan_ayah_id_str: p.pendidikan_ayah_id_str || null,
-                pekerjaan_ayah_id: String(p.pekerjaan_ayah_id || ''),
-                pekerjaan_ayah_id_str: p.pekerjaan_ayah_id_str || null,
-                penghasilan_id_ayah: String(p.penghasilan_id_ayah || ''),
-                penghasilan_ayah_id_str: p.penghasilan_ayah_id_str || null,
-                kebutuhan_khusus_ayah: p.kebutuhan_khusus_ayah || null,
-                no_wa_ayah: p.no_wa_ayah || null,
-                nik_ibu: p.nik_ibu || null,
-                nama_ibu: p.nama_ibu || p.nama_ibu_kandung || null,
-                tahun_lahir_ibu: String(p.tahun_lahir_ibu || ''),
-                jenjang_pendidikan_ibu: p.jenjang_pendidikan_ibu || null,
-                pendidikan_ibu_id_str: p.pendidikan_ibu_id_str || null,
-                pekerjaan_ibu_id: String(p.pekerjaan_ibu_id || ''),
-                pekerjaan_ibu_id_str: p.pekerjaan_ibu_id_str || null,
-                penghasilan_id_ibu: String(p.penghasilan_id_ibu || ''),
-                penghasilan_ibu_id_str: p.penghasilan_ibu_id_str || null,
-                kebutuhan_khusus_ibu: p.kebutuhan_khusus_ibu || null,
-                no_wa_ibu: p.no_wa_ibu || null,
-                nik_wali: p.nik_wali || null,
-                nama_wali: p.nama_wali || null,
-                status_wali: p.status_wali || 'Tidak',
-                tahun_lahir_wali: String(p.tahun_lahir_wali || ''),
-                jenjang_pendidikan_wali: p.jenjang_pendidikan_wali || null,
-                pendidikan_wali_id_str: p.pendidikan_wali_id_str || null,
-                pekerjaan_wali_id: String(p.pekerjaan_wali_id || ''),
-                pekerjaan_wali_id_str: p.pekerjaan_wali_id_str || null,
-                penghasilan_id_wali: String(p.penghasilan_id_wali || ''),
-                penghasilan_wali_id_str: p.penghasilan_wali_id_str || null,
-                no_wa_wali: p.no_wa_wali || null,
-                penerima_kps: p.penerima_kps || null,
+                penerima_kps: this.parseNumber(p.penerima_kps),
                 no_kps: p.no_kps || null,
-                layak_pip: p.layak_pip || null,
-                alasan_layak_pip: p.alasan_layak_pip || null,
-                penerima_kip: p.penerima_kip || null,
+                layak_pip: this.parseNumber(p.layak_pip),
+                penerima_kip: this.parseNumber(p.penerima_kip),
                 no_kip: p.no_kip || null,
-                nama_di_kip: p.nama_di_kip || null,
-                alasan_menolak_kip: p.alasan_menolak_kip || null,
+                nm_kip: p.nm_kip || null,
                 no_kks: p.no_kks || null,
                 reg_akta_lahir: p.reg_akta_lahir || null,
-                no_registrasi_akta_lahir: p.no_registrasi_akta_lahir || null,
+                id_layak_pip: this.parseNumber(p.id_layak_pip),
+                id_bank: p.id_bank || null,
                 rekening_bank: p.rekening_bank || null,
+                nama_kcp: p.nama_kcp || null,
                 rekening_atas_nama: p.rekening_atas_nama || null,
-                nipd: p.nipd || null,
-                npsn_sekolah_asal: p.npsn_sekolah_asal || null,
-                sekolah_asal: p.sekolah_asal || null,
-                tanggal_masuk_sekolah: this.parseDate(p.tanggal_masuk_sekolah),
-                nama_rombel: p.nama_rombel || null,
-                kurikulum_id: String(p.kurikulum_id || ''),
-                kurikulum_id_str: p.kurikulum_id_str || null,
-                no_seri_ijazah: p.no_seri_ijazah || null,
-                no_seri_skhun: p.no_seri_skhun || null,
-                no_ujian_nasional: p.no_ujian_nasional || null,
-                jenis_pendaftaran_id: String(p.jenis_pendaftaran_id || ''),
-                jenis_pendaftaran_id_str: p.jenis_pendaftaran_id_str || null,
-                nomor_induk_pd: p.nomor_induk_pd || null,
-                jurusan_sp_id: p.jurusan_sp_id || null,
-                semester_id: p.semester_id || null,
-                tingkat_pendidikan_id: p.tingkat_pendidikan_id || null,
-                jenis_keluar_id: p.jenis_keluar_id || null,
-                ket_keluar: p.ket_keluar || null,
-                tanggal_keluar: this.parseDate(p.tanggal_keluar),
-                no_skhun: p.no_skhun || null,
-                no_peserta_ujian: p.no_peserta_ujian || null,
+                status_data: p.status_data ? Number(p.status_data) : null,
+                nama_ayah: p.nama_ayah || null,
+                tahun_lahir_ayah: this.parseNumber(p.tahun_lahir_ayah),
+                jenjang_pendidikan_ayah: this.parseNumber(p.jenjang_pendidikan_ayah),
+                pekerjaan_id_ayah: p.pekerjaan_id_ayah ? Number(p.pekerjaan_id_ayah) : null,
+                penghasilan_id_ayah: p.penghasilan_id_ayah ? Number(p.penghasilan_id_ayah) : null,
+                kebutuhan_khusus_id_ayah: p.kebutuhan_khusus_id_ayah ? Number(p.kebutuhan_khusus_id_ayah) : null,
+                nama_ibu_kandung: p.nama_ibu_kandung || null,
+                tahun_lahir_ibu: this.parseNumber(p.tahun_lahir_ibu),
+                jenjang_pendidikan_ibu: this.parseNumber(p.jenjang_pendidikan_ibu),
+                penghasilan_id_ibu: p.penghasilan_id_ibu ? Number(p.penghasilan_id_ibu) : null,
+                pekerjaan_id_ibu: p.pekerjaan_id_ibu ? Number(p.pekerjaan_id_ibu) : null,
+                kebutuhan_khusus_id_ibu: p.kebutuhan_khusus_id_ibu ? Number(p.kebutuhan_khusus_id_ibu) : null,
+                nama_wali: p.nama_wali || null,
+                tahun_lahir_wali: this.parseNumber(p.tahun_lahir_wali),
+                jenjang_pendidikan_wali: this.parseNumber(p.jenjang_pendidikan_wali),
+                pekerjaan_id_wali: p.pekerjaan_id_wali ? Number(p.pekerjaan_id_wali) : null,
+                penghasilan_id_wali: p.penghasilan_id_wali ? Number(p.penghasilan_id_wali) : null,
+                kewarganegaraan: p.kewarganegaraan || 'Indonesia',
+                pekerjaan_id: p.pekerjaan_id ? Number(p.pekerjaan_id) : null,
+                soft_delete: this.parseNumber(p.soft_delete),
+                registrasi_id: rpd.registrasi_id || null,
+                jurusan_sp_id: rpd.jurusan_sp_id || null,
+                sekolah_id: rpd.sekolah_id || sekolahId,
+                jenis_pendaftaran_id: this.parseNumber(rpd.jenis_pendaftaran_id),
+                nipd: rpd.nipd || null,
+                tanggal_masuk_sekolah: this.parseDate(rpd.tanggal_masuk_sekolah),
+                jenis_keluar_id: rpd.jenis_keluar_id || null,
+                tanggal_keluar: this.parseDate(rpd.tanggal_keluar),
+                keterangan: rpd.keterangan || null,
+                no_skhun: rpd.no_skhun || null,
+                no_peserta_ujian: rpd.no_peserta_ujian || null,
+                no_seri_ijazah: rpd.no_seri_ijazah || null,
+                a_pernah_paud: this.parseNumber(rpd.a_pernah_paud),
+                a_pernah_tk: this.parseNumber(rpd.a_pernah_tk),
+                sekolah_asal: rpd.sekolah_asal || null,
+                id_hobby: this.parseNumber(rpd.id_hobby),
+                id_cita: this.parseNumber(rpd.id_cita),
+                qr_token,
+                foto: p.foto || null,
+                status: rpd.jenis_keluar_id ? (rpd.ket_keluar || 'Non-Aktif') : (p.status || 'Aktif'),
+                telegram_chat_id: p.telegram_chat_id || null,
+                telegram_token: p.telegram_token || null,
+                rombongan_belajar_id: p.rombongan_belajar_id || null,
             };
             try {
                 await this.prisma.pesertaDidik.upsert({
@@ -420,97 +358,88 @@ let SyncService = SyncService_1 = class SyncService {
             if (!qr_token && domain) {
                 qr_token = `${domain}/${g.ptk_id}`;
             }
-            let kabKota = g.kabupaten_kota || null;
-            let prov = g.provinsi || null;
-            if (g.kecamatan && (!kabKota || !prov)) {
-                const kecStr = g.kecamatan.toLowerCase().replace(/\s+/g, '');
-                if (kecStr === 'baleendah') {
-                    if (!kabKota)
-                        kabKota = 'Kabupaten Bandung';
-                    if (!prov)
-                        prov = 'Jawa Barat';
-                }
-                else if (['karangtengah', 'ciranjang', 'sukaluyu', 'sualuyu', 'cianjur', 'haurwangi', 'gekbrong', 'pacet', 'bojongpicung', 'cugenang', 'cikalongkulon', 'mande'].includes(kecStr)) {
-                    if (!kabKota)
-                        kabKota = 'Kabupaten Cianjur';
-                    if (!prov)
-                        prov = 'Jawa Barat';
-                }
-            }
+            const pt = g.ptk_terdaftar || {};
             const payload = {
-                ptk_terdaftar_id: g.ptk_terdaftar_id || null,
-                tahun_ajaran_id: String(g.tahun_ajaran_id || ''),
-                sekolah_id: sekolahId,
-                ptk_induk: String(g.ptk_induk || ''),
-                kode: g.kode || null,
-                status: g.status || 'Aktif',
-                sk_mengajar: g.sk_mengajar || null,
-                qr_token,
                 nama: g.nama || 'Tanpa Nama',
+                nip: g.nip || null,
                 jenis_kelamin: g.jenis_kelamin || null,
                 tempat_lahir: g.tempat_lahir || null,
                 tanggal_lahir: this.parseDate(g.tanggal_lahir),
-                nama_ibu_kandung: g.nama_ibu_kandung || null,
-                agama_id: String(g.agama_id || ''),
-                agama_id_str: g.agama_id_str || null,
-                nuptk: g.nuptk || null,
                 nik: g.nik || null,
                 no_kk: g.no_kk || null,
-                npwp: g.npwp || null,
-                nama_wajib_pajak: g.nama_wajib_pajak || null,
-                kewarganegaraan: g.kewarganegaraan || 'ID',
-                status_perkawinan: g.status_perkawinan !== null && g.status_perkawinan !== undefined && g.status_perkawinan !== '' ? String(g.status_perkawinan) : null,
-                nama_suami_istri: g.nama_suami_istri || null,
-                pekerjaan_suami_istri: g.pekerjaan_suami_istri !== null && g.pekerjaan_suami_istri !== undefined && g.pekerjaan_suami_istri !== '' ? String(g.pekerjaan_suami_istri) : null,
-                jenis_ptk_id: String(g.jenis_ptk_id || ''),
-                jenis_ptk_id_str: g.jenis_ptk_id_str || null,
-                jabatan_ptk_id: String(g.jabatan_ptk_id || ''),
-                jabatan_ptk_id_str: g.jabatan_ptk_id_str || null,
-                status_kepegawaian_id: String(g.status_kepegawaian_id || ''),
-                status_kepegawaian_id_str: g.status_kepegawaian_id_str || null,
-                nip: g.nip || null,
                 niy_nigk: g.niy_nigk || null,
+                nuptk: g.nuptk || null,
                 nrg: g.nrg || null,
-                sk_pengangkatan: g.sk_pengangkatan || null,
-                tanggal_surat_tugas: this.parseDate(g.tanggal_surat_tugas),
-                tmt_pengangkatan: this.parseDate(g.tmt_pengangkatan),
-                lembaga_pengangkat: g.lembaga_pengangkat || null,
-                sk_cpns: g.sk_cpns || null,
-                tmt_cpns: this.parseDate(g.tmt_cpns),
-                tmt_pns: this.parseDate(g.tmt_pns),
-                sumber_gaji: g.sumber_gaji || null,
-                lisensi_kepsek: g.lisensi_kepsek === true || g.lisensi_kepsek === '1' || g.lisensi_kepsek === 1,
                 nuks: g.nuks || null,
-                pendidikan_terakhir: g.pendidikan_terakhir || null,
-                bidang_studi_terakhir: g.bidang_studi_terakhir || null,
-                pangkat_golongan_terakhir: g.pangkat_golongan_terakhir || null,
+                status_kepegawaian_id: this.parseNumber(g.status_kepegawaian_id),
+                pengawas_bidang_studi_id: this.parseNumber(g.pengawas_bidang_studi_id),
+                agama_id: this.parseNumber(g.agama_id),
                 alamat_jalan: g.alamat_jalan || null,
-                rt: g.rt || null,
-                rw: g.rw || null,
-                dusun: g.dusun || null,
+                rt: this.parseNumber(g.rt),
+                rw: this.parseNumber(g.rw),
+                nama_dusun: g.nama_dusun || null,
                 desa_kelurahan: g.desa_kelurahan || null,
-                kecamatan: g.kecamatan || null,
-                kabupaten_kota: kabKota,
-                provinsi: prov,
+                kode_wilayah: g.kode_wilayah || null,
                 kode_pos: g.kode_pos || null,
                 lintang: this.parseNumber(g.lintang),
                 bujur: this.parseNumber(g.bujur),
                 no_telepon_rumah: g.no_telepon_rumah || null,
                 no_hp: g.no_hp || null,
-                no_wa: g.no_wa || null,
                 email: g.email || null,
-                foto: g.foto || null,
-                tandatangan: g.tandatangan || null,
-                keahlian_laboratorium: g.keahlian_laboratorium || null,
-                mampu_menangani_kebutuhan_khusus: g.mampu_menangani_kebutuhan_khusus || null,
-                keahlian_braille: g.keahlian_braille === true || g.keahlian_braille === '1' || g.keahlian_braille === 1,
-                keahlian_bahasa_isyarat: g.keahlian_bahasa_isyarat === true || g.keahlian_bahasa_isyarat === '1' || g.keahlian_bahasa_isyarat === 1,
+                status_keaktifan_id: this.parseNumber(g.status_keaktifan_id),
+                sk_cpns: g.sk_cpns || null,
+                tgl_cpns: this.parseDate(g.tgl_cpns),
+                sk_pengangkatan: g.sk_pengangkatan || null,
+                tmt_pengangkatan: this.parseDate(g.tmt_pengangkatan),
+                lembaga_pengangkat_id: this.parseNumber(g.lembaga_pengangkat_id),
+                pangkat_golongan_id: this.parseNumber(g.pangkat_golongan_id),
+                keahlian_laboratorium_id: this.parseNumber(g.keahlian_laboratorium_id),
+                sumber_gaji_id: this.parseNumber(g.sumber_gaji_id),
+                nama_ibu_kandung: g.nama_ibu_kandung || null,
+                status_perkawinan: this.parseNumber(g.status_perkawinan),
+                nama_suami_istri: g.nama_suami_istri || null,
+                nip_suami_istri: g.nip_suami_istri || null,
+                pekerjaan_suami_istri: this.parseNumber(g.pekerjaan_suami_istri),
+                tmt_pns: this.parseDate(g.tmt_pns),
+                sudah_lisensi_kepala_sekolah: this.parseNumber(g.sudah_lisensi_kepala_sekolah),
+                jumlah_sekolah_binaan: this.parseNumber(g.jumlah_sekolah_binaan),
+                pernah_diklat_kepengawasan: this.parseNumber(g.pernah_diklat_kepengawasan),
+                nm_wp: g.nm_wp || null,
+                status_data: this.parseNumber(g.status_data),
+                karpeg: g.karpeg || null,
+                karpas: g.karpas || null,
+                mampu_handle_kk: this.parseNumber(g.mampu_handle_kk),
+                keahlian_braille: this.parseNumber(g.keahlian_braille),
+                keahlian_bhs_isyarat: this.parseNumber(g.keahlian_bhs_isyarat),
+                kebutuhan_khusus_id: this.parseNumber(g.kebutuhan_khusus_id),
+                npwp: g.npwp || null,
+                kewarganegaraan: g.kewarganegaraan || null,
+                id_bank: g.id_bank || null,
+                rekening_bank: g.rekening_bank || null,
+                rekening_atas_nama: g.rekening_atas_nama || null,
+                blob_id: g.blob_id || null,
+                soft_delete: this.parseNumber(g.soft_delete),
+                last_sync: this.parseDate(g.last_sync),
+                updater_id: g.updater_id || null,
+                ptk_terdaftar_id: pt.ptk_terdaftar_id || null,
+                sekolah_id: sekolahId,
+                jenis_keluar_id: pt.jenis_keluar_id || null,
+                jabatan_ptk_id: this.parseNumber(pt.jabatan_ptk_id),
+                tahun_ajaran_id: this.parseNumber(pt.tahun_ajaran_id),
+                jenis_ptk_id: this.parseNumber(pt.jenis_ptk_id),
+                nomor_surat_tugas: pt.nomor_surat_tugas || null,
+                tanggal_surat_tugas: this.parseDate(pt.tanggal_surat_tugas),
+                ptk_induk: this.parseNumber(pt.ptk_induk),
+                tmt_tugas: this.parseDate(pt.tmt_tugas),
+                tgl_ptk_keluar: this.parseDate(pt.tgl_ptk_keluar),
+                qr_token,
+                status: g.status || 'Aktif',
             };
             try {
                 await this.prisma.gtk.upsert({
                     where: { ptk_id: g.ptk_id },
                     create: { ...payload, ptk_id: g.ptk_id },
-                    update: { ...payload, updated_at: new Date() },
+                    update: { ...payload, status: g.status || 'Aktif' },
                 });
                 if (g.rwy_pend_formal && Array.isArray(g.rwy_pend_formal)) {
                     for (const edu of g.rwy_pend_formal) {
@@ -555,7 +484,7 @@ let SyncService = SyncService_1 = class SyncService {
                 continue;
             const targetId = u.pengguna_id || u.username;
             let targetSekolahId = sekolahId;
-            if (u.peran_id_str === 'Administrator' || u.username === 'admin' || u.username.includes('admin')) {
+            if (u.peran_nama === 'Administrator' || u.username === 'admin' || u.username.includes('admin')) {
                 targetSekolahId = null;
             }
             let validatedPtkId = u.ptk_id || null;
@@ -582,7 +511,8 @@ let SyncService = SyncService_1 = class SyncService {
                 password: u.password || '$2y$10$defaultpasswordhashplaceholder',
                 nama: u.nama || 'Pengguna',
                 email: u.email || u.username || null,
-                peran_id_str: u.peran_id_str || 'Operator Sekolah',
+                peran_nama: u.peran_nama || 'Operator Sekolah',
+                peran_id: u.peran_id ? Number(u.peran_id) : null,
                 alamat: u.alamat || null,
                 no_telepon: u.no_telepon || null,
                 no_hp: u.no_hp || null,
@@ -592,7 +522,7 @@ let SyncService = SyncService_1 = class SyncService {
             try {
                 const existing = await this.prisma.pengguna.findUnique({ where: { username: u.username } });
                 if (existing) {
-                    if (existing.sekolah_id === null && targetSekolahId !== null && (existing.peran_id_str === 'Administrator' || existing.username.includes('admin'))) {
+                    if (existing.sekolah_id === null && targetSekolahId !== null && (existing.peran_nama === 'Administrator' || existing.username.includes('admin'))) {
                         targetSekolahId = null;
                     }
                     await this.prisma.pengguna.update({
@@ -707,79 +637,132 @@ let SyncService = SyncService_1 = class SyncService {
         }
         return { successCount };
     }
-    async syncBidangStudi(sekolahId, dataRows) {
+    async syncDudi(sekolahId, dataRows) {
         let successCount = 0;
-        for (const b of dataRows) {
-            if (b.bidang_studi_id === null || b.bidang_studi_id === undefined)
+        for (const d of dataRows) {
+            if (!d.dudi_id)
                 continue;
-            const id = Number(b.bidang_studi_id);
-            if (isNaN(id))
-                continue;
-            const payload = {
+            const dudiPayload = {
                 sekolah_id: sekolahId,
-                kelompok_bidang_studi_id: this.parseNumber(b.kelompok_bidang_studi_id),
-                kode: b.kode || null,
-                bidang_studi: b.bidang_studi || 'Tanpa Nama',
-                kelompok: String(b.kelompok || ''),
-                jenjang_paud: String(b.jenjang_paud || ''),
-                jenjang_tk: String(b.jenjang_tk || ''),
-                jenjang_sd: String(b.jenjang_sd || ''),
-                jenjang_smp: String(b.jenjang_smp || ''),
-                jenjang_sma: String(b.jenjang_sma || ''),
-                jenjang_tinggi: String(b.jenjang_tinggi || ''),
-                a_sert_komp: String(b.a_sert_komp || ''),
-                a_sert_profesi: String(b.a_sert_profesi || ''),
+                nama: d.nama || 'Tanpa Nama',
+                bidang_usaha_id: d.bidang_usaha_id || null,
+                nama_bidang_usaha: d.nama_bidang_usaha || null,
+                alamat_jalan: d.alamat_jalan || null,
+                rt: d.rt ? String(d.rt) : null,
+                rw: d.rw ? String(d.rw) : null,
+                nama_dusun: d.nama_dusun || null,
+                desa_kelurahan: d.desa_kelurahan || null,
+                kode_wilayah: d.kode_wilayah || null,
+                kode_pos: d.kode_pos || null,
+                lintang: this.parseNumber(d.lintang),
+                bujur: this.parseNumber(d.bujur),
+                nomor_telepon: d.nomor_telepon || null,
+                nomor_fax: d.nomor_fax || null,
+                email: d.email || null,
+                website: d.website || null,
+                npwp: d.npwp || null,
+                nama_cp: d.nama_cp || null,
+                no_hp_cp: d.no_hp_cp || null,
+                soft_delete: this.parseNumber(d.soft_delete),
             };
             try {
-                await this.prisma.bidangStudi.upsert({
-                    where: { bidang_studi_id: id },
-                    create: { ...payload, bidang_studi_id: id },
-                    update: { ...payload, updated_at: new Date() },
+                await this.prisma.dudi.upsert({
+                    where: { dudi_id: d.dudi_id },
+                    create: { ...dudiPayload, dudi_id: d.dudi_id },
+                    update: { ...dudiPayload, updated_at: new Date() },
                 });
                 successCount++;
+                if (Array.isArray(d.mou)) {
+                    for (const m of d.mou) {
+                        if (!m.mou_id)
+                            continue;
+                        const mouPayload = {
+                            dudi_id: d.dudi_id,
+                            sekolah_id: sekolahId,
+                            nomor_mou: m.nomor_mou || null,
+                            judul_mou: m.judul_mou || null,
+                            tanggal_mulai: this.parseDate(m.tanggal_mulai),
+                            tanggal_selesai: this.parseDate(m.tanggal_selesai),
+                            keterangan: m.keterangan || null,
+                            soft_delete: this.parseNumber(m.soft_delete),
+                        };
+                        await this.prisma.mou.upsert({
+                            where: { mou_id: m.mou_id },
+                            create: { ...mouPayload, mou_id: m.mou_id },
+                            update: { ...mouPayload, updated_at: new Date() },
+                        });
+                        if (Array.isArray(m.akt_pd)) {
+                            for (const a of m.akt_pd) {
+                                if (!a.id_akt_pd)
+                                    continue;
+                                const aktPayload = {
+                                    mou_id: m.mou_id,
+                                    jenis_akt_pd: a.jenis_akt_pd ? String(a.jenis_akt_pd) : null,
+                                    judul_akt_pd: a.judul_akt_pd || null,
+                                    sk_tugas: a.sk_tugas || null,
+                                    tanggal_sk_tugas: this.parseDate(a.tanggal_sk_tugas),
+                                    tanggal_mulai: this.parseDate(a.tanggal_mulai),
+                                    tanggal_selesai: this.parseDate(a.tanggal_selesai),
+                                    lokasi: a.lokasi || null,
+                                    soft_delete: this.parseNumber(a.soft_delete),
+                                };
+                                await this.prisma.aktPd.upsert({
+                                    where: { id_akt_pd: a.id_akt_pd },
+                                    create: { ...aktPayload, id_akt_pd: a.id_akt_pd },
+                                    update: { ...aktPayload, updated_at: new Date() },
+                                });
+                                if (Array.isArray(a.anggota_akt_pd)) {
+                                    for (const ang of a.anggota_akt_pd) {
+                                        if (!ang.anggota_akt_pd_id)
+                                            continue;
+                                        const pdId = ang.registrasi_peserta_didik?.peserta_didik_id || ang.peserta_didik_id || null;
+                                        await this.prisma.anggotaAktPd.upsert({
+                                            where: { anggota_akt_pd_id: ang.anggota_akt_pd_id },
+                                            create: {
+                                                anggota_akt_pd_id: ang.anggota_akt_pd_id,
+                                                id_akt_pd: a.id_akt_pd,
+                                                registrasi_id: ang.registrasi_id || null,
+                                                peserta_didik_id: pdId,
+                                                soft_delete: this.parseNumber(ang.soft_delete),
+                                            },
+                                            update: {
+                                                registrasi_id: ang.registrasi_id || null,
+                                                peserta_didik_id: pdId,
+                                                soft_delete: this.parseNumber(ang.soft_delete),
+                                                updated_at: new Date(),
+                                            },
+                                        });
+                                    }
+                                }
+                                if (Array.isArray(a.bimbing_pd)) {
+                                    for (const b of a.bimbing_pd) {
+                                        if (!b.bimbing_pd_id)
+                                            continue;
+                                        await this.prisma.bimbingPd.upsert({
+                                            where: { bimbing_pd_id: b.bimbing_pd_id },
+                                            create: {
+                                                bimbing_pd_id: b.bimbing_pd_id,
+                                                id_akt_pd: a.id_akt_pd,
+                                                ptk_id: b.ptk_id || null,
+                                                urutan_pembimbing: this.parseNumber(b.urutan_pembimbing),
+                                                soft_delete: this.parseNumber(b.soft_delete),
+                                            },
+                                            update: {
+                                                ptk_id: b.ptk_id || null,
+                                                urutan_pembimbing: this.parseNumber(b.urutan_pembimbing),
+                                                soft_delete: this.parseNumber(b.soft_delete),
+                                                updated_at: new Date(),
+                                            },
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
             catch (err) {
-                this.logger.error(`Error upsert BidangStudi ${id}: ${err.message}`);
-            }
-        }
-        return { successCount };
-    }
-    async syncLembSertifikasi(sekolahId, dataRows) {
-        let successCount = 0;
-        for (const l of dataRows) {
-            if (!l.kode_lemb_sert)
-                continue;
-            const id = String(l.kode_lemb_sert);
-            const payload = {
-                sekolah_id: sekolahId,
-                nm_lemb_sert: l.nm_lemb_sert || l.nama || 'Tanpa Nama',
-                tmt_lemb_sert: this.parseDate(l.tmt_lemb_sert),
-                ket_lemb_sert: l.ket_lemb_sert || null,
-                alamat_jalan: l.alamat_jalan || null,
-                rt: l.rt || null,
-                rw: l.rw || null,
-                nama_dusun: l.nama_dusun || null,
-                desa_kelurahan: l.desa_kelurahan || null,
-                kode_wilayah: l.kode_wilayah || null,
-                kode_pos: l.kode_pos || null,
-                lintang: this.parseNumber(l.lintang),
-                bujur: this.parseNumber(l.bujur),
-                nama: l.nama || l.nm_lemb_sert || null,
-                nomor_telepon: l.nomor_telepon || null,
-                nomor_fax: l.nomor_fax || null,
-                email: l.email || null,
-                website: l.website || null,
-            };
-            try {
-                await this.prisma.lembSertifikasi.upsert({
-                    where: { kode_lemb_sert: id },
-                    create: { ...payload, kode_lemb_sert: id },
-                    update: { ...payload, updated_at: new Date() },
-                });
-                successCount++;
-            }
-            catch (err) {
-                this.logger.error(`Error upsert LembSertifikasi ${id}: ${err.message}`);
+                this.logger.error(`Error upsert Dudi ${d.dudi_id}: ${err.message}`);
             }
         }
         return { successCount };
@@ -826,23 +809,27 @@ let SyncService = SyncService_1 = class SyncService {
                 continue;
             const payload = {
                 pembelajaran_id: p.pembelajaran_id,
-                sekolah_id: sekolahId,
                 rombongan_belajar_id: p.rombongan_belajar_id,
-                mata_pelajaran_id: String(p.mata_pelajaran_id || ''),
-                mata_pelajaran_id_str: p.mata_pelajaran_id_str || null,
+                semester_id: p.semester_id ? String(p.semester_id).trim() : null,
+                mata_pelajaran_id: this.parseNumber(p.mata_pelajaran_id),
                 ptk_terdaftar_id: p.ptk_terdaftar_id || null,
                 ptk_id: p.ptk_id || null,
+                sk_mengajar: p.sk_mengajar || null,
+                tanggal_sk_mengajar: this.parseDate(p.tanggal_sk_mengajar),
+                jam_mengajar_per_minggu: this.parseNumber(p.jam_mengajar_per_minggu),
+                status_di_kurikulum: this.parseNumber(p.status_di_kurikulum),
                 nama_mata_pelajaran: p.nama_mata_pelajaran || null,
                 induk_pembelajaran_id: p.induk_pembelajaran_id || null,
-                jam_mengajar_per_minggu: String(p.jam_mengajar_per_minggu || ''),
-                status_di_kurikulum: String(p.status_di_kurikulum || ''),
-                status_di_kurikulum_str: p.status_di_kurikulum_str || null,
+                sekolah_id: sekolahId,
+                soft_delete: this.parseNumber(p.soft_delete),
+                last_sync: this.parseDate(p.last_sync),
+                updater_id: p.updater_id || null,
             };
             try {
                 await this.prisma.pembelajaran.upsert({
                     where: { pembelajaran_id: p.pembelajaran_id },
                     create: payload,
-                    update: { ...payload, updated_at: new Date() },
+                    update: payload,
                 });
                 successCount++;
             }

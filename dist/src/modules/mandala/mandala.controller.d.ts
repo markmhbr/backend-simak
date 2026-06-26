@@ -40,8 +40,8 @@ export declare class MandalaController {
             alamat: string;
             email: string;
             website: string;
-            bentuk_pendidikan_is_str: string;
-            bentuk_pendidikan_id_str: string;
+            bentuk_pendidikan_is_str: any;
+            bentuk_pendidikan_id_str: any;
             kabupaten_kota: any;
             kecamatan: any;
             lintang: import("@prisma/client-runtime-utils").Decimal;
@@ -485,11 +485,6 @@ export declare class MandalaController {
             soft_delete: string | null;
             last_sync: Date | null;
             updater_id: string | null;
-            bentuk_pendidikan_id_str: string | null;
-            kode_wilayah_str: string | null;
-            kebutuhan_khusus_id_str: string | null;
-            yayasan_id_str: string | null;
-            vld_count: number | null;
             logo: string | null;
             cadisdik_id: string | null;
             social_media: import("@prisma/client/runtime/client").JsonValue | null;
@@ -511,27 +506,27 @@ export declare class MandalaController {
         status: string;
         data: {
             identitas: {
-                id: string;
-                sekolah_id: string;
-                nama: string;
-                nisn: string;
-                nik: string;
-                jenis_kelamin: string;
-                tempat_lahir: string;
-                tanggal_lahir: Date;
-                agama: string;
-                jenis_pendaftaran_id_str: string;
+                id: any;
+                sekolah_id: any;
+                nama: any;
+                nisn: any;
+                nik: any;
+                jenis_kelamin: any;
+                tempat_lahir: any;
+                tanggal_lahir: any;
+                agama: any;
+                jenis_pendaftaran_id_str: any;
             };
             akademik: {
-                nama_rombel: string;
-                tingkat: string;
-                jurusan: string;
+                nama_rombel: any;
+                tingkat: any;
+                jurusan: any;
             };
             data_pendukung: {
                 alamat_lengkap: string;
-                nama_ayah: string;
-                nama_ibu: string;
-                hp_orang_tua: string;
+                nama_ayah: any;
+                nama_ibu: any;
+                hp_orang_tua: any;
             };
         }[];
         total_data: number;
@@ -627,7 +622,7 @@ export declare class MandalaController {
                 nipd: string;
                 rombongan_belajar: {
                     nama: string;
-                    tingkat_pendidikan_id_str: string;
+                    tingkat_pendidikan_id: import("@prisma/client-runtime-utils").Decimal;
                 };
             };
             sekolah_id: string;
@@ -644,15 +639,9 @@ export declare class MandalaController {
     getGtkPresence(sekolahId: string, tanggal?: string): Promise<{
         status: string;
         data: {
+            gtk: any;
             status_masuk_str: string;
             status_pulang_str: string;
-            gtk: {
-                nama: string;
-                nip: string;
-                foto: string;
-                nuptk: string;
-                jenis_ptk_id_str: string;
-            };
             sekolah_id: string;
             created_at: Date;
             updated_at: Date;

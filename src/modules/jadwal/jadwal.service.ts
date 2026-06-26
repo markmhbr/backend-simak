@@ -518,7 +518,7 @@ export class JadwalService {
     }
 
     // Validasi 4: Total slot jadwal untuk pembelajaran_id harus <= jam_mengajar_perminggu
-    const jamMengajar = parseInt(pembelajaran.jam_mengajar_per_minggu || '0');
+    const jamMengajar = parseInt(pembelajaran.jam_mengajar_per_minggu?.toString() || '0');
     if (jamMengajar > 0) {
       // Count existing slots for this pembelajaran (exclude current slot being upserted)
       const existingCount = await this.prisma.jadwalPelajaran.count({

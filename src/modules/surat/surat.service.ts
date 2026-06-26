@@ -333,15 +333,34 @@ export class SuratService {
         include: {
           template_surat: { select: { nama_template: true } },
           peserta_didik: { select: { nama: true } },
-          gtk: { select: { nama: true, jenis_ptk_id_str: true } },
+          gtk: {
+            select: {
+              nama: true,
+              jenis_ptk: { select: { jenis_ptk: true } }
+            }
+          },
         },
         orderBy: { created_at: 'desc' },
       }),
     ]);
 
+    const mappedData = data.map(item => {
+      if (item.gtk) {
+        const { jenis_ptk, ...gtkRest } = item.gtk;
+        return {
+          ...item,
+          gtk: {
+            ...gtkRest,
+            jenis_ptk_id_str: jenis_ptk?.jenis_ptk || null
+          }
+        };
+      }
+      return item;
+    });
+
     return {
       status: 'success',
-      data,
+      data: mappedData,
       meta: {
         total_data: total,
         total_pages: Math.ceil(total / take),

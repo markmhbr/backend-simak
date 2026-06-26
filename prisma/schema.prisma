@@ -54,11 +54,7 @@ model Sekolah {
   soft_delete                String?
   last_sync                  DateTime?
   updater_id                 String?   @db.Uuid
-  bentuk_pendidikan_id_str   String?
-  kode_wilayah_str           String?
-  kebutuhan_khusus_id_str    String?
-  yayasan_id_str             String?
-  vld_count                  Int?
+
 
   // Kolom lama yang diinstruksikan untuk DIPERTAHANKAN
   logo                       String?
@@ -89,30 +85,28 @@ model Sekolah {
 }
 
 model RombonganBelajar {
-  rombongan_belajar_id      String                    @id @default(uuid()) @db.Uuid
-  nama                      String
-  tingkat_pendidikan_id     String?
-  tingkat_pendidikan_id_str String?
-  semester_id               String?
-  jenis_rombel              String?
-  jenis_rombel_str          String?
-  kurikulum_id              Int?
-  kurikulum_id_str          String?
-  id_ruang                  String?                   @db.Uuid
-  id_ruang_str              String?
-  moving_class              String?
-  ptk_id                    String?                   @db.Uuid
-  ptk_id_str                String?
-  jurusan_id                String?
-  jurusan_id_str            String?
-  created_at                DateTime                  @default(now())
-  updated_at                DateTime                  @updatedAt
-  sekolah_id                String?                   @db.Uuid
-  id_ekskul                 String?
-  id_kelas_ekskul           String?
-  nm_ekskul                 String?
-  sk_ekskul                 String?
-  anggota_rombel            AnggotaRombel[]
+  rombongan_belajar_id  String                    @id @default(uuid()) @db.Uuid
+  sekolah_id            String?                   @db.Uuid
+  semester_id           String?
+  id_ruang              String?                   @db.Uuid
+  tingkat_pendidikan_id Decimal?                  @db.Decimal
+  jurusan_sp_id         String?                   @db.Uuid
+  kurikulum_id          Int?
+  nama                  String
+  ptk_id                String?                   @db.Uuid
+  moving_class          Decimal?                  @db.Decimal
+  jenis_rombel          Decimal?                  @db.Decimal
+  sks                   Decimal?                  @db.Decimal
+  tanggal_mulai         DateTime?                 @db.Date
+  tanggal_selesai       DateTime?                 @db.Date
+  kebutuhan_khusus_id   Int?
+  create_date           DateTime                  @default(now())
+  last_update           DateTime                  @updatedAt
+  soft_delete           Decimal?                  @db.Decimal
+  last_sync             DateTime?
+  updater_id            String?                   @db.Uuid
+
+  anggota_rombel        AnggotaRombel[]
   pembelajaran              Pembelajaran[]
   peserta_didik             PesertaDidik[]            @relation("RombelPesertaDidik")
   jadwal_pelajaran          JadwalPelajaran[]
@@ -124,14 +118,17 @@ model RombonganBelajar {
 }
 
 model AnggotaRombel {
-  anggota_rombel_id        String           @id @default(uuid()) @db.Uuid
-  rombongan_belajar_id     String           @db.Uuid
-  peserta_didik_id         String           @db.Uuid
-  jenis_pendaftaran_id     String?
-  jenis_pendaftaran_id_str String?
-  created_at               DateTime         @default(now())
-  updated_at               DateTime         @updatedAt
-  sekolah_id               String?          @db.Uuid
+  anggota_rombel_id    String           @id @default(uuid()) @db.Uuid
+  rombongan_belajar_id String           @db.Uuid
+  peserta_didik_id     String           @db.Uuid
+  jenis_pendaftaran_id Decimal?         @db.Decimal
+  sekolah_id           String?          @db.Uuid
+  create_date          DateTime         @default(now())
+  last_update          DateTime         @updatedAt
+  soft_delete          Decimal?         @db.Decimal
+  last_sync            DateTime?
+  updater_id           String?          @db.Uuid
+
   rombongan_belajar        RombonganBelajar @relation(fields: [rombongan_belajar_id], references: [rombongan_belajar_id], onDelete: Cascade)
 
   @@index([rombongan_belajar_id])
@@ -143,19 +140,23 @@ model AnggotaRombel {
 model Pembelajaran {
   pembelajaran_id         String            @id @default(uuid()) @db.Uuid
   rombongan_belajar_id    String            @db.Uuid
-  mata_pelajaran_id       String?
-  mata_pelajaran_id_str   String?
+  semester_id             String?
+  mata_pelajaran_id       Int?
   ptk_terdaftar_id        String?           @db.Uuid
   ptk_id                  String?           @db.Uuid
+  sk_mengajar             String?
+  tanggal_sk_mengajar     DateTime?         @db.Date
+  jam_mengajar_per_minggu Decimal?          @db.Decimal
+  status_di_kurikulum     Decimal?          @db.Decimal
   nama_mata_pelajaran     String?
   induk_pembelajaran_id   String?           @db.Uuid
-  jam_mengajar_per_minggu String?
-  status_di_kurikulum     String?
-  status_di_kurikulum_str String?
-  created_at              DateTime          @default(now())
-  updated_at              DateTime          @updatedAt
   sekolah_id              String?           @db.Uuid
-  ptk_id_str              String?
+  create_date             DateTime          @default(now())
+  last_update             DateTime          @updatedAt
+  soft_delete             Decimal?          @db.Decimal
+  last_sync               DateTime?
+  updater_id              String?           @db.Uuid
+
   gtk                     Gtk?              @relation(fields: [ptk_id], references: [ptk_id])
   rombongan_belajar       RombonganBelajar  @relation(fields: [rombongan_belajar_id], references: [rombongan_belajar_id], onDelete: Cascade)
   jadwal_pelajaran        JadwalPelajaran[]
@@ -167,11 +168,8 @@ model Pembelajaran {
 }
 
 model PesertaDidik {
+  // --- Kolom dari tabel peserta_didik ---
   peserta_didik_id          String                 @id @default(uuid()) @db.Uuid
-  sekolah_id                String?                @db.Uuid
-  registrasi_id             String?                @db.Uuid
-  anggota_rombel_id         String?                @db.Uuid
-  rombongan_belajar_id      String?                @db.Uuid
   nama                      String
   jenis_kelamin             String?
   nisn                      String?
@@ -179,144 +177,93 @@ model PesertaDidik {
   no_kk                     String?
   tempat_lahir              String?
   tanggal_lahir             DateTime?              @db.Date
-  agama_id                  String?
-  agama_id_str              String?
-  kewarganegaraan           String?                @default("Indonesia")
+  agama_id                  Int?                   @db.SmallInt
   kebutuhan_khusus_id       Int?
-  kebutuhan_khusus          String?
   alamat_jalan              String?
-  rt                        String?
-  rw                        String?
+  rt                        Decimal?               @db.Decimal
+  rw                        Decimal?               @db.Decimal
   nama_dusun                String?
   desa_kelurahan            String?
   kode_wilayah              String?
   kode_pos                  String?
-  lintang                   Decimal?
-  bujur                     Decimal?
-  jenis_tinggal_id          String?
-  alat_transportasi_id      String?
+  lintang                   Decimal?               @db.Decimal
+  bujur                     Decimal?               @db.Decimal
+  jenis_tinggal_id          Decimal?               @db.Decimal
+  alat_transportasi_id      Decimal?               @db.Decimal
+  nik_ayah                  String?
+  nik_ibu                   String?
+  anak_keberapa             Decimal?               @db.Decimal
+  nik_wali                  String?
   nomor_telepon_rumah       String?
   nomor_telepon_seluler     String?
   email                     String?
-  tinggi_badan              String?
-  berat_badan               String?
-  anak_keberapa             String?
-  yatim_piatu               Int?
-  nik_ayah                  String?
-  nama_ayah                 String?
-  tahun_lahir_ayah          String?
-  jenjang_pendidikan_ayah   String?
-  pekerjaan_id_ayah         Int?
-  pekerjaan_ayah_id         String?
-  pekerjaan_ayah_id_str     String?
-  penghasilan_id_ayah       String?
-  kebutuhan_khusus_id_ayah  Int?
-  nik_ibu                   String?
-  nama_ibu                  String?
-  tahun_lahir_ibu           String?
-  jenjang_pendidikan_ibu    String?
-  pekerjaan_id_ibu          Int?
-  pekerjaan_ibu_id          String?
-  pekerjaan_ibu_id_str      String?
-  penghasilan_id_ibu        String?
-  kebutuhan_khusus_id_ibu   Int?
-  nik_wali                  String?
-  nama_wali                 String?
-  tahun_lahir_wali          String?
-  jenjang_pendidikan_wali   String?
-  pekerjaan_id_wali         Int?
-  pekerjaan_wali_id         String?
-  pekerjaan_wali_id_str     String?
-  penghasilan_id_wali       String?
-  penerima_kps              String?
+  penerima_kps              Decimal?               @db.Decimal
   no_kps                    String?
-  layak_pip                 String?
-  id_layak_pip              String?
-  penerima_kip              String?
+  layak_pip                 Decimal?               @db.Decimal
+  penerima_kip              Decimal?               @db.Decimal
   no_kip                    String?
   nm_kip                    String?
   no_kks                    String?
   reg_akta_lahir            String?
+  id_layak_pip              Decimal?               @db.Decimal
   id_bank                   String?
   rekening_bank             String?
   nama_kcp                  String?
   rekening_atas_nama        String?
+  status_data               Int?
+  nama_ayah                 String?
+  tahun_lahir_ayah          Decimal?               @db.Decimal
+  jenjang_pendidikan_ayah   Decimal?               @db.Decimal
+  pekerjaan_id_ayah         Int?
+  penghasilan_id_ayah       Int?
+  kebutuhan_khusus_id_ayah  Int?
+  nama_ibu_kandung          String?
+  tahun_lahir_ibu           Decimal?               @db.Decimal
+  jenjang_pendidikan_ibu    Decimal?               @db.Decimal
+  penghasilan_id_ibu        Int?
+  pekerjaan_id_ibu          Int?
+  kebutuhan_khusus_id_ibu   Int?
+  nama_wali                 String?
+  tahun_lahir_wali          Decimal?               @db.Decimal
+  jenjang_pendidikan_wali   Decimal?               @db.Decimal
+  pekerjaan_id_wali         Int?
+  penghasilan_id_wali       Int?
+  kewarganegaraan           String?
+  pekerjaan_id              Int?
+  soft_delete               Decimal?               @db.Decimal
+
+  // --- Kolom dari tabel registrasi_peserta_didik ---
+  registrasi_id             String?                @db.Uuid
+  jurusan_sp_id             String?                @db.Uuid
+  sekolah_id                String?                @db.Uuid
+  jenis_pendaftaran_id      Decimal?               @db.Decimal
   nipd                      String?
-  nomor_induk_pd            String?
-  jenis_pendaftaran_id      String?
-  jenis_pendaftaran_id_str  String?
   tanggal_masuk_sekolah     DateTime?              @db.Date
-  sekolah_asal              String?
-  jurusan_sp_id             String?
-  semester_id               String?
-  tingkat_pendidikan_id     String?
-  nama_rombel               String?
-  kurikulum_id              String?
-  kurikulum_id_str          String?
   jenis_keluar_id           String?
-  ket_keluar                String?
   tanggal_keluar            DateTime?              @db.Date
   keterangan                String?
   no_skhun                  String?
   no_peserta_ujian          String?
   no_seri_ijazah            String?
-  a_pernah_paud             String?
-  a_pernah_tk               String?
-  id_hobby                  String?
-  id_cita                   String?
-  pekerjaan_id              Int?
-  status_data               Int?
-  konfirmasi_mutasi         Int?
-  vld_count                 Int                    @default(0)
-  asal_data                 String?
-  create_date               DateTime               @default(now())
-  last_update               DateTime               @updatedAt
-  soft_delete               String?
-  last_sync                 DateTime?
-  updater_id                String?                @db.Uuid
-  alasan_layak_pip          String?
-  alasan_menolak_kip        String?
-  alat_transportasi_id_str  String?
-  cita_cita                 String?
-  created_at                DateTime               @default(now())
-  dusun                     String?
-  foto                      String?
-  hobi                      String?
-  jarak_rumah_ke_sekolah_km String?
-  jenis_tinggal_id_str      String?
-  jumlah_saudara_kandung    Int?
-  kabupaten_kota            String?
-  kebutuhan_khusus_ayah     String?
-  kebutuhan_khusus_ibu      String?
-  kecamatan                 String?
-  lingkar_kepala            Int?
-  nama_di_kip               String?
-  no_registrasi_akta_lahir  String?
-  no_seri_skhun             String?
-  no_ujian_nasional         String?
-  no_wa                     String?
-  no_wa_ayah                String?
-  no_wa_ibu                 String?
-  no_wa_wali                String?
-  npsn_sekolah_asal         String?
-  paud_formal               String?
-  paud_non_formal           String?
-  pendidikan_ayah_id_str    String?
-  pendidikan_ibu_id_str     String?
-  pendidikan_wali_id_str    String?
-  penghasilan_ayah_id_str   String?
-  penghasilan_ibu_id_str    String?
-  penghasilan_wali_id_str   String?
-  provinsi                  String?
+  a_pernah_paud             Decimal?               @db.Decimal
+  a_pernah_tk               Decimal?               @db.Decimal
+  sekolah_asal              String?
+  id_hobby                  Decimal?               @db.Decimal
+  id_cita                   Decimal?               @db.Decimal
+
+  // --- Kolom SIMAK ---
   qr_token                  String?
+  foto                      String?
   status                    String                 @default("Aktif")
-  status_wali               String                 @default("Tidak")
   telegram_chat_id          String?
   telegram_token            String?
+  created_at                DateTime               @default(now())
   updated_at                DateTime               @updatedAt
-  waktu_tempuh_menit        String?
-  penggunas                 Pengguna[]
+
+  // --- Relations ---
+  rombongan_belajar_id      String?                @db.Uuid
   rombongan_belajar         RombonganBelajar?      @relation("RombelPesertaDidik", fields: [rombongan_belajar_id], references: [rombongan_belajar_id])
+  penggunas                 Pengguna[]
   izin                      Izin[]
   pelanggaran               Pelanggaran[]          @relation("PesertaDidikPelanggaran")
   presensi_mapel            PresensiMapel[]
@@ -324,6 +271,8 @@ model PesertaDidik {
   riwayat_transaksi_spp     RiwayatTransaksiSpp[]
   spp                       Spp[]
   surat_keluar              SuratKeluar[]
+  anggota_akt_pd            AnggotaAktPd[]
+  agama                     agama?                 @relation(fields: [agama_id], references: [agama_id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([sekolah_id])
   @@index([rombongan_belajar_id])
@@ -333,81 +282,96 @@ model PesertaDidik {
 }
 
 model Gtk {
+  // --- Kolom dari tabel ptk ---
   ptk_id                           String                    @id @default(uuid()) @db.Uuid
-  ptk_terdaftar_id                 String?                   @db.Uuid
-  tahun_ajaran_id                  String?
-  sekolah_id                       String?                   @db.Uuid
-  ptk_induk                        String?
-  kode                             String?
-  status                           String                    @default("Aktif")
-  sk_mengajar                      String?
-  qr_token                         String?
   nama                             String
+  nip                              String?
   jenis_kelamin                    String?
   tempat_lahir                     String?
   tanggal_lahir                    DateTime?                 @db.Date
-  nama_ibu_kandung                 String?
-  agama_id                         String?
-  agama_id_str                     String?
-  nuptk                            String?
   nik                              String?
   no_kk                            String?
-  npwp                             String?
-  nama_wajib_pajak                 String?
-  kewarganegaraan                  String?                   @default("ID")
-  status_perkawinan                String?
-  nama_suami_istri                 String?
-  pekerjaan_suami_istri            String?
-  jenis_ptk_id                     String?
-  jenis_ptk_id_str                 String?
-  jabatan_ptk_id                   String?
-  jabatan_ptk_id_str               String?
-  status_kepegawaian_id            String?
-  status_kepegawaian_id_str        String?
-  nip                              String?
   niy_nigk                         String?
+  nuptk                            String?
   nrg                              String?
-  sk_pengangkatan                  String?
-  tanggal_surat_tugas              DateTime?                 @db.Date
-  tmt_pengangkatan                 DateTime?                 @db.Date
-  lembaga_pengangkat               String?
-  sk_cpns                          String?
-  tmt_cpns                         DateTime?                 @db.Date
-  tmt_pns                          DateTime?                 @db.Date
-  sumber_gaji                      String?
-  lisensi_kepsek                   Boolean                   @default(false)
   nuks                             String?
-  keahlian_laboratorium            String?
-  mampu_menangani_kebutuhan_khusus String?
-  keahlian_braille                 Boolean                   @default(false)
-  keahlian_bahasa_isyarat          Boolean                   @default(false)
-  pendidikan_terakhir              String?
-  bidang_studi_terakhir            String?
-  pangkat_golongan_terakhir        String?
-  rwy_kepangkatan                  Json?
+  status_kepegawaian_id            Int?                      @db.SmallInt
+  pengawas_bidang_studi_id         Int?
+  agama_id                         Int?                      @db.SmallInt
   alamat_jalan                     String?
-  rt                               String?
-  rw                               String?
-  dusun                            String?
+  rt                               Decimal?                  @db.Decimal
+  rw                               Decimal?                  @db.Decimal
+  nama_dusun                       String?
   desa_kelurahan                   String?
-  kecamatan                        String?
+  kode_wilayah                     String?
   kode_pos                         String?
-  lintang                          Decimal?
-  bujur                            Decimal?
+  lintang                          Decimal?                  @db.Decimal
+  bujur                            Decimal?                  @db.Decimal
   no_telepon_rumah                 String?
   no_hp                            String?
-  no_wa                            String?
   email                            String?
-  foto                             String?
-  tandatangan                      String?
-  created_at                       DateTime                  @default(now())
-  updated_at                       DateTime                  @updatedAt
-  kabupaten_kota                   String?
-  provinsi                         String?
+  status_keaktifan_id              Decimal?                  @db.Decimal
+  sk_cpns                          String?
+  tgl_cpns                         DateTime?                 @db.Date
+  sk_pengangkatan                  String?
+  tmt_pengangkatan                 DateTime?                 @db.Date
+  lembaga_pengangkat_id            Decimal?                  @db.Decimal
+  pangkat_golongan_id              Decimal?                  @db.Decimal
+  keahlian_laboratorium_id         Int?                      @db.SmallInt
+  sumber_gaji_id                   Decimal?                  @db.Decimal
+  nama_ibu_kandung                 String?
+  status_perkawinan                Decimal?                  @db.Decimal
+  nama_suami_istri                 String?
+  nip_suami_istri                  String?
+  pekerjaan_suami_istri            Int?
+  tmt_pns                          DateTime?                 @db.Date
+  sudah_lisensi_kepala_sekolah     Decimal?                  @db.Decimal
+  jumlah_sekolah_binaan            Int?                      @db.SmallInt
+  pernah_diklat_kepengawasan       Decimal?                  @db.Decimal
+  nm_wp                            String?
+  status_data                      Int?
+  karpeg                           String?
+  karpas                           String?
+  mampu_handle_kk                  Int?
+  keahlian_braille                 Decimal?                  @db.Decimal
+  keahlian_bhs_isyarat             Decimal?                  @db.Decimal
+  kebutuhan_khusus_id              Int?
+  npwp                             String?
+  kewarganegaraan                  String?
   id_bank                          String?
-  nama_kcp                         String?
-  rekening_atas_nama               String?
   rekening_bank                    String?
+  rekening_atas_nama               String?
+  blob_id                          String?                   @db.Uuid
+  create_date                      DateTime                  @default(now())
+  last_update                      DateTime                  @updatedAt
+  soft_delete                      Decimal?                  @db.Decimal
+  last_sync                        DateTime?
+  updater_id                       String?                   @db.Uuid
+
+  // --- Kolom dari tabel ptk_terdaftar ---
+  ptk_terdaftar_id                 String?                   @db.Uuid
+  sekolah_id                       String?                   @db.Uuid
+  jenis_keluar_id                  String?
+  jabatan_ptk_id                   Decimal?                  @db.Decimal
+  tahun_ajaran_id                  Decimal?                  @db.Decimal
+  jenis_ptk_id                     Decimal?                  @db.Decimal
+  nomor_surat_tugas                String?
+  tanggal_surat_tugas              DateTime?                 @db.Date
+  ptk_induk                        Decimal?                  @db.Decimal
+  tmt_tugas                        DateTime?                 @db.Date
+  tgl_ptk_keluar                   DateTime?                 @db.Date
+
+  // --- Kolom SIMAK (dipertahankan) ---
+  qr_token                         String?
+  foto                             String?
+  status                           String                    @default("Aktif")
+
+  // --- Relations ---
+  jenis_ptk                        jenis_ptk?                @relation(fields: [jenis_ptk_id], references: [jenis_ptk_id], onDelete: NoAction, onUpdate: NoAction)
+  status_kepegawaian               status_kepegawaian?       @relation(fields: [status_kepegawaian_id], references: [status_kepegawaian_id], onDelete: NoAction, onUpdate: NoAction)
+  jabatan_ptk                      jabatan_ptk?              @relation(fields: [jabatan_ptk_id], references: [jabatan_ptk_id], onDelete: NoAction, onUpdate: NoAction)
+  sumber_gaji                      sumber_gaji?              @relation(fields: [sumber_gaji_id], references: [sumber_gaji_id], onDelete: NoAction, onUpdate: NoAction)
+  agama                            agama?                    @relation(fields: [agama_id], references: [agama_id], onDelete: NoAction, onUpdate: NoAction)
   pembelajaran                     Pembelajaran[]
   penggunas                        Pengguna[]
   riwayat_pendidikan_formal        RiwayatPendidikanFormal[]
@@ -418,6 +382,7 @@ model Gtk {
   presensiGtks                     PresensiGtk[]
   surat_keluar                     SuratKeluar[]
   tindak_lanjut_petugas            TindakLanjut[]            @relation("PetugasTindakLanjut")
+  bimbing_pd                       BimbingPd[]
 
   @@index([sekolah_id])
   @@index([qr_token])
@@ -432,7 +397,8 @@ model Pengguna {
   password         String
   nama             String
   email            String?       @unique
-  peran_id_str     String?
+  peran_nama       String?
+  peran_id         Int?
   alamat           String?
   no_telepon       String?
   no_hp            String?
@@ -612,74 +578,15 @@ model AppKey {
   @@schema("simak")
 }
 
-model BidangStudi {
-  bidang_studi_id          Int              @id
-  sekolah_id               String?          @db.Uuid
-  kelompok_bidang_studi_id Int?
-  kode                     String?
-  bidang_studi             String
-  kelompok                 String?
-  jenjang_paud             String?
-  jenjang_tk               String?
-  jenjang_sd               String?
-  jenjang_smp              String?
-  jenjang_sma              String?
-  jenjang_tinggi           String?
-  a_sert_komp              String?
-  a_sert_profesi           String?
-  create_date              DateTime?
-  last_update              DateTime?
-  expired_date             DateTime?
-  last_sync                DateTime?
-  created_at               DateTime         @default(now())
-  updated_at               DateTime         @updatedAt
-  rwy_sertifikasi          RwySertifikasi[]
-
-  @@map("bidang_studi")
-  @@schema("dapodik")
-}
-
-model LembSertifikasi {
-  kode_lemb_sert  String           @id
-  sekolah_id      String?          @db.Uuid
-  nm_lemb_sert    String
-  tmt_lemb_sert   DateTime?        @db.Date
-  ket_lemb_sert   String?
-  alamat_jalan    String?
-  rt              String?
-  rw              String?
-  nama_dusun      String?
-  desa_kelurahan  String?
-  kode_wilayah    String?
-  kode_pos        String?
-  lintang         Decimal?
-  bujur           Decimal?
-  nama            String?
-  nomor_telepon   String?
-  nomor_fax       String?
-  email           String?
-  website         String?
-  create_date     DateTime?
-  last_update     DateTime?
-  expired_date    DateTime?
-  last_sync       DateTime?
-  created_at      DateTime         @default(now())
-  updated_at      DateTime         @updatedAt
-  rwy_sertifikasi RwySertifikasi[]
-
-  @@map("lemb_sertifikasi")
-  @@schema("dapodik")
-}
-
 model RwySertifikasi {
-  riwayat_sertifikasi_id String           @id @default(uuid()) @db.Uuid
-  sekolah_id             String?          @db.Uuid
+  riwayat_sertifikasi_id String   @id @default(uuid()) @db.Uuid
+  sekolah_id             String?  @db.Uuid
   kode_lemb_sert         String?
-  ptk_id                 String?          @db.Uuid
+  ptk_id                 String?  @db.Uuid
   bidang_studi_id        Int?
   id_jenis_sertifikasi   String?
-  tgl_sert               DateTime?        @db.Date
-  tgl_exp_sert           DateTime?        @db.Date
+  tgl_sert               DateTime? @db.Date
+  tgl_exp_sert           DateTime? @db.Date
   nomor_sertifikat       String?
   nomer_registrasi       String?
   nomor_peserta          String?
@@ -689,17 +596,140 @@ model RwySertifikasi {
   last_update            DateTime?
   soft_delete            String?
   last_sync              DateTime?
-  updater_id             String?          @db.Uuid
+  updater_id             String?  @db.Uuid
   ptk_id_str             String?
   bidang_studi_id_str    String?
-  vld_count              Int              @default(0)
-  created_at             DateTime         @default(now())
-  updated_at             DateTime         @updatedAt
-  bidang_studi           BidangStudi?     @relation(fields: [bidang_studi_id], references: [bidang_studi_id])
-  lemb_sertifikasi       LembSertifikasi? @relation(fields: [kode_lemb_sert], references: [kode_lemb_sert])
-  gtk                    Gtk?             @relation(fields: [ptk_id], references: [ptk_id], onDelete: Cascade)
+  vld_count              Int      @default(0)
+  created_at             DateTime @default(now())
+  updated_at             DateTime @updatedAt
+  gtk                    Gtk?     @relation(fields: [ptk_id], references: [ptk_id], onDelete: Cascade)
 
   @@map("rwy_sertifikasi")
+  @@schema("dapodik")
+}
+
+// ========================
+// DUDI (Dunia Usaha & Industri)
+// ========================
+
+model Dudi {
+  dudi_id            String   @id @default(uuid()) @db.Uuid
+  sekolah_id         String?  @db.Uuid
+  nama               String
+  bidang_usaha_id    String?  @db.Char(10)
+  nama_bidang_usaha  String?
+  alamat_jalan       String?
+  rt                 String?
+  rw                 String?
+  nama_dusun         String?
+  desa_kelurahan     String?
+  kode_wilayah       String?
+  kode_pos           String?
+  lintang            Decimal? @db.Decimal
+  bujur              Decimal? @db.Decimal
+  nomor_telepon      String?
+  nomor_fax          String?
+  email              String?
+  website            String?
+  npwp               String?
+  nama_cp            String?
+  no_hp_cp           String?
+  soft_delete        Decimal? @db.Decimal
+  create_date        DateTime? @db.Timestamp(6)
+  last_update        DateTime? @db.Timestamp(6)
+  last_sync          DateTime? @db.Timestamp(6)
+  updater_id         String?  @db.Uuid
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+
+  @@index([sekolah_id])
+  @@map("dudi")
+  @@schema("dapodik")
+}
+
+model Mou {
+  mou_id             String    @id @default(uuid()) @db.Uuid
+  dudi_id            String    @db.Uuid
+  sekolah_id         String?   @db.Uuid
+  nomor_mou          String?
+  judul_mou          String?
+  tanggal_mulai      DateTime? @db.Date
+  tanggal_selesai    DateTime? @db.Date
+  keterangan         String?
+  soft_delete        Decimal?  @db.Decimal
+  create_date        DateTime? @db.Timestamp(6)
+  last_update        DateTime? @db.Timestamp(6)
+  last_sync          DateTime? @db.Timestamp(6)
+  updater_id         String?   @db.Uuid
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
+
+  @@index([dudi_id])
+  @@index([sekolah_id])
+  @@map("mou")
+  @@schema("dapodik")
+}
+
+model AktPd {
+  id_akt_pd          String    @id @default(uuid()) @db.Uuid
+  mou_id             String    @db.Uuid
+  sekolah_id         String?   @db.Uuid
+  jenis_akt_pd       String?
+  judul_akt_pd       String?
+  sk_tugas           String?
+  tanggal_sk_tugas   DateTime? @db.Date
+  tanggal_mulai      DateTime? @db.Date
+  tanggal_selesai    DateTime? @db.Date
+  lokasi             String?
+  soft_delete        Decimal?  @db.Decimal
+  create_date        DateTime? @db.Timestamp(6)
+  last_update        DateTime? @db.Timestamp(6)
+  last_sync          DateTime? @db.Timestamp(6)
+  updater_id         String?   @db.Uuid
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
+  anggota_akt_pd     AnggotaAktPd[]
+  bimbing_pd         BimbingPd[]
+
+  @@index([mou_id])
+  @@index([sekolah_id])
+  @@map("akt_pd")
+  @@schema("dapodik")
+}
+
+model AnggotaAktPd {
+  anggota_akt_pd_id  String    @id @default(uuid()) @db.Uuid
+  id_akt_pd          String    @db.Uuid
+  sekolah_id         String?   @db.Uuid
+  registrasi_id      String?   @db.Uuid
+  peserta_didik_id   String?   @db.Uuid
+  soft_delete        Decimal?  @db.Decimal
+  create_date        DateTime? @db.Timestamp(6)
+  last_update        DateTime? @db.Timestamp(6)
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
+  @@index([id_akt_pd])
+  @@index([sekolah_id])
+  @@index([peserta_didik_id])
+  @@map("anggota_akt_pd")
+  @@schema("dapodik")
+}
+
+model BimbingPd {
+  bimbing_pd_id      String    @id @default(uuid()) @db.Uuid
+  id_akt_pd          String    @db.Uuid
+  sekolah_id         String?   @db.Uuid
+  ptk_id             String?   @db.Uuid
+  urutan_pembimbing  Int?
+  soft_delete        Decimal?  @db.Decimal
+  create_date        DateTime? @db.Timestamp(6)
+  last_update        DateTime? @db.Timestamp(6)
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
+  @@index([id_akt_pd])
+  @@index([sekolah_id])
+  @@index([ptk_id])
+  @@map("bimbing_pd")
   @@schema("dapodik")
 }
 
@@ -1465,6 +1495,8 @@ model agama {
   last_update  DateTime  @default(dbgenerated("'2019-09-10 14:29:54.336888'::timestamp without time zone")) @db.Timestamp(6)
   expired_date DateTime? @db.Timestamp(6)
   last_sync    DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  gtks         Gtk[]
+  peserta_didik PesertaDidik[]
 
   @@schema("ref")
 }
@@ -1705,6 +1737,7 @@ model jabatan_ptk {
   expired_date   DateTime? @db.Timestamp(6)
   last_sync      DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
   jenis_ptk      jenis_ptk @relation(fields: [jenis_ptk_id], references: [jenis_ptk_id], onUpdate: Restrict, map: "fk_jabatan__jenis_ptk_jenis_pt")
+  gtks           Gtk[]
 
   @@index([jenis_ptk_id], map: "jenis_ptk_jabatan_fk2")
   @@schema("ref")
@@ -2043,6 +2076,7 @@ model jenis_ptk {
   expired_date DateTime?     @db.Timestamp(6)
   last_sync    DateTime      @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
   jabatan_ptk  jabatan_ptk[]
+  gtks         Gtk[]
 
   @@schema("ref")
 }
@@ -2791,6 +2825,7 @@ model status_kepegawaian {
   last_update           DateTime  @default(dbgenerated("'2019-09-10 14:29:59.408033'::timestamp without time zone")) @db.Timestamp(6)
   expired_date          DateTime? @db.Timestamp(6)
   last_sync             DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  gtks                  Gtk[]
 
   @@schema("ref")
 }
@@ -2861,6 +2896,7 @@ model sumber_gaji {
   last_update    DateTime  @default(dbgenerated("'2019-09-10 14:29:59.50086'::timestamp without time zone")) @db.Timestamp(6)
   expired_date   DateTime? @db.Timestamp(6)
   last_sync      DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  gtks           Gtk[]
 
   @@schema("ref")
 }

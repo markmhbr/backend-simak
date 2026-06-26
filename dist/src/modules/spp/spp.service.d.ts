@@ -21,8 +21,8 @@ export declare class SppService {
             rombongan_belajar: {
                 nama: string;
                 rombongan_belajar_id: string;
-                tingkat_pendidikan_id_str: string;
                 semester_id: string;
+                tingkat_pendidikan_id: import("@prisma/client-runtime-utils").Decimal;
             };
         } & {
             created_at: Date;
@@ -91,7 +91,9 @@ export declare class SppService {
         peserta_didik: {
             nama: string;
             nisn: string;
-            nama_rombel: string;
+            rombongan_belajar: {
+                nama: string;
+            };
         };
         riwayat_transaksi: {
             sekolah_id: string;

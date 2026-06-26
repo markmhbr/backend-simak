@@ -430,7 +430,7 @@ let JadwalService = class JadwalService {
                 throw new common_1.ConflictException(`Guru sudah mengajar di kelas lain pada hari ${data.hari} urutan ${data.urutan}`);
             }
         }
-        const jamMengajar = parseInt(pembelajaran.jam_mengajar_per_minggu || '0');
+        const jamMengajar = parseInt(pembelajaran.jam_mengajar_per_minggu?.toString() || '0');
         if (jamMengajar > 0) {
             const existingCount = await this.prisma.jadwalPelajaran.count({
                 where: {

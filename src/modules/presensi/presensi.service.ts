@@ -582,7 +582,11 @@ export class PresensiService {
         nama: true,
         nisn: true,
         rombongan_belajar_id: true,
-        nama_rombel: true,
+        rombongan_belajar: {
+          select: {
+            nama: true,
+          }
+        },
         foto: true,
       },
     });
@@ -597,22 +601,34 @@ export class PresensiService {
           jam_kembali: null,
         },
       });
-      return { type: 'pd', data: pd, activeIzinKeluar };
+      const pdMapped = {
+        ...pd,
+        nama_rombel: pd.rombongan_belajar?.nama || '',
+      };
+      return { type: 'pd', data: pdMapped, activeIzinKeluar };
     }
 
     // 2. Cari di GTK
-    const gtk = await this.prisma.gtk.findFirst({
+    const rawGtk = await this.prisma.gtk.findFirst({
       where: { sekolah_id: sekolahId, qr_token: token },
       select: {
         ptk_id: true,
         nama: true,
         nuptk: true,
         foto: true,
-        jenis_ptk_id_str: true,
+        jenis_ptk: {
+          select: { jenis_ptk: true }
+        },
       },
     });
 
-    if (gtk) {
+    if (rawGtk) {
+      const { jenis_ptk, ...gtkRest } = rawGtk;
+      const gtk = {
+        ...gtkRest,
+        jenis_ptk_id_str: jenis_ptk?.jenis_ptk || null
+      };
+
       const activeIzinKeluar = await this.prisma.izin.findFirst({
         where: {
           sekolah_id: sekolahId,
@@ -661,6 +677,7 @@ export class PresensiService {
     // 1. Cari di Peserta Didik
     const pd = await this.prisma.pesertaDidik.findFirst({
       where: { sekolah_id: sekolahId, qr_token: token },
+      include: { rombongan_belajar: { select: { nama: true } } },
     });
 
     if (pd) {
@@ -729,7 +746,7 @@ export class PresensiService {
           foto: pd.foto,
           nisn: pd.nisn,
           rombongan_belajar_id: pd.rombongan_belajar_id,
-          nama_rombel: pd.nama_rombel,
+          nama_rombel: pd.rombongan_belajar?.nama || null,
         },
       };
     }
@@ -737,6 +754,9 @@ export class PresensiService {
     // 2. Cari di GTK
     const gtk = await this.prisma.gtk.findFirst({
       where: { sekolah_id: sekolahId, qr_token: token },
+      include: {
+        jenis_ptk: true,
+      }
     });
 
     if (gtk) {
@@ -805,7 +825,7 @@ export class PresensiService {
           nama: gtk.nama,
           foto: gtk.foto,
           nuptk: gtk.nuptk,
-          jenis_ptk_id_str: gtk.jenis_ptk_id_str,
+          jenis_ptk_id_str: gtk.jenis_ptk?.jenis_ptk || null,
         },
       };
     }
@@ -835,7 +855,11 @@ export class PresensiService {
         peserta_didik_id: true,
         nama: true,
         nisn: true,
-        nama_rombel: true,
+        rombongan_belajar: {
+          select: {
+            nama: true,
+          }
+        },
         foto: true,
       },
       orderBy: {
@@ -864,11 +888,12 @@ export class PresensiService {
         .map(i => [i.peserta_didik_id!, i])
     );
 
-    return students.map(student => {
+    return students.map((student: any) => {
       const att = attendanceMap.get(student.peserta_didik_id);
       const iz = izinMap.get(student.peserta_didik_id);
       return {
         ...student,
+        nama_rombel: student.rombongan_belajar?.nama || '',
         presensi: att || null,
         izin: iz || null,
       };
@@ -894,7 +919,9 @@ export class PresensiService {
         nama: true,
         nuptk: true,
         foto: true,
-        jenis_ptk_id_str: true,
+        jenis_ptk: {
+          select: { jenis_ptk: true }
+        },
       },
       orderBy: {
         nama: 'asc',
@@ -922,11 +949,13 @@ export class PresensiService {
         .map(i => [i.ptk_id!, i])
     );
 
-    return gtks.map(gtk => {
-      const att = attendanceMap.get(gtk.ptk_id);
-      const iz = izinMap.get(gtk.ptk_id);
+    return gtks.map(g => {
+      const att = attendanceMap.get(g.ptk_id);
+      const iz = izinMap.get(g.ptk_id);
+      const { jenis_ptk, ...gtkRest } = g;
       return {
-        ...gtk,
+        ...gtkRest,
+        jenis_ptk_id_str: jenis_ptk?.jenis_ptk || null,
         presensi: att || null,
         izin: iz || null,
       };
@@ -956,7 +985,7 @@ export class PresensiService {
       dateOnly = new Date(wibDate.toISOString().split('T')[0]);
     }
 
-    return this.prisma.izin.findMany({
+    const data = await this.prisma.izin.findMany({
       where: {
         sekolah_id: sekolahId,
         jenis: 2, // Keluar
@@ -966,7 +995,11 @@ export class PresensiService {
         peserta_didik: {
           select: {
             nama: true,
-            nama_rombel: true,
+            rombongan_belajar: {
+              select: {
+                nama: true
+              }
+            },
             nisn: true,
           },
         },
@@ -974,13 +1007,38 @@ export class PresensiService {
           select: {
             nama: true,
             nuptk: true,
-            jenis_ptk_id_str: true,
+            jenis_ptk: {
+              select: { jenis_ptk: true }
+            },
           },
         },
       },
       orderBy: {
         created_at: 'desc',
       },
+    });
+
+    return data.map((item: any) => {
+      const formattedItem = {
+        ...item,
+        peserta_didik: item.peserta_didik ? {
+          nama: item.peserta_didik.nama,
+          nisn: item.peserta_didik.nisn,
+          nama_rombel: item.peserta_didik.rombongan_belajar?.nama || ''
+        } : null
+      };
+
+      if (item.gtk) {
+        const { jenis_ptk, ...gtkRest } = item.gtk;
+        return {
+          ...formattedItem,
+          gtk: {
+            ...gtkRest,
+            jenis_ptk_id_str: jenis_ptk?.jenis_ptk || null
+          }
+        };
+      }
+      return formattedItem;
     });
   }
 

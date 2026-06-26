@@ -1,7 +1,6 @@
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
-import * as dotenv from 'axios'; // Sebenarnya dotenv tapi saya akan pakai pendekatan manual saja jika tidak ada dotenv
 
 // Saya akan pakai cara manual untuk ambil DB URL dari .env
 const fs = require('fs');

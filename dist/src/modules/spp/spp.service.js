@@ -44,7 +44,7 @@ let SppService = class SppService {
                             select: {
                                 rombongan_belajar_id: true,
                                 nama: true,
-                                tingkat_pendidikan_id_str: true,
+                                tingkat_pendidikan_id: true,
                                 semester_id: true,
                             },
                         },
@@ -311,7 +311,7 @@ let SppService = class SppService {
                     select: {
                         nama: true,
                         nisn: true,
-                        nama_rombel: true,
+                        rombongan_belajar: { select: { nama: true } },
                     },
                 },
                 pengaturan_tagihan: {
@@ -394,7 +394,7 @@ let SppService = class SppService {
                     select: {
                         nama: true,
                         nisn: true,
-                        nama_rombel: true,
+                        rombongan_belajar: { select: { nama: true } },
                     },
                 },
                 pengaturan_tagihan: {
@@ -411,7 +411,7 @@ let SppService = class SppService {
                 peserta_didik_id: s.peserta_didik_id,
                 nama: s.peserta_didik?.nama || 'Unknown',
                 nisn: s.peserta_didik?.nisn || '-',
-                kelas: s.peserta_didik?.nama_rombel || '-',
+                kelas: s.peserta_didik?.rombongan_belajar?.nama || '-',
                 nama_tagihan: s.pengaturan_tagihan?.nama_tagihan || 'Tagihan',
                 nominal_tagihan: s.nominal_tagihan.toString(),
                 nominal_terbayar: s.nominal_terbayar.toString(),
@@ -429,7 +429,7 @@ let SppService = class SppService {
                 peserta_didik: {
                     select: {
                         rombongan_belajar_id: true,
-                        nama_rombel: true,
+                        rombongan_belajar: { select: { nama: true } },
                     },
                 },
             },
@@ -437,7 +437,7 @@ let SppService = class SppService {
         const rekapMap = {};
         for (const s of listSpp) {
             const rombelId = s.peserta_didik?.rombongan_belajar_id || 'unassigned';
-            const rombelNama = s.peserta_didik?.nama_rombel || 'Tanpa Kelas';
+            const rombelNama = s.peserta_didik?.rombongan_belajar?.nama || 'Tanpa Kelas';
             const tunggakan = s.nominal_tagihan - s.nominal_terbayar;
             if (!rekapMap[rombelId]) {
                 rekapMap[rombelId] = {

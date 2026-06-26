@@ -607,4 +607,22 @@ export class DapodikController {
     const data = await this.dapodikService.updatePesertaDidik(sekolahId, id, body);
     return { status: 'success', data };
   }
+
+  // ========================
+  // DUDI (Dunia Usaha & Industri)
+  // ========================
+
+  @Get('dudi')
+  async getDudi(@Req() req: Request) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.getDudi(sekolahId);
+    return { status: 'success', data };
+  }
+
+  @Get('dudi/:id')
+  async getDudiDetail(@Req() req: Request, @Param('id') id: string) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.getDudiById(sekolahId, id);
+    return { status: 'success', data };
+  }
 }

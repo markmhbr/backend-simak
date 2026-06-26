@@ -89,8 +89,8 @@ export class MandalaService implements OnModuleInit {
           alamat: school.alamat_jalan,
           email: school.email,
           website: school.website,
-          bentuk_pendidikan_is_str: school.bentuk_pendidikan_id_str,
-          bentuk_pendidikan_id_str: school.bentuk_pendidikan_id_str,
+          bentuk_pendidikan_is_str: null,
+          bentuk_pendidikan_id_str: null,
           kabupaten_kota: null,
           kecamatan: null,
           lintang: school.lintang,
@@ -707,8 +707,8 @@ export class MandalaService implements OnModuleInit {
           { sekolah_id: sekolahId },
           {
             OR: [
-              { jabatan_ptk_id_str: { contains: 'Kepala Sekolah', mode: 'insensitive' } },
-              { jenis_ptk_id_str: { contains: 'Kepala Sekolah', mode: 'insensitive' } },
+              { jenis_ptk: { jenis_ptk: { contains: 'Kepala Sekolah', mode: 'insensitive' } } },
+              { jabatan_ptk: { jabatan_ptk: { contains: 'Kepala Sekolah', mode: 'insensitive' } } },
             ],
           },
         ],
@@ -782,28 +782,26 @@ export class MandalaService implements OnModuleInit {
         skip: skip,
         include: {
           rombongan_belajar: true,
+          agama: true,
         },
         orderBy: { nama: 'asc' },
       }),
     ]);
 
-    const formattedData = students.map((pd) => {
+    const formattedData = students.map((pd: any) => {
       // Construct alamat lengkap
       const addressParts = [
         pd.alamat_jalan,
         pd.rt ? `RT ${pd.rt}` : null,
         pd.rw ? `RW ${pd.rw}` : null,
-        pd.dusun ? `Dusun ${pd.dusun}` : null,
+        pd.nama_dusun ? `Dusun ${pd.nama_dusun}` : null,
         pd.desa_kelurahan ? `Desa/Kel. ${pd.desa_kelurahan}` : null,
-        pd.kecamatan ? `Kec. ${pd.kecamatan}` : null,
-        pd.kabupaten_kota,
-        pd.provinsi,
         pd.kode_pos
       ].filter(Boolean);
       const alamatLengkap = addressParts.length > 0 ? addressParts.join(', ') : '';
 
-      // Select HP Orang Tua (priority: no_wa_ayah -> no_wa_ibu -> no_wa -> nomor_telepon_seluler)
-      const hpOrangTua = pd.no_wa_ayah || pd.no_wa_ibu || pd.no_wa || pd.nomor_telepon_seluler || '';
+      // Select HP Orang Tua
+      const hpOrangTua = pd.nomor_telepon_seluler || '';
 
       return {
         identitas: {
@@ -815,18 +813,18 @@ export class MandalaService implements OnModuleInit {
           jenis_kelamin: pd.jenis_kelamin,
           tempat_lahir: pd.tempat_lahir,
           tanggal_lahir: pd.tanggal_lahir,
-          agama: pd.agama_id_str || pd.agama_id || '',
-          jenis_pendaftaran_id_str: pd.jenis_pendaftaran_id_str || pd.jenis_pendaftaran_id || '',
+          agama: pd.agama?.nama || pd.agama_id || '',
+          jenis_pendaftaran_id_str: pd.jenis_pendaftaran_id?.toString() || '',
         },
         akademik: {
-          nama_rombel: pd.nama_rombel || pd.rombongan_belajar?.nama || '',
-          tingkat: pd.rombongan_belajar?.tingkat_pendidikan_id_str || pd.rombongan_belajar?.tingkat_pendidikan_id || pd.tingkat_pendidikan_id || '',
-          jurusan: pd.rombongan_belajar?.jurusan_id_str || pd.rombongan_belajar?.jurusan_id || pd.jurusan_sp_id || '',
+          nama_rombel: pd.rombongan_belajar?.nama || '',
+          tingkat: pd.rombongan_belajar?.tingkat_pendidikan_id?.toString() || '',
+          jurusan: pd.rombongan_belajar?.jurusan_sp_id || '',
         },
         data_pendukung: {
           alamat_lengkap: alamatLengkap,
           nama_ayah: pd.nama_ayah || '',
-          nama_ibu: pd.nama_ibu || '',
+          nama_ibu: pd.nama_ibu_kandung || '',
           hp_orang_tua: hpOrangTua,
         },
       };
@@ -872,10 +870,10 @@ export class MandalaService implements OnModuleInit {
     }
 
     if (type === 'guru') {
-      whereClause.jenis_ptk_id_str = { contains: 'Guru', mode: 'insensitive' };
+      whereClause.jenis_ptk = { jenis_ptk: { contains: 'Guru', mode: 'insensitive' } };
     } else if (type === 'tendik') {
       whereClause.NOT = {
-        jenis_ptk_id_str: { contains: 'Guru', mode: 'insensitive' },
+        jenis_ptk: { jenis_ptk: { contains: 'Guru', mode: 'insensitive' } },
       };
     }
 
@@ -891,11 +889,32 @@ export class MandalaService implements OnModuleInit {
       this.prisma.gtk.count({ where: whereClause }),
       this.prisma.gtk.findMany({
         where: whereClause,
+        include: {
+          jenis_ptk: true,
+          status_kepegawaian: true,
+          jabatan_ptk: true,
+          agama: true,
+          riwayat_pendidikan_formal: {
+            select: { jenjang_pendidikan_id_str: true }
+          }
+        },
         take: limit,
         skip: skip,
         orderBy: { nama: 'asc' },
       }),
     ]);
+
+    const getPendidikanTerakhir = (riwayat: { jenjang_pendidikan_id_str: string | null }[]): string => {
+      const jenjangs = riwayat.map(r => r.jenjang_pendidikan_id_str?.toUpperCase() || '');
+      if (jenjangs.includes('S3')) return 'S3';
+      if (jenjangs.includes('S2')) return 'S2';
+      if (jenjangs.includes('S1') || jenjangs.includes('D4')) return 'S1';
+      if (jenjangs.includes('D3')) return 'D3';
+      if (jenjangs.includes('D2')) return 'D2';
+      if (jenjangs.includes('D1')) return 'D1';
+      if (jenjangs.includes('SMA') || jenjangs.includes('SMK') || jenjangs.includes('SLTA')) return 'SMA';
+      return '';
+    };
 
     const formattedData = gtks.map((g) => {
       // Construct alamat lengkap
@@ -903,11 +922,8 @@ export class MandalaService implements OnModuleInit {
         g.alamat_jalan,
         g.rt ? `RT ${g.rt}` : null,
         g.rw ? `RW ${g.rw}` : null,
-        g.dusun ? `Dusun ${g.dusun}` : null,
+        g.nama_dusun ? `Dusun ${g.nama_dusun}` : null,
         g.desa_kelurahan ? `Desa/Kel. ${g.desa_kelurahan}` : null,
-        g.kecamatan ? `Kec. ${g.kecamatan}` : null,
-        g.kabupaten_kota,
-        g.provinsi,
         g.kode_pos
       ].filter(Boolean);
       const alamatLengkap = addressParts.length > 0 ? addressParts.join(', ') : '';
@@ -923,19 +939,19 @@ export class MandalaService implements OnModuleInit {
           jenis_kelamin: g.jenis_kelamin || '',
           tempat_lahir: g.tempat_lahir || '',
           tanggal_lahir: g.tanggal_lahir || null,
-          agama: g.agama_id_str || g.agama_id || '',
+          agama: g.agama?.nama || g.agama_id?.toString() || '',
         },
         kepegawaian: {
-          jenis_ptk: g.jenis_ptk_id_str || '',
-          jabatan: g.jabatan_ptk_id_str || '',
-          status_kepegawaian: g.status_kepegawaian_id_str || '',
+          jenis_ptk: g.jenis_ptk?.jenis_ptk || '',
+          jabatan: g.jabatan_ptk?.jabatan_ptk || '',
+          status_kepegawaian: g.status_kepegawaian?.nama || '',
           status: g.status,
-          pendidikan_terakhir: g.pendidikan_terakhir || '',
+          pendidikan_terakhir: getPendidikanTerakhir(g.riwayat_pendidikan_formal),
         },
         data_pendukung: {
           alamat_lengkap: alamatLengkap,
           no_hp: g.no_hp || '',
-          no_wa: g.no_wa || '',
+          no_wa: '',
           email: g.email || '',
         },
       };
@@ -967,19 +983,45 @@ export class MandalaService implements OnModuleInit {
       throw new NotFoundException(`School with ID ${sekolahId} not found.`);
     }
 
-    const gtks = await this.prisma.gtk.findMany({
+    const rawGtks = await this.prisma.gtk.findMany({
       where: {
         sekolah_id: sekolahId,
         status: 'Aktif',
       },
       select: {
-        jenis_ptk_id_str: true,
         jenis_kelamin: true,
-        status_kepegawaian_id_str: true,
         tanggal_lahir: true,
-        pendidikan_terakhir: true,
+        jenis_ptk: {
+          select: { jenis_ptk: true }
+        },
+        status_kepegawaian: {
+          select: { nama: true }
+        },
+        riwayat_pendidikan_formal: {
+          select: { jenjang_pendidikan_id_str: true }
+        }
       },
     });
+
+    const getPendidikanTerakhir = (riwayat: { jenjang_pendidikan_id_str: string | null }[]): string => {
+      const jenjangs = riwayat.map(r => r.jenjang_pendidikan_id_str?.toUpperCase() || '');
+      if (jenjangs.includes('S3')) return 'S3';
+      if (jenjangs.includes('S2')) return 'S2';
+      if (jenjangs.includes('S1') || jenjangs.includes('D4')) return 'S1';
+      if (jenjangs.includes('D3')) return 'D3';
+      if (jenjangs.includes('D2')) return 'D2';
+      if (jenjangs.includes('D1')) return 'D1';
+      if (jenjangs.includes('SMA') || jenjangs.includes('SMK') || jenjangs.includes('SLTA')) return 'SMA';
+      return '';
+    };
+
+    const gtks = rawGtks.map(g => ({
+      jenis_ptk_id_str: g.jenis_ptk?.jenis_ptk || '',
+      jenis_kelamin: g.jenis_kelamin,
+      status_kepegawaian_id_str: g.status_kepegawaian?.nama || '',
+      tanggal_lahir: g.tanggal_lahir,
+      pendidikan_terakhir: getPendidikanTerakhir(g.riwayat_pendidikan_formal)
+    }));
 
     const isGuru = (j: string) => (j || '').toLowerCase().includes('guru');
     const isAsn = (s: string) => ['pns', 'pppk'].includes((s || '').toLowerCase());
@@ -1104,7 +1146,7 @@ export class MandalaService implements OnModuleInit {
             rombongan_belajar: {
               select: {
                 nama: true,
-                tingkat_pendidikan_id_str: true,
+                tingkat_pendidikan_id: true,
               }
             }
           }
@@ -1137,18 +1179,31 @@ export class MandalaService implements OnModuleInit {
             nuptk: true,
             nip: true,
             foto: true,
-            jenis_ptk_id_str: true,
+            jenis_ptk: {
+              select: { jenis_ptk: true }
+            },
           }
         }
       },
       orderBy: { jam_masuk: 'desc' },
     });
 
-    return data.map(item => ({
-      ...item,
-      status_masuk_str: this.mapStatusMasuk(item.status_masuk),
-      status_pulang_str: this.mapStatusPulang(item.status_pulang),
-    }));
+    return data.map(item => {
+      let formattedGtk = null;
+      if (item.gtk) {
+        const { jenis_ptk, ...gtkRest } = item.gtk;
+        formattedGtk = {
+          ...gtkRest,
+          jenis_ptk_id_str: jenis_ptk?.jenis_ptk || null
+        };
+      }
+      return {
+        ...item,
+        gtk: formattedGtk,
+        status_masuk_str: this.mapStatusMasuk(item.status_masuk),
+        status_pulang_str: this.mapStatusPulang(item.status_pulang),
+      };
+    });
   }
 
   private mapStatusMasuk(status: number | null): string {
