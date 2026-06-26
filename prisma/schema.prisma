@@ -640,6 +640,7 @@ model Dudi {
   updater_id        String?   @db.Uuid
   created_at        DateTime  @default(now())
   updated_at        DateTime  @updatedAt
+  mou               Mou[]
 
   @@index([sekolah_id])
   @@map("dudi")
@@ -662,6 +663,8 @@ model Mou {
   updater_id      String?   @db.Uuid
   created_at      DateTime  @default(now())
   updated_at      DateTime  @updatedAt
+  dudi            Dudi      @relation(fields: [dudi_id], references: [dudi_id])
+  akt_pd          AktPd[]
 
   @@index([dudi_id])
   @@index([sekolah_id])
@@ -687,6 +690,7 @@ model AktPd {
   updater_id       String?        @db.Uuid
   created_at       DateTime       @default(now())
   updated_at       DateTime       @updatedAt
+  mou              Mou            @relation(fields: [mou_id], references: [mou_id])
   anggota_akt_pd   AnggotaAktPd[]
   bimbing_pd       BimbingPd[]
 
@@ -707,8 +711,7 @@ model AnggotaAktPd {
   last_update                  DateTime?     @db.Timestamp(6)
   created_at                   DateTime      @default(now())
   updated_at                   DateTime      @updatedAt
-  pesertaDidik                 PesertaDidik? @relation(fields: [pesertaDidikPeserta_didik_id], references: [peserta_didik_id])
-  pesertaDidikPeserta_didik_id String?       @db.Uuid
+  peserta_didik                PesertaDidik? @relation(fields: [peserta_didik_id], references: [peserta_didik_id])
   aktPd                        AktPd?        @relation(fields: [aktPdId_akt_pd], references: [id_akt_pd])
   aktPdId_akt_pd               String?       @db.Uuid
 
