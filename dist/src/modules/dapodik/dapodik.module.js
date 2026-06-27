@@ -10,11 +10,13 @@ exports.DapodikModule = void 0;
 const common_1 = require("@nestjs/common");
 const dapodik_controller_1 = require("./dapodik.controller");
 const dapodik_service_1 = require("./dapodik.service");
+const reference_module_1 = require("../reference/reference.module");
 let DapodikModule = class DapodikModule {
 };
 exports.DapodikModule = DapodikModule;
 exports.DapodikModule = DapodikModule = __decorate([
     (0, common_1.Module)({
+        imports: [reference_module_1.ReferenceModule],
         controllers: [dapodik_controller_1.DapodikController],
         providers: [dapodik_service_1.DapodikService],
     })

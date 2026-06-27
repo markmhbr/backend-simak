@@ -895,7 +895,7 @@ export class MandalaService implements OnModuleInit {
           jabatan_ptk: true,
           agama: true,
           riwayat_pendidikan_formal: {
-            select: { jenjang_pendidikan_id_str: true }
+            select: { jenjang_pendidikan_id: true }
           }
         },
         take: limit,
@@ -904,19 +904,19 @@ export class MandalaService implements OnModuleInit {
       }),
     ]);
 
-    const getPendidikanTerakhir = (riwayat: { jenjang_pendidikan_id_str: string | null }[]): string => {
-      const jenjangs = riwayat.map(r => r.jenjang_pendidikan_id_str?.toUpperCase() || '');
-      if (jenjangs.includes('S3')) return 'S3';
-      if (jenjangs.includes('S2')) return 'S2';
-      if (jenjangs.includes('S1') || jenjangs.includes('D4')) return 'S1';
-      if (jenjangs.includes('D3')) return 'D3';
-      if (jenjangs.includes('D2')) return 'D2';
-      if (jenjangs.includes('D1')) return 'D1';
-      if (jenjangs.includes('SMA') || jenjangs.includes('SMK') || jenjangs.includes('SLTA')) return 'SMA';
+    const getPendidikanTerakhir = (riwayat: { jenjang_pendidikan_id: any }[]): string => {
+      const ids = riwayat.map(r => r.jenjang_pendidikan_id ? Number(r.jenjang_pendidikan_id) : 0);
+      if (ids.some(id => id === 40 || id === 41)) return 'S3';
+      if (ids.some(id => id === 35 || id === 36)) return 'S2';
+      if (ids.some(id => id === 30 || id === 31 || id === 23)) return 'S1';
+      if (ids.some(id => id === 22)) return 'D3';
+      if (ids.some(id => id === 21)) return 'D2';
+      if (ids.some(id => id === 20)) return 'D1';
+      if (ids.some(id => id === 6 || id === 9)) return 'SMA';
       return '';
     };
 
-    const formattedData = gtks.map((g) => {
+    const formattedData = gtks.map((g: any) => {
       // Construct alamat lengkap
       const addressParts = [
         g.alamat_jalan,
@@ -998,24 +998,24 @@ export class MandalaService implements OnModuleInit {
           select: { nama: true }
         },
         riwayat_pendidikan_formal: {
-          select: { jenjang_pendidikan_id_str: true }
+          select: { jenjang_pendidikan_id: true }
         }
       },
     });
 
-    const getPendidikanTerakhir = (riwayat: { jenjang_pendidikan_id_str: string | null }[]): string => {
-      const jenjangs = riwayat.map(r => r.jenjang_pendidikan_id_str?.toUpperCase() || '');
-      if (jenjangs.includes('S3')) return 'S3';
-      if (jenjangs.includes('S2')) return 'S2';
-      if (jenjangs.includes('S1') || jenjangs.includes('D4')) return 'S1';
-      if (jenjangs.includes('D3')) return 'D3';
-      if (jenjangs.includes('D2')) return 'D2';
-      if (jenjangs.includes('D1')) return 'D1';
-      if (jenjangs.includes('SMA') || jenjangs.includes('SMK') || jenjangs.includes('SLTA')) return 'SMA';
+    const getPendidikanTerakhir = (riwayat: { jenjang_pendidikan_id: any }[]): string => {
+      const ids = riwayat.map(r => r.jenjang_pendidikan_id ? Number(r.jenjang_pendidikan_id) : 0);
+      if (ids.some(id => id === 40 || id === 41)) return 'S3';
+      if (ids.some(id => id === 35 || id === 36)) return 'S2';
+      if (ids.some(id => id === 30 || id === 31 || id === 23)) return 'S1';
+      if (ids.some(id => id === 22)) return 'D3';
+      if (ids.some(id => id === 21)) return 'D2';
+      if (ids.some(id => id === 20)) return 'D1';
+      if (ids.some(id => id === 6 || id === 9)) return 'SMA';
       return '';
     };
 
-    const gtks = rawGtks.map(g => ({
+    const gtks = rawGtks.map((g: any) => ({
       jenis_ptk_id_str: g.jenis_ptk?.jenis_ptk || '',
       jenis_kelamin: g.jenis_kelamin,
       status_kepegawaian_id_str: g.status_kepegawaian?.nama || '',

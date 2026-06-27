@@ -49,6 +49,10 @@ export declare class SyncController {
         status: string;
         count: number;
     }>;
+    syncRwyKepangkatan(req: Request, data: any[]): Promise<{
+        status: string;
+        count: number;
+    }>;
     syncPembelajaran(req: Request, data: any[]): Promise<{
         status: string;
         count: number;

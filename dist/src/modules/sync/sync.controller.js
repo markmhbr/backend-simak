@@ -142,6 +142,17 @@ let SyncController = class SyncController {
             return { status: 'success', count: result.successCount };
         });
     }
+    async syncRwyKepangkatan(req, data) {
+        const sekolahId = this.getSekolahId(req);
+        if (!sekolahId) {
+            throw new common_1.NotFoundException('sekolah_id tidak ditemukan.');
+        }
+        return this.getLock(sekolahId).run(async () => {
+            const rows = Array.isArray(data) ? data : [data];
+            const result = await this.syncService.syncRwyKepangkatan(sekolahId, rows);
+            return { status: 'success', count: result.successCount };
+        });
+    }
     async syncPembelajaran(req, data) {
         const sekolahId = this.getSekolahId(req);
         if (!sekolahId) {
@@ -243,6 +254,16 @@ __decorate([
     __metadata("design:paramtypes", [Object, Array]),
     __metadata("design:returntype", Promise)
 ], SyncController.prototype, "syncRwySertifikat", null);
+__decorate([
+    (0, common_1.Post)('rwy_kepangkatan'),
+    (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Array]),
+    __metadata("design:returntype", Promise)
+], SyncController.prototype, "syncRwyKepangkatan", null);
 __decorate([
     (0, common_1.Post)('pembelajaran'),
     (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),

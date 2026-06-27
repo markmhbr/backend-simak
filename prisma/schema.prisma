@@ -129,6 +129,7 @@ model AnggotaRombel {
   updater_id           String?   @db.Uuid
 
   rombongan_belajar RombonganBelajar @relation(fields: [rombongan_belajar_id], references: [rombongan_belajar_id], onDelete: Cascade)
+  peserta_didik     PesertaDidik     @relation(fields: [peserta_didik_id], references: [peserta_didik_id], onDelete: Cascade)
 
   @@index([rombongan_belajar_id])
   @@index([sekolah_id])
@@ -250,6 +251,16 @@ model PesertaDidik {
   id_hobby              Decimal?  @db.Decimal
   id_cita               Decimal?  @db.Decimal
 
+  // --- Kolom dari tabel peserta_didik_longitudinal ---
+  berat_badan              Decimal?  @db.Decimal(38, 0)
+  tinggi_badan             Decimal?  @db.Decimal(38, 0)
+  lingkar_kepala           Decimal?  @db.Decimal(38, 0)
+  jarak_rumah_ke_sekolah   Decimal?  @db.Decimal(38, 0)
+  jarak_rumah_ke_sekolah_km Decimal? @db.Decimal(38, 0)
+  waktu_tempuh_ke_sekolah  Decimal?  @db.Decimal(38, 0)
+  menit_tempuh_ke_sekolah  Decimal?  @db.Decimal(38, 0)
+  jumlah_saudara_kandung   Decimal?  @db.Decimal(38, 0)
+
   // --- Kolom SIMAK ---
   qr_token         String?
   foto             String?
@@ -271,6 +282,7 @@ model PesertaDidik {
   spp                   Spp[]
   surat_keluar          SuratKeluar[]
   anggota_akt_pd        AnggotaAktPd[]
+  anggota_rombel        AnggotaRombel[]
   agama                 agama?                 @relation(fields: [agama_id], references: [agama_id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([sekolah_id])
@@ -375,6 +387,7 @@ model Gtk {
   penggunas                 Pengguna[]
   riwayat_pendidikan_formal RiwayatPendidikanFormal[]
   rwy_sertifikasi           RwySertifikasi[]
+  rwy_kepangkatan           RwyKepangkatan[]
   izins                     Izin[]
   pelanggaran_dilaporkan    Pelanggaran[]             @relation("PelaporGtk")
   pelanggaran               Pelanggaran[]             @relation("GtkPelanggaran")
@@ -604,6 +617,30 @@ model RwySertifikasi {
   gtk                    Gtk?      @relation(fields: [ptk_id], references: [ptk_id], onDelete: Cascade)
 
   @@map("rwy_sertifikasi")
+  @@schema("dapodik")
+}
+
+model RwyKepangkatan {
+  riwayat_kepangkatan_id String    @id @default(uuid()) @db.Uuid
+  sekolah_id             String?   @db.Uuid
+  ptk_id                 String?   @db.Uuid
+  pangkat_golongan_id    Decimal?  @db.Decimal(38, 0)
+  nomor_sk               String?
+  tanggal_sk             DateTime? @db.Date
+  tmt_pangkat            DateTime? @db.Date
+  masa_kerja_gol_tahun   Decimal?  @db.Decimal(38, 0)
+  masa_kerja_gol_bulan   Decimal?  @db.Decimal(38, 0)
+  asal_data              String?
+  create_date            DateTime?
+  last_update            DateTime?
+  soft_delete            Decimal?  @db.Decimal(38, 0)
+  last_sync              DateTime?
+  updater_id             String?   @db.Uuid
+  created_at             DateTime  @default(now())
+  updated_at             DateTime  @updatedAt
+  gtk                    Gtk?      @relation(fields: [ptk_id], references: [ptk_id], onDelete: Cascade)
+
+  @@map("rwy_kepangkatan")
   @@schema("dapodik")
 }
 
@@ -1373,21 +1410,22 @@ model RiwayatPendidikanFormal {
   ptk_id                       String   @db.Uuid
   satuan_pendidikan_formal     String
   fakultas                     String?
-  kependidikan                 String?
-  tahun_masuk                  String?
-  tahun_lulus                  String?
+  kependidikan                 Decimal? @db.Decimal(1, 0)
+  tahun_masuk                  Decimal? @db.Decimal(4, 0)
+  tahun_lulus                  Decimal? @db.Decimal(4, 0)
   nim                          String?
-  status_kuliah                String?
-  semester                     String?
-  ipk                          String?
-  prodi                        String?
-  id_reg_pd                    String?
-  bidang_studi_id_str          String?
-  jenjang_pendidikan_id_str    String?
-  gelar_akademik_id_str        String?
+  status_kuliah                Decimal? @db.Decimal(1, 0)
+  semester                     Decimal? @db.Decimal(2, 0)
+  ipk                          Decimal? @db.Decimal(5, 2)
+  prodi                        String?  @db.Uuid
+  id_reg_pd                    String?  @db.Uuid
+  bidang_studi_id              Int?
+  jenjang_pendidikan_id        Decimal? @db.Decimal(2, 0)
+  gelar_akademik_id            Int?
   created_at                   DateTime @default(now())
   updated_at                   DateTime @updatedAt
   gtk                          Gtk      @relation(fields: [ptk_id], references: [ptk_id], onDelete: Cascade)
+  jenjang_pendidikan           jenjang_pendidikan? @relation(fields: [jenjang_pendidikan_id], references: [jenjang_pendidikan_id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([ptk_id])
   @@map("riwayat_pendidikan_formal")
@@ -2213,6 +2251,7 @@ model jenjang_pendidikan {
   kurikulum             kurikulum[]
   template_un           template_un[]
   tingkat_pendidikan    tingkat_pendidikan[]
+  riwayat_pendidikan_formal RiwayatPendidikanFormal[]
 
   @@schema("ref")
 }

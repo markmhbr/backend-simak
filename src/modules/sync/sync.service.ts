@@ -245,6 +245,10 @@ export class SyncService {
     const appKey = await this.prisma.appKey.findUnique({ where: { sekolah_id: sekolahId } });
     const domain = appKey?.domain?.replace(/\/+$/, '') || '';
 
+    // Pre-fetch valid agama IDs to avoid FK constraint violations
+    const validAgamaRows = await this.prisma.agama.findMany({ select: { agama_id: true } });
+    const validAgamaIds = new Set(validAgamaRows.map(a => a.agama_id));
+
     for (const p of dataRows) {
       if (!p.peserta_didik_id) continue;
 
@@ -255,6 +259,10 @@ export class SyncService {
 
       const rpd = p.registrasi_peserta_didik || {};
 
+      // Validate agama_id against ref table
+      const rawAgamaId = p.agama_id ? Number(p.agama_id) : null;
+      const validatedAgamaId = rawAgamaId && validAgamaIds.has(rawAgamaId) ? rawAgamaId : null;
+
       const payload = {
         // --- Kolom dari peserta_didik ---
         nama: p.nama || 'Tanpa Nama',
@@ -264,7 +272,7 @@ export class SyncService {
         no_kk: p.no_kk || null,
         tempat_lahir: p.tempat_lahir || null,
         tanggal_lahir: this.parseDate(p.tanggal_lahir),
-        agama_id: p.agama_id ? Number(p.agama_id) : null,
+        agama_id: validatedAgamaId,
         kebutuhan_khusus_id: this.parseNumber(p.kebutuhan_khusus_id),
         alamat_jalan: p.alamat_jalan || null,
         rt: this.parseNumber(p.rt),
@@ -338,6 +346,16 @@ export class SyncService {
         id_hobby: this.parseNumber(rpd.id_hobby),
         id_cita: this.parseNumber(rpd.id_cita),
 
+        // --- Kolom dari peserta_didik_longitudinal ---
+        berat_badan: this.parseNumber(p.berat_badan),
+        tinggi_badan: this.parseNumber(p.tinggi_badan),
+        lingkar_kepala: this.parseNumber(p.lingkar_kepala),
+        jarak_rumah_ke_sekolah: this.parseNumber(p.jarak_rumah_ke_sekolah),
+        jarak_rumah_ke_sekolah_km: this.parseNumber(p.jarak_rumah_ke_sekolah_km),
+        waktu_tempuh_ke_sekolah: this.parseNumber(p.waktu_tempuh_ke_sekolah),
+        menit_tempuh_ke_sekolah: this.parseNumber(p.menit_tempuh_ke_sekolah),
+        jumlah_saudara_kandung: this.parseNumber(p.jumlah_saudara_kandung),
+
         // --- SIMAK fields ---
         qr_token,
         foto: p.foto || null,
@@ -369,6 +387,22 @@ export class SyncService {
     const appKey = await this.prisma.appKey.findUnique({ where: { sekolah_id: sekolahId } });
     const domain = appKey?.domain?.replace(/\/+$/, '') || '';
 
+    // Pre-fetch valid FK IDs to avoid FK constraint violations (sama seperti pola syncPesertaDidik)
+    const [validAgamaRows, validJenisPtkRows, validJabatanPtkRows, validStatusKepegawaianRows, validSumberGajiRows] = await Promise.all([
+      this.prisma.agama.findMany({ select: { agama_id: true } }),
+      this.prisma.jenis_ptk.findMany({ select: { jenis_ptk_id: true } }),
+      this.prisma.jabatan_ptk.findMany({ select: { jabatan_ptk_id: true } }),
+      this.prisma.status_kepegawaian.findMany({ select: { status_kepegawaian_id: true } }),
+      this.prisma.sumber_gaji.findMany({ select: { sumber_gaji_id: true } }),
+    ]);
+    const validAgamaIds = new Set(validAgamaRows.map(a => a.agama_id));
+    const validJenisPtkIds = new Set(validJenisPtkRows.map(j => j.jenis_ptk_id.toNumber()));
+    const validJabatanPtkIds = new Set(validJabatanPtkRows.map(j => j.jabatan_ptk_id.toNumber()));
+    const validStatusKepegawaianIds = new Set(validStatusKepegawaianRows.map(s => s.status_kepegawaian_id));
+    const validSumberGajiIds = new Set(validSumberGajiRows.map(s => s.sumber_gaji_id.toNumber()));
+
+    this.logger.log(`syncGtk: Validating ${dataRows.length} GTK records for sekolah ${sekolahId}. Valid ref counts: agama=${validAgamaIds.size}, jenis_ptk=${validJenisPtkIds.size}, jabatan_ptk=${validJabatanPtkIds.size}, status_kepegawaian=${validStatusKepegawaianIds.size}, sumber_gaji=${validSumberGajiIds.size}`);
+
     for (const g of dataRows) {
       if (!g.ptk_id) continue;
 
@@ -380,6 +414,22 @@ export class SyncService {
 
       // ptk_terdaftar data (nested dari main.js)
       const pt = g.ptk_terdaftar || {};
+
+      // Validate FK references — null-kan jika tidak ada di tabel ref backend
+      const rawAgamaId = this.parseNumber(g.agama_id);
+      const validatedAgamaId = rawAgamaId && validAgamaIds.has(rawAgamaId) ? rawAgamaId : null;
+
+      const rawJenisPtkId = this.parseNumber(pt.jenis_ptk_id);
+      const validatedJenisPtkId = rawJenisPtkId && validJenisPtkIds.has(rawJenisPtkId) ? rawJenisPtkId : null;
+
+      const rawJabatanPtkId = this.parseNumber(pt.jabatan_ptk_id);
+      const validatedJabatanPtkId = rawJabatanPtkId && validJabatanPtkIds.has(rawJabatanPtkId) ? rawJabatanPtkId : null;
+
+      const rawStatusKepegawaianId = this.parseNumber(g.status_kepegawaian_id);
+      const validatedStatusKepegawaianId = rawStatusKepegawaianId && validStatusKepegawaianIds.has(rawStatusKepegawaianId) ? rawStatusKepegawaianId : null;
+
+      const rawSumberGajiId = this.parseNumber(g.sumber_gaji_id);
+      const validatedSumberGajiId = rawSumberGajiId && validSumberGajiIds.has(rawSumberGajiId) ? rawSumberGajiId : null;
 
       const payload = {
         // --- Kolom dari ptk ---
@@ -394,9 +444,9 @@ export class SyncService {
         nuptk: g.nuptk || null,
         nrg: g.nrg || null,
         nuks: g.nuks || null,
-        status_kepegawaian_id: this.parseNumber(g.status_kepegawaian_id),
+        status_kepegawaian_id: validatedStatusKepegawaianId,
         pengawas_bidang_studi_id: this.parseNumber(g.pengawas_bidang_studi_id),
-        agama_id: this.parseNumber(g.agama_id),
+        agama_id: validatedAgamaId,
         alamat_jalan: g.alamat_jalan || null,
         rt: this.parseNumber(g.rt),
         rw: this.parseNumber(g.rw),
@@ -417,7 +467,7 @@ export class SyncService {
         lembaga_pengangkat_id: this.parseNumber(g.lembaga_pengangkat_id),
         pangkat_golongan_id: this.parseNumber(g.pangkat_golongan_id),
         keahlian_laboratorium_id: this.parseNumber(g.keahlian_laboratorium_id),
-        sumber_gaji_id: this.parseNumber(g.sumber_gaji_id),
+        sumber_gaji_id: validatedSumberGajiId,
         nama_ibu_kandung: g.nama_ibu_kandung || null,
         status_perkawinan: this.parseNumber(g.status_perkawinan),
         nama_suami_istri: g.nama_suami_istri || null,
@@ -449,9 +499,9 @@ export class SyncService {
         ptk_terdaftar_id: pt.ptk_terdaftar_id || null,
         sekolah_id: sekolahId,
         jenis_keluar_id: pt.jenis_keluar_id || null,
-        jabatan_ptk_id: this.parseNumber(pt.jabatan_ptk_id),
+        jabatan_ptk_id: validatedJabatanPtkId,
         tahun_ajaran_id: this.parseNumber(pt.tahun_ajaran_id),
-        jenis_ptk_id: this.parseNumber(pt.jenis_ptk_id),
+        jenis_ptk_id: validatedJenisPtkId,
         nomor_surat_tugas: pt.nomor_surat_tugas || null,
         tanggal_surat_tugas: this.parseDate(pt.tanggal_surat_tugas),
         ptk_induk: this.parseNumber(pt.ptk_induk),
@@ -479,24 +529,24 @@ export class SyncService {
               ptk_id: g.ptk_id,
               satuan_pendidikan_formal: edu.satuan_pendidikan_formal || 'Tanpa Nama',
               fakultas: edu.fakultas || null,
-              kependidikan: String(edu.kependidikan || ''),
-              tahun_masuk: String(edu.tahun_masuk || ''),
-              tahun_lulus: String(edu.tahun_lulus || ''),
+              kependidikan: this.parseNumber(edu.kependidikan),
+              tahun_masuk: this.parseNumber(edu.tahun_masuk),
+              tahun_lulus: this.parseNumber(edu.tahun_lulus),
               nim: edu.nim || null,
-              status_kuliah: String(edu.status_kuliah || ''),
-              semester: String(edu.semester || ''),
-              ipk: edu.ipk || null,
+              status_kuliah: this.parseNumber(edu.status_kuliah),
+              semester: this.parseNumber(edu.semester),
+              ipk: this.parseNumber(edu.ipk),
               prodi: edu.prodi || null,
               id_reg_pd: edu.id_reg_pd || null,
-              bidang_studi_id_str: edu.bidang_studi_id_str || null,
-              jenjang_pendidikan_id_str: edu.jenjang_pendidikan_id_str || null,
-              gelar_akademik_id_str: edu.gelar_akademik_id_str || null,
+              bidang_studi_id: this.parseNumber(edu.bidang_studi_id),
+              jenjang_pendidikan_id: this.parseNumber(edu.jenjang_pendidikan_id),
+              gelar_akademik_id: this.parseNumber(edu.gelar_akademik_id),
             };
 
             await this.prisma.riwayatPendidikanFormal.upsert({
               where: { riwayat_pendidikan_formal_id: edu.riwayat_pendidikan_formal_id },
-              create: { ...eduPayload, riwayat_pendidikan_formal_id: edu.riwayat_pendidikan_formal_id },
-              update: { ...eduPayload, updated_at: new Date() },
+              create: { ...eduPayload, riwayat_pendidikan_formal_id: edu.riwayat_pendidikan_formal_id } as any,
+              update: { ...eduPayload, updated_at: new Date() } as any,
             });
           }
         }
@@ -840,6 +890,42 @@ export class SyncService {
         successCount++;
       } catch (err) {
         this.logger.error(`Error upsert RwySertifikat ${r.riwayat_sertifikasi_id}: ${err.message}`);
+      }
+    }
+    return { successCount };
+  }
+
+  async syncRwyKepangkatan(sekolahId: string, dataRows: any[]) {
+    let successCount = 0;
+    for (const r of dataRows) {
+      if (!r.riwayat_kepangkatan_id) continue;
+
+      const payload = {
+        sekolah_id: sekolahId,
+        ptk_id: r.ptk_id || null,
+        pangkat_golongan_id: this.parseNumber(r.pangkat_golongan_id),
+        nomor_sk: r.nomor_sk || null,
+        tanggal_sk: this.parseDate(r.tanggal_sk),
+        tmt_pangkat: this.parseDate(r.tmt_pangkat),
+        masa_kerja_gol_tahun: this.parseNumber(r.masa_kerja_gol_tahun),
+        masa_kerja_gol_bulan: this.parseNumber(r.masa_kerja_gol_bulan),
+        asal_data: r.asal_data ? String(r.asal_data) : null,
+        create_date: this.parseDate(r.create_date),
+        last_update: this.parseDate(r.last_update || r.last_sync),
+        soft_delete: this.parseNumber(r.soft_delete),
+        last_sync: this.parseDate(r.last_sync),
+        updater_id: r.updater_id || null,
+      };
+
+      try {
+        await this.prisma.rwyKepangkatan.upsert({
+          where: { riwayat_kepangkatan_id: r.riwayat_kepangkatan_id },
+          create: { ...payload, riwayat_kepangkatan_id: r.riwayat_kepangkatan_id },
+          update: { ...payload, updated_at: new Date() },
+        });
+        successCount++;
+      } catch (err) {
+        this.logger.error(`Error upsert RwyKepangkatan ${r.riwayat_kepangkatan_id}: ${err.message}`);
       }
     }
     return { successCount };

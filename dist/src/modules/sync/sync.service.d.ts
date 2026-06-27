@@ -35,6 +35,9 @@ export declare class SyncService {
     syncRwySertifikat(sekolahId: string, dataRows: any[]): Promise<{
         successCount: number;
     }>;
+    syncRwyKepangkatan(sekolahId: string, dataRows: any[]): Promise<{
+        successCount: number;
+    }>;
     syncPembelajaran(sekolahId: string, dataRows: any[]): Promise<{
         successCount: number;
     }>;

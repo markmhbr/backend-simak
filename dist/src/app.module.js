@@ -29,6 +29,7 @@ const pelaporan_module_1 = require("./modules/mandala/pelaporan/pelaporan.module
 const indisipliner_module_1 = require("./modules/indisipliner/indisipliner.module");
 const spp_module_1 = require("./modules/spp/spp.module");
 const surat_module_1 = require("./modules/surat/surat.module");
+const reference_module_1 = require("./modules/reference/reference.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -54,6 +55,7 @@ exports.AppModule = AppModule = __decorate([
             indisipliner_module_1.IndisiplinerModule,
             spp_module_1.SppModule,
             surat_module_1.SuratModule,
+            reference_module_1.ReferenceModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [

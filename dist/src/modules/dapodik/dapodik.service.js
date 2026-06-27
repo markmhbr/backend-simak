@@ -12,10 +12,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DapodikService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../core/prisma/prisma.service");
+const reference_service_1 = require("../reference/reference.service");
 let DapodikService = class DapodikService {
     prisma;
-    constructor(prisma) {
+    referenceService;
+    constructor(prisma, referenceService) {
         this.prisma = prisma;
+        this.referenceService = referenceService;
     }
     getSekolahFilter(sekolahId) {
         if (!sekolahId) {
@@ -25,6 +28,7 @@ let DapodikService = class DapodikService {
     }
     async resolveWilayahHierarchy(kodeWilayah) {
         const result = {
+            desa: null,
             kecamatan: null,
             kabupaten: null,
             provinsi: null,
@@ -43,6 +47,9 @@ let DapodikService = class DapodikService {
                 if (!wil)
                     break;
                 switch (wil.id_level_wilayah) {
+                    case 4:
+                        result.desa = wil.nama;
+                        break;
                     case 3:
                         result.kecamatan = wil.nama;
                         break;
@@ -475,11 +482,19 @@ let DapodikService = class DapodikService {
         };
         if (status !== 'non-aktif') {
             whereClause.AND.push({
-                NOT: { nama_rombel: { contains: 'Ekstrakurikuler', mode: 'insensitive' } }
+                AND: [
+                    { NOT: { rombongan_belajar: { nama: { contains: 'Ekstrakurikuler', mode: 'insensitive' } } } },
+                    { NOT: { anggota_rombel: { some: { rombongan_belajar: { nama: { contains: 'Ekstrakurikuler', mode: 'insensitive' } } } } } }
+                ]
             });
         }
         if (rombelName) {
-            whereClause.AND.push({ nama_rombel: rombelName });
+            whereClause.AND.push({
+                OR: [
+                    { rombongan_belajar: { nama: rombelName } },
+                    { anggota_rombel: { some: { rombongan_belajar: { nama: rombelName } } } }
+                ]
+            });
         }
         if (tingkat && tingkat !== 'all') {
             let rombelPrefix = '';
@@ -492,23 +507,46 @@ let DapodikService = class DapodikService {
             if (rombelPrefix) {
                 if (rombelPrefix === 'X') {
                     whereClause.AND.push({
-                        nama_rombel: { startsWith: 'X', mode: 'insensitive' },
-                    });
-                    whereClause.AND.push({
-                        NOT: { nama_rombel: { startsWith: 'XI', mode: 'insensitive' } },
+                        OR: [
+                            {
+                                AND: [
+                                    { rombongan_belajar: { nama: { startsWith: 'X', mode: 'insensitive' } } },
+                                    { NOT: { rombongan_belajar: { nama: { startsWith: 'XI', mode: 'insensitive' } } } }
+                                ]
+                            },
+                            {
+                                AND: [
+                                    { anggota_rombel: { some: { rombongan_belajar: { nama: { startsWith: 'X', mode: 'insensitive' } } } } },
+                                    { NOT: { anggota_rombel: { some: { rombongan_belajar: { nama: { startsWith: 'XI', mode: 'insensitive' } } } } } }
+                                ]
+                            }
+                        ]
                     });
                 }
                 else if (rombelPrefix === 'XI') {
                     whereClause.AND.push({
-                        nama_rombel: { startsWith: 'XI', mode: 'insensitive' },
-                    });
-                    whereClause.AND.push({
-                        NOT: { nama_rombel: { startsWith: 'XII', mode: 'insensitive' } },
+                        OR: [
+                            {
+                                AND: [
+                                    { rombongan_belajar: { nama: { startsWith: 'XI', mode: 'insensitive' } } },
+                                    { NOT: { rombongan_belajar: { nama: { startsWith: 'XII', mode: 'insensitive' } } } }
+                                ]
+                            },
+                            {
+                                AND: [
+                                    { anggota_rombel: { some: { rombongan_belajar: { nama: { startsWith: 'XI', mode: 'insensitive' } } } } },
+                                    { NOT: { anggota_rombel: { some: { rombongan_belajar: { nama: { startsWith: 'XII', mode: 'insensitive' } } } } } }
+                                ]
+                            }
+                        ]
                     });
                 }
                 else {
                     whereClause.AND.push({
-                        nama_rombel: { startsWith: 'XII', mode: 'insensitive' },
+                        OR: [
+                            { rombongan_belajar: { nama: { startsWith: 'XII', mode: 'insensitive' } } },
+                            { anggota_rombel: { some: { rombongan_belajar: { nama: { startsWith: 'XII', mode: 'insensitive' } } } } }
+                        ]
                     });
                 }
             }
@@ -528,7 +566,7 @@ let DapodikService = class DapodikService {
             });
         }
         const skip = (page - 1) * limit;
-        const [total, data] = await Promise.all([
+        const [total, data, refJenisPendaftaran] = await Promise.all([
             this.prisma.pesertaDidik.count({ where: whereClause }),
             this.prisma.pesertaDidik.findMany({
                 where: whereClause,
@@ -551,6 +589,7 @@ let DapodikService = class DapodikService {
                     tanggal_keluar: true,
                     status: true,
                     tanggal_masuk_sekolah: true,
+                    jenis_pendaftaran_id: true,
                     alamat_jalan: true,
                     rt: true,
                     rw: true,
@@ -565,6 +604,21 @@ let DapodikService = class DapodikService {
                             tingkat_pendidikan_id: true,
                         }
                     },
+                    anggota_rombel: {
+                        where: {
+                            rombongan_belajar: {
+                                jenis_rombel: 1,
+                            }
+                        },
+                        select: {
+                            rombongan_belajar: {
+                                select: {
+                                    nama: true,
+                                    tingkat_pendidikan_id: true,
+                                }
+                            }
+                        }
+                    },
                     agama: {
                         select: {
                             nama: true,
@@ -573,23 +627,33 @@ let DapodikService = class DapodikService {
                 },
                 orderBy: { nama: 'asc' },
             }),
+            this.prisma.jenis_pendaftaran.findMany({
+                select: {
+                    jenis_pendaftaran_id: true,
+                    nama: true
+                }
+            })
         ]);
         const appUrl = process.env.APP_URL || 'http://localhost:3000';
-        const formattedData = data.map((item) => ({
-            ...item,
-            foto: item.foto ? (item.foto.startsWith('http') ? item.foto : `${appUrl}${item.foto}`) : null,
-            nama_rombel: item.rombongan_belajar?.nama || null,
-            tingkat_pendidikan_id: item.rombongan_belajar?.tingkat_pendidikan_id || null,
-            agama_id_str: item.agama?.nama || null,
-            nama_ibu: item.nama_ibu_kandung || null,
-            ket_keluar: item.keterangan || null,
-            provinsi: null,
-            kabupaten_kota: null,
-            kecamatan: null,
-            tinggi_badan: null,
-            berat_badan: null,
-            jenis_pendaftaran_id_str: null,
-        }));
+        const formattedData = data.map((item) => {
+            const jp = refJenisPendaftaran.find((r) => String(r.jenis_pendaftaran_id) === String(item.jenis_pendaftaran_id));
+            const rombel = item.rombongan_belajar || item.anggota_rombel?.[0]?.rombongan_belajar;
+            return {
+                ...item,
+                foto: item.foto ? (item.foto.startsWith('http') ? item.foto : `${appUrl}${item.foto}`) : null,
+                nama_rombel: rombel?.nama || null,
+                tingkat_pendidikan_id: rombel?.tingkat_pendidikan_id ? String(rombel.tingkat_pendidikan_id) : null,
+                agama_id_str: item.agama?.nama || null,
+                nama_ibu: item.nama_ibu_kandung || null,
+                ket_keluar: item.keterangan || null,
+                provinsi: null,
+                kabupaten_kota: null,
+                kecamatan: null,
+                tinggi_badan: null,
+                berat_badan: null,
+                jenis_pendaftaran_id_str: jp?.nama || null,
+            };
+        });
         return { total, data: formattedData };
     }
     async getPesertaDidikForMandala(sekolahId, query) {
@@ -1320,7 +1384,7 @@ let DapodikService = class DapodikService {
                     },
                     riwayat_pendidikan_formal: {
                         select: {
-                            jenjang_pendidikan_id_str: true
+                            jenjang_pendidikan_id: true
                         }
                     }
                 },
@@ -1329,20 +1393,20 @@ let DapodikService = class DapodikService {
         ]);
         const appUrl = process.env.APP_URL || 'http://localhost:3000';
         const getPendidikanTerakhir = (riwayat) => {
-            const jenjangs = riwayat.map(r => r.jenjang_pendidikan_id_str?.toUpperCase() || '');
-            if (jenjangs.includes('S3'))
+            const ids = riwayat.map(r => r.jenjang_pendidikan_id ? Number(r.jenjang_pendidikan_id) : 0);
+            if (ids.some(id => id === 40 || id === 41))
                 return 'S3';
-            if (jenjangs.includes('S2'))
+            if (ids.some(id => id === 35 || id === 36))
                 return 'S2';
-            if (jenjangs.includes('S1') || jenjangs.includes('D4'))
+            if (ids.some(id => id === 30 || id === 31 || id === 23))
                 return 'S1';
-            if (jenjangs.includes('D3'))
+            if (ids.some(id => id === 22))
                 return 'D3';
-            if (jenjangs.includes('D2'))
+            if (ids.some(id => id === 21))
                 return 'D2';
-            if (jenjangs.includes('D1'))
+            if (ids.some(id => id === 20))
                 return 'D1';
-            if (jenjangs.includes('SMA') || jenjangs.includes('SMK') || jenjangs.includes('SLTA'))
+            if (ids.some(id => id === 6 || id === 9))
                 return 'SMA';
             return '';
         };
@@ -1403,7 +1467,13 @@ let DapodikService = class DapodikService {
                 sumber_gaji: {
                     select: { nama: true }
                 },
-                riwayat_pendidikan_formal: true,
+                riwayat_pendidikan_formal: {
+                    include: {
+                        jenjang_pendidikan: true
+                    }
+                },
+                rwy_sertifikasi: true,
+                rwy_kepangkatan: true,
             },
         });
         if (gtk) {
@@ -1432,18 +1502,49 @@ let DapodikService = class DapodikService {
             const appUrl = process.env.APP_URL || 'http://localhost:3000';
             const formattedFoto = gtk.foto ? (gtk.foto.startsWith('http') ? gtk.foto : `${appUrl}${gtk.foto}`) : null;
             const wilayahHierarchy = await this.resolveWilayahHierarchy(gtk.kode_wilayah);
+            const mappedRiwayat = gtk.riwayat_pendidikan_formal.map(edu => {
+                const { jenjang_pendidikan, ...rest } = edu;
+                return {
+                    ...rest,
+                    jenjang_pendidikan_id_str: jenjang_pendidikan?.nama || null,
+                    bidang_studi_id_str: null,
+                    gelar_akademik_id_str: null,
+                };
+            });
+            let pendidikanTerakhir = null;
+            let bidangStudiTerakhir = null;
+            if (gtk.riwayat_pendidikan_formal && gtk.riwayat_pendidikan_formal.length > 0) {
+                const sortedEdu = [...gtk.riwayat_pendidikan_formal].sort((a, b) => {
+                    const idA = a.jenjang_pendidikan_id ? Number(a.jenjang_pendidikan_id) : 0;
+                    const idB = b.jenjang_pendidikan_id ? Number(b.jenjang_pendidikan_id) : 0;
+                    if (idB !== idA)
+                        return idB - idA;
+                    const yrA = a.tahun_lulus ? Number(a.tahun_lulus) : 0;
+                    const yrB = b.tahun_lulus ? Number(b.tahun_lulus) : 0;
+                    return yrB - yrA;
+                });
+                const highest = sortedEdu[0];
+                pendidikanTerakhir = highest.jenjang_pendidikan?.nama || null;
+                bidangStudiTerakhir = highest.satuan_pendidikan_formal || null;
+            }
+            const g = gtk;
+            const resolved = await this.referenceService.resolveGtk(gtk);
             return {
-                ...gtk,
+                ...resolved,
+                riwayat_pendidikan_formal: mappedRiwayat,
                 foto: formattedFoto,
                 foto_dokumen: fotoDokumen,
+                desa_kelurahan: resolved.desa_kelurahan || wilayahHierarchy.desa,
                 kecamatan: wilayahHierarchy.kecamatan,
                 kabupaten: wilayahHierarchy.kabupaten,
                 provinsi: wilayahHierarchy.provinsi,
                 negara: wilayahHierarchy.negara,
-                jenis_ptk_id_str: gtk.jenis_ptk?.jenis_ptk || null,
-                status_kepegawaian_id_str: gtk.status_kepegawaian?.nama || null,
-                jabatan_ptk_id_str: gtk.jabatan_ptk?.jabatan_ptk || null,
-                sumber_gaji_id_str: gtk.sumber_gaji?.nama || null,
+                pendidikan_terakhir: resolved.pendidikan_terakhir || pendidikanTerakhir,
+                bidang_studi_terakhir: resolved.bidang_studi_terakhir || bidangStudiTerakhir,
+                jenis_ptk_id_str: g.jenis_ptk?.jenis_ptk || null,
+                status_kepegawaian_id_str: g.status_kepegawaian?.nama || null,
+                jabatan_ptk_id_str: g.jabatan_ptk?.jabatan_ptk || null,
+                sumber_gaji_id_str: g.sumber_gaji?.nama || null,
             };
         }
         return null;
@@ -1474,9 +1575,76 @@ let DapodikService = class DapodikService {
         if (updateData.tmt_pns) {
             updateData.tmt_pns = new Date(updateData.tmt_pns);
         }
+        const cleanData = {};
+        const safeGtkFields = [
+            'nama', 'nip', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'nik', 'no_kk',
+            'niy_nigk', 'nuptk', 'nrg', 'nuks', 'alamat_jalan', 'rt', 'rw', 'nama_dusun',
+            'desa_kelurahan', 'kode_wilayah', 'kode_pos', 'lintang', 'bujur', 'no_telepon_rumah',
+            'no_hp', 'email', 'status_keaktifan_id', 'sk_cpns', 'tgl_cpns', 'sk_pengangkatan',
+            'tmt_pengangkatan', 'nama_ibu_kandung', 'status_perkawinan', 'nama_suami_istri',
+            'nip_suami_istri', 'tmt_pns', 'sudah_lisensi_kepala_sekolah', 'jumlah_sekolah_binaan',
+            'pernah_diklat_kepengawasan', 'nm_wp', 'status_data', 'karpeg', 'karpas', 'mampu_handle_kk',
+            'keahlian_braille', 'keahlian_bhs_isyarat', 'npwp', 'kewarganegaraan', 'rekening_bank',
+            'rekening_atas_nama', 'ptk_terdaftar_id', 'jenis_keluar_id', 'tahun_ajaran_id',
+            'nomor_surat_tugas', 'tanggal_surat_tugas', 'tgl_ptk_keluar', 'status', 'foto', 'qr_token',
+            'nama_kcp'
+        ];
+        for (const field of safeGtkFields) {
+            if (updateData[field] !== undefined) {
+                cleanData[field] = updateData[field];
+            }
+        }
+        const mapNumeric = (val) => (val !== undefined && val !== null && val !== '' ? Number(val) : undefined);
+        const mapString = (val) => (val !== undefined && val !== null && val !== '' ? String(val) : undefined);
+        if (updateData.status_perkawinan !== undefined)
+            cleanData.status_perkawinan = mapNumeric(updateData.status_perkawinan);
+        if (updateData.agama_id !== undefined)
+            cleanData.agama_id = mapNumeric(updateData.agama_id);
+        else if (updateData.agama_id_str !== undefined)
+            cleanData.agama_id = mapNumeric(updateData.agama_id_str);
+        if (updateData.id_bank !== undefined)
+            cleanData.id_bank = mapString(updateData.id_bank);
+        else if (updateData.namaBank !== undefined)
+            cleanData.id_bank = mapString(updateData.namaBank);
+        if (updateData.jenis_ptk_id !== undefined)
+            cleanData.jenis_ptk_id = mapNumeric(updateData.jenis_ptk_id);
+        else if (updateData.jenis_ptk_id_str !== undefined)
+            cleanData.jenis_ptk_id = mapNumeric(updateData.jenis_ptk_id_str);
+        if (updateData.jabatan_ptk_id !== undefined)
+            cleanData.jabatan_ptk_id = mapNumeric(updateData.jabatan_ptk_id);
+        else if (updateData.jabatan_ptk_id_str !== undefined)
+            cleanData.jabatan_ptk_id = mapNumeric(updateData.jabatan_ptk_id_str);
+        if (updateData.status_kepegawaian_id !== undefined)
+            cleanData.status_kepegawaian_id = mapNumeric(updateData.status_kepegawaian_id);
+        else if (updateData.status_kepegawaian_id_str !== undefined)
+            cleanData.status_kepegawaian_id = mapNumeric(updateData.status_kepegawaian_id_str);
+        if (updateData.sumber_gaji_id !== undefined)
+            cleanData.sumber_gaji_id = mapNumeric(updateData.sumber_gaji_id);
+        else if (updateData.sumber_gaji !== undefined)
+            cleanData.sumber_gaji_id = mapNumeric(updateData.sumber_gaji);
+        if (updateData.lembaga_pengangkat_id !== undefined)
+            cleanData.lembaga_pengangkat_id = mapNumeric(updateData.lembaga_pengangkat_id);
+        else if (updateData.lembaga_pengangkat !== undefined)
+            cleanData.lembaga_pengangkat_id = mapNumeric(updateData.lembaga_pengangkat);
+        if (updateData.pangkat_golongan_id !== undefined)
+            cleanData.pangkat_golongan_id = mapNumeric(updateData.pangkat_golongan_id);
+        else if (updateData.pangkat_golongan_terakhir !== undefined)
+            cleanData.pangkat_golongan_id = mapNumeric(updateData.pangkat_golongan_terakhir);
+        if (updateData.keahlian_laboratorium_id !== undefined)
+            cleanData.keahlian_laboratorium_id = mapNumeric(updateData.keahlian_laboratorium_id);
+        else if (updateData.keahlian_laboratorium !== undefined)
+            cleanData.keahlian_laboratorium_id = mapNumeric(updateData.keahlian_laboratorium);
+        if (updateData.kebutuhan_khusus_id !== undefined)
+            cleanData.kebutuhan_khusus_id = mapNumeric(updateData.kebutuhan_khusus_id);
+        else if (updateData.mampu_menangani_kebutuhan_khusus !== undefined)
+            cleanData.kebutuhan_khusus_id = mapNumeric(updateData.mampu_menangani_kebutuhan_khusus);
+        if (updateData.pekerjaan_suami_istri !== undefined)
+            cleanData.pekerjaan_suami_istri = mapNumeric(updateData.pekerjaan_suami_istri);
+        if (updateData.ptk_induk !== undefined)
+            cleanData.ptk_induk = mapNumeric(updateData.ptk_induk);
         const updatedGtk = await this.prisma.gtk.update({
             where: { ptk_id: id },
-            data: updateData,
+            data: cleanData,
         });
         if (emailAkun !== undefined) {
             await this.prisma.pengguna.updateMany({
@@ -1513,10 +1681,12 @@ let DapodikService = class DapodikService {
             const appUrl = process.env.APP_URL || 'http://localhost:3000';
             const formattedFoto = student.foto ? (student.foto.startsWith('http') ? student.foto : `${appUrl}${student.foto}`) : null;
             const wilayahHierarchy = await this.resolveWilayahHierarchy(student.kode_wilayah);
+            const resolved = await this.referenceService.resolvePesertaDidik(student);
             return {
-                ...student,
+                ...resolved,
                 foto: formattedFoto,
                 uploaded_docs: uploadedDocs,
+                desa_kelurahan: resolved.desa_kelurahan || wilayahHierarchy.desa,
                 kecamatan: wilayahHierarchy.kecamatan,
                 kabupaten: wilayahHierarchy.kabupaten,
                 provinsi: wilayahHierarchy.provinsi,
@@ -1545,9 +1715,104 @@ let DapodikService = class DapodikService {
         if (updateData.tanggal_masuk_sekolah) {
             updateData.tanggal_masuk_sekolah = new Date(updateData.tanggal_masuk_sekolah);
         }
+        const cleanData = {};
+        const safePdFields = [
+            'nama', 'jenis_kelamin', 'nisn', 'nik', 'no_kk', 'tempat_lahir', 'tanggal_lahir',
+            'alamat_jalan', 'rt', 'rw', 'nama_dusun', 'desa_kelurahan', 'kode_wilayah', 'kode_pos',
+            'lintang', 'bujur', 'nik_ayah', 'nik_ibu', 'anak_keberapa', 'nik_wali', 'nomor_telepon_rumah',
+            'nomor_telepon_seluler', 'email', 'no_kps', 'no_kip', 'nm_kip', 'no_kks', 'reg_akta_lahir',
+            'rekening_bank', 'nama_kcp', 'rekening_atas_nama', 'status_data', 'nama_ayah', 'tahun_lahir_ayah',
+            'nama_ibu_kandung', 'tahun_lahir_ibu', 'nama_wali', 'tahun_lahir_wali', 'kewarganegaraan',
+            'registrasi_id', 'jurusan_sp_id', 'nipd', 'tanggal_masuk_sekolah', 'tanggal_keluar',
+            'keterangan', 'no_skhun', 'no_peserta_ujian', 'no_seri_ijazah', 'sekolah_asal',
+            'qr_token', 'foto', 'status', 'rombongan_belajar_id', 'soft_delete'
+        ];
+        for (const field of safePdFields) {
+            if (updateData[field] !== undefined) {
+                cleanData[field] = updateData[field];
+            }
+        }
+        const mapNumeric = (val) => (val !== undefined && val !== null && val !== '' ? Number(val) : undefined);
+        const mapString = (val) => (val !== undefined && val !== null && val !== '' ? String(val) : undefined);
+        if (updateData.agama_id !== undefined)
+            cleanData.agama_id = mapNumeric(updateData.agama_id);
+        else if (updateData.agama_id_str !== undefined)
+            cleanData.agama_id = mapNumeric(updateData.agama_id_str);
+        if (updateData.id_bank !== undefined)
+            cleanData.id_bank = mapString(updateData.id_bank);
+        else if (updateData.id_bank_str !== undefined)
+            cleanData.id_bank = mapString(updateData.id_bank_str);
+        if (updateData.jenis_tinggal_id !== undefined)
+            cleanData.jenis_tinggal_id = mapNumeric(updateData.jenis_tinggal_id);
+        else if (updateData.jenis_tinggal_id_str !== undefined)
+            cleanData.jenis_tinggal_id = mapNumeric(updateData.jenis_tinggal_id_str);
+        if (updateData.alat_transportasi_id !== undefined)
+            cleanData.alat_transportasi_id = mapNumeric(updateData.alat_transportasi_id);
+        else if (updateData.alat_transportasi_id_str !== undefined)
+            cleanData.alat_transportasi_id = mapNumeric(updateData.alat_transportasi_id_str);
+        if (updateData.id_cita !== undefined)
+            cleanData.id_cita = mapNumeric(updateData.id_cita);
+        if (updateData.id_hobby !== undefined)
+            cleanData.id_hobby = mapNumeric(updateData.id_hobby);
+        if (updateData.id_layak_pip !== undefined)
+            cleanData.id_layak_pip = mapNumeric(updateData.id_layak_pip);
+        if (updateData.jenis_pendaftaran_id !== undefined)
+            cleanData.jenis_pendaftaran_id = mapNumeric(updateData.jenis_pendaftaran_id);
+        if (updateData.jenis_keluar_id !== undefined)
+            cleanData.jenis_keluar_id = mapString(updateData.jenis_keluar_id);
+        if (updateData.kebutuhan_khusus_id !== undefined)
+            cleanData.kebutuhan_khusus_id = mapNumeric(updateData.kebutuhan_khusus_id);
+        if (updateData.kebutuhan_khusus_id_ayah !== undefined)
+            cleanData.kebutuhan_khusus_id_ayah = mapNumeric(updateData.kebutuhan_khusus_id_ayah);
+        if (updateData.kebutuhan_khusus_id_ibu !== undefined)
+            cleanData.kebutuhan_khusus_id_ibu = mapNumeric(updateData.kebutuhan_khusus_id_ibu);
+        if (updateData.pekerjaan_id !== undefined)
+            cleanData.pekerjaan_id = mapNumeric(updateData.pekerjaan_id);
+        if (updateData.pekerjaan_id_ayah !== undefined)
+            cleanData.pekerjaan_id_ayah = mapNumeric(updateData.pekerjaan_id_ayah);
+        else if (updateData.pekerjaan_ayah_id_str !== undefined)
+            cleanData.pekerjaan_id_ayah = mapNumeric(updateData.pekerjaan_ayah_id_str);
+        if (updateData.pekerjaan_id_ibu !== undefined)
+            cleanData.pekerjaan_id_ibu = mapNumeric(updateData.pekerjaan_id_ibu);
+        else if (updateData.pekerjaan_ibu_id_str !== undefined)
+            cleanData.pekerjaan_id_ibu = mapNumeric(updateData.pekerjaan_ibu_id_str);
+        if (updateData.pekerjaan_id_wali !== undefined)
+            cleanData.pekerjaan_id_wali = mapNumeric(updateData.pekerjaan_id_wali);
+        else if (updateData.pekerjaan_wali_id_str !== undefined)
+            cleanData.pekerjaan_id_wali = mapNumeric(updateData.pekerjaan_wali_id_str);
+        if (updateData.jenjang_pendidikan_ayah !== undefined)
+            cleanData.jenjang_pendidikan_ayah = mapNumeric(updateData.jenjang_pendidikan_ayah);
+        else if (updateData.pendidikan_ayah_id_str !== undefined)
+            cleanData.jenjang_pendidikan_ayah = mapNumeric(updateData.pendidikan_ayah_id_str);
+        if (updateData.jenjang_pendidikan_ibu !== undefined)
+            cleanData.jenjang_pendidikan_ibu = mapNumeric(updateData.jenjang_pendidikan_ibu);
+        else if (updateData.pendidikan_ibu_id_str !== undefined)
+            cleanData.jenjang_pendidikan_ibu = mapNumeric(updateData.pendidikan_ibu_id_str);
+        if (updateData.jenjang_pendidikan_wali !== undefined)
+            cleanData.jenjang_pendidikan_wali = mapNumeric(updateData.jenjang_pendidikan_wali);
+        else if (updateData.pendidikan_wali_id_str !== undefined)
+            cleanData.jenjang_pendidikan_wali = mapNumeric(updateData.pendidikan_wali_id_str);
+        if (updateData.penghasilan_id_ayah !== undefined)
+            cleanData.penghasilan_id_ayah = mapNumeric(updateData.penghasilan_id_ayah);
+        else if (updateData.penghasilan_ayah_id_str !== undefined)
+            cleanData.penghasilan_id_ayah = mapNumeric(updateData.penghasilan_ayah_id_str);
+        if (updateData.penghasilan_id_ibu !== undefined)
+            cleanData.penghasilan_id_ibu = mapNumeric(updateData.penghasilan_id_ibu);
+        else if (updateData.penghasilan_ibu_id_str !== undefined)
+            cleanData.penghasilan_id_ibu = mapNumeric(updateData.penghasilan_ibu_id_str);
+        if (updateData.penghasilan_id_wali !== undefined)
+            cleanData.penghasilan_id_wali = mapNumeric(updateData.penghasilan_id_wali);
+        else if (updateData.penghasilan_wali_id_str !== undefined)
+            cleanData.penghasilan_id_wali = mapNumeric(updateData.penghasilan_wali_id_str);
+        if (updateData.penerima_kps !== undefined)
+            cleanData.penerima_kps = mapNumeric(updateData.penerima_kps);
+        if (updateData.penerima_kip !== undefined)
+            cleanData.penerima_kip = mapNumeric(updateData.penerima_kip);
+        if (updateData.layak_pip !== undefined)
+            cleanData.layak_pip = mapNumeric(updateData.layak_pip);
         const updatedPd = await this.prisma.pesertaDidik.update({
             where: { peserta_didik_id: id },
-            data: updateData,
+            data: cleanData,
         });
         if (emailAkun !== undefined) {
             await this.prisma.pengguna.updateMany({
@@ -1635,32 +1900,32 @@ let DapodikService = class DapodikService {
                         semester: true,
                         ipk: true,
                         prodi: true,
-                        bidang_studi_id_str: true,
-                        jenjang_pendidikan_id_str: true,
-                        gelar_akademik_id_str: true,
+                        bidang_studi_id: true,
+                        jenjang_pendidikan_id: true,
+                        gelar_akademik_id: true,
                     }
                 }
             }
         });
         const getPendidikanTerakhir = (riwayat) => {
-            const jenjangs = riwayat.map(r => r.jenjang_pendidikan_id_str?.toUpperCase() || '');
-            if (jenjangs.includes('S3'))
+            const ids = riwayat.map(r => r.jenjang_pendidikan_id ? Number(r.jenjang_pendidikan_id) : 0);
+            if (ids.some(id => id === 40 || id === 41))
                 return 'S3';
-            if (jenjangs.includes('S2'))
+            if (ids.some(id => id === 35 || id === 36))
                 return 'S2';
-            if (jenjangs.includes('S1') || jenjangs.includes('D4'))
+            if (ids.some(id => id === 30 || id === 31 || id === 23))
                 return 'S1';
-            if (jenjangs.includes('D3'))
+            if (ids.some(id => id === 22))
                 return 'D3';
-            if (jenjangs.includes('D2'))
+            if (ids.some(id => id === 21))
                 return 'D2';
-            if (jenjangs.includes('D1'))
+            if (ids.some(id => id === 20))
                 return 'D1';
-            if (jenjangs.includes('SMA') || jenjangs.includes('SMK') || jenjangs.includes('SLTA'))
+            if (ids.some(id => id === 6 || id === 9))
                 return 'SMA';
             return '';
         };
-        const gtks = rawGtks.map(g => ({
+        const gtks = rawGtks.map((g) => ({
             jenis_kelamin: g.jenis_kelamin,
             status_kepegawaian_nama: g.status_kepegawaian?.nama || '',
             pendidikan_terakhir: getPendidikanTerakhir(g.riwayat_pendidikan_formal)
@@ -1808,6 +2073,7 @@ let DapodikService = class DapodikService {
 exports.DapodikService = DapodikService;
 exports.DapodikService = DapodikService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        reference_service_1.ReferenceService])
 ], DapodikService);
 //# sourceMappingURL=dapodik.service.js.map

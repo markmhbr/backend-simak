@@ -98,10 +98,10 @@ export declare class PresensiService {
             peserta_didik_id: string;
             foto: string;
             rombongan_belajar_id: string;
-            nisn: string;
             rombongan_belajar: {
                 nama: string;
             };
+            nisn: string;
         };
         activeIzinKeluar: {
             sekolah_id: string;
@@ -109,10 +109,10 @@ export declare class PresensiService {
             updated_at: Date;
             ptk_id: string | null;
             peserta_didik_id: string | null;
+            jenis: number;
             keterangan: string;
             tanggal: Date;
             izin_id: string;
-            jenis: number;
             disetujui: boolean;
             jam_keluar: Date | null;
             jam_kembali: Date | null;
@@ -133,10 +133,10 @@ export declare class PresensiService {
             updated_at: Date;
             ptk_id: string | null;
             peserta_didik_id: string | null;
+            jenis: number;
             keterangan: string;
             tanggal: Date;
             izin_id: string;
-            jenis: number;
             disetujui: boolean;
             jam_keluar: Date | null;
             jam_kembali: Date | null;
@@ -197,10 +197,10 @@ export declare class PresensiService {
             updated_at: Date;
             ptk_id: string | null;
             peserta_didik_id: string | null;
+            jenis: number;
             keterangan: string;
             tanggal: Date;
             izin_id: string;
-            jenis: number;
             disetujui: boolean;
             jam_keluar: Date | null;
             jam_kembali: Date | null;
@@ -219,10 +219,10 @@ export declare class PresensiService {
         updated_at: Date;
         ptk_id: string | null;
         peserta_didik_id: string | null;
+        jenis: number;
         keterangan: string;
         tanggal: Date;
         izin_id: string;
-        jenis: number;
         disetujui: boolean;
         jam_keluar: Date | null;
         jam_kembali: Date | null;
@@ -234,10 +234,10 @@ export declare class PresensiService {
         updated_at: Date;
         ptk_id: string | null;
         peserta_didik_id: string | null;
+        jenis: number;
         keterangan: string;
         tanggal: Date;
         izin_id: string;
-        jenis: number;
         disetujui: boolean;
         jam_keluar: Date | null;
         jam_kembali: Date | null;

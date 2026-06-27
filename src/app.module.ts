@@ -20,6 +20,7 @@ import { PelaporanModule } from './modules/mandala/pelaporan/pelaporan.module';
 import { IndisiplinerModule } from './modules/indisipliner/indisipliner.module';
 import { SppModule } from './modules/spp/spp.module';
 import { SuratModule } from './modules/surat/surat.module';
+import { ReferenceModule } from './modules/reference/reference.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { SuratModule } from './modules/surat/surat.module';
     IndisiplinerModule,
     SppModule,
     SuratModule,
+    ReferenceModule,
   ],
 
 
