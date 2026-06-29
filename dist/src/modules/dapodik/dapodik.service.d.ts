@@ -729,6 +729,7 @@ export declare class DapodikService {
         status: string;
         no_whatsapp: string | null;
         id_telegram: string | null;
+        nama_kcp: string | null;
     }>;
     getPesertaDidikById(sekolahId: string, id: string): Promise<any>;
     updatePesertaDidik(sekolahId: string, id: string, data: any): Promise<{
@@ -766,6 +767,7 @@ export declare class DapodikService {
         qr_token: string | null;
         status: string;
         no_whatsapp: string | null;
+        nama_kcp: string | null;
         alat_transportasi_id: import("@prisma/client-runtime-utils").Decimal | null;
         id_cita: import("@prisma/client-runtime-utils").Decimal | null;
         id_hobby: import("@prisma/client-runtime-utils").Decimal | null;
@@ -793,7 +795,6 @@ export declare class DapodikService {
         nm_kip: string | null;
         no_kks: string | null;
         reg_akta_lahir: string | null;
-        nama_kcp: string | null;
         nama_ayah: string | null;
         tahun_lahir_ayah: import("@prisma/client-runtime-utils").Decimal | null;
         pekerjaan_id_ayah: number | null;
@@ -1021,4 +1022,21 @@ export declare class DapodikService {
         nama_cp: string | null;
         no_hp_cp: string | null;
     }>;
+    getDistinctRoles(sekolahId?: string): Promise<{
+        peran_nama: string;
+        peran_id: number;
+    }[]>;
+    getMenuRoles(): Promise<{
+        peran_nama: string | null;
+        peran_id: number;
+        menu_role_id: string;
+        menu_id: string;
+    }[]>;
+    saveMenuRoles(peranId: number, peranNama: string, menuIds: string[]): Promise<{
+        success: boolean;
+    }>;
+    getMyMenus(peranId: number): Promise<string[]>;
+    getMyMenusByUserId(penggunaId: string): Promise<string[]>;
+    private formatSqlValue;
+    generateBackupSql(sekolahId: string): Promise<string>;
 }

@@ -223,6 +223,7 @@ export declare class JadwalService {
                 status: string;
                 no_whatsapp: string | null;
                 id_telegram: string | null;
+                nama_kcp: string | null;
             };
         } & {
             sekolah_id: string | null;

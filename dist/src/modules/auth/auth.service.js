@@ -180,7 +180,10 @@ let AuthService = class AuthService {
         }
     }
     async determineRole(user) {
-        const peran = user.peran_id_str || '';
+        const peran = user.peran_nama || user.peran_id_str || '';
+        if (user.peran_id === 10 || peran === 'Operator Sekolah') {
+            return 'Operator Sekolah';
+        }
         if (peran === 'Kepala Sekolah') {
             return 'Kepala Sekolah';
         }

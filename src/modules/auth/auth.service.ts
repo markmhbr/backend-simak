@@ -169,7 +169,12 @@ export class AuthService {
    * Menentukan Role berdasarkan peran_id_str dan data GTK/Peserta Didik
    */
   private async determineRole(user: any): Promise<string> {
-    const peran = user.peran_id_str || '';
+    const peran = user.peran_nama || user.peran_id_str || '';
+    
+    // Jika peran di pengguna adalah Operator Sekolah, prioritas utama
+    if (user.peran_id === 10 || peran === 'Operator Sekolah') {
+      return 'Operator Sekolah';
+    }
     
     // Jika peran di pengguna sudah Kepala Sekolah, gunakan itu
     if (peran === 'Kepala Sekolah') {

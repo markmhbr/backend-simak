@@ -76,9 +76,11 @@ export class MandalaService implements OnModuleInit {
 
     const richSchools = await Promise.all(
       schools.map(async (school) => {
-        const [totalSiswa, totalGtk] = await Promise.all([
+        const [totalSiswa, totalGtk, bentukPend, wilayahHierarchy] = await Promise.all([
           this.prisma.pesertaDidik.count({ where: { sekolah_id: school.sekolah_id } }),
           this.prisma.gtk.count({ where: { sekolah_id: school.sekolah_id } }),
+          school.bentuk_pendidikan_id ? this.prisma.bentuk_pendidikan.findUnique({ where: { bentuk_pendidikan_id: school.bentuk_pendidikan_id } }) : null,
+          this.resolveWilayahHierarchy(school.kode_wilayah),
         ]);
 
         return {
@@ -89,13 +91,13 @@ export class MandalaService implements OnModuleInit {
           alamat: school.alamat_jalan,
           email: school.email,
           website: school.website,
-          bentuk_pendidikan_is_str: null,
-          bentuk_pendidikan_id_str: null,
-          kabupaten_kota: null,
-          kecamatan: null,
+          bentuk_pendidikan_is_str: bentukPend?.nama || null,
+          bentuk_pendidikan_id_str: school.bentuk_pendidikan_id?.toString() || null,
+          kabupaten_kota: wilayahHierarchy.kabupaten,
+          kecamatan: wilayahHierarchy.kecamatan,
           lintang: school.lintang,
           bujur: school.bujur,
-          desa_kelurahan: school.desa_kelurahan,
+          desa_kelurahan: school.desa_kelurahan || wilayahHierarchy.desa,
           total_siswa: totalSiswa,
           total_gtk: totalGtk,
           nomor_telepon: school.nomor_telepon,
@@ -781,7 +783,11 @@ export class MandalaService implements OnModuleInit {
         take: limit,
         skip: skip,
         include: {
-          rombongan_belajar: true,
+          rombongan_belajar: {
+            include: {
+              jurusan_sp: true,
+            },
+          },
           agama: true,
         },
         orderBy: { nama: 'asc' },
@@ -819,7 +825,7 @@ export class MandalaService implements OnModuleInit {
         akademik: {
           nama_rombel: pd.rombongan_belajar?.nama || '',
           tingkat: pd.rombongan_belajar?.tingkat_pendidikan_id?.toString() || '',
-          jurusan: pd.rombongan_belajar?.jurusan_sp_id || '',
+          jurusan: pd.rombongan_belajar?.jurusan_sp?.nama_jurusan_sp || pd.rombongan_belajar?.jurusan_sp_id || '',
         },
         data_pendukung: {
           alamat_lengkap: alamatLengkap,
@@ -953,6 +959,7 @@ export class MandalaService implements OnModuleInit {
           no_hp: g.no_hp || '',
           no_wa: '',
           email: g.email || '',
+          nama_ibu_kandung: g.nama_ibu_kandung || '',
         },
       };
     });
@@ -1299,5 +1306,46 @@ export class MandalaService implements OnModuleInit {
     });
 
     return summary;
+  }
+
+  private async resolveWilayahHierarchy(kodeWilayah: string | null) {
+    const result = {
+      desa: null as string | null,
+      kecamatan: null as string | null,
+      kabupaten: null as string | null,
+      provinsi: null as string | null,
+      negara: null as string | null,
+    };
+
+    if (!kodeWilayah) return result;
+
+    try {
+      let currentKode: string | null = kodeWilayah.trim();
+      let maxDepth = 6;
+
+      while (currentKode && maxDepth > 0) {
+        const wil = await this.prisma.mst_wilayah.findUnique({
+          where: { kode_wilayah: currentKode },
+          select: { nama: true, id_level_wilayah: true, mst_kode_wilayah: true },
+        });
+
+        if (!wil) break;
+
+        switch (wil.id_level_wilayah) {
+          case 4: result.desa = wil.nama; break;
+          case 3: result.kecamatan = wil.nama; break;
+          case 2: result.kabupaten = wil.nama; break;
+          case 1: result.provinsi = wil.nama; break;
+          case 0: result.negara = wil.nama; break;
+        }
+
+        currentKode = wil.mst_kode_wilayah?.trim() || null;
+        maxDepth--;
+      }
+    } catch (e) {
+      // Jika tabel ref belum ada datanya, tetap kembalikan null
+    }
+
+    return result;
   }
 }

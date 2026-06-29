@@ -180,24 +180,27 @@ let SppService = class SppService {
         if (rombelIds.length === 0) {
             throw new common_1.BadRequestException('Pengaturan tagihan belum dihubungkan ke kelas (rombongan belajar) mana pun.');
         }
-        const siswaList = await this.prisma.pesertaDidik.findMany({
+        const anggotaList = await this.prisma.anggotaRombel.findMany({
             where: {
                 rombongan_belajar_id: { in: rombelIds },
                 sekolah_id: sekolahId,
-                status: 'Aktif',
+                soft_delete: 0,
+                peserta_didik: {
+                    status: 'Aktif',
+                },
             },
             select: {
                 peserta_didik_id: true,
                 rombongan_belajar_id: true,
             },
         });
-        if (siswaList.length === 0) {
+        if (anggotaList.length === 0) {
             return {
                 message: 'Tidak ada peserta didik aktif ditemukan pada kelas yang terpilih.',
                 count: 0,
             };
         }
-        const siswaIds = siswaList.map((s) => s.peserta_didik_id);
+        const siswaIds = anggotaList.map((s) => s.peserta_didik_id);
         const existingSpps = await this.prisma.spp.findMany({
             where: {
                 peserta_didik_id: { in: siswaIds },
@@ -208,7 +211,7 @@ let SppService = class SppService {
             },
         });
         const existingSiswaIds = new Set(existingSpps.map((s) => s.peserta_didik_id));
-        const siswaBelumAdaTagihan = siswaList.filter((s) => !existingSiswaIds.has(s.peserta_didik_id));
+        const siswaBelumAdaTagihan = anggotaList.filter((s) => !existingSiswaIds.has(s.peserta_didik_id));
         if (siswaBelumAdaTagihan.length === 0) {
             return {
                 message: 'Semua peserta didik di kelas terpilih sudah memiliki tagihan ini.',
@@ -383,35 +386,74 @@ let SppService = class SppService {
             return transaksi;
         });
     }
-    async getTunggakanPerSiswa(sekolahId) {
-        const listSpp = await this.prisma.spp.findMany({
+    async getStudentRombelMap(sekolahId) {
+        const mappings = await this.prisma.anggotaRombel.findMany({
             where: {
                 sekolah_id: sekolahId,
-                status: { in: [1, 2] },
+                soft_delete: 0,
             },
-            include: {
-                peserta_didik: {
+            select: {
+                peserta_didik_id: true,
+                rombongan_belajar_id: true,
+                rombongan_belajar: {
                     select: {
+                        rombongan_belajar_id: true,
                         nama: true,
-                        nisn: true,
-                        rombongan_belajar: { select: { nama: true } },
-                    },
-                },
-                pengaturan_tagihan: {
-                    select: {
-                        nama_tagihan: true,
+                        semester_id: true,
+                        jenis_rombel: true,
                     },
                 },
             },
         });
+        const studentMap = new Map();
+        const sorted = [...mappings].sort((a, b) => {
+            const aIsReg = a.rombongan_belajar && Number(a.rombongan_belajar.jenis_rombel) === 1 ? 1 : 0;
+            const bIsReg = b.rombongan_belajar && Number(b.rombongan_belajar.jenis_rombel) === 1 ? 1 : 0;
+            return aIsReg - bIsReg;
+        });
+        for (const m of sorted) {
+            if (m.rombongan_belajar) {
+                studentMap.set(m.peserta_didik_id, {
+                    id: m.rombongan_belajar.rombongan_belajar_id,
+                    nama: m.rombongan_belajar.nama,
+                    semester_id: m.rombongan_belajar.semester_id,
+                });
+            }
+        }
+        return studentMap;
+    }
+    async getTunggakanPerSiswa(sekolahId) {
+        const [listSpp, rombelMap] = await Promise.all([
+            this.prisma.spp.findMany({
+                where: {
+                    sekolah_id: sekolahId,
+                    status: { in: [1, 2] },
+                },
+                include: {
+                    peserta_didik: {
+                        select: {
+                            nama: true,
+                            nisn: true,
+                        },
+                    },
+                    pengaturan_tagihan: {
+                        select: {
+                            nama_tagihan: true,
+                        },
+                    },
+                },
+            }),
+            this.getStudentRombelMap(sekolahId)
+        ]);
         return listSpp.map((s) => {
             const sisaTunggakan = s.nominal_tagihan - s.nominal_terbayar;
+            const rInfo = rombelMap.get(s.peserta_didik_id);
             return {
                 spp_id: s.spp_id,
                 peserta_didik_id: s.peserta_didik_id,
                 nama: s.peserta_didik?.nama || 'Unknown',
                 nisn: s.peserta_didik?.nisn || '-',
-                kelas: s.peserta_didik?.rombongan_belajar?.nama || '-',
+                kelas: rInfo?.nama || '-',
                 nama_tagihan: s.pengaturan_tagihan?.nama_tagihan || 'Tagihan',
                 nominal_tagihan: s.nominal_tagihan.toString(),
                 nominal_terbayar: s.nominal_terbayar.toString(),
@@ -420,24 +462,20 @@ let SppService = class SppService {
         });
     }
     async getTunggakanPerKelas(sekolahId) {
-        const listSpp = await this.prisma.spp.findMany({
-            where: {
-                sekolah_id: sekolahId,
-                status: { in: [1, 2] },
-            },
-            include: {
-                peserta_didik: {
-                    select: {
-                        rombongan_belajar_id: true,
-                        rombongan_belajar: { select: { nama: true } },
-                    },
+        const [listSpp, rombelMap] = await Promise.all([
+            this.prisma.spp.findMany({
+                where: {
+                    sekolah_id: sekolahId,
+                    status: { in: [1, 2] },
                 },
-            },
-        });
+            }),
+            this.getStudentRombelMap(sekolahId)
+        ]);
         const rekapMap = {};
         for (const s of listSpp) {
-            const rombelId = s.peserta_didik?.rombongan_belajar_id || 'unassigned';
-            const rombelNama = s.peserta_didik?.rombongan_belajar?.nama || 'Tanpa Kelas';
+            const rInfo = rombelMap.get(s.peserta_didik_id);
+            const rombelId = rInfo?.id || 'unassigned';
+            const rombelNama = rInfo?.nama || 'Tanpa Kelas';
             const tunggakan = s.nominal_tagihan - s.nominal_terbayar;
             if (!rekapMap[rombelId]) {
                 rekapMap[rombelId] = {
@@ -515,26 +553,19 @@ let SppService = class SppService {
             .sort((a, b) => b.bulan_tahun.localeCompare(a.bulan_tahun));
     }
     async getRekapTahunPelajaran(sekolahId) {
-        const listPembayaran = await this.prisma.riwayatTransaksiSpp.findMany({
-            where: {
-                sekolah_id: sekolahId,
-                jenis_transaksi: 1,
-            },
-            include: {
-                peserta_didik: {
-                    select: {
-                        rombongan_belajar: {
-                            select: {
-                                semester_id: true,
-                            },
-                        },
-                    },
+        const [listPembayaran, rombelMap] = await Promise.all([
+            this.prisma.riwayatTransaksiSpp.findMany({
+                where: {
+                    sekolah_id: sekolahId,
+                    jenis_transaksi: 1,
                 },
-            },
-        });
+            }),
+            this.getStudentRombelMap(sekolahId)
+        ]);
         const semesterMap = {};
         for (const p of listPembayaran) {
-            const semesterId = p.peserta_didik?.rombongan_belajar?.semester_id || 'unassigned';
+            const rInfo = rombelMap.get(p.peserta_didik_id);
+            const semesterId = rInfo?.semester_id || 'unassigned';
             if (!semesterMap[semesterId]) {
                 semesterMap[semesterId] = {
                     semester_id: semesterId,

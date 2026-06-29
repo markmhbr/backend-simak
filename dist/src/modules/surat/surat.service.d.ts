@@ -286,6 +286,7 @@ export declare class SuratService {
             qr_token: string | null;
             status: string;
             no_whatsapp: string | null;
+            nama_kcp: string | null;
             alat_transportasi_id: import("@prisma/client-runtime-utils").Decimal | null;
             id_cita: import("@prisma/client-runtime-utils").Decimal | null;
             id_hobby: import("@prisma/client-runtime-utils").Decimal | null;
@@ -313,7 +314,6 @@ export declare class SuratService {
             nm_kip: string | null;
             no_kks: string | null;
             reg_akta_lahir: string | null;
-            nama_kcp: string | null;
             nama_ayah: string | null;
             tahun_lahir_ayah: import("@prisma/client-runtime-utils").Decimal | null;
             pekerjaan_id_ayah: number | null;
@@ -432,6 +432,7 @@ export declare class SuratService {
             status: string;
             no_whatsapp: string | null;
             id_telegram: string | null;
+            nama_kcp: string | null;
         };
     } & {
         sekolah_id: string;

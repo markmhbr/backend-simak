@@ -427,6 +427,7 @@ model Gtk {
   status      String  @default("Aktif")
   no_whatsapp String?
   id_telegram String?
+  nama_kcp    String?
 
   // --- Relations ---
   jenis_ptk                 jenis_ptk?                @relation(fields: [jenis_ptk_id], references: [jenis_ptk_id], onDelete: NoAction, onUpdate: NoAction)
@@ -3224,4 +3225,16 @@ model waktu_penyelenggaraan {
   last_sync                DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
 
   @@schema("ref")
+}
+
+model MenuRole {
+  menu_role_id String   @id @default(uuid()) @db.Uuid
+  menu_id      String   @db.VarChar(100)
+  peran_id     Int
+  peran_nama   String?  @db.VarChar(100)
+
+  @@index([menu_id])
+  @@index([peran_id])
+  @@map("menu_roles")
+  @@schema("simak")
 }

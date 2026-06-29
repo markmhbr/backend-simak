@@ -131,6 +131,7 @@ export declare class SppService {
         metode_pembayaran: number | null;
         riwayat_transaksi_spp_id: string;
     }>;
+    private getStudentRombelMap;
     getTunggakanPerSiswa(sekolahId: string): Promise<{
         spp_id: string;
         peserta_didik_id: string;

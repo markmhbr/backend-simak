@@ -1960,48 +1960,15 @@ export class DapodikService {
   }
 
   async updateGtk(sekolahId: string, id: string, data: any) {
-    // Handle JSON fields
     const updateData: any = { ...data };
     delete updateData.ptk_id;
     delete updateData.sekolah_id;
 
-    const emailAkun = updateData.email_akun;
-    delete updateData.email_akun;
-
-    if (updateData.foto && updateData.foto.startsWith('http')) {
-      try {
-        const url = new URL(updateData.foto);
-        updateData.foto = url.pathname;
-      } catch (e) {
-        // ignore
-      }
-    }
-
-    if (updateData.tmt_pengangkatan) {
-      updateData.tmt_pengangkatan = new Date(updateData.tmt_pengangkatan);
-    }
-    if (updateData.tanggal_surat_tugas) {
-      updateData.tanggal_surat_tugas = new Date(updateData.tanggal_surat_tugas);
-    }
-    if (updateData.tmt_cpns) {
-      updateData.tmt_cpns = new Date(updateData.tmt_cpns);
-    }
-    if (updateData.tmt_pns) {
-      updateData.tmt_pns = new Date(updateData.tmt_pns);
-    }
-
     const cleanData: any = {};
     const safeGtkFields = [
-      'nama', 'nip', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'nik', 'no_kk',
-      'niy_nigk', 'nuptk', 'nrg', 'nuks', 'alamat_jalan', 'rt', 'rw', 'nama_dusun',
-      'desa_kelurahan', 'kode_wilayah', 'kode_pos', 'lintang', 'bujur', 'no_telepon_rumah',
-      'no_hp', 'email', 'status_keaktifan_id', 'sk_cpns', 'tgl_cpns', 'sk_pengangkatan',
-      'tmt_pengangkatan', 'nama_ibu_kandung', 'status_perkawinan', 'nama_suami_istri',
-      'nip_suami_istri', 'tmt_pns', 'sudah_lisensi_kepala_sekolah', 'jumlah_sekolah_binaan',
-      'pernah_diklat_kepengawasan', 'nm_wp', 'status_data', 'karpeg', 'karpas', 'mampu_handle_kk',
-      'keahlian_braille', 'keahlian_bhs_isyarat', 'npwp', 'kewarganegaraan', 'rekening_bank',
-      'rekening_atas_nama', 'ptk_terdaftar_id', 'jenis_keluar_id', 'tahun_ajaran_id',
-      'nomor_surat_tugas', 'tanggal_surat_tugas', 'tgl_ptk_keluar', 'status', 'foto', 'qr_token',
+      'no_kk', 'nm_wp', 'npwp', 'alamat_jalan', 'rt', 'rw', 'nama_dusun',
+      'desa_kelurahan', 'kode_pos', 'lintang', 'bujur', 'no_telepon_rumah',
+      'no_hp', 'rekening_bank', 'rekening_atas_nama', 'no_whatsapp', 'id_telegram',
       'nama_kcp'
     ];
 
@@ -2014,52 +1981,27 @@ export class DapodikService {
     const mapNumeric = (val: any) => (val !== undefined && val !== null && val !== '' ? Number(val) : undefined);
     const mapString = (val: any) => (val !== undefined && val !== null && val !== '' ? String(val) : undefined);
 
+    if (updateData.no_wa !== undefined) {
+      cleanData.no_whatsapp = updateData.no_wa;
+    }
+    if (updateData.id_telegram !== undefined) {
+      cleanData.id_telegram = updateData.id_telegram;
+    }
+    if (updateData.kecamatan !== undefined && updateData.kecamatan !== "") {
+      cleanData.kode_wilayah = updateData.kecamatan;
+    }
+
     if (updateData.status_perkawinan !== undefined) cleanData.status_perkawinan = mapNumeric(updateData.status_perkawinan);
-
     if (updateData.agama_id !== undefined) cleanData.agama_id = mapNumeric(updateData.agama_id);
-    else if (updateData.agama_id_str !== undefined) cleanData.agama_id = mapNumeric(updateData.agama_id_str);
-
+    if (updateData.sumber_gaji_id !== undefined) cleanData.sumber_gaji_id = mapNumeric(updateData.sumber_gaji_id);
+    if (updateData.pekerjaan_suami_istri !== undefined) cleanData.pekerjaan_suami_istri = mapNumeric(updateData.pekerjaan_suami_istri);
     if (updateData.id_bank !== undefined) cleanData.id_bank = mapString(updateData.id_bank);
     else if (updateData.namaBank !== undefined) cleanData.id_bank = mapString(updateData.namaBank);
-
-    if (updateData.jenis_ptk_id !== undefined) cleanData.jenis_ptk_id = mapNumeric(updateData.jenis_ptk_id);
-    else if (updateData.jenis_ptk_id_str !== undefined) cleanData.jenis_ptk_id = mapNumeric(updateData.jenis_ptk_id_str);
-
-    if (updateData.jabatan_ptk_id !== undefined) cleanData.jabatan_ptk_id = mapNumeric(updateData.jabatan_ptk_id);
-    else if (updateData.jabatan_ptk_id_str !== undefined) cleanData.jabatan_ptk_id = mapNumeric(updateData.jabatan_ptk_id_str);
-
-    if (updateData.status_kepegawaian_id !== undefined) cleanData.status_kepegawaian_id = mapNumeric(updateData.status_kepegawaian_id);
-    else if (updateData.status_kepegawaian_id_str !== undefined) cleanData.status_kepegawaian_id = mapNumeric(updateData.status_kepegawaian_id_str);
-
-    if (updateData.sumber_gaji_id !== undefined) cleanData.sumber_gaji_id = mapNumeric(updateData.sumber_gaji_id);
-    else if (updateData.sumber_gaji !== undefined) cleanData.sumber_gaji_id = mapNumeric(updateData.sumber_gaji);
-
-    if (updateData.lembaga_pengangkat_id !== undefined) cleanData.lembaga_pengangkat_id = mapNumeric(updateData.lembaga_pengangkat_id);
-    else if (updateData.lembaga_pengangkat !== undefined) cleanData.lembaga_pengangkat_id = mapNumeric(updateData.lembaga_pengangkat);
-
-    if (updateData.pangkat_golongan_id !== undefined) cleanData.pangkat_golongan_id = mapNumeric(updateData.pangkat_golongan_id);
-    else if (updateData.pangkat_golongan_terakhir !== undefined) cleanData.pangkat_golongan_id = mapNumeric(updateData.pangkat_golongan_terakhir);
-
-    if (updateData.keahlian_laboratorium_id !== undefined) cleanData.keahlian_laboratorium_id = mapNumeric(updateData.keahlian_laboratorium_id);
-    else if (updateData.keahlian_laboratorium !== undefined) cleanData.keahlian_laboratorium_id = mapNumeric(updateData.keahlian_laboratorium);
-
-    if (updateData.kebutuhan_khusus_id !== undefined) cleanData.kebutuhan_khusus_id = mapNumeric(updateData.kebutuhan_khusus_id);
-    else if (updateData.mampu_menangani_kebutuhan_khusus !== undefined) cleanData.kebutuhan_khusus_id = mapNumeric(updateData.mampu_menangani_kebutuhan_khusus);
-
-    if (updateData.pekerjaan_suami_istri !== undefined) cleanData.pekerjaan_suami_istri = mapNumeric(updateData.pekerjaan_suami_istri);
-    if (updateData.ptk_induk !== undefined) cleanData.ptk_induk = mapNumeric(updateData.ptk_induk);
 
     const updatedGtk = await this.prisma.gtk.update({
       where: { ptk_id: id },
       data: cleanData,
     });
-
-    if (emailAkun !== undefined) {
-      await this.prisma.pengguna.updateMany({
-        where: { ptk_id: id },
-        data: { email: emailAkun || null },
-      });
-    }
 
     return updatedGtk;
   }
@@ -2113,36 +2055,15 @@ export class DapodikService {
     delete updateData.peserta_didik_id;
     delete updateData.sekolah_id;
 
-    const emailAkun = updateData.email_akun;
-    delete updateData.email_akun;
-
-    if (updateData.foto && updateData.foto.startsWith('http')) {
-      try {
-        const url = new URL(updateData.foto);
-        updateData.foto = url.pathname;
-      } catch (e) {
-        // ignore
-      }
-    }
-
-    if (updateData.tanggal_lahir) {
-      updateData.tanggal_lahir = new Date(updateData.tanggal_lahir);
-    }
-    if (updateData.tanggal_masuk_sekolah) {
-      updateData.tanggal_masuk_sekolah = new Date(updateData.tanggal_masuk_sekolah);
-    }
-
     const cleanData: any = {};
     const safePdFields = [
-      'nama', 'jenis_kelamin', 'nisn', 'nik', 'no_kk', 'tempat_lahir', 'tanggal_lahir',
-      'alamat_jalan', 'rt', 'rw', 'nama_dusun', 'desa_kelurahan', 'kode_wilayah', 'kode_pos',
-      'lintang', 'bujur', 'nik_ayah', 'nik_ibu', 'anak_keberapa', 'nik_wali', 'nomor_telepon_rumah',
-      'nomor_telepon_seluler', 'email', 'no_kps', 'no_kip', 'nm_kip', 'no_kks', 'reg_akta_lahir',
-      'rekening_bank', 'nama_kcp', 'rekening_atas_nama', 'status_data', 'nama_ayah', 'tahun_lahir_ayah',
-      'nama_ibu_kandung', 'tahun_lahir_ibu', 'nama_wali', 'tahun_lahir_wali', 'kewarganegaraan',
-      'registrasi_id', 'jurusan_sp_id', 'nipd', 'tanggal_masuk_sekolah', 'tanggal_keluar',
-      'keterangan', 'no_skhun', 'no_peserta_ujian', 'no_seri_ijazah', 'sekolah_asal',
-      'qr_token', 'foto', 'status', 'rombongan_belajar_id', 'soft_delete'
+      'no_kk', 'reg_akta_lahir', 'alamat_jalan', 'rt', 'rw', 'nama_dusun',
+      'desa_kelurahan', 'kode_pos', 'lintang', 'bujur', 'nik_ayah', 'nik_ibu',
+      'nik_wali', 'nomor_telepon_rumah', 'nomor_telepon_seluler', 'nama_ayah',
+      'tahun_lahir_ayah', 'tahun_lahir_ibu', 'nama_wali', 'tahun_lahir_wali',
+      'berat_badan', 'tinggi_badan', 'lingkar_kepala', 'jarak_rumah_ke_sekolah',
+      'jarak_rumah_ke_sekolah_km', 'waktu_tempuh_ke_sekolah', 'menit_tempuh_ke_sekolah',
+      'jumlah_saudara_kandung', 'anak_keberapa'
     ];
 
     for (const field of safePdFields) {
@@ -2154,11 +2075,15 @@ export class DapodikService {
     const mapNumeric = (val: any) => (val !== undefined && val !== null && val !== '' ? Number(val) : undefined);
     const mapString = (val: any) => (val !== undefined && val !== null && val !== '' ? String(val) : undefined);
 
+    if (updateData.kecamatan !== undefined && updateData.kecamatan !== "") {
+      cleanData.kode_wilayah = updateData.kecamatan;
+    }
+
+    if (updateData.id_hobby !== undefined) cleanData.id_hobby = mapNumeric(updateData.id_hobby);
+    if (updateData.id_cita !== undefined) cleanData.id_cita = mapNumeric(updateData.id_cita);
+
     if (updateData.agama_id !== undefined) cleanData.agama_id = mapNumeric(updateData.agama_id);
     else if (updateData.agama_id_str !== undefined) cleanData.agama_id = mapNumeric(updateData.agama_id_str);
-
-    if (updateData.id_bank !== undefined) cleanData.id_bank = mapString(updateData.id_bank);
-    else if (updateData.id_bank_str !== undefined) cleanData.id_bank = mapString(updateData.id_bank_str);
 
     if (updateData.jenis_tinggal_id !== undefined) cleanData.jenis_tinggal_id = mapNumeric(updateData.jenis_tinggal_id);
     else if (updateData.jenis_tinggal_id_str !== undefined) cleanData.jenis_tinggal_id = mapNumeric(updateData.jenis_tinggal_id_str);
@@ -2166,19 +2091,10 @@ export class DapodikService {
     if (updateData.alat_transportasi_id !== undefined) cleanData.alat_transportasi_id = mapNumeric(updateData.alat_transportasi_id);
     else if (updateData.alat_transportasi_id_str !== undefined) cleanData.alat_transportasi_id = mapNumeric(updateData.alat_transportasi_id_str);
 
-    if (updateData.id_cita !== undefined) cleanData.id_cita = mapNumeric(updateData.id_cita);
-    if (updateData.id_hobby !== undefined) cleanData.id_hobby = mapNumeric(updateData.id_hobby);
-    if (updateData.id_layak_pip !== undefined) cleanData.id_layak_pip = mapNumeric(updateData.id_layak_pip);
-    if (updateData.jenis_pendaftaran_id !== undefined) cleanData.jenis_pendaftaran_id = mapNumeric(updateData.jenis_pendaftaran_id);
-    if (updateData.jenis_keluar_id !== undefined) cleanData.jenis_keluar_id = mapString(updateData.jenis_keluar_id);
-
-    // Kebutuhan Khusus
-    if (updateData.kebutuhan_khusus_id !== undefined) cleanData.kebutuhan_khusus_id = mapNumeric(updateData.kebutuhan_khusus_id);
     if (updateData.kebutuhan_khusus_id_ayah !== undefined) cleanData.kebutuhan_khusus_id_ayah = mapNumeric(updateData.kebutuhan_khusus_id_ayah);
     if (updateData.kebutuhan_khusus_id_ibu !== undefined) cleanData.kebutuhan_khusus_id_ibu = mapNumeric(updateData.kebutuhan_khusus_id_ibu);
 
     // Pekerjaan
-    if (updateData.pekerjaan_id !== undefined) cleanData.pekerjaan_id = mapNumeric(updateData.pekerjaan_id);
     if (updateData.pekerjaan_id_ayah !== undefined) cleanData.pekerjaan_id_ayah = mapNumeric(updateData.pekerjaan_id_ayah);
     else if (updateData.pekerjaan_ayah_id_str !== undefined) cleanData.pekerjaan_id_ayah = mapNumeric(updateData.pekerjaan_ayah_id_str);
 
@@ -2208,22 +2124,10 @@ export class DapodikService {
     if (updateData.penghasilan_id_wali !== undefined) cleanData.penghasilan_id_wali = mapNumeric(updateData.penghasilan_id_wali);
     else if (updateData.penghasilan_wali_id_str !== undefined) cleanData.penghasilan_id_wali = mapNumeric(updateData.penghasilan_wali_id_str);
 
-    // Booleans
-    if (updateData.penerima_kps !== undefined) cleanData.penerima_kps = mapNumeric(updateData.penerima_kps);
-    if (updateData.penerima_kip !== undefined) cleanData.penerima_kip = mapNumeric(updateData.penerima_kip);
-    if (updateData.layak_pip !== undefined) cleanData.layak_pip = mapNumeric(updateData.layak_pip);
-
     const updatedPd = await this.prisma.pesertaDidik.update({
       where: { peserta_didik_id: id },
       data: cleanData,
     });
-
-    if (emailAkun !== undefined) {
-      await this.prisma.pengguna.updateMany({
-        where: { peserta_didik_id: id },
-        data: { email: emailAkun || null },
-      });
-    }
 
     return updatedPd;
   }
@@ -2495,5 +2399,255 @@ export class DapodikService {
       ...dudi,
       ...wilayah,
     };
+  }
+
+  async getDistinctRoles(sekolahId?: string) {
+    const users = await this.prisma.pengguna.findMany({
+      where: sekolahId ? { sekolah_id: sekolahId } : undefined,
+      select: {
+        peran_id: true,
+        peran_nama: true,
+      }
+    });
+    const distinct = Array.from(
+      new Map(users.map(u => [`${u.peran_id}-${u.peran_nama}`, u])).values()
+    );
+    
+    // Filter out generic PTK role (peran_id: 53)
+    const baseRoles = distinct.filter(r => r.peran_id !== 53);
+
+    // Fetch distinct jenis_ptk_id from gtk table filtered by sekolah_id
+    const distinctGtks = await this.prisma.gtk.findMany({
+      select: {
+        jenis_ptk_id: true,
+      },
+      where: {
+        jenis_ptk_id: { not: null },
+        sekolah_id: sekolahId ? sekolahId : undefined,
+      },
+      distinct: ['jenis_ptk_id'],
+    });
+
+    const activeJenisPtkIds = distinctGtks.map(g => Number(g.jenis_ptk_id));
+
+    // Fetch only the types of PTK (jenis_ptk) that are active in gtks
+    const jenisPtks = await this.prisma.jenis_ptk.findMany({
+      where: {
+        jenis_ptk_id: { in: activeJenisPtkIds }
+      },
+      select: {
+        jenis_ptk_id: true,
+        jenis_ptk: true,
+      },
+      orderBy: {
+        jenis_ptk: 'asc'
+      }
+    });
+
+    const ptkRoles = jenisPtks.map(j => ({
+      peran_id: 1000 + Number(j.jenis_ptk_id),
+      peran_nama: j.jenis_ptk,
+    }));
+
+    // Fetch distinct tugas_tambahan jabatan_ptk_id active in this school
+    const distinctTugas = await this.prisma.tugasTambahan.findMany({
+      select: {
+        jabatan_ptk_id: true,
+      },
+      where: {
+        sekolah_id: sekolahId ? sekolahId : undefined,
+        jabatan_ptk_id: { not: null }
+      },
+      distinct: ['jabatan_ptk_id']
+    });
+
+    const activeJabatanIds = distinctTugas.map(t => Number(t.jabatan_ptk_id));
+
+    const jabatans = await this.prisma.jabatan_tugas_ptk.findMany({
+      where: {
+        jabatan_ptk_id: { in: activeJabatanIds }
+      },
+      select: {
+        jabatan_ptk_id: true,
+        nama: true,
+      },
+      orderBy: {
+        nama: 'asc'
+      }
+    });
+
+    const tugasRoles = jabatans.map(j => ({
+      peran_id: 2000 + Number(j.jabatan_ptk_id),
+      peran_nama: j.nama,
+    }));
+
+    return [...baseRoles, ...ptkRoles, ...tugasRoles];
+  }
+
+  async getMenuRoles() {
+    return this.prisma.menuRole.findMany();
+  }
+
+  async saveMenuRoles(peranId: number, peranNama: string, menuIds: string[]) {
+    await this.prisma.$transaction([
+      this.prisma.menuRole.deleteMany({
+        where: { peran_id: peranId }
+      }),
+      this.prisma.menuRole.createMany({
+        data: menuIds.map(menuId => ({
+          menu_id: menuId,
+          peran_id: peranId,
+          peran_nama: peranNama,
+        }))
+      })
+    ]);
+    return { success: true };
+  }
+
+  async getMyMenus(peranId: number) {
+    const mappings = await this.prisma.menuRole.findMany({
+      where: { peran_id: peranId },
+      select: { menu_id: true }
+    });
+    return mappings.map(m => m.menu_id);
+  }
+
+  async getMyMenusByUserId(penggunaId: string) {
+    const pengguna = await this.prisma.pengguna.findUnique({
+      where: { pengguna_id: penggunaId },
+      select: { peran_id: true, ptk_id: true, sekolah_id: true }
+    });
+    if (!pengguna) return [];
+
+    let allowedMenuIds: string[] = [];
+
+    if (pengguna.ptk_id) {
+      // 1. Fetch from jenis_ptk
+      const gtk = await this.prisma.gtk.findUnique({
+        where: { ptk_id: pengguna.ptk_id },
+        select: { jenis_ptk_id: true }
+      });
+      if (gtk && gtk.jenis_ptk_id) {
+        const jPtk = await this.prisma.jenis_ptk.findUnique({
+          where: { jenis_ptk_id: gtk.jenis_ptk_id },
+          select: { jenis_ptk: true }
+        });
+        if (jPtk) {
+          const mappings = await this.prisma.menuRole.findMany({
+            where: { peran_nama: jPtk.jenis_ptk },
+            select: { menu_id: true }
+          });
+          allowedMenuIds.push(...mappings.map(m => m.menu_id));
+        }
+      }
+
+      // 2. Fetch from tugas_tambahan
+      const additionalTasks = await this.prisma.tugasTambahan.findMany({
+        where: { ptk_id: pengguna.ptk_id, sekolah_id: pengguna.sekolah_id || undefined },
+        select: { jabatan_ptk_id: true }
+      });
+
+      const taskJabatanIds = additionalTasks.map(t => Number(t.jabatan_ptk_id));
+
+      if (taskJabatanIds.length > 0) {
+        const jabatans = await this.prisma.jabatan_tugas_ptk.findMany({
+          where: { jabatan_ptk_id: { in: taskJabatanIds } },
+          select: { nama: true }
+        });
+
+        const taskNames = jabatans.map(j => j.nama);
+
+        if (taskNames.length > 0) {
+          const taskMappings = await this.prisma.menuRole.findMany({
+            where: { peran_nama: { in: taskNames } },
+            select: { menu_id: true }
+          });
+          allowedMenuIds.push(...taskMappings.map(m => m.menu_id));
+        }
+      }
+
+      if (allowedMenuIds.length > 0) {
+        return Array.from(new Set(allowedMenuIds));
+      }
+    }
+
+    return this.getMyMenus(pengguna.peran_id);
+  }
+
+  private formatSqlValue(val: any): string {
+    if (val === null || val === undefined) return 'NULL';
+    if (typeof val === 'boolean') return val ? 'TRUE' : 'FALSE';
+    if (typeof val === 'number') return String(val);
+    if (val instanceof Date) return `'${val.toISOString()}'`;
+    if (typeof val === 'object') {
+      if (val.toFixed) return String(val); // Decimal
+      return `'${JSON.stringify(val).replace(/'/g, "''")}'`;
+    }
+    return `'${String(val).replace(/'/g, "''")}'`;
+  }
+
+  async generateBackupSql(sekolahId: string): Promise<string> {
+    if (!sekolahId) throw new Error('Sekolah ID is required for backup.');
+
+    const tables = await this.prisma.$queryRawUnsafe(`
+      SELECT table_schema, table_name 
+      FROM information_schema.tables 
+      WHERE table_schema IN ('dapodik', 'simak', 'mandala')
+    `) as any[];
+
+    const tablesWithSekolahId: { schema: string; name: string }[] = [];
+    for (const t of tables) {
+      const cols = await this.prisma.$queryRawUnsafe(`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_schema = $1 AND table_name = $2 AND column_name = 'sekolah_id'
+      `, t.table_schema, t.table_name) as any[];
+      if (cols.length > 0) {
+        tablesWithSekolahId.push({ schema: t.table_schema, name: t.table_name });
+      }
+    }
+
+    let sqlLines: string[] = [];
+    sqlLines.push('-- ===================================================');
+    sqlLines.push('-- SIMAK POSTGRESQL SCHEMA DUMP');
+    sqlLines.push('-- SCHOOL ID: ' + sekolahId);
+    sqlLines.push('-- EXPORT DATE: ' + new Date().toISOString());
+    sqlLines.push('-- ===================================================\n');
+
+    sqlLines.push("SET session_replication_role = 'replica';\n");
+
+    for (const t of tablesWithSekolahId) {
+      const fullTableName = '"' + t.schema + '"."' + t.name + '"';
+      
+      const columnInfo = await this.prisma.$queryRawUnsafe(`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_schema = $1 AND table_name = $2
+      `, t.schema, t.name) as any[];
+      const cols = columnInfo.map(c => c.column_name);
+
+      if (cols.length === 0) continue;
+
+      const rows = await this.prisma.$queryRawUnsafe(
+        'SELECT * FROM ' + fullTableName + ' WHERE "sekolah_id" = $1',
+        sekolahId
+      ) as any[];
+
+      if (rows.length > 0) {
+        sqlLines.push('-- Data for table ' + fullTableName + ' (' + rows.length + ' rows)');
+        sqlLines.push('TRUNCATE TABLE ' + fullTableName + ' CASCADE;');
+        
+        for (const row of rows) {
+          const colNames = cols.map(c => '"' + c + '"').join(', ');
+          const values = cols.map(c => this.formatSqlValue(row[c])).join(', ');
+          sqlLines.push('INSERT INTO ' + fullTableName + ' (' + colNames + ') VALUES (' + values + ');');
+        }
+        sqlLines.push('');
+      }
+    }
+
+    sqlLines.push("SET session_replication_role = 'origin';");
+
+    return sqlLines.join('\n');
   }
 }

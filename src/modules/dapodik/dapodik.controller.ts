@@ -1,8 +1,8 @@
-import { Controller, Get, UseGuards, Req, Query, Patch, Body, Post, Delete, UseInterceptors, UploadedFile, Param, BadRequestException } from '@nestjs/common';
+import { Controller, Get, UseGuards, Req, Res, Query, Patch, Body, Post, Delete, UseInterceptors, UploadedFile, Param, BadRequestException } from '@nestjs/common';
 import { DapodikService } from './dapodik.service';
 import { ApiKeyGuard } from '../../core/app-key/api-key.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 
 @Controller('dapodik')
 @UseGuards(ApiKeyGuard)
@@ -624,5 +624,44 @@ export class DapodikController {
     const { sekolahId } = this.getSekolahInfo(req);
     const data = await this.dapodikService.getDudiById(sekolahId, id);
     return { status: 'success', data };
+  }
+
+  @Get('roles')
+  async getRoles(@Req() req: Request) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.getDistinctRoles(sekolahId);
+    return { status: 'success', data };
+  }
+
+  @Get('menu-roles')
+  async getMenuRoles() {
+    const data = await this.dapodikService.getMenuRoles();
+    return { status: 'success', data };
+  }
+
+  @Post('menu-roles')
+  async saveMenuRoles(@Body() body: { peranId: number; peranNama: string; menuIds: string[] }) {
+    const data = await this.dapodikService.saveMenuRoles(body.peranId, body.peranNama, body.menuIds);
+    return { status: 'success', data };
+  }
+
+  @Get('menu-roles/my-menus')
+  async getMyMenus(@Req() req: Request) {
+    const user = req['user'] as any;
+    if (!user || !user.sub) {
+      return { status: 'success', data: [] };
+    }
+    const data = await this.dapodikService.getMyMenusByUserId(user.sub);
+    return { status: 'success', data };
+  }
+
+  @Get('backup/generate')
+  async generateBackup(@Req() req: Request, @Res() res: Response) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    const sql = await this.dapodikService.generateBackupSql(sekolahId);
+    
+    res.setHeader('Content-Type', 'application/sql');
+    res.setHeader('Content-Disposition', `attachment; filename="backup_simak_${sekolahId}_${new Date().toISOString().split('T')[0]}.sql"`);
+    return res.send(sql);
   }
 }

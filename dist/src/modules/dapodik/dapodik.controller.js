@@ -467,6 +467,34 @@ let DapodikController = class DapodikController {
         const data = await this.dapodikService.getDudiById(sekolahId, id);
         return { status: 'success', data };
     }
+    async getRoles(req) {
+        const { sekolahId } = this.getSekolahInfo(req);
+        const data = await this.dapodikService.getDistinctRoles(sekolahId);
+        return { status: 'success', data };
+    }
+    async getMenuRoles() {
+        const data = await this.dapodikService.getMenuRoles();
+        return { status: 'success', data };
+    }
+    async saveMenuRoles(body) {
+        const data = await this.dapodikService.saveMenuRoles(body.peranId, body.peranNama, body.menuIds);
+        return { status: 'success', data };
+    }
+    async getMyMenus(req) {
+        const user = req['user'];
+        if (!user || !user.sub) {
+            return { status: 'success', data: [] };
+        }
+        const data = await this.dapodikService.getMyMenusByUserId(user.sub);
+        return { status: 'success', data };
+    }
+    async generateBackup(req, res) {
+        const { sekolahId } = this.getSekolahInfo(req);
+        const sql = await this.dapodikService.generateBackupSql(sekolahId);
+        res.setHeader('Content-Type', 'application/sql');
+        res.setHeader('Content-Disposition', `attachment; filename="backup_simak_${sekolahId}_${new Date().toISOString().split('T')[0]}.sql"`);
+        return res.send(sql);
+    }
 };
 exports.DapodikController = DapodikController;
 __decorate([
@@ -817,6 +845,41 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], DapodikController.prototype, "getDudiDetail", null);
+__decorate([
+    (0, common_1.Get)('roles'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "getRoles", null);
+__decorate([
+    (0, common_1.Get)('menu-roles'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "getMenuRoles", null);
+__decorate([
+    (0, common_1.Post)('menu-roles'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "saveMenuRoles", null);
+__decorate([
+    (0, common_1.Get)('menu-roles/my-menus'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "getMyMenus", null);
+__decorate([
+    (0, common_1.Get)('backup/generate'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "generateBackup", null);
 exports.DapodikController = DapodikController = __decorate([
     (0, common_1.Controller)('dapodik'),
     (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),

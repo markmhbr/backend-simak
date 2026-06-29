@@ -1,5 +1,5 @@
 import { DapodikService } from './dapodik.service';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 export declare class DapodikController {
     private readonly dapodikService;
     constructor(dapodikService: DapodikService);
@@ -901,6 +901,7 @@ export declare class DapodikController {
             status: string;
             no_whatsapp: string | null;
             id_telegram: string | null;
+            nama_kcp: string | null;
         };
     }>;
     getPesertaDidikDetail(req: Request, id: string): Promise<{
@@ -944,6 +945,7 @@ export declare class DapodikController {
             qr_token: string | null;
             status: string;
             no_whatsapp: string | null;
+            nama_kcp: string | null;
             alat_transportasi_id: import("@prisma/client-runtime-utils").Decimal | null;
             id_cita: import("@prisma/client-runtime-utils").Decimal | null;
             id_hobby: import("@prisma/client-runtime-utils").Decimal | null;
@@ -971,7 +973,6 @@ export declare class DapodikController {
             nm_kip: string | null;
             no_kks: string | null;
             reg_akta_lahir: string | null;
-            nama_kcp: string | null;
             nama_ayah: string | null;
             tahun_lahir_ayah: import("@prisma/client-runtime-utils").Decimal | null;
             pekerjaan_id_ayah: number | null;
@@ -1176,4 +1177,35 @@ export declare class DapodikController {
             no_hp_cp: string | null;
         };
     }>;
+    getRoles(req: Request): Promise<{
+        status: string;
+        data: {
+            peran_nama: string;
+            peran_id: number;
+        }[];
+    }>;
+    getMenuRoles(): Promise<{
+        status: string;
+        data: {
+            peran_nama: string | null;
+            peran_id: number;
+            menu_role_id: string;
+            menu_id: string;
+        }[];
+    }>;
+    saveMenuRoles(body: {
+        peranId: number;
+        peranNama: string;
+        menuIds: string[];
+    }): Promise<{
+        status: string;
+        data: {
+            success: boolean;
+        };
+    }>;
+    getMyMenus(req: Request): Promise<{
+        status: string;
+        data: string[];
+    }>;
+    generateBackup(req: Request, res: Response): Promise<Response<any, Record<string, any>>>;
 }

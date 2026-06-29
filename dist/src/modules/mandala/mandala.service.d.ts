@@ -33,10 +33,10 @@ export declare class MandalaService implements OnModuleInit {
         alamat: string;
         email: string;
         website: string;
-        bentuk_pendidikan_is_str: any;
-        bentuk_pendidikan_id_str: any;
-        kabupaten_kota: any;
-        kecamatan: any;
+        bentuk_pendidikan_is_str: string;
+        bentuk_pendidikan_id_str: string;
+        kabupaten_kota: string;
+        kecamatan: string;
         lintang: import("@prisma/client-runtime-utils").Decimal;
         bujur: import("@prisma/client-runtime-utils").Decimal;
         desa_kelurahan: string;
@@ -548,6 +548,7 @@ export declare class MandalaService implements OnModuleInit {
                 no_hp: any;
                 no_wa: string;
                 email: any;
+                nama_ibu_kandung: any;
             };
         }[];
         total_data: number;
@@ -650,4 +651,5 @@ export declare class MandalaService implements OnModuleInit {
         alpha: number;
     }[]>;
     private calculateMonthlySummary;
+    private resolveWilayahHierarchy;
 }

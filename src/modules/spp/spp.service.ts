@@ -216,12 +216,15 @@ export class SppService {
       throw new BadRequestException('Pengaturan tagihan belum dihubungkan ke kelas (rombongan belajar) mana pun.');
     }
 
-    // 2. Dapatkan seluruh siswa aktif yang berada pada rombel-rombel tersebut
-    const siswaList = await this.prisma.pesertaDidik.findMany({
+    // 2. Dapatkan seluruh siswa aktif yang berada pada rombel-rombel tersebut via anggotaRombel
+    const anggotaList = await this.prisma.anggotaRombel.findMany({
       where: {
         rombongan_belajar_id: { in: rombelIds },
         sekolah_id: sekolahId,
-        status: 'Aktif',
+        soft_delete: 0,
+        peserta_didik: {
+          status: 'Aktif',
+        },
       },
       select: {
         peserta_didik_id: true,
@@ -229,14 +232,14 @@ export class SppService {
       },
     });
 
-    if (siswaList.length === 0) {
+    if (anggotaList.length === 0) {
       return {
         message: 'Tidak ada peserta didik aktif ditemukan pada kelas yang terpilih.',
         count: 0,
       };
     }
 
-    const siswaIds = siswaList.map((s) => s.peserta_didik_id);
+    const siswaIds = anggotaList.map((s) => s.peserta_didik_id);
 
     // Ambil semua tagihan yang sudah ada untuk siswa-siswa tersebut dalam sekali query
     const existingSpps = await this.prisma.spp.findMany({
@@ -253,7 +256,7 @@ export class SppService {
     const existingSiswaIds = new Set(existingSpps.map((s) => s.peserta_didik_id));
 
     // Filter daftar siswa yang BENAR-BENAR belum punya tagihan ini
-    const siswaBelumAdaTagihan = siswaList.filter(
+    const siswaBelumAdaTagihan = anggotaList.filter(
       (s) => !existingSiswaIds.has(s.peserta_didik_id),
     );
 
@@ -476,37 +479,82 @@ export class SppService {
   // 4. LAPORAN & REKAPITULASI
   // ===================================
 
-  // A. Tunggakan per Siswa
-  async getTunggakanPerSiswa(sekolahId: string) {
-    const listSpp = await this.prisma.spp.findMany({
+  private async getStudentRombelMap(sekolahId: string) {
+    const mappings = await this.prisma.anggotaRombel.findMany({
       where: {
         sekolah_id: sekolahId,
-        status: { in: [1, 2] }, // Belum Bayar, Sebagian
+        soft_delete: 0,
       },
-      include: {
-        peserta_didik: {
+      select: {
+        peserta_didik_id: true,
+        rombongan_belajar_id: true,
+        rombongan_belajar: {
           select: {
+            rombongan_belajar_id: true,
             nama: true,
-            nisn: true,
-            rombongan_belajar: { select: { nama: true } },
-          },
-        },
-        pengaturan_tagihan: {
-          select: {
-            nama_tagihan: true,
+            semester_id: true,
+            jenis_rombel: true,
           },
         },
       },
     });
 
+    const studentMap = new Map<string, { id: string; nama: string; semester_id: string }>();
+    
+    // Sort mappings so reguler (jenis_rombel = 1) is processed last to override other fallbacks
+    const sorted = [...mappings].sort((a, b) => {
+      const aIsReg = a.rombongan_belajar && Number(a.rombongan_belajar.jenis_rombel) === 1 ? 1 : 0;
+      const bIsReg = b.rombongan_belajar && Number(b.rombongan_belajar.jenis_rombel) === 1 ? 1 : 0;
+      return aIsReg - bIsReg;
+    });
+
+    for (const m of sorted) {
+      if (m.rombongan_belajar) {
+        studentMap.set(m.peserta_didik_id, {
+          id: m.rombongan_belajar.rombongan_belajar_id,
+          nama: m.rombongan_belajar.nama,
+          semester_id: m.rombongan_belajar.semester_id,
+        });
+      }
+    }
+
+    return studentMap;
+  }
+
+  // A. Tunggakan per Siswa
+  async getTunggakanPerSiswa(sekolahId: string) {
+    const [listSpp, rombelMap] = await Promise.all([
+      this.prisma.spp.findMany({
+        where: {
+          sekolah_id: sekolahId,
+          status: { in: [1, 2] }, // Belum Bayar, Sebagian
+        },
+        include: {
+          peserta_didik: {
+            select: {
+              nama: true,
+              nisn: true,
+            },
+          },
+          pengaturan_tagihan: {
+            select: {
+              nama_tagihan: true,
+            },
+          },
+        },
+      }),
+      this.getStudentRombelMap(sekolahId)
+    ]);
+
     return listSpp.map((s) => {
       const sisaTunggakan = s.nominal_tagihan - s.nominal_terbayar;
+      const rInfo = rombelMap.get(s.peserta_didik_id);
       return {
         spp_id: s.spp_id,
         peserta_didik_id: s.peserta_didik_id,
         nama: s.peserta_didik?.nama || 'Unknown',
         nisn: s.peserta_didik?.nisn || '-',
-        kelas: s.peserta_didik?.rombongan_belajar?.nama || '-',
+        kelas: rInfo?.nama || '-',
         nama_tagihan: s.pengaturan_tagihan?.nama_tagihan || 'Tagihan',
         nominal_tagihan: s.nominal_tagihan.toString(),
         nominal_terbayar: s.nominal_terbayar.toString(),
@@ -517,26 +565,22 @@ export class SppService {
 
   // B. Tunggakan per Kelas
   async getTunggakanPerKelas(sekolahId: string) {
-    const listSpp = await this.prisma.spp.findMany({
-      where: {
-        sekolah_id: sekolahId,
-        status: { in: [1, 2] },
-      },
-      include: {
-        peserta_didik: {
-          select: {
-            rombongan_belajar_id: true,
-            rombongan_belajar: { select: { nama: true } },
-          },
+    const [listSpp, rombelMap] = await Promise.all([
+      this.prisma.spp.findMany({
+        where: {
+          sekolah_id: sekolahId,
+          status: { in: [1, 2] },
         },
-      },
-    });
+      }),
+      this.getStudentRombelMap(sekolahId)
+    ]);
 
     const rekapMap: Record<string, { kelas: string; total_tunggakan: bigint }> = {};
 
     for (const s of listSpp) {
-      const rombelId = s.peserta_didik?.rombongan_belajar_id || 'unassigned';
-      const rombelNama = s.peserta_didik?.rombongan_belajar?.nama || 'Tanpa Kelas';
+      const rInfo = rombelMap.get(s.peserta_didik_id);
+      const rombelId = rInfo?.id || 'unassigned';
+      const rombelNama = rInfo?.nama || 'Tanpa Kelas';
       const tunggakan = s.nominal_tagihan - s.nominal_terbayar;
 
       if (!rekapMap[rombelId]) {
@@ -630,29 +674,21 @@ export class SppService {
 
   // F. Rekap Pembayaran per Tahun Pelajaran
   async getRekapTahunPelajaran(sekolahId: string) {
-    const listPembayaran = await this.prisma.riwayatTransaksiSpp.findMany({
-      where: {
-        sekolah_id: sekolahId,
-        jenis_transaksi: 1,
-      },
-      include: {
-        peserta_didik: {
-          select: {
-            rombongan_belajar: {
-              select: {
-                semester_id: true,
-              },
-            },
-          },
+    const [listPembayaran, rombelMap] = await Promise.all([
+      this.prisma.riwayatTransaksiSpp.findMany({
+        where: {
+          sekolah_id: sekolahId,
+          jenis_transaksi: 1,
         },
-      },
-    });
+      }),
+      this.getStudentRombelMap(sekolahId)
+    ]);
 
     const semesterMap: Record<string, { semester_id: string; total_nominal: bigint }> = {};
 
     for (const p of listPembayaran) {
-      // Semester id didapatkan dari rombongan belajar peserta didik
-      const semesterId = p.peserta_didik?.rombongan_belajar?.semester_id || 'unassigned';
+      const rInfo = rombelMap.get(p.peserta_didik_id);
+      const semesterId = rInfo?.semester_id || 'unassigned';
 
       if (!semesterMap[semesterId]) {
         semesterMap[semesterId] = {
