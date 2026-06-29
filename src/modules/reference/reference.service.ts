@@ -320,6 +320,8 @@ export class ReferenceService {
 
     return {
       ...gtk,
+      lintang: gtk.lintang !== null && gtk.lintang !== undefined ? gtk.lintang.toString() : null,
+      bujur: gtk.bujur !== null && gtk.bujur !== undefined ? gtk.bujur.toString() : null,
       rwy_sertifikasi: resolvedSertifikasi,
       rwy_kepangkatan: resolvedKepangkatan,
       agama_nama: agama?.nama || null,
@@ -337,7 +339,7 @@ export class ReferenceService {
       jenis_keluar_nama: jenis_keluar?.ket_keluar || null,
       // Boolean format mapping (1 = Ya, 0 = Tidak)
       sudah_lisensi_kepala_sekolah_str: this.formatYesNo(gtk.sudah_lisensi_kepala_sekolah),
-      pernah_diklat_kepengawasan_str: this.formatYesNo(gtk.pernah_diklat_kepengawasan),
+      pernah_diklat_kepengawasan_str: this.formatYesNo(gtk.pernah_dilat_kepengawasan || gtk.pernah_diklat_kepengawasan),
       keahlian_braille_str: this.formatYesNo(gtk.keahlian_braille),
       keahlian_bhs_isyarat_str: this.formatYesNo(gtk.keahlian_bhs_isyarat),
       ptk_induk_str: this.formatYesNo(gtk.ptk_induk),

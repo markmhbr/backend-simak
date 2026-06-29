@@ -21,6 +21,10 @@ export declare class SyncController {
         status: string;
         count: number;
     }>;
+    syncJurusanSp(req: Request, data: any[]): Promise<{
+        status: string;
+        count: number;
+    }>;
     syncRombel(req: Request, data: any[]): Promise<{
         status: string;
         count: number;

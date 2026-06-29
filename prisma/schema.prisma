@@ -105,6 +105,7 @@ model RombonganBelajar {
   last_sync             DateTime?
   updater_id            String?   @db.Uuid
 
+  jurusan_sp        JurusanSp? @relation("JurusanSpRombel", fields: [jurusan_sp_id], references: [jurusan_sp_id], onDelete: NoAction, onUpdate: NoAction)
   anggota_rombel    AnggotaRombel[]
   pembelajaran      Pembelajaran[]
   peserta_didik     PesertaDidik[]            @relation("RombelPesertaDidik")
@@ -113,6 +114,27 @@ model RombonganBelajar {
 
   @@index([sekolah_id])
   @@map("rombongan_belajar")
+  @@schema("dapodik")
+}
+
+model JurusanSp {
+  jurusan_sp_id         String    @id @default(uuid()) @db.Uuid
+  sekolah_id            String?   @db.Uuid
+  kebutuhan_khusus_id   Int
+  jurusan_id            String
+  nama_jurusan_sp       String
+  sk_izin               String?
+  tanggal_sk_izin       DateTime? @db.Date
+  create_date           DateTime  @default(now())
+  last_update           DateTime  @updatedAt
+  soft_delete           Decimal?  @db.Decimal
+  last_sync             DateTime?
+  updater_id            String?   @db.Uuid
+
+  rombongan_belajar     RombonganBelajar[] @relation("JurusanSpRombel")
+
+  @@index([sekolah_id])
+  @@map("jurusan_sp")
   @@schema("dapodik")
 }
 
@@ -166,6 +188,30 @@ model Pembelajaran {
   @@map("pembelajaran")
   @@schema("dapodik")
 }
+
+model TugasTambahan {
+  ptk_tugas_tambahan_id String    @id @default(uuid()) @db.Uuid
+  ptk_id                String    @db.Uuid
+  sekolah_id            String?   @db.Uuid
+  jabatan_ptk_id        Decimal?  @db.Decimal
+  jumlah_jam            Decimal?  @db.Decimal
+  nomor_sk              String?
+  tmt_tambahan          DateTime? @db.Date
+  tst_tambahan          DateTime? @db.Date
+  soft_delete           Decimal?  @db.Decimal
+  create_date           DateTime  @default(now())
+  last_update           DateTime  @updatedAt
+  last_sync             DateTime?
+  updater_id            String?   @db.Uuid
+
+  gtk                  Gtk       @relation(fields: [ptk_id], references: [ptk_id])
+
+  @@index([ptk_id])
+  @@index([sekolah_id])
+  @@map("tugas_tambahan")
+  @@schema("dapodik")
+}
+
 
 model PesertaDidik {
   // --- Kolom dari tabel peserta_didik ---
@@ -267,6 +313,9 @@ model PesertaDidik {
   status           String   @default("Aktif")
   telegram_chat_id String?
   telegram_token   String?
+  no_whatsapp      String?
+  email_aktif      String?
+  is_wali          Boolean? @default(false)
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
 
@@ -373,9 +422,11 @@ model Gtk {
   tgl_ptk_keluar      DateTime? @db.Date
 
   // --- Kolom SIMAK (dipertahankan) ---
-  qr_token String?
-  foto     String?
-  status   String  @default("Aktif")
+  qr_token    String?
+  foto        String?
+  status      String  @default("Aktif")
+  no_whatsapp String?
+  id_telegram String?
 
   // --- Relations ---
   jenis_ptk                 jenis_ptk?                @relation(fields: [jenis_ptk_id], references: [jenis_ptk_id], onDelete: NoAction, onUpdate: NoAction)
@@ -384,6 +435,7 @@ model Gtk {
   sumber_gaji               sumber_gaji?              @relation(fields: [sumber_gaji_id], references: [sumber_gaji_id], onDelete: NoAction, onUpdate: NoAction)
   agama                     agama?                    @relation(fields: [agama_id], references: [agama_id], onDelete: NoAction, onUpdate: NoAction)
   pembelajaran              Pembelajaran[]
+  tugas_tambahan            TugasTambahan[]
   penggunas                 Pengguna[]
   riwayat_pendidikan_formal RiwayatPendidikanFormal[]
   rwy_sertifikasi           RwySertifikasi[]
@@ -587,6 +639,21 @@ model AppKey {
   domain         String?
 
   @@map("app_keys")
+  @@schema("simak")
+}
+
+model PengajuanPerbaikan {
+  id                String   @id @default(uuid()) @db.Uuid
+  sekolah_id        String   @db.Uuid
+  ptk_id            String?  @db.Uuid
+  peserta_didik_id  String?  @db.Uuid
+  tipe              String   // "GTK" | "SISWA"
+  perubahan         Json     // Format: { [nama_field]: { sebelumnya: any, diajukan: any } }
+  status            String   @default("PENDING") // "PENDING" | "APPROVED" | "REJECTED"
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  @@map("pengajuan_perbaikan")
   @@schema("simak")
 }
 

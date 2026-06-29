@@ -14,6 +14,9 @@ export declare class SyncService {
     syncSekolah(sekolahId: string, dataRows: any[], rawApiKey?: string): Promise<{
         successCount: number;
     }>;
+    syncJurusanSp(sekolahId: string, dataRows: any[]): Promise<{
+        successCount: number;
+    }>;
     syncRombel(sekolahId: string, dataRows: any[]): Promise<{
         successCount: number;
     }>;

@@ -451,7 +451,7 @@ export class DapodikController {
   @Get('rombongan-belajar')
   async getRombonganBelajarList(
     @Req() req: Request, 
-    @Query('type') type?: 'reguler' | 'pilihan',
+    @Query('type') type?: string,
     @Query('limit') limit?: string,
     @Query('page') page?: string,
     @Query('search') search?: string,

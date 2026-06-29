@@ -67,6 +67,21 @@ export class SyncController {
     });
   }
 
+  @Post('jurusan-sp')
+  @UseGuards(ApiKeyGuard)
+  @HttpCode(HttpStatus.OK)
+  async syncJurusanSp(@Req() req: Request, @Body() data: any[]) {
+    const sekolahId = this.getSekolahId(req);
+    if (!sekolahId) {
+      throw new NotFoundException('sekolah_id tidak ditemukan.');
+    }
+    return this.getLock(sekolahId).run(async () => {
+      const rows = Array.isArray(data) ? data : [data];
+      const result = await this.syncService.syncJurusanSp(sekolahId, rows);
+      return { status: 'success', count: result.successCount };
+    });
+  }
+
   @Post('rombel')
   @UseGuards(ApiKeyGuard)
   @HttpCode(HttpStatus.OK)

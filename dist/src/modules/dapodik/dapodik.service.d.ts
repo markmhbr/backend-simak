@@ -523,12 +523,30 @@ export declare class DapodikService {
         nomor_permohonan: string | null;
         tanggal_pengajuan: Date | null;
     }>;
-    getRombelRekapKategori(sekolahId: string | null): Promise<any[]>;
-    getRombelRekapKompetensi(sekolahId: string | null): Promise<any[]>;
-    getRombonganBelajar(sekolahId: string | null, type?: 'reguler' | 'pilihan', limit?: number, page?: number, search?: string, tingkat?: string): Promise<{
+    getRombelRekapKategori(sekolahId: string | null): Promise<{
+        id: number;
+        kategori: string;
+        tingkat10: number;
+        tingkat11: number;
+        tingkat12: number;
+        total: number;
+    }[]>;
+    getRombelRekapKompetensi(sekolahId: string | null): Promise<{
+        id: number;
+        kompetensi: string;
+        tingkat10: number;
+        tingkat11: number;
+        tingkat12: number;
+        total: number;
+    }[]>;
+    getRombonganBelajar(sekolahId: string | null, type?: string, limit?: number, page?: number, search?: string, tingkat?: string): Promise<{
         total: number;
         data: {
             jumlah_siswa: number;
+            ptk_id_str: any;
+            tingkat_pendidikan_id_str: string;
+            kurikulum_id_str: any;
+            id_ruang_str: any;
             nama: string;
             _count: {
                 anggota_rombel: number;
@@ -563,17 +581,19 @@ export declare class DapodikService {
     getEkstrakurikuler(sekolahId: string | null, search?: string): Promise<{
         nm_ekskul: string;
         anggotaRombel: number;
+        ptk_id_str: any;
+        id_ruang_str: any;
         nama: string;
         _count: {
             anggota_rombel: number;
         };
+        ptk_id: string;
         rombongan_belajar_id: string;
         id_ruang: string;
     }[]>;
     getJurusan(sekolahId: string | null): Promise<{
-        kode: any;
-        nama: any;
-        jurusan_sp_id: any;
+        kode: string;
+        nama_jurusan: string;
     }[]>;
     getMataPelajaran(sekolahId: string | null, limit?: number, search?: string, page?: number): Promise<{
         total: number;
@@ -707,6 +727,8 @@ export declare class DapodikService {
         tgl_ptk_keluar: Date | null;
         qr_token: string | null;
         status: string;
+        no_whatsapp: string | null;
+        id_telegram: string | null;
     }>;
     getPesertaDidikById(sekolahId: string, id: string): Promise<any>;
     updatePesertaDidik(sekolahId: string, id: string, data: any): Promise<{
@@ -743,6 +765,7 @@ export declare class DapodikService {
         jenis_keluar_id: string | null;
         qr_token: string | null;
         status: string;
+        no_whatsapp: string | null;
         alat_transportasi_id: import("@prisma/client-runtime-utils").Decimal | null;
         id_cita: import("@prisma/client-runtime-utils").Decimal | null;
         id_hobby: import("@prisma/client-runtime-utils").Decimal | null;
@@ -805,6 +828,8 @@ export declare class DapodikService {
         jumlah_saudara_kandung: import("@prisma/client-runtime-utils").Decimal | null;
         telegram_chat_id: string | null;
         telegram_token: string | null;
+        email_aktif: string | null;
+        is_wali: boolean | null;
     }>;
     getGtkRekapKategori(sekolahId: string | null): Promise<{
         id: number;

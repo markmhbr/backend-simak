@@ -144,6 +144,37 @@ let SyncService = SyncService_1 = class SyncService {
         }
         return { successCount };
     }
+    async syncJurusanSp(sekolahId, dataRows) {
+        let successCount = 0;
+        for (const r of dataRows) {
+            if (!r.jurusan_sp_id)
+                continue;
+            const payload = {
+                jurusan_sp_id: r.jurusan_sp_id,
+                sekolah_id: sekolahId,
+                kebutuhan_khusus_id: this.parseNumber(r.kebutuhan_khusus_id) ?? 0,
+                jurusan_id: r.jurusan_id ? String(r.jurusan_id) : '',
+                nama_jurusan_sp: r.nama_jurusan_sp || 'Tanpa Nama',
+                sk_izin: r.sk_izin || null,
+                tanggal_sk_izin: this.parseDate(r.tanggal_sk_izin),
+                soft_delete: this.parseNumber(r.soft_delete),
+                last_sync: this.parseDate(r.last_sync),
+                updater_id: r.updater_id || null,
+            };
+            try {
+                await this.prisma.jurusanSp.upsert({
+                    where: { jurusan_sp_id: r.jurusan_sp_id },
+                    create: payload,
+                    update: payload,
+                });
+                successCount++;
+            }
+            catch (err) {
+                this.logger.error(`Error upsert JurusanSp ${r.jurusan_sp_id}: ${err.message}`);
+            }
+        }
+        return { successCount };
+    }
     async syncRombel(sekolahId, dataRows) {
         let successCount = 0;
         for (const r of dataRows) {
@@ -501,6 +532,31 @@ let SyncService = SyncService_1 = class SyncService {
                             where: { riwayat_pendidikan_formal_id: edu.riwayat_pendidikan_formal_id },
                             create: { ...eduPayload, riwayat_pendidikan_formal_id: edu.riwayat_pendidikan_formal_id },
                             update: { ...eduPayload, updated_at: new Date() },
+                        });
+                    }
+                }
+                const ttRaw = g.tugas_tambahan;
+                if (ttRaw) {
+                    const ttList = Array.isArray(ttRaw) ? ttRaw : [ttRaw];
+                    for (const tt of ttList) {
+                        if (!tt.ptk_tugas_tambahan_id)
+                            continue;
+                        const ttPayload = {
+                            ptk_id: g.ptk_id,
+                            sekolah_id: sekolahId,
+                            jabatan_ptk_id: this.parseNumber(tt.jabatan_ptk_id),
+                            jumlah_jam: this.parseNumber(tt.jumlah_jam),
+                            nomor_sk: tt.nomor_sk || null,
+                            tmt_tambahan: this.parseDate(tt.tmt_tambahan),
+                            tst_tambahan: this.parseDate(tt.tst_tambahan),
+                            soft_delete: this.parseNumber(tt.soft_delete),
+                            last_sync: this.parseDate(tt.last_sync),
+                            updater_id: tt.updater_id || null,
+                        };
+                        await this.prisma.tugasTambahan.upsert({
+                            where: { ptk_tugas_tambahan_id: tt.ptk_tugas_tambahan_id },
+                            create: { ...ttPayload, ptk_tugas_tambahan_id: tt.ptk_tugas_tambahan_id },
+                            update: ttPayload,
                         });
                     }
                 }

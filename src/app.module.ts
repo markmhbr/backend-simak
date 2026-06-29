@@ -21,6 +21,7 @@ import { IndisiplinerModule } from './modules/indisipliner/indisipliner.module';
 import { SppModule } from './modules/spp/spp.module';
 import { SuratModule } from './modules/surat/surat.module';
 import { ReferenceModule } from './modules/reference/reference.module';
+import { PengajuanPerbaikanModule } from './modules/pengajuan-perbaikan/pengajuan-perbaikan.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { ReferenceModule } from './modules/reference/reference.module';
     SppModule,
     SuratModule,
     ReferenceModule,
+    PengajuanPerbaikanModule,
   ],
 
 

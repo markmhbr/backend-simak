@@ -285,6 +285,7 @@ export declare class SuratService {
             jenis_keluar_id: string | null;
             qr_token: string | null;
             status: string;
+            no_whatsapp: string | null;
             alat_transportasi_id: import("@prisma/client-runtime-utils").Decimal | null;
             id_cita: import("@prisma/client-runtime-utils").Decimal | null;
             id_hobby: import("@prisma/client-runtime-utils").Decimal | null;
@@ -347,6 +348,8 @@ export declare class SuratService {
             jumlah_saudara_kandung: import("@prisma/client-runtime-utils").Decimal | null;
             telegram_chat_id: string | null;
             telegram_token: string | null;
+            email_aktif: string | null;
+            is_wali: boolean | null;
         };
         gtk: {
             sekolah_id: string | null;
@@ -427,6 +430,8 @@ export declare class SuratService {
             tgl_ptk_keluar: Date | null;
             qr_token: string | null;
             status: string;
+            no_whatsapp: string | null;
+            id_telegram: string | null;
         };
     } & {
         sekolah_id: string;

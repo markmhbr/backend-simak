@@ -30,6 +30,7 @@ const indisipliner_module_1 = require("./modules/indisipliner/indisipliner.modul
 const spp_module_1 = require("./modules/spp/spp.module");
 const surat_module_1 = require("./modules/surat/surat.module");
 const reference_module_1 = require("./modules/reference/reference.module");
+const pengajuan_perbaikan_module_1 = require("./modules/pengajuan-perbaikan/pengajuan-perbaikan.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -56,6 +57,7 @@ exports.AppModule = AppModule = __decorate([
             spp_module_1.SppModule,
             surat_module_1.SuratModule,
             reference_module_1.ReferenceModule,
+            pengajuan_perbaikan_module_1.PengajuanPerbaikanModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [

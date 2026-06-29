@@ -646,17 +646,35 @@ export declare class DapodikController {
     }>;
     getRombelRekapKategori(req: Request): Promise<{
         status: string;
-        data: any[];
+        data: {
+            id: number;
+            kategori: string;
+            tingkat10: number;
+            tingkat11: number;
+            tingkat12: number;
+            total: number;
+        }[];
     }>;
     getRombelRekapKompetensi(req: Request): Promise<{
         status: string;
-        data: any[];
+        data: {
+            id: number;
+            kompetensi: string;
+            tingkat10: number;
+            tingkat11: number;
+            tingkat12: number;
+            total: number;
+        }[];
     }>;
-    getRombonganBelajarList(req: Request, type?: 'reguler' | 'pilihan', limit?: string, page?: string, search?: string, tingkat?: string): Promise<{
+    getRombonganBelajarList(req: Request, type?: string, limit?: string, page?: string, search?: string, tingkat?: string): Promise<{
         status: string;
         klien: any;
         data: {
             jumlah_siswa: number;
+            ptk_id_str: any;
+            tingkat_pendidikan_id_str: string;
+            kurikulum_id_str: any;
+            id_ruang_str: any;
             nama: string;
             _count: {
                 anggota_rombel: number;
@@ -707,10 +725,13 @@ export declare class DapodikController {
         data: {
             nm_ekskul: string;
             anggotaRombel: number;
+            ptk_id_str: any;
+            id_ruang_str: any;
             nama: string;
             _count: {
                 anggota_rombel: number;
             };
+            ptk_id: string;
             rombongan_belajar_id: string;
             id_ruang: string;
         }[];
@@ -719,9 +740,8 @@ export declare class DapodikController {
         status: string;
         klien: any;
         data: {
-            kode: any;
-            nama: any;
-            jurusan_sp_id: any;
+            kode: string;
+            nama_jurusan: string;
         }[];
     }>;
     getMataPelajaranList(req: Request, limit?: string, search?: string, page?: string): Promise<{
@@ -879,6 +899,8 @@ export declare class DapodikController {
             tgl_ptk_keluar: Date | null;
             qr_token: string | null;
             status: string;
+            no_whatsapp: string | null;
+            id_telegram: string | null;
         };
     }>;
     getPesertaDidikDetail(req: Request, id: string): Promise<{
@@ -921,6 +943,7 @@ export declare class DapodikController {
             jenis_keluar_id: string | null;
             qr_token: string | null;
             status: string;
+            no_whatsapp: string | null;
             alat_transportasi_id: import("@prisma/client-runtime-utils").Decimal | null;
             id_cita: import("@prisma/client-runtime-utils").Decimal | null;
             id_hobby: import("@prisma/client-runtime-utils").Decimal | null;
@@ -983,6 +1006,8 @@ export declare class DapodikController {
             jumlah_saudara_kandung: import("@prisma/client-runtime-utils").Decimal | null;
             telegram_chat_id: string | null;
             telegram_token: string | null;
+            email_aktif: string | null;
+            is_wali: boolean | null;
         };
     }>;
     getDudi(req: Request): Promise<{

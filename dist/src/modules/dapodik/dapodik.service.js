@@ -749,6 +749,20 @@ let DapodikService = class DapodikService {
                     select: {
                         nama: true,
                     }
+                },
+                anggota_rombel: {
+                    where: {
+                        rombongan_belajar: {
+                            jenis_rombel: 1,
+                        }
+                    },
+                    select: {
+                        rombongan_belajar: {
+                            select: {
+                                nama: true,
+                            }
+                        }
+                    }
                 }
             }
         });
@@ -757,7 +771,8 @@ let DapodikService = class DapodikService {
             rekapMap.set(tingkat, { tingkat, l: 0, p: 0, total: 0, siswaBaru: 0, pindahan: 0, mengulang: 0 });
         });
         students.forEach((pd) => {
-            const nama_rombel = pd.rombongan_belajar?.nama || null;
+            const rombel = pd.rombongan_belajar || pd.anggota_rombel?.[0]?.rombongan_belajar;
+            const nama_rombel = rombel?.nama || null;
             let t = 'Lainnya';
             if (nama_rombel) {
                 if (nama_rombel.startsWith('XII'))
@@ -812,7 +827,6 @@ let DapodikService = class DapodikService {
             where: {
                 sekolah_id: filter.sekolah_id,
                 status: 'Aktif',
-                rombongan_belajar_id: { not: null }
             },
             select: {
                 jenis_kelamin: true,
@@ -820,18 +834,32 @@ let DapodikService = class DapodikService {
                     select: {
                         nama: true,
                     }
+                },
+                anggota_rombel: {
+                    where: {
+                        rombongan_belajar: {
+                            jenis_rombel: 1,
+                        }
+                    },
+                    select: {
+                        rombongan_belajar: {
+                            select: {
+                                nama: true,
+                            }
+                        }
+                    }
                 }
             }
         });
         const rekapMap = new Map();
         students.forEach((pd) => {
-            const rombel = pd.rombongan_belajar?.nama || '';
+            const rombelObj = pd.rombongan_belajar || pd.anggota_rombel?.[0]?.rombongan_belajar;
+            const rombel = rombelObj?.nama || '';
             const parts = rombel.split(' ');
             let kode = parts.length > 1 ? parts[1] : 'Umum';
             if (kode === 'MIPA' || kode === 'IPS')
                 kode = parts[1];
-            const namaJurusan = jurusanMap.get(kode);
-            const kompetensiName = namaJurusan ? `${namaJurusan} (${kode})` : kode;
+            const kompetensiName = kode;
             if (!rekapMap.has(kode)) {
                 rekapMap.set(kode, {
                     kompetensi: kompetensiName,
@@ -1047,10 +1075,91 @@ let DapodikService = class DapodikService {
         });
     }
     async getRombelRekapKategori(sekolahId) {
-        return [];
+        const filter = this.getSekolahFilter(sekolahId);
+        const rombels = await this.prisma.rombonganBelajar.findMany({
+            where: {
+                sekolah_id: filter.sekolah_id,
+            },
+            select: {
+                jenis_rombel: true,
+                tingkat_pendidikan_id: true,
+            }
+        });
+        const categories = [
+            { id: 1, name: 'Reguler', jenisIds: [1] },
+            { id: 2, name: 'Praktik', jenisIds: [2] },
+            { id: 3, name: 'Ekskul', jenisIds: [51] },
+            { id: 4, name: 'Matpel Pilihan', jenisIds: [16] },
+            { id: 5, name: 'Wali', jenisIds: [18] }
+        ];
+        const result = categories.map(cat => {
+            let t10 = 0;
+            let t11 = 0;
+            let t12 = 0;
+            rombels.forEach(r => {
+                const jr = r.jenis_rombel ? Number(r.jenis_rombel) : 0;
+                if (cat.jenisIds.includes(jr)) {
+                    const tingkat = r.tingkat_pendidikan_id ? Number(r.tingkat_pendidikan_id) : 0;
+                    if (tingkat === 10)
+                        t10++;
+                    else if (tingkat === 11)
+                        t11++;
+                    else if (tingkat === 12)
+                        t12++;
+                }
+            });
+            return {
+                id: cat.id,
+                kategori: cat.name,
+                tingkat10: t10,
+                tingkat11: t11,
+                tingkat12: t12,
+                total: t10 + t11 + t12
+            };
+        });
+        return result;
     }
     async getRombelRekapKompetensi(sekolahId) {
-        return [];
+        const filter = this.getSekolahFilter(sekolahId);
+        const rombels = await this.prisma.rombonganBelajar.findMany({
+            where: {
+                sekolah_id: filter.sekolah_id,
+                jenis_rombel: 1,
+            },
+            select: {
+                nama: true,
+                tingkat_pendidikan_id: true,
+            }
+        });
+        const rekapMap = new Map();
+        rombels.forEach(r => {
+            const parts = r.nama.split(' ');
+            let kode = parts.length > 1 ? parts[1] : 'Umum';
+            if (kode === 'MIPA' || kode === 'IPS')
+                kode = parts[1];
+            if (!rekapMap.has(kode)) {
+                rekapMap.set(kode, { t10: 0, t11: 0, t12: 0 });
+            }
+            const data = rekapMap.get(kode);
+            const tingkat = r.tingkat_pendidikan_id ? Number(r.tingkat_pendidikan_id) : 0;
+            if (tingkat === 10)
+                data.t10++;
+            else if (tingkat === 11)
+                data.t11++;
+            else if (tingkat === 12)
+                data.t12++;
+        });
+        let index = 1;
+        return Array.from(rekapMap.entries())
+            .sort((a, b) => a[0].localeCompare(b[0]))
+            .map(([kode, counts]) => ({
+            id: index++,
+            kompetensi: kode,
+            tingkat10: counts.t10,
+            tingkat11: counts.t11,
+            tingkat12: counts.t12,
+            total: counts.t10 + counts.t11 + counts.t12
+        }));
     }
     async getRombonganBelajar(sekolahId, type, limit = 10, page = 1, search, tingkat) {
         const filter = this.getSekolahFilter(sekolahId);
@@ -1062,8 +1171,17 @@ let DapodikService = class DapodikService {
         if (type === 'reguler') {
             whereClause.AND.push({ jenis_rombel: 1 });
         }
+        else if (type === 'praktik' || type === 'praktek') {
+            whereClause.AND.push({ jenis_rombel: 2 });
+        }
+        else if (type === 'ekskul') {
+            whereClause.AND.push({ jenis_rombel: 51 });
+        }
         else if (type === 'pilihan') {
-            whereClause.AND.push({ jenis_rombel: 14 });
+            whereClause.AND.push({ jenis_rombel: 16 });
+        }
+        else if (type === 'wali') {
+            whereClause.AND.push({ jenis_rombel: 18 });
         }
         if (tingkat && tingkat !== 'all') {
             whereClause.AND.push({ tingkat_pendidikan_id: Number(tingkat) });
@@ -1095,11 +1213,35 @@ let DapodikService = class DapodikService {
                 orderBy: { nama: 'asc' },
             })
         ]);
+        const ptkIds = data.map(item => item.ptk_id).filter(Boolean);
+        const kurikulumIds = data.map(item => item.kurikulum_id).filter(Boolean);
+        const idRuangs = data.map(item => item.id_ruang).filter(Boolean);
+        const [gtks, kurikulums, ruangs] = await Promise.all([
+            ptkIds.length > 0 ? this.prisma.gtk.findMany({
+                where: { ptk_id: { in: ptkIds } },
+                select: { ptk_id: true, nama: true }
+            }) : [],
+            kurikulumIds.length > 0 ? this.prisma.kurikulum.findMany({
+                where: { kurikulum_id: { in: kurikulumIds } },
+                select: { kurikulum_id: true, nama_kurikulum: true }
+            }) : [],
+            idRuangs.length > 0 ? this.prisma.ruang.findMany({
+                where: { id_ruang: { in: idRuangs } },
+                select: { id_ruang: true, nm_ruang: true }
+            }) : []
+        ]);
+        const gtkMap = new Map(gtks.map(item => [item.ptk_id, item.nama]));
+        const kurikulumMap = new Map(kurikulums.map(item => [item.kurikulum_id, item.nama_kurikulum]));
+        const ruangMap = new Map(ruangs.map(item => [item.id_ruang, item.nm_ruang]));
         return {
             total,
             data: data.map(item => ({
                 ...item,
-                jumlah_siswa: item._count.anggota_rombel
+                jumlah_siswa: item._count.anggota_rombel,
+                ptk_id_str: item.ptk_id ? (gtkMap.get(item.ptk_id) || "") : "",
+                tingkat_pendidikan_id_str: item.tingkat_pendidikan_id ? `Tingkat ${item.tingkat_pendidikan_id}` : "",
+                kurikulum_id_str: item.kurikulum_id ? (kurikulumMap.get(item.kurikulum_id) || "") : "",
+                id_ruang_str: item.id_ruang ? (ruangMap.get(item.id_ruang) || "") : ""
             }))
         };
     }
@@ -1190,7 +1332,7 @@ let DapodikService = class DapodikService {
         let whereClause = {
             AND: [
                 { sekolah_id: filter.sekolah_id },
-                { jenis_rombel: 5 },
+                { jenis_rombel: 51 },
             ],
         };
         if (search) {
@@ -1204,44 +1346,66 @@ let DapodikService = class DapodikService {
                 rombongan_belajar_id: true,
                 nama: true,
                 id_ruang: true,
+                ptk_id: true,
                 _count: {
                     select: { anggota_rombel: true }
                 }
             },
             orderBy: { nama: 'asc' },
         });
+        const ptkIds = data.map(item => item.ptk_id).filter(Boolean);
+        const idRuangs = data.map(item => item.id_ruang).filter(Boolean);
+        const [gtks, ruangs] = await Promise.all([
+            ptkIds.length > 0 ? this.prisma.gtk.findMany({
+                where: { ptk_id: { in: ptkIds } },
+                select: { ptk_id: true, nama: true }
+            }) : [],
+            idRuangs.length > 0 ? this.prisma.ruang.findMany({
+                where: { id_ruang: { in: idRuangs } },
+                select: { id_ruang: true, nm_ruang: true }
+            }) : []
+        ]);
+        const gtkMap = new Map(gtks.map(item => [item.ptk_id, item.nama]));
+        const ruangMap = new Map(ruangs.map(item => [item.id_ruang, item.nm_ruang]));
         return data.map(item => ({
             ...item,
             nm_ekskul: item.nama,
-            anggotaRombel: item._count.anggota_rombel
+            anggotaRombel: item._count.anggota_rombel,
+            ptk_id_str: item.ptk_id ? (gtkMap.get(item.ptk_id) || "") : "",
+            id_ruang_str: item.id_ruang ? (ruangMap.get(item.id_ruang) || "") : ""
         }));
     }
     async getJurusan(sekolahId) {
         const filter = this.getSekolahFilter(sekolahId);
         const rombels = await this.prisma.rombonganBelajar.findMany({
             where: {
-                AND: [
-                    { sekolah_id: filter.sekolah_id },
-                    { jurusan_sp_id: { not: null } },
-                ],
+                sekolah_id: filter.sekolah_id,
+                jenis_rombel: 1,
+                soft_delete: 0,
+                jurusan_sp_id: { not: null },
             },
             select: {
                 nama: true,
-                jurusan_sp_id: true,
+                jurusan_sp: {
+                    select: {
+                        nama_jurusan_sp: true,
+                    },
+                },
             },
         });
-        const jurusanMap = new Map();
-        rombels.forEach((r) => {
-            const parts = r.nama.split(' ');
-            let kode = parts.length > 1 ? parts[1] : parts[0];
-            if (!jurusanMap.has(kode)) {
-                jurusanMap.set(kode, r.jurusan_sp_id);
+        const uniqueJurusan = new Map();
+        for (const r of rombels) {
+            if (!r.jurusan_sp)
+                continue;
+            const parts = r.nama.trim().split(/\s+/);
+            const kode = parts.length > 2 ? parts[1] : (parts.length > 1 ? parts[1] : parts[0]);
+            if (kode) {
+                uniqueJurusan.set(kode, r.jurusan_sp.nama_jurusan_sp);
             }
-        });
-        return Array.from(jurusanMap.entries()).map(([kode, id]) => ({
+        }
+        return Array.from(uniqueJurusan.entries()).map(([kode, nama]) => ({
             kode,
-            nama: kode,
-            jurusan_sp_id: id
+            nama_jurusan: nama,
         }));
     }
     async getMataPelajaran(sekolahId, limit = 10, search, page = 1) {
@@ -1449,12 +1613,6 @@ let DapodikService = class DapodikService {
                 penggunas: {
                     select: { email: true },
                 },
-                pembelajaran: {
-                    select: {
-                        rombongan_belajar: true,
-                        jam_mengajar_per_minggu: true,
-                    }
-                },
                 jenis_ptk: {
                     select: { jenis_ptk: true }
                 },
@@ -1474,6 +1632,7 @@ let DapodikService = class DapodikService {
                 },
                 rwy_sertifikasi: true,
                 rwy_kepangkatan: true,
+                tugas_tambahan: true,
             },
         });
         if (gtk) {
@@ -1502,12 +1661,19 @@ let DapodikService = class DapodikService {
             const appUrl = process.env.APP_URL || 'http://localhost:3000';
             const formattedFoto = gtk.foto ? (gtk.foto.startsWith('http') ? gtk.foto : `${appUrl}${gtk.foto}`) : null;
             const wilayahHierarchy = await this.resolveWilayahHierarchy(gtk.kode_wilayah);
+            const refBidangStudi = await this.prisma.bidang_studi.findMany({
+                select: {
+                    bidang_studi_id: true,
+                    bidang_studi: true,
+                }
+            });
             const mappedRiwayat = gtk.riwayat_pendidikan_formal.map(edu => {
                 const { jenjang_pendidikan, ...rest } = edu;
+                const bs = refBidangStudi.find((x) => x.bidang_studi_id === edu.bidang_studi_id);
                 return {
                     ...rest,
                     jenjang_pendidikan_id_str: jenjang_pendidikan?.nama || null,
-                    bidang_studi_id_str: null,
+                    bidang_studi_id_str: bs?.bidang_studi || null,
                     gelar_akademik_id_str: null,
                 };
             });
@@ -1525,13 +1691,63 @@ let DapodikService = class DapodikService {
                 });
                 const highest = sortedEdu[0];
                 pendidikanTerakhir = highest.jenjang_pendidikan?.nama || null;
-                bidangStudiTerakhir = highest.satuan_pendidikan_formal || null;
+                const bs = refBidangStudi.find((x) => x.bidang_studi_id === highest.bidang_studi_id);
+                bidangStudiTerakhir = bs?.bidang_studi || null;
             }
+            const refStatusKurikulum = await this.prisma.status_di_kurikulum.findMany({
+                select: {
+                    status_di_kurikulum: true,
+                    ket_stat_di_kurikulum: true,
+                }
+            });
+            const orConditions = [];
+            if (gtk.ptk_terdaftar_id)
+                orConditions.push({ ptk_terdaftar_id: gtk.ptk_terdaftar_id });
+            if (gtk.ptk_id)
+                orConditions.push({ ptk_id: gtk.ptk_id });
+            let rawPembelajaran = [];
+            if (orConditions.length > 0) {
+                rawPembelajaran = await this.prisma.pembelajaran.findMany({
+                    where: {
+                        OR: orConditions,
+                        sekolah_id: sekolahId
+                    },
+                    include: {
+                        rombongan_belajar: true
+                    }
+                });
+            }
+            const mappedPembelajaran = rawPembelajaran.map((p) => {
+                const statusVal = p.status_di_kurikulum !== null && p.status_di_kurikulum !== undefined ? Number(p.status_di_kurikulum) : null;
+                const refStatus = refStatusKurikulum.find((x) => Number(x.status_di_kurikulum) === statusVal);
+                return {
+                    ...p,
+                    status_kurikulum_id_str: refStatus?.ket_stat_di_kurikulum || null,
+                };
+            });
+            const refJabatanTugas = await this.prisma.jabatan_tugas_ptk.findMany({
+                select: {
+                    jabatan_ptk_id: true,
+                    nama: true,
+                    jumlah_jam_diakui: true,
+                }
+            });
+            const mappedTugasTambahan = (gtk.tugas_tambahan || []).map((t) => {
+                const jabVal = t.jabatan_ptk_id !== null && t.jabatan_ptk_id !== undefined ? Number(t.jabatan_ptk_id) : null;
+                const refJab = refJabatanTugas.find((x) => Number(x.jabatan_ptk_id) === jabVal);
+                return {
+                    ...t,
+                    jabatan_tugas_nama: refJab?.nama || null,
+                    jumlah_jam_diakui: refJab?.jumlah_jam_diakui !== null && refJab?.jumlah_jam_diakui !== undefined ? Number(refJab.jumlah_jam_diakui) : 0,
+                };
+            });
             const g = gtk;
             const resolved = await this.referenceService.resolveGtk(gtk);
             return {
                 ...resolved,
                 riwayat_pendidikan_formal: mappedRiwayat,
+                pembelajaran: mappedPembelajaran,
+                tugas_tambahan: mappedTugasTambahan,
                 foto: formattedFoto,
                 foto_dokumen: fotoDokumen,
                 desa_kelurahan: resolved.desa_kelurahan || wilayahHierarchy.desa,

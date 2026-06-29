@@ -266,6 +266,8 @@ export declare class JadwalController {
                     tgl_ptk_keluar: Date | null;
                     qr_token: string | null;
                     status: string;
+                    no_whatsapp: string | null;
+                    id_telegram: string | null;
                 };
             } & {
                 sekolah_id: string | null;
