@@ -1863,7 +1863,7 @@ let DapodikService = class DapodikService {
             'tahun_lahir_ayah', 'tahun_lahir_ibu', 'nama_wali', 'tahun_lahir_wali',
             'berat_badan', 'tinggi_badan', 'lingkar_kepala', 'jarak_rumah_ke_sekolah',
             'jarak_rumah_ke_sekolah_km', 'waktu_tempuh_ke_sekolah', 'menit_tempuh_ke_sekolah',
-            'jumlah_saudara_kandung', 'anak_keberapa'
+            'jumlah_saudara_kandung', 'anak_keberapa', 'email', 'email_aktif', 'no_whatsapp'
         ];
         for (const field of safePdFields) {
             if (updateData[field] !== undefined) {
@@ -1874,6 +1874,12 @@ let DapodikService = class DapodikService {
         const mapString = (val) => (val !== undefined && val !== null && val !== '' ? String(val) : undefined);
         if (updateData.kecamatan !== undefined && updateData.kecamatan !== "") {
             cleanData.kode_wilayah = updateData.kecamatan;
+        }
+        if (updateData.no_wa !== undefined) {
+            cleanData.no_whatsapp = updateData.no_wa;
+        }
+        if (updateData.email !== undefined) {
+            cleanData.email_aktif = updateData.email;
         }
         if (updateData.id_hobby !== undefined)
             cleanData.id_hobby = mapNumeric(updateData.id_hobby);

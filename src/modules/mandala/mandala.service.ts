@@ -74,6 +74,23 @@ export class MandalaService implements OnModuleInit {
       orderBy: { nama: 'asc' },
     });
 
+    const getBentukNama = (id: number | null): string | null => {
+      if (!id) return null;
+      const map: Record<number, string> = {
+        1: 'TK',
+        5: 'SD',
+        6: 'SMP',
+        13: 'SMA',
+        15: 'SMK',
+        16: 'PNF',
+        17: 'SLB',
+        34: 'SPK SD',
+        35: 'SPK SMP',
+        36: 'SPK SMA',
+      };
+      return map[id] || null;
+    };
+
     const richSchools = await Promise.all(
       schools.map(async (school) => {
         const [totalSiswa, totalGtk, bentukPend, wilayahHierarchy] = await Promise.all([
@@ -91,7 +108,7 @@ export class MandalaService implements OnModuleInit {
           alamat: school.alamat_jalan,
           email: school.email,
           website: school.website,
-          bentuk_pendidikan_is_str: bentukPend?.nama || null,
+          bentuk_pendidikan_is_str: bentukPend?.nama || getBentukNama(school.bentuk_pendidikan_id) || null,
           bentuk_pendidikan_id_str: school.bentuk_pendidikan_id?.toString() || null,
           kabupaten_kota: wilayahHierarchy.kabupaten,
           kecamatan: wilayahHierarchy.kecamatan,
