@@ -15,6 +15,29 @@ export declare class PengajuanPerbaikanController {
         tipe: string;
         perubahan: import("@prisma/client/runtime/client").JsonValue;
     }>;
+    dapatkanPerbaikanDisetujui(req: Request): Promise<({
+        id: string;
+        sekolah_id: string;
+        tipe: string;
+        ptk_id: string;
+        updates: any;
+        updated_at: Date;
+        peserta_didik_id?: undefined;
+    } | {
+        id: string;
+        sekolah_id: string;
+        tipe: string;
+        peserta_didik_id: string;
+        updates: any;
+        updated_at: Date;
+        ptk_id?: undefined;
+    })[]>;
+    clearPerbaikanDisetujui(req: Request, body: {
+        ids?: string[];
+    }): Promise<{
+        status: string;
+        message: string;
+    }>;
     dapatkanDaftar(req: Request): Promise<{
         nama: string;
         sekolah_id: string;

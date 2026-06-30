@@ -550,6 +550,7 @@ export declare class MandalaService implements OnModuleInit {
                 email: any;
                 nama_ibu_kandung: any;
             };
+            sertifikasi: any;
         }[];
         total_data: number;
         total_pages: number;

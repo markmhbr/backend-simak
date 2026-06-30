@@ -29,6 +29,18 @@ export class PengajuanPerbaikanController {
     return this.service.buatPengajuan(sekolahId, body);
   }
 
+  @Get('approved-updates')
+  async dapatkanPerbaikanDisetujui(@Req() req: Request) {
+    const sekolahId = this.getSekolahId(req);
+    return this.service.dapatkanPerbaikanDisetujui(sekolahId);
+  }
+
+  @Post('approved-updates/clear')
+  async clearPerbaikanDisetujui(@Req() req: Request, @Body() body: { ids?: string[] }) {
+    const sekolahId = this.getSekolahId(req);
+    return this.service.clearPerbaikanDisetujui(sekolahId, body.ids);
+  }
+
   @Get()
   async dapatkanDaftar(@Req() req: Request) {
     const sekolahId = this.getSekolahId(req);

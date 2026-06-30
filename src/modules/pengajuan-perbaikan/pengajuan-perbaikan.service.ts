@@ -39,6 +39,7 @@ export class PengajuanPerbaikanService {
     const list = await this.prisma.pengajuanPerbaikan.findMany({
       where: {
         sekolah_id: sekolahId,
+        status: 'PENDING',
       },
       orderBy: {
         created_at: 'desc',
@@ -100,12 +101,13 @@ export class PengajuanPerbaikanService {
       });
     }
 
-    // Langsung hapus log pengajuan setelah di-approve
-    await this.prisma.pengajuanPerbaikan.delete({
+    // Ubah status pengajuan menjadi 'APPROVED' alih-alih menghapusnya
+    await this.prisma.pengajuanPerbaikan.update({
       where: { id },
+      data: { status: 'APPROVED' },
     });
 
-    return { status: 'success', message: 'Pengajuan disetujui, data diperbarui, dan log pengajuan dihapus.' };
+    return { status: 'success', message: 'Pengajuan disetujui, data diperbarui, dan status diubah menjadi APPROVED.' };
   }
 
   async tolakPengajuan(sekolahId: string, id: string) {
@@ -117,10 +119,74 @@ export class PengajuanPerbaikanService {
       throw new NotFoundException('Data pengajuan tidak ditemukan.');
     }
 
-    await this.prisma.pengajuanPerbaikan.delete({
+    await this.prisma.pengajuanPerbaikan.update({
       where: { id },
+      data: { status: 'REJECTED' },
     });
 
-    return { status: 'success', message: 'Pengajuan ditolak dan log pengajuan dihapus.' };
+    return { status: 'success', message: 'Pengajuan ditolak dan status diubah menjadi REJECTED.' };
+  }
+
+  async dapatkanPerbaikanDisetujui(sekolahId: string) {
+    const list = await this.prisma.pengajuanPerbaikan.findMany({
+      where: {
+        sekolah_id: sekolahId,
+        status: 'APPROVED',
+      },
+      orderBy: {
+        updated_at: 'asc',
+      },
+    });
+
+    return list.map((item) => {
+      const perubahan = item.perubahan as any;
+      const updates: any = {};
+      
+      for (const key in perubahan) {
+        if (perubahan[key] && perubahan[key].diajukan !== undefined) {
+          updates[key] = perubahan[key].diajukan;
+        }
+      }
+
+      if (item.tipe === 'GTK') {
+        return {
+          id: item.id,
+          sekolah_id: item.sekolah_id,
+          tipe: item.tipe,
+          ptk_id: item.ptk_id,
+          updates,
+          updated_at: item.updated_at,
+        };
+      } else {
+        return {
+          id: item.id,
+          sekolah_id: item.sekolah_id,
+          tipe: item.tipe,
+          peserta_didik_id: item.peserta_didik_id,
+          updates,
+          updated_at: item.updated_at,
+        };
+      }
+    });
+  }
+
+  async clearPerbaikanDisetujui(sekolahId: string, ids?: string[]) {
+    if (ids && ids.length > 0) {
+      await this.prisma.pengajuanPerbaikan.deleteMany({
+        where: {
+          sekolah_id: sekolahId,
+          status: 'APPROVED',
+          id: { in: ids },
+        },
+      });
+    } else {
+      await this.prisma.pengajuanPerbaikan.deleteMany({
+        where: {
+          sekolah_id: sekolahId,
+          status: 'APPROVED',
+        },
+      });
+    }
+    return { status: 'success', message: 'Log perbaikan disetujui berhasil dibersihkan.' };
   }
 }

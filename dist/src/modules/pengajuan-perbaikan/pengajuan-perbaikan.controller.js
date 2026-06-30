@@ -39,6 +39,14 @@ let PengajuanPerbaikanController = class PengajuanPerbaikanController {
         const sekolahId = this.getSekolahId(req);
         return this.service.buatPengajuan(sekolahId, body);
     }
+    async dapatkanPerbaikanDisetujui(req) {
+        const sekolahId = this.getSekolahId(req);
+        return this.service.dapatkanPerbaikanDisetujui(sekolahId);
+    }
+    async clearPerbaikanDisetujui(req, body) {
+        const sekolahId = this.getSekolahId(req);
+        return this.service.clearPerbaikanDisetujui(sekolahId, body.ids);
+    }
     async dapatkanDaftar(req) {
         const sekolahId = this.getSekolahId(req);
         return this.service.dapatkanDaftar(sekolahId);
@@ -61,6 +69,21 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], PengajuanPerbaikanController.prototype, "buatPengajuan", null);
+__decorate([
+    (0, common_1.Get)('approved-updates'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], PengajuanPerbaikanController.prototype, "dapatkanPerbaikanDisetujui", null);
+__decorate([
+    (0, common_1.Post)('approved-updates/clear'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], PengajuanPerbaikanController.prototype, "clearPerbaikanDisetujui", null);
 __decorate([
     (0, common_1.Get)(),
     __param(0, (0, common_1.Req)()),

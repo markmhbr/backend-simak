@@ -1790,7 +1790,13 @@ let DapodikService = class DapodikService {
             cleanData.id_telegram = updateData.id_telegram;
         }
         if (updateData.kecamatan !== undefined && updateData.kecamatan !== "") {
-            cleanData.kode_wilayah = updateData.kecamatan;
+            const isNumericOnly = /^[0-9.\s-]+$/.test(String(updateData.kecamatan).trim());
+            if (isNumericOnly) {
+                const cleanKec = String(updateData.kecamatan).replace(/[^0-9]/g, '');
+                if (cleanKec.length >= 6) {
+                    cleanData.kode_wilayah = cleanKec;
+                }
+            }
         }
         if (updateData.status_perkawinan !== undefined)
             cleanData.status_perkawinan = mapNumeric(updateData.status_perkawinan);
@@ -1873,7 +1879,13 @@ let DapodikService = class DapodikService {
         const mapNumeric = (val) => (val !== undefined && val !== null && val !== '' ? Number(val) : undefined);
         const mapString = (val) => (val !== undefined && val !== null && val !== '' ? String(val) : undefined);
         if (updateData.kecamatan !== undefined && updateData.kecamatan !== "") {
-            cleanData.kode_wilayah = updateData.kecamatan;
+            const isNumericOnly = /^[0-9.\s-]+$/.test(String(updateData.kecamatan).trim());
+            if (isNumericOnly) {
+                const cleanKec = String(updateData.kecamatan).replace(/[^0-9]/g, '');
+                if (cleanKec.length >= 6) {
+                    cleanData.kode_wilayah = cleanKec;
+                }
+            }
         }
         if (updateData.no_wa !== undefined) {
             cleanData.no_whatsapp = updateData.no_wa;
@@ -2331,6 +2343,88 @@ let DapodikService = class DapodikService {
             }
         }
         return this.getMyMenus(pengguna.peran_id);
+    }
+    async getUpdateGtk(sekolahId) {
+        return this.prisma.gtk.findMany({
+            where: {
+                sekolah_id: sekolahId,
+            },
+            select: {
+                ptk_id: true,
+                no_kk: true,
+                agama_id: true,
+                status_perkawinan: true,
+                nama_suami_istri: true,
+                pekerjaan_suami_istri: true,
+                alamat_jalan: true,
+                rt: true,
+                rw: true,
+                nama_dusun: true,
+                desa_kelurahan: true,
+                kode_wilayah: true,
+                kode_pos: true,
+                lintang: true,
+                bujur: true,
+                no_telepon_rumah: true,
+                no_hp: true,
+                nm_wp: true,
+                npwp: true,
+            },
+        });
+    }
+    async getUpdatePesertaDidik(sekolahId) {
+        return this.prisma.pesertaDidik.findMany({
+            where: {
+                sekolah_id: sekolahId,
+            },
+            select: {
+                peserta_didik_id: true,
+                no_kk: true,
+                reg_akta_lahir: true,
+                agama_id: true,
+                anak_keberapa: true,
+                alamat_jalan: true,
+                rt: true,
+                rw: true,
+                nama_dusun: true,
+                desa_kelurahan: true,
+                kode_wilayah: true,
+                kode_pos: true,
+                jenis_tinggal_id: true,
+                alat_transportasi_id: true,
+                lintang: true,
+                bujur: true,
+                nomor_telepon_rumah: true,
+                nomor_telepon_seluler: true,
+                tinggi_badan: true,
+                berat_badan: true,
+                lingkar_kepala: true,
+                jarak_rumah_ke_sekolah: true,
+                jarak_rumah_ke_sekolah_km: true,
+                waktu_tempuh_ke_sekolah: true,
+                menit_tempuh_ke_sekolah: true,
+                jumlah_saudara_kandung: true,
+                nik_ayah: true,
+                nik_ibu: true,
+                nik_wali: true,
+                nama_ayah: true,
+                tahun_lahir_ayah: true,
+                tahun_lahir_ibu: true,
+                nama_wali: true,
+                tahun_lahir_wali: true,
+                pekerjaan_id_ayah: true,
+                pekerjaan_id_ibu: true,
+                pekerjaan_id_wali: true,
+                jenjang_pendidikan_ayah: true,
+                jenjang_pendidikan_ibu: true,
+                jenjang_pendidikan_wali: true,
+                penghasilan_id_ayah: true,
+                penghasilan_id_ibu: true,
+                penghasilan_id_wali: true,
+                id_hobby: true,
+                id_cita: true,
+            },
+        });
     }
     formatSqlValue(val) {
         if (val === null || val === undefined)

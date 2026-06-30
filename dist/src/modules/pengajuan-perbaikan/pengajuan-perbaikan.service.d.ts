@@ -38,4 +38,25 @@ export declare class PengajuanPerbaikanService {
         status: string;
         message: string;
     }>;
+    dapatkanPerbaikanDisetujui(sekolahId: string): Promise<({
+        id: string;
+        sekolah_id: string;
+        tipe: string;
+        ptk_id: string;
+        updates: any;
+        updated_at: Date;
+        peserta_didik_id?: undefined;
+    } | {
+        id: string;
+        sekolah_id: string;
+        tipe: string;
+        peserta_didik_id: string;
+        updates: any;
+        updated_at: Date;
+        ptk_id?: undefined;
+    })[]>;
+    clearPerbaikanDisetujui(sekolahId: string, ids?: string[]): Promise<{
+        status: string;
+        message: string;
+    }>;
 }

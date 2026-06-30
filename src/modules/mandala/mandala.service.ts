@@ -919,7 +919,8 @@ export class MandalaService implements OnModuleInit {
           agama: true,
           riwayat_pendidikan_formal: {
             select: { jenjang_pendidikan_id: true }
-          }
+          },
+          rwy_sertifikasi: true,
         },
         take: limit,
         skip: skip,
@@ -939,6 +940,54 @@ export class MandalaService implements OnModuleInit {
       return '';
     };
 
+    // Collect all unique IDs for bulk fetching reference names
+    const allKodeLembSert = new Set<number>();
+    const allIdJenisSertifikasi = new Set<number>();
+    const allBidangStudiId = new Set<number>();
+
+    for (const g of gtks) {
+      if (g.rwy_sertifikasi) {
+        for (const s of g.rwy_sertifikasi) {
+          if (s.kode_lemb_sert) {
+            const val = Number(s.kode_lemb_sert);
+            if (!isNaN(val)) allKodeLembSert.add(val);
+          }
+          if (s.id_jenis_sertifikasi) {
+            const val = Number(s.id_jenis_sertifikasi);
+            if (!isNaN(val)) allIdJenisSertifikasi.add(val);
+          }
+          if (s.bidang_studi_id) {
+            allBidangStudiId.add(s.bidang_studi_id);
+          }
+        }
+      }
+    }
+
+    const [lembList, jenisList, bidangList] = await Promise.all([
+      allKodeLembSert.size > 0
+        ? this.prisma.lemb_sertifikasi.findMany({
+            where: { kode_lemb_sert: { in: Array.from(allKodeLembSert) } },
+            select: { kode_lemb_sert: true, nm_lemb_sert: true }
+          })
+        : [],
+      allIdJenisSertifikasi.size > 0
+        ? this.prisma.jenis_sertifikasi.findMany({
+            where: { id_jenis_sertifikasi: { in: Array.from(allIdJenisSertifikasi) } },
+            select: { id_jenis_sertifikasi: true, jenis_sertifikasi: true }
+          })
+        : [],
+      allBidangStudiId.size > 0
+        ? this.prisma.bidang_studi.findMany({
+            where: { bidang_studi_id: { in: Array.from(allBidangStudiId) } },
+            select: { bidang_studi_id: true, bidang_studi: true }
+          })
+        : [],
+    ]);
+
+    const lembMap = new Map<number, string>(lembList.map((item: any) => [Number(item.kode_lemb_sert), item.nm_lemb_sert] as [number, string]));
+    const jenisMap = new Map<number, string>(jenisList.map((item: any) => [Number(item.id_jenis_sertifikasi), item.jenis_sertifikasi] as [number, string]));
+    const bidangMap = new Map<number, string>(bidangList.map((item: any) => [item.bidang_studi_id, item.bidang_studi] as [number, string]));
+
     const formattedData = gtks.map((g: any) => {
       // Construct alamat lengkap
       const addressParts = [
@@ -950,6 +999,32 @@ export class MandalaService implements OnModuleInit {
         g.kode_pos
       ].filter(Boolean);
       const alamatLengkap = addressParts.length > 0 ? addressParts.join(', ') : '';
+
+      const sertifikasi = (g.rwy_sertifikasi || []).map((s: any) => {
+        const kodeLembVal = s.kode_lemb_sert ? Number(s.kode_lemb_sert) : null;
+        const idJenisVal = s.id_jenis_sertifikasi ? Number(s.id_jenis_sertifikasi) : null;
+        const bidangIdVal = s.bidang_studi_id || null;
+
+        return {
+          riwayat_sertifikasi_id: s.riwayat_sertifikasi_id,
+          kode_lemb_sert: s.kode_lemb_sert,
+          lembaga_sertifikasi: (kodeLembVal !== null ? lembMap.get(kodeLembVal) : null) || s.kode_lemb_sert || '',
+          lembaga_sertifikasi_nama: (kodeLembVal !== null ? lembMap.get(kodeLembVal) : null) || s.kode_lemb_sert || '',
+          bidang_studi_id: s.bidang_studi_id,
+          bidang_studi: (bidangIdVal !== null ? bidangMap.get(bidangIdVal) : null) || s.bidang_studi_id_str || '',
+          bidang_studi_nama: (bidangIdVal !== null ? bidangMap.get(bidangIdVal) : null) || s.bidang_studi_id_str || '',
+          id_jenis_sertifikasi: s.id_jenis_sertifikasi,
+          jenis_sertifikasi: (idJenisVal !== null ? jenisMap.get(idJenisVal) : null) || s.id_jenis_sertifikasi || '',
+          jenis_sertifikasi_nama: (idJenisVal !== null ? jenisMap.get(idJenisVal) : null) || s.id_jenis_sertifikasi || '',
+          tgl_berlaku: s.tgl_sert || null,
+          tgl_habis_berlaku: s.tgl_exp_sert || null,
+          no_sertifikasi: s.nomor_sertifikat || '',
+          no_registrasi: s.nomer_registrasi || '',
+          nomer_registrasi: s.nomer_registrasi || '',
+          nomor_peserta: s.nomor_peserta || '',
+          kualifikasi: s.kualifikasi || '',
+        };
+      });
 
       return {
         identitas: {
@@ -978,6 +1053,7 @@ export class MandalaService implements OnModuleInit {
           email: g.email || '',
           nama_ibu_kandung: g.nama_ibu_kandung || '',
         },
+        sertifikasi,
       };
     });
 

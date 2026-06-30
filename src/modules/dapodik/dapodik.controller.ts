@@ -27,6 +27,20 @@ export class DapodikController {
     };
   }
 
+  @Get('updategtk')
+  async dapatkanUpdateGtk(@Req() req: Request) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    if (!sekolahId) throw new BadRequestException('Sekolah ID tidak ditemukan.');
+    return this.dapodikService.getUpdateGtk(sekolahId);
+  }
+
+  @Get('updatepesertadidik')
+  async dapatkanUpdatePesertaDidik(@Req() req: Request) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    if (!sekolahId) throw new BadRequestException('Sekolah ID tidak ditemukan.');
+    return this.dapodikService.getUpdatePesertaDidik(sekolahId);
+  }
+
   @Get('cadisdik')
   async getCadisdikList() {
     const data = await this.dapodikService.getCadisdiks();
