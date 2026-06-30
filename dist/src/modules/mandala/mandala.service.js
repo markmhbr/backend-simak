@@ -737,6 +737,11 @@ let MandalaService = MandalaService_1 = class MandalaService {
                         },
                     },
                     anggota_rombel: {
+                        where: {
+                            rombongan_belajar: {
+                                jenis_rombel: 1,
+                            },
+                        },
                         include: {
                             rombongan_belajar: {
                                 include: {
