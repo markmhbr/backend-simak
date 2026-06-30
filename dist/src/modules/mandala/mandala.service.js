@@ -736,6 +736,15 @@ let MandalaService = MandalaService_1 = class MandalaService {
                             jurusan_sp: true,
                         },
                     },
+                    anggota_rombel: {
+                        include: {
+                            rombongan_belajar: {
+                                include: {
+                                    jurusan_sp: true,
+                                },
+                            },
+                        },
+                    },
                     agama: true,
                 },
                 orderBy: { nama: 'asc' },
@@ -752,6 +761,8 @@ let MandalaService = MandalaService_1 = class MandalaService {
             ].filter(Boolean);
             const alamatLengkap = addressParts.length > 0 ? addressParts.join(', ') : '';
             const hpOrangTua = pd.nomor_telepon_seluler || '';
+            const activeAnggota = pd.anggota_rombel?.[0];
+            const activeRombel = activeAnggota?.rombongan_belajar || pd.rombongan_belajar;
             return {
                 identitas: {
                     id: pd.peserta_didik_id,
@@ -766,9 +777,9 @@ let MandalaService = MandalaService_1 = class MandalaService {
                     jenis_pendaftaran_id_str: pd.jenis_pendaftaran_id?.toString() || '',
                 },
                 akademik: {
-                    nama_rombel: pd.rombongan_belajar?.nama || '',
-                    tingkat: pd.rombongan_belajar?.tingkat_pendidikan_id?.toString() || '',
-                    jurusan: pd.rombongan_belajar?.jurusan_sp?.nama_jurusan_sp || pd.rombongan_belajar?.jurusan_sp_id || '',
+                    nama_rombel: activeRombel?.nama || '',
+                    tingkat: activeRombel?.tingkat_pendidikan_id?.toString() || '',
+                    jurusan: activeRombel?.jurusan_sp?.nama_jurusan_sp || activeRombel?.jurusan_sp_id || '',
                 },
                 data_pendukung: {
                     alamat_lengkap: alamatLengkap,
@@ -954,6 +965,7 @@ let MandalaService = MandalaService_1 = class MandalaService {
                     status_kepegawaian: g.status_kepegawaian?.nama || '',
                     status: g.status,
                     pendidikan_terakhir: getPendidikanTerakhir(g.riwayat_pendidikan_formal),
+                    ptk_induk: g.ptk_induk !== null && g.ptk_induk !== undefined ? Number(g.ptk_induk) : 0,
                 },
                 data_pendukung: {
                     alamat_lengkap: alamatLengkap,

@@ -138,8 +138,13 @@ let ReferenceService = class ReferenceService {
     }
     async getKebutuhanKhusus() {
         return this.prisma.kebutuhan_khusus.findMany({
+            where: {
+                kebutuhan_khusus_id: {
+                    in: [0, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768]
+                }
+            },
             select: { kebutuhan_khusus_id: true, kebutuhan_khusus: true },
-            orderBy: { kebutuhan_khusus: 'asc' },
+            orderBy: { kebutuhan_khusus_id: 'asc' },
         });
     }
     async getPekerjaan() {
@@ -156,8 +161,13 @@ let ReferenceService = class ReferenceService {
     }
     async getPenghasilan() {
         return this.prisma.penghasilan.findMany({
+            where: {
+                penghasilan_id: {
+                    in: [11, 12, 13, 14, 15, 16, 99]
+                }
+            },
             select: { penghasilan_id: true, nama: true },
-            orderBy: { nama: 'asc' },
+            orderBy: { penghasilan_id: 'asc' },
         });
     }
     async getAllOptions() {

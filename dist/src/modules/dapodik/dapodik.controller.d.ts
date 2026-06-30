@@ -35,6 +35,7 @@ export declare class DapodikController {
         kode_pos: string;
         lintang: import("@prisma/client-runtime-utils").Decimal;
         bujur: import("@prisma/client-runtime-utils").Decimal;
+        kebutuhan_khusus_id: number;
         peserta_didik_id: string;
         no_kk: string;
         agama_id: number;
@@ -56,9 +57,11 @@ export declare class DapodikController {
         tahun_lahir_ayah: import("@prisma/client-runtime-utils").Decimal;
         pekerjaan_id_ayah: number;
         penghasilan_id_ayah: number;
+        kebutuhan_khusus_id_ayah: number;
         tahun_lahir_ibu: import("@prisma/client-runtime-utils").Decimal;
         penghasilan_id_ibu: number;
         pekerjaan_id_ibu: number;
+        kebutuhan_khusus_id_ibu: number;
         nama_wali: string;
         tahun_lahir_wali: import("@prisma/client-runtime-utils").Decimal;
         pekerjaan_id_wali: number;

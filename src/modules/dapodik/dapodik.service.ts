@@ -2111,6 +2111,7 @@ export class DapodikService {
     if (updateData.alat_transportasi_id !== undefined) cleanData.alat_transportasi_id = mapNumeric(updateData.alat_transportasi_id);
     else if (updateData.alat_transportasi_id_str !== undefined) cleanData.alat_transportasi_id = mapNumeric(updateData.alat_transportasi_id_str);
 
+    if (updateData.kebutuhan_khusus_id !== undefined) cleanData.kebutuhan_khusus_id = mapNumeric(updateData.kebutuhan_khusus_id);
     if (updateData.kebutuhan_khusus_id_ayah !== undefined) cleanData.kebutuhan_khusus_id_ayah = mapNumeric(updateData.kebutuhan_khusus_id_ayah);
     if (updateData.kebutuhan_khusus_id_ibu !== undefined) cleanData.kebutuhan_khusus_id_ibu = mapNumeric(updateData.kebutuhan_khusus_id_ibu);
 
@@ -2674,6 +2675,9 @@ export class DapodikService {
         penghasilan_id_wali: true,
         id_hobby: true,
         id_cita: true,
+        kebutuhan_khusus_id: true,
+        kebutuhan_khusus_id_ayah: true,
+        kebutuhan_khusus_id_ibu: true,
       },
     });
   }
