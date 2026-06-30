@@ -64,6 +64,11 @@ export class AuthController {
     return { status: 'success', message: 'Logout berhasil' };
   }
 
+  @Post('reset-2fa')
+  async reset2fa(@Body() body: { ptk_id?: string; peserta_didik_id?: string; pengguna_id?: string }) {
+    return this.authService.reset2FA(body);
+  }
+
   // Endpoint untuk mendapatkan identitas sekolah (Public)
   @Get('system-info')
   async getSystemInfo(@Req() request: Request) {

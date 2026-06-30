@@ -31,6 +31,7 @@ const spp_module_1 = require("./modules/spp/spp.module");
 const surat_module_1 = require("./modules/surat/surat.module");
 const reference_module_1 = require("./modules/reference/reference.module");
 const pengajuan_perbaikan_module_1 = require("./modules/pengajuan-perbaikan/pengajuan-perbaikan.module");
+const pengaturan_umum_module_1 = require("./modules/pengaturan-umum/pengaturan-umum.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -58,6 +59,7 @@ exports.AppModule = AppModule = __decorate([
             surat_module_1.SuratModule,
             reference_module_1.ReferenceModule,
             pengajuan_perbaikan_module_1.PengajuanPerbaikanModule,
+            pengaturan_umum_module_1.PengaturanUmumModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [

@@ -22,6 +22,7 @@ import { SppModule } from './modules/spp/spp.module';
 import { SuratModule } from './modules/surat/surat.module';
 import { ReferenceModule } from './modules/reference/reference.module';
 import { PengajuanPerbaikanModule } from './modules/pengajuan-perbaikan/pengajuan-perbaikan.module';
+import { PengaturanUmumModule } from './modules/pengaturan-umum/pengaturan-umum.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { PengajuanPerbaikanModule } from './modules/pengajuan-perbaikan/pengajua
     SuratModule,
     ReferenceModule,
     PengajuanPerbaikanModule,
+    PengaturanUmumModule,
   ],
 
 

@@ -54,6 +54,9 @@ let AuthController = class AuthController {
         response.clearCookie('refresh_token');
         return { status: 'success', message: 'Logout berhasil' };
     }
+    async reset2fa(body) {
+        return this.authService.reset2FA(body);
+    }
     async getSystemInfo(request) {
         const domain = this.getRequestDomain(request);
         return this.authService.getSystemInfo(domain);
@@ -128,6 +131,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "logout", null);
+__decorate([
+    (0, common_1.Post)('reset-2fa'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "reset2fa", null);
 __decorate([
     (0, common_1.Get)('system-info'),
     __param(0, (0, common_1.Req)()),

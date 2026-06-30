@@ -287,6 +287,33 @@ let AuthService = class AuthService {
             throw new common_1.UnauthorizedException('Sesi telah berakhir, silakan login kembali');
         }
     }
+    async reset2FA(body) {
+        const { ptk_id, peserta_didik_id, pengguna_id } = body;
+        let targetUser = null;
+        if (pengguna_id) {
+            targetUser = await this.prisma.pengguna.findUnique({
+                where: { pengguna_id },
+            });
+        }
+        else if (ptk_id) {
+            targetUser = await this.prisma.pengguna.findFirst({
+                where: { ptk_id },
+            });
+        }
+        else if (peserta_didik_id) {
+            targetUser = await this.prisma.pengguna.findFirst({
+                where: { peserta_didik_id },
+            });
+        }
+        if (!targetUser) {
+            throw new common_1.BadRequestException('Pengguna tidak ditemukan');
+        }
+        await this.prisma.pengguna.update({
+            where: { pengguna_id: targetUser.pengguna_id },
+            data: { google2fa_secret: null },
+        });
+        return { status: 'success', message: 'Authenticator berhasil diset ulang' };
+    }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([

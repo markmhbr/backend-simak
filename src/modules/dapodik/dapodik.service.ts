@@ -2078,8 +2078,8 @@ export class DapodikService {
       }
     }
 
-    const mapNumeric = (val: any) => (val !== undefined && val !== null && val !== '' ? Number(val) : undefined);
-    const mapString = (val: any) => (val !== undefined && val !== null && val !== '' ? String(val) : undefined);
+    const mapNumeric = (val: any) => (val !== undefined ? (val === null || val === '' ? null : Number(val)) : undefined);
+    const mapString = (val: any) => (val !== undefined ? (val === null || val === '' ? null : String(val)) : undefined);
 
     if (updateData.kecamatan !== undefined && updateData.kecamatan !== "") {
       const isNumericOnly = /^[0-9.\s-]+$/.test(String(updateData.kecamatan).trim());
@@ -2111,9 +2111,15 @@ export class DapodikService {
     if (updateData.alat_transportasi_id !== undefined) cleanData.alat_transportasi_id = mapNumeric(updateData.alat_transportasi_id);
     else if (updateData.alat_transportasi_id_str !== undefined) cleanData.alat_transportasi_id = mapNumeric(updateData.alat_transportasi_id_str);
 
-    if (updateData.kebutuhan_khusus_id !== undefined) cleanData.kebutuhan_khusus_id = mapNumeric(updateData.kebutuhan_khusus_id);
-    if (updateData.kebutuhan_khusus_id_ayah !== undefined) cleanData.kebutuhan_khusus_id_ayah = mapNumeric(updateData.kebutuhan_khusus_id_ayah);
-    if (updateData.kebutuhan_khusus_id_ibu !== undefined) cleanData.kebutuhan_khusus_id_ibu = mapNumeric(updateData.kebutuhan_khusus_id_ibu);
+    if (updateData.kebutuhan_khusus_id !== undefined) {
+      cleanData.kebutuhan_khusus_id = (updateData.kebutuhan_khusus_id === null || updateData.kebutuhan_khusus_id === '') ? 0 : Number(updateData.kebutuhan_khusus_id);
+    }
+    if (updateData.kebutuhan_khusus_id_ayah !== undefined) {
+      cleanData.kebutuhan_khusus_id_ayah = (updateData.kebutuhan_khusus_id_ayah === null || updateData.kebutuhan_khusus_id_ayah === '') ? 0 : Number(updateData.kebutuhan_khusus_id_ayah);
+    }
+    if (updateData.kebutuhan_khusus_id_ibu !== undefined) {
+      cleanData.kebutuhan_khusus_id_ibu = (updateData.kebutuhan_khusus_id_ibu === null || updateData.kebutuhan_khusus_id_ibu === '') ? 0 : Number(updateData.kebutuhan_khusus_id_ibu);
+    }
 
     // Pekerjaan
     if (updateData.pekerjaan_id_ayah !== undefined) cleanData.pekerjaan_id_ayah = mapNumeric(updateData.pekerjaan_id_ayah);

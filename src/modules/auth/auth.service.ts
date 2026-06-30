@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../../core/prisma/prisma.service';
 import { CryptoService } from '../../core/crypto/crypto.service';
@@ -315,5 +315,36 @@ export class AuthService {
     } catch (e) {
       throw new UnauthorizedException('Sesi telah berakhir, silakan login kembali');
     }
+  }
+
+  async reset2FA(body: { ptk_id?: string; peserta_didik_id?: string; pengguna_id?: string }) {
+    const { ptk_id, peserta_didik_id, pengguna_id } = body;
+
+    let targetUser = null;
+
+    if (pengguna_id) {
+      targetUser = await this.prisma.pengguna.findUnique({
+        where: { pengguna_id },
+      });
+    } else if (ptk_id) {
+      targetUser = await this.prisma.pengguna.findFirst({
+        where: { ptk_id },
+      });
+    } else if (peserta_didik_id) {
+      targetUser = await this.prisma.pengguna.findFirst({
+        where: { peserta_didik_id },
+      });
+    }
+
+    if (!targetUser) {
+      throw new BadRequestException('Pengguna tidak ditemukan');
+    }
+
+    await this.prisma.pengguna.update({
+      where: { pengguna_id: targetUser.pengguna_id },
+      data: { google2fa_secret: null },
+    });
+
+    return { status: 'success', message: 'Authenticator berhasil diset ulang' };
   }
 }

@@ -75,4 +75,12 @@ export declare class AuthService {
             role: string;
         };
     }>;
+    reset2FA(body: {
+        ptk_id?: string;
+        peserta_didik_id?: string;
+        pengguna_id?: string;
+    }): Promise<{
+        status: string;
+        message: string;
+    }>;
 }

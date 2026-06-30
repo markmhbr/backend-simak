@@ -55,6 +55,14 @@ export declare class AuthController {
         status: string;
         message: string;
     }>;
+    reset2fa(body: {
+        ptk_id?: string;
+        peserta_didik_id?: string;
+        pengguna_id?: string;
+    }): Promise<{
+        status: string;
+        message: string;
+    }>;
     getSystemInfo(request: Request): Promise<{
         isConfigured: boolean;
         registeredDomain: string;

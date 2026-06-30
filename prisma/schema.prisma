@@ -78,6 +78,7 @@ model Sekolah {
   surat_keluar           SuratKeluar[]
   surat_masuk            SuratMasuk[]
   template_surat         TemplateSurat[]
+  pengaturan_umum        PengaturanUmum?
 
   @@map("sekolah")
   @@schema("dapodik")
@@ -3236,5 +3237,21 @@ model MenuRole {
   @@index([menu_id])
   @@index([peran_id])
   @@map("menu_roles")
+  @@schema("simak")
+}
+
+model PengaturanUmum {
+  pengaturan_umum_id     String   @id @default(uuid()) @db.Uuid
+  sekolah_id             String   @db.Uuid @unique
+  background_gtk         String?
+  background_pd          String?
+  waktu_mulai_pengajuan  String?
+  waktu_sampai_pengajuan String?
+  create_date            DateTime @default(now())
+  last_update            DateTime @updatedAt
+
+  sekolah                Sekolah  @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
+
+  @@map("pengaturan_umum")
   @@schema("simak")
 }
