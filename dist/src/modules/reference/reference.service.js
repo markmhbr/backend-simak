@@ -125,10 +125,11 @@ let ReferenceService = class ReferenceService {
         });
     }
     async getJenisTinggal() {
-        return this.prisma.jenis_tinggal.findMany({
+        const list = await this.prisma.jenis_tinggal.findMany({
             select: { jenis_tinggal_id: true, nama: true },
             orderBy: { nama: 'asc' },
         });
+        return list.filter(item => item.nama && !item.nama.toLowerCase().includes('unknown'));
     }
     async getJenisKeluar() {
         return this.prisma.jenis_keluar.findMany({

@@ -414,6 +414,7 @@ export class DapodikController {
     @Query('rombel') rombelName?: string,
     @Query('status') status?: 'aktif' | 'non-aktif',
     @Query('tingkat') tingkat?: string,
+    @Query('completeness') completeness?: string,
     @Query('sekolah_id') sekolahIdQuery?: string
     ) {
     if (req['isMandala']) {
@@ -434,7 +435,7 @@ export class DapodikController {
     const take = limit ? parseInt(limit, 10) : 10;
     const skipPage = page ? parseInt(page, 10) : 1;
 
-    const { data, total } = await this.dapodikService.getPesertaDidik(sekolahId, take, search, skipPage, rombelName, status, tingkat);
+    const { data, total } = await this.dapodikService.getPesertaDidik(sekolahId, take, search, skipPage, rombelName, status, tingkat, completeness);
     return {
       status: 'success',
       klien: namaApp,
@@ -573,13 +574,14 @@ export class DapodikController {
     @Query('search') search?: string,
     @Query('page') page?: string,
     @Query('type') type?: 'guru' | 'tendik',
-    @Query('status') status?: 'aktif' | 'non-aktif'
+    @Query('status') status?: 'aktif' | 'non-aktif',
+    @Query('completeness') completeness?: string
   ) {
     const { sekolahId, namaApp } = this.getSekolahInfo(req);
     const take = limit ? parseInt(limit, 10) : 10;
     const skipPage = page ? parseInt(page, 10) : 1;
     
-    const { data, total } = await this.dapodikService.getGtk(sekolahId, take, search, skipPage, type, status);
+    const { data, total } = await this.dapodikService.getGtk(sekolahId, take, search, skipPage, type, status, completeness);
     
     return {
       status: 'success',

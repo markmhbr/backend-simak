@@ -60,8 +60,8 @@ export declare class ReferenceService {
         nm_hobby: string;
     }[]>;
     getAlasanLayakPip(): Promise<{
-        alasan_layak_pip: string;
         id_layak_pip: import("@prisma/client-runtime-utils").Decimal;
+        alasan_layak_pip: string;
     }[]>;
     getJenisPendaftaran(): Promise<{
         nama: string;
@@ -141,8 +141,8 @@ export declare class ReferenceService {
             nm_hobby: string;
         }[];
         alasan_layak_pip: {
-            alasan_layak_pip: string;
             id_layak_pip: import("@prisma/client-runtime-utils").Decimal;
+            alasan_layak_pip: string;
         }[];
         jenis_pendaftaran: {
             nama: string;

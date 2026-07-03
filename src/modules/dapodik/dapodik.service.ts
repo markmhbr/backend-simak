@@ -26,7 +26,7 @@ export class DapodikService {
    * Walk up parent chain via mst_kode_wilayah, identify level via id_level_wilayah:
    *   4 = desa/kelurahan, 3 = kecamatan, 2 = kabupaten/kota, 1 = provinsi, 0 = negara
    */
-  private async resolveWilayahHierarchy(kodeWilayah: string | null) {
+  private async resolveWilayahHierarchy(kodeWilayah: string | null, cache?: Map<string, any>) {
     const result = {
       desa: null as string | null,
       kecamatan: null as string | null,
@@ -36,9 +36,13 @@ export class DapodikService {
     };
 
     if (!kodeWilayah) return result;
+    const trimmed = kodeWilayah.trim();
+    if (cache && cache.has(trimmed)) {
+      return cache.get(trimmed);
+    }
 
     try {
-      let currentKode: string | null = kodeWilayah.trim();
+      let currentKode: string | null = trimmed;
       let maxDepth = 6; // Safety limit agar tidak infinite loop
 
       while (currentKode && maxDepth > 0) {
@@ -64,6 +68,9 @@ export class DapodikService {
       // Jika tabel ref belum ada datanya, tetap kembalikan null
     }
 
+    if (cache) {
+      cache.set(trimmed, result);
+    }
     return result;
   }
 
@@ -112,6 +119,286 @@ export class DapodikService {
       }),
     ]);
 
+    // Calculate GTK completeness
+    const allGtk = await this.prisma.gtk.findMany({
+      where: {
+        sekolah_id: sekolahId,
+        status: 'Aktif'
+      },
+      select: {
+        ptk_id: true,
+        nama: true,
+        nuptk: true,
+        nik: true,
+        nip: true,
+        ptk_induk: true,
+        jenis_kelamin: true,
+        tempat_lahir: true,
+        tanggal_lahir: true,
+        nama_ibu_kandung: true,
+        alamat_jalan: true,
+        rt: true,
+        rw: true,
+        nama_dusun: true,
+        desa_kelurahan: true,
+        kode_wilayah: true,
+        kode_pos: true,
+        lintang: true,
+        bujur: true,
+        status_perkawinan: true,
+        nama_suami_istri: true,
+        pekerjaan_suami_istri: true,
+        nm_wp: true,
+        npwp: true,
+        id_bank: true,
+        rekening_bank: true,
+        rekening_atas_nama: true,
+        nama_kcp: true,
+        no_whatsapp: true,
+        id_telegram: true,
+        status: true,
+        no_kk: true,
+        no_hp: true,
+        email: true,
+        sumber_gaji: {
+          select: { nama: true }
+        },
+        agama: {
+          select: { nama: true }
+        },
+        rwy_sertifikasi: {
+          select: { riwayat_sertifikasi_id: true }
+        }
+      }
+    });
+
+    const mappedGtk = allGtk.map((item: any) => {
+      return {
+        ...item,
+        rt: item.rt !== null && item.rt !== undefined ? String(item.rt) : null,
+        rw: item.rw !== null && item.rw !== undefined ? String(item.rw) : null,
+        status_perkawinan: item.status_perkawinan !== null && item.status_perkawinan !== undefined ? String(item.status_perkawinan) : null,
+        pekerjaan_suami_istri: item.pekerjaan_suami_istri !== null && item.pekerjaan_suami_istri !== undefined ? String(item.pekerjaan_suami_istri) : null,
+        agama_id_str: item.agama?.nama || null,
+        sumber_gaji: item.sumber_gaji?.nama || null,
+        memilikiSertifikasi: item.rwy_sertifikasi && item.rwy_sertifikasi.length > 0 ? "Ya" : "Tidak",
+      };
+    });
+
+    const checkGtkCompleteness = (item: any) => {
+      const allFields = [
+        'nama', 'nik', 'no_kk', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir',
+        'nama_ibu_kandung', 'agama_id_str', 'status_perkawinan', 'nama_suami_istri',
+        'pekerjaan_suami_istri', 'nm_wp', 'npwp', 'alamat_jalan', 'rt', 'rw',
+        'nama_dusun', 'desa_kelurahan', 'provinsi', 'kabupaten_kota', 'kecamatan',
+        'kode_pos', 'lintang', 'bujur', 'sumber_gaji', 'id_bank', 'rekening_bank',
+        'rekening_atas_nama', 'nama_kcp', 'no_hp', 'no_whatsapp', 'id_telegram',
+        'email'
+      ];
+
+      const isFieldFilled = (key: string) => {
+        if (key === 'provinsi' || key === 'kabupaten_kota' || key === 'kecamatan') {
+          const desa = item['desa_kelurahan'];
+          const kodeWilayah = item['kode_wilayah'];
+          if ((desa && desa !== '-' && desa !== '') || (kodeWilayah && kodeWilayah !== '-' && kodeWilayah !== '')) {
+            return true;
+          }
+        }
+        const value = item[key];
+        if (value && value !== '-' && value !== '' && value !== 0 && value !== '0') {
+          return true;
+        }
+        return false;
+      };
+
+      const fields = allFields.filter(key => {
+        if (key === 'id_bank' || key === 'rekening_bank' || key === 'rekening_atas_nama' || key === 'nama_kcp') {
+          return item['memilikiSertifikasi'] === 'Ya';
+        }
+        if (key === 'nama_suami_istri' || key === 'pekerjaan_suami_istri') {
+          const statusPerkawinan = item['status_perkawinan'];
+          return statusPerkawinan === '1' || statusPerkawinan === 1;
+        }
+        return true;
+      });
+
+      let filled = 0;
+      fields.forEach(f => {
+        if (isFieldFilled(f)) {
+          filled++;
+        }
+      });
+      return Math.round((filled / fields.length) * 100);
+    };
+
+    let completedGtkCount = 0;
+    let totalGtkCompletenessPercentSum = 0;
+    mappedGtk.forEach((gtk: any) => {
+      const pct = checkGtkCompleteness(gtk);
+      totalGtkCompletenessPercentSum += pct;
+      if (pct === 100) {
+        completedGtkCount++;
+      }
+    });
+
+    const avgGtkCompleteness = mappedGtk.length > 0 ? Math.round((completedGtkCount / mappedGtk.length) * 100) : 0;
+
+    // Calculate Student completeness
+    const allStudents = await this.prisma.pesertaDidik.findMany({
+      where: {
+        sekolah_id: sekolahId,
+        status: 'Aktif'
+      },
+      select: {
+        peserta_didik_id: true,
+        nama: true,
+        nisn: true,
+        nipd: true,
+        nik: true,
+        no_kk: true,
+        jenis_kelamin: true,
+        tempat_lahir: true,
+        tanggal_lahir: true,
+        alamat_jalan: true,
+        rt: true,
+        rw: true,
+        desa_kelurahan: true,
+        nomor_telepon_seluler: true,
+        email: true,
+        nama_ayah: true,
+        nama_ibu_kandung: true,
+        kode_wilayah: true,
+        tinggi_badan: true,
+        berat_badan: true,
+        agama: {
+          select: {
+            nama: true,
+          }
+        },
+        reg_akta_lahir: true,
+        kebutuhan_khusus_id: true,
+        anak_keberapa: true,
+        nomor_telepon_rumah: true,
+        no_whatsapp: true,
+        email_aktif: true,
+        nama_dusun: true,
+        kode_pos: true,
+        lintang: true,
+        bujur: true,
+        jenis_tinggal_id: true,
+        alat_transportasi_id: true,
+        lingkar_kepala: true,
+        jarak_rumah_ke_sekolah: true,
+        waktu_tempuh_ke_sekolah: true,
+        menit_tempuh_ke_sekolah: true,
+        jumlah_saudara_kandung: true,
+        nik_ayah: true,
+        tahun_lahir_ayah: true,
+        jenjang_pendidikan_ayah: true,
+        pekerjaan_id_ayah: true,
+        penghasilan_id_ayah: true,
+        nik_ibu: true,
+        tahun_lahir_ibu: true,
+        jenjang_pendidikan_ibu: true,
+        pekerjaan_id_ibu: true,
+        penghasilan_id_ibu: true,
+        is_wali: true,
+        nama_wali: true,
+        nik_wali: true,
+        tahun_lahir_wali: true,
+        jenjang_pendidikan_wali: true,
+        pekerjaan_id_wali: true,
+        penghasilan_id_wali: true,
+      }
+    });
+
+    const mappedStudents = allStudents.map((item: any) => {
+      return {
+        ...item,
+        agama_id_str: item.agama?.nama || null,
+        nama_ibu: item.nama_ibu_kandung || null,
+        rt: item.rt !== null && item.rt !== undefined ? String(item.rt) : null,
+        rw: item.rw !== null && item.rw !== undefined ? String(item.rw) : null,
+        is_wali: item.is_wali === true || item.is_wali === 1 || item.is_wali === "1" || !!(item.nama_wali || item.nik_wali),
+        tinggi_badan: item.tinggi_badan !== null && item.tinggi_badan !== undefined ? Number(item.tinggi_badan) : null,
+        berat_badan: item.berat_badan !== null && item.berat_badan !== undefined ? Number(item.berat_badan) : null,
+        lingkar_kepala: item.lingkar_kepala !== null && item.lingkar_kepala !== undefined ? Number(item.lingkar_kepala) : null,
+        jarak_rumah_ke_sekolah: item.jarak_rumah_ke_sekolah !== null && item.jarak_rumah_ke_sekolah !== undefined ? Number(item.jarak_rumah_ke_sekolah) : null,
+        waktu_tempuh_ke_sekolah: item.waktu_tempuh_ke_sekolah !== null && item.waktu_tempuh_ke_sekolah !== undefined ? Number(item.waktu_tempuh_ke_sekolah) : null,
+        menit_tempuh_ke_sekolah: item.menit_tempuh_ke_sekolah !== null && item.menit_tempuh_ke_sekolah !== undefined ? Number(item.menit_tempuh_ke_sekolah) : null,
+        jumlah_saudara_kandung: item.jumlah_saudara_kandung !== null && item.jumlah_saudara_kandung !== undefined ? Number(item.jumlah_saudara_kandung) : null,
+        penghasilan_id_ayah: item.penghasilan_id_ayah !== null && item.penghasilan_id_ayah !== undefined ? Number(item.penghasilan_id_ayah) : null,
+        pekerjaan_id_ayah: item.pekerjaan_id_ayah !== null && item.pekerjaan_id_ayah !== undefined ? Number(item.pekerjaan_id_ayah) : null,
+        penghasilan_id_ibu: item.penghasilan_id_ibu !== null && item.penghasilan_id_ibu !== undefined ? Number(item.penghasilan_id_ibu) : null,
+        pekerjaan_id_ibu: item.pekerjaan_id_ibu !== null && item.pekerjaan_id_ibu !== undefined ? Number(item.pekerjaan_id_ibu) : null,
+        penghasilan_id_wali: item.penghasilan_id_wali !== null && item.penghasilan_id_wali !== undefined ? Number(item.penghasilan_id_wali) : null,
+        pekerjaan_id_wali: item.pekerjaan_id_wali !== null && item.pekerjaan_id_wali !== undefined ? Number(item.pekerjaan_id_wali) : null,
+        jenjang_pendidikan_ayah: item.jenjang_pendidikan_ayah !== null && item.jenjang_pendidikan_ayah !== undefined ? Number(item.jenjang_pendidikan_ayah) : null,
+        jenjang_pendidikan_ibu: item.jenjang_pendidikan_ibu !== null && item.jenjang_pendidikan_ibu !== undefined ? Number(item.jenjang_pendidikan_ibu) : null,
+        jenjang_pendidikan_wali: item.jenjang_pendidikan_wali !== null && item.jenjang_pendidikan_wali !== undefined ? Number(item.jenjang_pendidikan_wali) : null,
+        anak_keberapa: item.anak_keberapa !== null && item.anak_keberapa !== undefined ? Number(item.anak_keberapa) : null,
+        kebutuhan_khusus_id: item.kebutuhan_khusus_id !== null && item.kebutuhan_khusus_id !== undefined ? Number(item.kebutuhan_khusus_id) : null,
+        jenis_tinggal_id: item.jenis_tinggal_id !== null && item.jenis_tinggal_id !== undefined ? Number(item.jenis_tinggal_id) : null,
+        alat_transportasi_id: item.alat_transportasi_id !== null && item.alat_transportasi_id !== undefined ? Number(item.alat_transportasi_id) : null,
+      };
+    });
+
+    const checkStudentCompleteness = (item: any) => {
+      const allFields = [
+        'nama', 'jenis_kelamin', 'nik', 'tempat_lahir', 'tanggal_lahir',
+        'agama_id_str', 'no_kk', 'reg_akta_lahir', 'anak_keberapa',
+        'nomor_telepon_seluler', 'no_whatsapp', 'email_aktif',
+        'alamat_jalan', 'rt', 'rw', 'nama_dusun', 'desa_kelurahan', 'provinsi', 'kabupaten_kota', 'kecamatan',
+        'kode_pos', 'jenis_tinggal_id', 'alat_transportasi_id', 'lintang', 'bujur',
+        'tinggi_badan', 'berat_badan', 'lingkar_kepala', 'jarak_rumah_ke_sekolah', 'waktu_tempuh_ke_sekolah',
+        'menit_tempuh_ke_sekolah', 'jumlah_saudara_kandung',
+        'nama_ayah', 'nik_ayah', 'tahun_lahir_ayah', 'jenjang_pendidikan_ayah', 'pekerjaan_id_ayah', 'penghasilan_id_ayah',
+        'nama_ibu', 'nik_ibu', 'tahun_lahir_ibu', 'jenjang_pendidikan_ibu', 'pekerjaan_id_ibu', 'penghasilan_id_ibu',
+        'nama_wali', 'nik_wali', 'tahun_lahir_wali', 'jenjang_pendidikan_wali', 'pekerjaan_id_wali', 'penghasilan_id_wali'
+      ];
+      
+      const isFieldFilled = (key: string) => {
+        if (key === 'provinsi' || key === 'kabupaten_kota' || key === 'kecamatan') {
+          const desa = item['desa_kelurahan'];
+          const kodeWilayah = item['kode_wilayah'];
+          return !!((desa && desa !== '-' && desa !== '') || (kodeWilayah && kodeWilayah !== '-' && kodeWilayah !== ''));
+        }
+        
+        const value = item[key];
+        if (value && value !== '-' && value !== '' && value !== 0 && value !== '0') {
+          return true;
+        }
+        return false;
+      };
+
+      const fields = allFields.filter(key => {
+        if (key.endsWith('_wali')) {
+          return item['is_wali'] === true || item['is_wali'] === 1 || item['is_wali'] === '1' || !!(item['nama_wali'] || item['nik_wali']);
+        }
+        return true;
+      });
+
+      let filled = 0;
+      fields.forEach(f => {
+        if (isFieldFilled(f)) {
+          filled++;
+        }
+      });
+      return Math.round((filled / fields.length) * 100);
+    };
+
+    let completedStudentCount = 0;
+    let totalStudentCompletenessPercentSum = 0;
+    mappedStudents.forEach((student: any) => {
+      const pct = checkStudentCompleteness(student);
+      totalStudentCompletenessPercentSum += pct;
+      if (pct === 100) {
+        completedStudentCount++;
+      }
+    });
+
+    const avgStudentCompleteness = mappedStudents.length > 0 ? Math.round((completedStudentCount / mappedStudents.length) * 100) : 0;
+
     return {
       sekolah_id: sekolahId,
       total_tanah: totalTanah,
@@ -121,6 +408,10 @@ export class DapodikService {
       total_pd: totalSiswa,
       total_gtk: totalGtk,
       total_rombel: totalRombel,
+      completed_gtk: completedGtkCount,
+      avg_gtk_completeness: avgGtkCompleteness,
+      completed_pd: completedStudentCount,
+      avg_pd_completeness: avgStudentCompleteness,
     };
   }
 
@@ -558,7 +849,16 @@ export class DapodikService {
     return { total, data };
   }
 
-  async getPesertaDidik(sekolahId: string | null, limit: number = 10, search?: string, page: number = 1, rombelName?: string, status?: 'aktif' | 'non-aktif', tingkat?: string) {
+  async getPesertaDidik(
+    sekolahId: string | null,
+    limit: number = 10,
+    search?: string,
+    page: number = 1,
+    rombelName?: string,
+    status?: 'aktif' | 'non-aktif',
+    tingkat?: string,
+    completeness?: string
+  ) {
     const filter = this.getSekolahFilter(sekolahId);
     
     let whereClause: any = {
@@ -654,103 +954,285 @@ export class DapodikService {
       });
     }
 
-    const skip = (page - 1) * limit;
-
-    const [total, data, refJenisPendaftaran] = await Promise.all([
-      this.prisma.pesertaDidik.count({ where: whereClause }),
-      this.prisma.pesertaDidik.findMany({
-        where: whereClause,
-        take: limit,
-        skip: skip,
+    const appUrl = process.env.APP_URL || 'http://localhost:3000';
+    const hasCompletenessFilter = completeness && completeness !== 'all';
+    
+    // Select fields for query
+    const querySelect = {
+      peserta_didik_id: true,
+      nama: true,
+      nisn: true,
+      nipd: true,
+      nik: true,
+      no_kk: true,
+      jenis_kelamin: true,
+      foto: true,
+      qr_token: true,
+      tempat_lahir: true,
+      tanggal_lahir: true,
+      jenis_keluar_id: true,
+      keterangan: true,
+      tanggal_keluar: true,
+      status: true,
+      tanggal_masuk_sekolah: true,
+      jenis_pendaftaran_id: true,
+      alamat_jalan: true,
+      rt: true,
+      rw: true,
+      desa_kelurahan: true,
+      nomor_telepon_seluler: true,
+      email: true,
+      nama_ayah: true,
+      nama_ibu_kandung: true,
+      kode_wilayah: true,
+      tinggi_badan: true,
+      berat_badan: true,
+      rombongan_belajar: {
         select: {
-          peserta_didik_id: true,
           nama: true,
-          nisn: true,
-          nipd: true,
-          nik: true,
-          no_kk: true,
-          jenis_kelamin: true,
-          foto: true,
-          qr_token: true,
-          tempat_lahir: true,
-          tanggal_lahir: true,
-          jenis_keluar_id: true,
-          keterangan: true,
-          tanggal_keluar: true,
-          status: true,
-          tanggal_masuk_sekolah: true,
-          jenis_pendaftaran_id: true,
-          alamat_jalan: true,
-          rt: true,
-          rw: true,
-          desa_kelurahan: true,
-          nomor_telepon_seluler: true,
-          email: true,
-          nama_ayah: true,
-          nama_ibu_kandung: true,
+          tingkat_pendidikan_id: true,
+        }
+      },
+      anggota_rombel: {
+        where: {
+          rombongan_belajar: {
+            jenis_rombel: 1,
+          }
+        },
+        select: {
           rombongan_belajar: {
             select: {
               nama: true,
               tingkat_pendidikan_id: true,
             }
-          },
-          anggota_rombel: {
-            where: {
-              rombongan_belajar: {
-                jenis_rombel: 1,
-              }
-            },
-            select: {
-              rombongan_belajar: {
-                select: {
-                  nama: true,
-                  tingkat_pendidikan_id: true,
-                }
-              }
-            }
-          },
-          agama: {
-            select: {
-              nama: true,
-            }
           }
-        },
-        orderBy: { nama: 'asc' },
-      }),
-      this.prisma.jenis_pendaftaran.findMany({
-        select: {
-          jenis_pendaftaran_id: true,
-          nama: true
         }
-      })
-    ]);
+      },
+      agama: {
+        select: {
+          nama: true,
+        }
+      },
+      reg_akta_lahir: true,
+      kebutuhan_khusus_id: true,
+      anak_keberapa: true,
+      nomor_telepon_rumah: true,
+      no_whatsapp: true,
+      email_aktif: true,
+      nama_dusun: true,
+      kode_pos: true,
+      lintang: true,
+      bujur: true,
+      jenis_tinggal_id: true,
+      alat_transportasi_id: true,
+      lingkar_kepala: true,
+      jarak_rumah_ke_sekolah: true,
+      waktu_tempuh_ke_sekolah: true,
+      menit_tempuh_ke_sekolah: true,
+      jumlah_saudara_kandung: true,
+      nik_ayah: true,
+      tahun_lahir_ayah: true,
+      jenjang_pendidikan_ayah: true,
+      pekerjaan_id_ayah: true,
+      penghasilan_id_ayah: true,
+      nik_ibu: true,
+      tahun_lahir_ibu: true,
+      jenjang_pendidikan_ibu: true,
+      pekerjaan_id_ibu: true,
+      penghasilan_id_ibu: true,
+      is_wali: true,
+      nama_wali: true,
+      nik_wali: true,
+      tahun_lahir_wali: true,
+      jenjang_pendidikan_wali: true,
+      pekerjaan_id_wali: true,
+      penghasilan_id_wali: true,
+    };
 
-    const appUrl = process.env.APP_URL || 'http://localhost:3000';
-    const formattedData = data.map((item: any) => {
-      const jp = refJenisPendaftaran.find(
-        (r: any) => String(r.jenis_pendaftaran_id) === String(item.jenis_pendaftaran_id)
-      );
-
-      const rombel = item.rombongan_belajar || item.anggota_rombel?.[0]?.rombongan_belajar;
-
-      return {
-        ...item,
-        foto: item.foto ? (item.foto.startsWith('http') ? item.foto : `${appUrl}${item.foto}`) : null,
-        nama_rombel: rombel?.nama || null,
-        tingkat_pendidikan_id: rombel?.tingkat_pendidikan_id ? String(rombel.tingkat_pendidikan_id) : null,
-        agama_id_str: item.agama?.nama || null,
-        nama_ibu: item.nama_ibu_kandung || null,
-        ket_keluar: item.keterangan || null,
-        provinsi: null,
-        kabupaten_kota: null,
-        kecamatan: null,
-        tinggi_badan: null,
-        berat_badan: null,
-        jenis_pendaftaran_id_str: jp?.nama || null,
-      };
+    const refJenisPendaftaran = await this.prisma.jenis_pendaftaran.findMany({
+      select: {
+        jenis_pendaftaran_id: true,
+        nama: true
+      }
     });
 
-    return { total, data: formattedData };
+    const checkStudentCompleteness = (item: any) => {
+      const allFields = [
+        'nama', 'jenis_kelamin', 'nik', 'tempat_lahir', 'tanggal_lahir',
+        'agama_id_str', 'no_kk', 'reg_akta_lahir', 'anak_keberapa',
+        'nomor_telepon_seluler', 'no_whatsapp', 'email_aktif',
+        'alamat_jalan', 'rt', 'rw', 'nama_dusun', 'desa_kelurahan', 'provinsi', 'kabupaten_kota', 'kecamatan',
+        'kode_pos', 'jenis_tinggal_id', 'alat_transportasi_id', 'lintang', 'bujur',
+        'tinggi_badan', 'berat_badan', 'lingkar_kepala', 'jarak_rumah_ke_sekolah', 'waktu_tempuh_ke_sekolah',
+        'menit_tempuh_ke_sekolah', 'jumlah_saudara_kandung',
+        'nama_ayah', 'nik_ayah', 'tahun_lahir_ayah', 'jenjang_pendidikan_ayah', 'pekerjaan_id_ayah', 'penghasilan_id_ayah',
+        'nama_ibu', 'nik_ibu', 'tahun_lahir_ibu', 'jenjang_pendidikan_ibu', 'pekerjaan_id_ibu', 'penghasilan_id_ibu',
+        'nama_wali', 'nik_wali', 'tahun_lahir_wali', 'jenjang_pendidikan_wali', 'pekerjaan_id_wali', 'penghasilan_id_wali'
+      ];
+      
+      const isFieldFilled = (key: string) => {
+        if (key === 'provinsi' || key === 'kabupaten_kota' || key === 'kecamatan') {
+          const desa = item['desa_kelurahan'];
+          const kodeWilayah = item['kode_wilayah'];
+          return !!((desa && desa !== '-' && desa !== '') || (kodeWilayah && kodeWilayah !== '-' && kodeWilayah !== ''));
+        }
+        
+        const value = item[key];
+        if (value && value !== '-' && value !== '' && value !== 0 && value !== '0') {
+          return true;
+        }
+        return false;
+      };
+
+      const fields = allFields.filter(key => {
+        if (key.endsWith('_wali')) {
+          return item['is_wali'] === true || item['is_wali'] === 1 || item['is_wali'] === '1' || !!(item['nama_wali'] || item['nik_wali']);
+        }
+        return true;
+      });
+
+      let filled = 0;
+      fields.forEach(f => {
+        if (isFieldFilled(f)) {
+          filled++;
+        }
+      });
+      return Math.round((filled / fields.length) * 100);
+    };
+
+    if (hasCompletenessFilter) {
+      // 1. Fetch ALL matching records to apply completeness filter in memory
+      const rawData = await this.prisma.pesertaDidik.findMany({
+        where: whereClause,
+        select: querySelect,
+        orderBy: { nama: 'asc' },
+      });
+
+      const wilayahCache = new Map<string, any>();
+      const mappedAll = await Promise.all(rawData.map(async (item: any) => {
+        const jp = refJenisPendaftaran.find(
+          (r: any) => String(r.jenis_pendaftaran_id) === String(item.jenis_pendaftaran_id)
+        );
+        const rombel = item.rombongan_belajar || item.anggota_rombel?.[0]?.rombongan_belajar;
+        const wilayahHierarchy = await this.resolveWilayahHierarchy(item.kode_wilayah, wilayahCache);
+
+        return {
+          ...item,
+          foto: item.foto ? (item.foto.startsWith('http') ? item.foto : `${appUrl}${item.foto}`) : null,
+          nama_rombel: rombel?.nama || null,
+          tingkat_pendidikan_id: rombel?.tingkat_pendidikan_id ? String(rombel.tingkat_pendidikan_id) : null,
+          agama_id_str: item.agama?.nama || null,
+          nama_ibu: item.nama_ibu_kandung || null,
+          ket_keluar: item.keterangan || null,
+          provinsi: wilayahHierarchy.provinsi,
+          kabupaten_kota: wilayahHierarchy.kabupaten,
+          kecamatan: wilayahHierarchy.kecamatan,
+          tinggi_badan: item.tinggi_badan !== null && item.tinggi_badan !== undefined ? Number(item.tinggi_badan) : null,
+          berat_badan: item.berat_badan !== null && item.berat_badan !== undefined ? Number(item.berat_badan) : null,
+          jenis_pendaftaran_id_str: jp?.nama || null,
+          rt: item.rt !== null && item.rt !== undefined ? String(item.rt) : null,
+          rw: item.rw !== null && item.rw !== undefined ? String(item.rw) : null,
+          is_wali: item.is_wali === true || item.is_wali === 1 || item.is_wali === "1" || !!(item.nama_wali || item.nik_wali),
+          lingkar_kepala: item.lingkar_kepala !== null && item.lingkar_kepala !== undefined ? Number(item.lingkar_kepala) : null,
+          jarak_rumah_ke_sekolah: item.jarak_rumah_ke_sekolah !== null && item.jarak_rumah_ke_sekolah !== undefined ? Number(item.jarak_rumah_ke_sekolah) : null,
+          waktu_tempuh_ke_sekolah: item.waktu_tempuh_ke_sekolah !== null && item.waktu_tempuh_ke_sekolah !== undefined ? Number(item.waktu_tempuh_ke_sekolah) : null,
+          menit_tempuh_ke_sekolah: item.menit_tempuh_ke_sekolah !== null && item.menit_tempuh_ke_sekolah !== undefined ? Number(item.menit_tempuh_ke_sekolah) : null,
+          jumlah_saudara_kandung: item.jumlah_saudara_kandung !== null && item.jumlah_saudara_kandung !== undefined ? Number(item.jumlah_saudara_kandung) : null,
+          penghasilan_id_ayah: item.penghasilan_id_ayah !== null && item.penghasilan_id_ayah !== undefined ? Number(item.penghasilan_id_ayah) : null,
+          pekerjaan_id_ayah: item.pekerjaan_id_ayah !== null && item.pekerjaan_id_ayah !== undefined ? Number(item.pekerjaan_id_ayah) : null,
+          penghasilan_id_ibu: item.penghasilan_id_ibu !== null && item.penghasilan_id_ibu !== undefined ? Number(item.penghasilan_id_ibu) : null,
+          pekerjaan_id_ibu: item.pekerjaan_id_ibu !== null && item.pekerjaan_id_ibu !== undefined ? Number(item.pekerjaan_id_ibu) : null,
+          penghasilan_id_wali: item.penghasilan_id_wali !== null && item.penghasilan_id_wali !== undefined ? Number(item.penghasilan_id_wali) : null,
+          pekerjaan_id_wali: item.pekerjaan_id_wali !== null && item.pekerjaan_id_wali !== undefined ? Number(item.pekerjaan_id_wali) : null,
+          jenjang_pendidikan_ayah: item.jenjang_pendidikan_ayah !== null && item.jenjang_pendidikan_ayah !== undefined ? Number(item.jenjang_pendidikan_ayah) : null,
+          jenjang_pendidikan_ibu: item.jenjang_pendidikan_ibu !== null && item.jenjang_pendidikan_ibu !== undefined ? Number(item.jenjang_pendidikan_ibu) : null,
+          jenjang_pendidikan_wali: item.jenjang_pendidikan_wali !== null && item.jenjang_pendidikan_wali !== undefined ? Number(item.jenjang_pendidikan_wali) : null,
+          anak_keberapa: item.anak_keberapa !== null && item.anak_keberapa !== undefined ? Number(item.anak_keberapa) : null,
+          kebutuhan_khusus_id: item.kebutuhan_khusus_id !== null && item.kebutuhan_khusus_id !== undefined ? Number(item.kebutuhan_khusus_id) : null,
+          jenis_tinggal_id: item.jenis_tinggal_id !== null && item.jenis_tinggal_id !== undefined ? Number(item.jenis_tinggal_id) : null,
+          alat_transportasi_id: item.alat_transportasi_id !== null && item.alat_transportasi_id !== undefined ? Number(item.alat_transportasi_id) : null,
+        };
+      }));
+
+      // 2. Filter by completeness
+      let filteredData = mappedAll;
+      if (completeness === '100') {
+        filteredData = mappedAll.filter((item: any) => checkStudentCompleteness(item) === 100);
+      } else if (completeness === '99') {
+        filteredData = mappedAll.filter((item: any) => checkStudentCompleteness(item) < 100);
+      } else if (completeness === '50') {
+        filteredData = mappedAll.filter((item: any) => checkStudentCompleteness(item) < 50);
+      }
+
+      // 3. Paginate
+      const totalFiltered = filteredData.length;
+      const skip = (page - 1) * limit;
+      const paginatedData = filteredData.slice(skip, skip + limit);
+
+      return { total: totalFiltered, data: paginatedData };
+
+    } else {
+      // Standard database pagination (when not filtering by completeness)
+      const skip = (page - 1) * limit;
+      const [totalCount, rawData] = await Promise.all([
+        this.prisma.pesertaDidik.count({ where: whereClause }),
+        this.prisma.pesertaDidik.findMany({
+          where: whereClause,
+          take: limit,
+          skip: skip,
+          select: querySelect,
+          orderBy: { nama: 'asc' },
+        })
+      ]);
+
+      const wilayahCache = new Map<string, any>();
+      const mappedData = await Promise.all(rawData.map(async (item: any) => {
+        const jp = refJenisPendaftaran.find(
+          (r: any) => String(r.jenis_pendaftaran_id) === String(item.jenis_pendaftaran_id)
+        );
+        const rombel = item.rombongan_belajar || item.anggota_rombel?.[0]?.rombongan_belajar;
+        const wilayahHierarchy = await this.resolveWilayahHierarchy(item.kode_wilayah, wilayahCache);
+
+        return {
+          ...item,
+          foto: item.foto ? (item.foto.startsWith('http') ? item.foto : `${appUrl}${item.foto}`) : null,
+          nama_rombel: rombel?.nama || null,
+          tingkat_pendidikan_id: rombel?.tingkat_pendidikan_id ? String(rombel.tingkat_pendidikan_id) : null,
+          agama_id_str: item.agama?.nama || null,
+          nama_ibu: item.nama_ibu_kandung || null,
+          ket_keluar: item.keterangan || null,
+          provinsi: wilayahHierarchy.provinsi,
+          kabupaten_kota: wilayahHierarchy.kecamatan,
+          kecamatan: wilayahHierarchy.kecamatan,
+          tinggi_badan: item.tinggi_badan !== null && item.tinggi_badan !== undefined ? Number(item.tinggi_badan) : null,
+          berat_badan: item.berat_badan !== null && item.berat_badan !== undefined ? Number(item.berat_badan) : null,
+          jenis_pendaftaran_id_str: jp?.nama || null,
+          rt: item.rt !== null && item.rt !== undefined ? String(item.rt) : null,
+          rw: item.rw !== null && item.rw !== undefined ? String(item.rw) : null,
+          is_wali: item.is_wali === true || item.is_wali === 1 || item.is_wali === "1" || !!(item.nama_wali || item.nik_wali),
+          lingkar_kepala: item.lingkar_kepala !== null && item.lingkar_kepala !== undefined ? Number(item.lingkar_kepala) : null,
+          jarak_rumah_ke_sekolah: item.jarak_rumah_ke_sekolah !== null && item.jarak_rumah_ke_sekolah !== undefined ? Number(item.jarak_rumah_ke_sekolah) : null,
+          waktu_tempuh_ke_sekolah: item.waktu_tempuh_ke_sekolah !== null && item.waktu_tempuh_ke_sekolah !== undefined ? Number(item.waktu_tempuh_ke_sekolah) : null,
+          menit_tempuh_ke_sekolah: item.menit_tempuh_ke_sekolah !== null && item.menit_tempuh_ke_sekolah !== undefined ? Number(item.menit_tempuh_ke_sekolah) : null,
+          jumlah_saudara_kandung: item.jumlah_saudara_kandung !== null && item.jumlah_saudara_kandung !== undefined ? Number(item.jumlah_saudara_kandung) : null,
+          penghasilan_id_ayah: item.penghasilan_id_ayah !== null && item.penghasilan_id_ayah !== undefined ? Number(item.penghasilan_id_ayah) : null,
+          pekerjaan_id_ayah: item.pekerjaan_id_ayah !== null && item.pekerjaan_id_ayah !== undefined ? Number(item.pekerjaan_id_ayah) : null,
+          penghasilan_id_ibu: item.penghasilan_id_ibu !== null && item.penghasilan_id_ibu !== undefined ? Number(item.penghasilan_id_ibu) : null,
+          pekerjaan_id_ibu: item.pekerjaan_id_ibu !== null && item.pekerjaan_id_ibu !== undefined ? Number(item.pekerjaan_id_ibu) : null,
+          penghasilan_id_wali: item.penghasilan_id_wali !== null && item.penghasilan_id_wali !== undefined ? Number(item.penghasilan_id_wali) : null,
+          pekerjaan_id_wali: item.pekerjaan_id_wali !== null && item.pekerjaan_id_wali !== undefined ? Number(item.pekerjaan_id_wali) : null,
+          jenjang_pendidikan_ayah: item.jenjang_pendidikan_ayah !== null && item.jenjang_pendidikan_ayah !== undefined ? Number(item.jenjang_pendidikan_ayah) : null,
+          jenjang_pendidikan_ibu: item.jenjang_pendidikan_ibu !== null && item.jenjang_pendidikan_ibu !== undefined ? Number(item.jenjang_pendidikan_ibu) : null,
+          jenjang_pendidikan_wali: item.jenjang_pendidikan_wali !== null && item.jenjang_pendidikan_wali !== undefined ? Number(item.jenjang_pendidikan_wali) : null,
+          anak_keberapa: item.anak_keberapa !== null && item.anak_keberapa !== undefined ? Number(item.anak_keberapa) : null,
+          kebutuhan_khusus_id: item.kebutuhan_khusus_id !== null && item.kebutuhan_khusus_id !== undefined ? Number(item.kebutuhan_khusus_id) : null,
+          jenis_tinggal_id: item.jenis_tinggal_id !== null && item.jenis_tinggal_id !== undefined ? Number(item.jenis_tinggal_id) : null,
+          alat_transportasi_id: item.alat_transportasi_id !== null && item.alat_transportasi_id !== undefined ? Number(item.alat_transportasi_id) : null,
+        };
+      }));
+
+      return { total: totalCount, data: mappedData };
+    }
   }
 
   async getPesertaDidikForMandala(
@@ -1648,7 +2130,15 @@ export class DapodikService {
     });
   }
 
-  async getGtk(sekolahId: string | null, limit: number = 10, search?: string, page: number = 1, type?: 'guru' | 'tendik', status?: 'aktif' | 'non-aktif') {
+  async getGtk(
+    sekolahId: string | null,
+    limit: number = 10,
+    search?: string,
+    page: number = 1,
+    type?: 'guru' | 'tendik',
+    status?: 'aktif' | 'non-aktif',
+    completeness?: string
+  ) {
     const filter = this.getSekolahFilter(sekolahId);
     let whereClause: any = {
       AND: [{ sekolah_id: filter.sekolah_id }],
@@ -1690,59 +2180,8 @@ export class DapodikService {
       whereClause.AND.push({ NOT: { status: 'Aktif' } });
     }
 
-    const skip = (page - 1) * limit;
-
-    const [total, data] = await Promise.all([
-      this.prisma.gtk.count({ where: whereClause }),
-      this.prisma.gtk.findMany({
-        where: whereClause,
-        take: limit,
-        skip: skip,
-        select: {
-          ptk_id: true,
-          nama: true,
-          nuptk: true,
-          nik: true,
-          nip: true,
-          foto: true,
-          qr_token: true,
-          ptk_induk: true,
-          jenis_kelamin: true,
-          tempat_lahir: true,
-          tanggal_lahir: true,
-          nama_ibu_kandung: true,
-          alamat_jalan: true,
-          tanggal_surat_tugas: true,
-          status: true,
-          no_kk: true,
-          no_hp: true,
-          email: true,
-          sk_pengangkatan: true,
-          tmt_pengangkatan: true,
-          last_update: true,
-          jenis_ptk: {
-            select: { jenis_ptk: true }
-          },
-          status_kepegawaian: {
-            select: { nama: true }
-          },
-          jabatan_ptk: {
-            select: { jabatan_ptk: true }
-          },
-          sumber_gaji: {
-            select: { nama: true }
-          },
-          riwayat_pendidikan_formal: {
-            select: {
-              jenjang_pendidikan_id: true
-            }
-          }
-        },
-        orderBy: { nama: 'asc' },
-      }),
-    ]);
-
     const appUrl = process.env.APP_URL || 'http://localhost:3000';
+    const hasCompletenessFilter = completeness && completeness !== 'all';
 
     const getPendidikanTerakhir = (riwayat: { jenjang_pendidikan_id: any }[]): string => {
       const ids = riwayat.map(r => r.jenjang_pendidikan_id ? Number(r.jenjang_pendidikan_id) : 0);
@@ -1756,36 +2195,273 @@ export class DapodikService {
       return '';
     };
 
-    const formattedData = data.map(item => ({
-      ptk_id: item.ptk_id,
-      nama: item.nama,
-      nuptk: item.nuptk,
-      nik: item.nik,
-      nip: item.nip,
-      foto: item.foto ? (item.foto.startsWith('http') ? item.foto : `${appUrl}${item.foto}`) : null,
-      qr_token: item.qr_token,
-      ptk_induk: item.ptk_induk,
-      jenis_kelamin: item.jenis_kelamin,
-      tempat_lahir: item.tempat_lahir,
-      tanggal_lahir: item.tanggal_lahir,
-      nama_ibu_kandung: item.nama_ibu_kandung,
-      alamat_jalan: item.alamat_jalan,
-      tanggal_surat_tugas: item.tanggal_surat_tugas,
-      status: item.status,
-      no_kk: item.no_kk,
-      no_hp: item.no_hp,
-      email: item.email,
-      sk_pengangkatan: item.sk_pengangkatan,
-      tmt_pengangkatan: item.tmt_pengangkatan,
-      jabatan_ptk_id_str: item.jabatan_ptk?.jabatan_ptk || null,
-      jenis_ptk_id_str: item.jenis_ptk?.jenis_ptk || null,
-      status_kepegawaian_id_str: item.status_kepegawaian?.nama || null,
-      sumber_gaji: item.sumber_gaji?.nama || null,
-      pendidikan_terakhir: getPendidikanTerakhir(item.riwayat_pendidikan_formal),
-      updated_at: item.last_update,
-    }));
+    const querySelect = {
+      ptk_id: true,
+      nama: true,
+      nuptk: true,
+      nik: true,
+      nip: true,
+      foto: true,
+      qr_token: true,
+      ptk_induk: true,
+      jenis_kelamin: true,
+      tempat_lahir: true,
+      tanggal_lahir: true,
+      nama_ibu_kandung: true,
+      alamat_jalan: true,
+      rt: true,
+      rw: true,
+      nama_dusun: true,
+      desa_kelurahan: true,
+      kode_wilayah: true,
+      kode_pos: true,
+      lintang: true,
+      bujur: true,
+      status_perkawinan: true,
+      nama_suami_istri: true,
+      pekerjaan_suami_istri: true,
+      nm_wp: true,
+      npwp: true,
+      id_bank: true,
+      rekening_bank: true,
+      rekening_atas_nama: true,
+      nama_kcp: true,
+      no_whatsapp: true,
+      id_telegram: true,
+      tanggal_surat_tugas: true,
+      status: true,
+      no_kk: true,
+      no_hp: true,
+      email: true,
+      sk_pengangkatan: true,
+      tmt_pengangkatan: true,
+      last_update: true,
+      jenis_ptk: {
+        select: { jenis_ptk: true }
+      },
+      status_kepegawaian: {
+        select: { nama: true }
+      },
+      jabatan_ptk: {
+        select: { jabatan_ptk: true }
+      },
+      sumber_gaji: {
+        select: { nama: true }
+      },
+      agama: {
+        select: { nama: true }
+      },
+      rwy_sertifikasi: {
+        select: { riwayat_sertifikasi_id: true }
+      },
+      riwayat_pendidikan_formal: {
+        select: {
+          jenjang_pendidikan_id: true
+        }
+      }
+    };
 
-    return { total, data: formattedData };
+    const checkGtkCompleteness = (item: any) => {
+      const allFields = [
+        'nama', 'nik', 'no_kk', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir',
+        'nama_ibu_kandung', 'agama_id_str', 'status_perkawinan', 'nama_suami_istri',
+        'pekerjaan_suami_istri', 'nm_wp', 'npwp', 'alamat_jalan', 'rt', 'rw',
+        'nama_dusun', 'desa_kelurahan', 'provinsi', 'kabupaten_kota', 'kecamatan',
+        'kode_pos', 'lintang', 'bujur', 'sumber_gaji', 'id_bank', 'rekening_bank',
+        'rekening_atas_nama', 'nama_kcp', 'no_hp', 'no_whatsapp', 'id_telegram',
+        'email'
+      ];
+
+      const isFieldFilled = (key: string) => {
+        if (key === 'provinsi' || key === 'kabupaten_kota' || key === 'kecamatan') {
+          const desa = item['desa_kelurahan'];
+          const kodeWilayah = item['kode_wilayah'];
+          if ((desa && desa !== '-' && desa !== '') || (kodeWilayah && kodeWilayah !== '-' && kodeWilayah !== '')) {
+            return true;
+          }
+        }
+        const value = item[key];
+        if (value && value !== '-' && value !== '' && value !== 0 && value !== '0') {
+          return true;
+        }
+        return false;
+      };
+
+      const fields = allFields.filter(key => {
+        if (key === 'id_bank' || key === 'rekening_bank' || key === 'rekening_atas_nama' || key === 'nama_kcp') {
+          return item['memilikiSertifikasi'] === 'Ya';
+        }
+        if (key === 'nama_suami_istri' || key === 'pekerjaan_suami_istri') {
+          const statusPerkawinan = item['status_perkawinan'];
+          return statusPerkawinan === '1' || statusPerkawinan === 1;
+        }
+        return true;
+      });
+
+      let filled = 0;
+      fields.forEach(f => {
+        if (isFieldFilled(f)) {
+          filled++;
+        }
+      });
+      return Math.round((filled / fields.length) * 100);
+    };
+
+    if (hasCompletenessFilter) {
+      // 1. Fetch ALL matching records
+      const rawData = await this.prisma.gtk.findMany({
+        where: whereClause,
+        select: querySelect,
+        orderBy: { nama: 'asc' },
+      });
+
+      const wilayahCache = new Map<string, any>();
+      const mappedAll = await Promise.all(rawData.map(async (item: any) => {
+        const wilayahHierarchy = await this.resolveWilayahHierarchy(item.kode_wilayah, wilayahCache);
+        return {
+          ptk_id: item.ptk_id,
+          nama: item.nama,
+          nuptk: item.nuptk,
+          nik: item.nik,
+          nip: item.nip,
+          foto: item.foto ? (item.foto.startsWith('http') ? item.foto : `${appUrl}${item.foto}`) : null,
+          qr_token: item.qr_token,
+          ptk_induk: item.ptk_induk,
+          jenis_kelamin: item.jenis_kelamin,
+          tempat_lahir: item.tempat_lahir,
+          tanggal_lahir: item.tanggal_lahir,
+          nama_ibu_kandung: item.nama_ibu_kandung,
+          alamat_jalan: item.alamat_jalan,
+          rt: item.rt !== null && item.rt !== undefined ? String(item.rt) : null,
+          rw: item.rw !== null && item.rw !== undefined ? String(item.rw) : null,
+          nama_dusun: item.nama_dusun,
+          desa_kelurahan: item.desa_kelurahan || wilayahHierarchy.desa,
+          kode_wilayah: item.kode_wilayah,
+          provinsi: wilayahHierarchy.provinsi,
+          kabupaten_kota: wilayahHierarchy.kabupaten,
+          kecamatan: wilayahHierarchy.kecamatan,
+          kode_pos: item.kode_pos,
+          lintang: item.lintang !== null && item.lintang !== undefined ? String(item.lintang) : null,
+          bujur: item.bujur !== null && item.bujur !== undefined ? String(item.bujur) : null,
+          status_perkawinan: item.status_perkawinan !== null && item.status_perkawinan !== undefined ? String(item.status_perkawinan) : null,
+          nama_suami_istri: item.nama_suami_istri,
+          pekerjaan_suami_istri: item.pekerjaan_suami_istri !== null && item.pekerjaan_suami_istri !== undefined ? String(item.pekerjaan_suami_istri) : null,
+          nm_wp: item.nm_wp,
+          npwp: item.npwp,
+          id_bank: item.id_bank,
+          rekening_bank: item.rekening_bank,
+          rekening_atas_nama: item.rekening_atas_nama,
+          nama_kcp: item.nama_kcp,
+          no_whatsapp: item.no_whatsapp,
+          id_telegram: item.id_telegram,
+          tanggal_surat_tugas: item.tanggal_surat_tugas,
+          status: item.status,
+          no_kk: item.no_kk,
+          no_hp: item.no_hp,
+          email: item.email,
+          sk_pengangkatan: item.sk_pengangkatan,
+          tmt_pengangkatan: item.tmt_pengangkatan,
+          jabatan_ptk_id_str: item.jabatan_ptk?.jabatan_ptk || null,
+          jenis_ptk_id_str: item.jenis_ptk?.jenis_ptk || null,
+          status_kepegawaian_id_str: item.status_kepegawaian?.nama || null,
+          sumber_gaji: item.sumber_gaji?.nama || null,
+          agama_id_str: item.agama?.nama || null,
+          memilikiSertifikasi: item.rwy_sertifikasi && item.rwy_sertifikasi.length > 0 ? "Ya" : "Tidak",
+          pendidikan_terakhir: getPendidikanTerakhir(item.riwayat_pendidikan_formal),
+          updated_at: item.last_update,
+        };
+      }));
+
+      // 2. Filter by completeness
+      let filteredData = mappedAll;
+      if (completeness === '100') {
+        filteredData = mappedAll.filter((item: any) => checkGtkCompleteness(item) === 100);
+      } else if (completeness === '99') {
+        filteredData = mappedAll.filter((item: any) => checkGtkCompleteness(item) < 100);
+      } else if (completeness === '50') {
+        filteredData = mappedAll.filter((item: any) => checkGtkCompleteness(item) < 50);
+      }
+
+      // 3. Paginate
+      const totalFiltered = filteredData.length;
+      const skip = (page - 1) * limit;
+      const paginatedData = filteredData.slice(skip, skip + limit);
+
+      return { total: totalFiltered, data: paginatedData };
+
+    } else {
+      // Standard database pagination (when not filtering by completeness)
+      const skip = (page - 1) * limit;
+      const [totalCount, rawData] = await Promise.all([
+        this.prisma.gtk.count({ where: whereClause }),
+        this.prisma.gtk.findMany({
+          where: whereClause,
+          take: limit,
+          skip: skip,
+          select: querySelect,
+          orderBy: { nama: 'asc' },
+        })
+      ]);
+
+      const wilayahCache = new Map<string, any>();
+      const mappedData = await Promise.all(rawData.map(async (item: any) => {
+        const wilayahHierarchy = await this.resolveWilayahHierarchy(item.kode_wilayah, wilayahCache);
+        return {
+          ptk_id: item.ptk_id,
+          nama: item.nama,
+          nuptk: item.nuptk,
+          nik: item.nik,
+          nip: item.nip,
+          foto: item.foto ? (item.foto.startsWith('http') ? item.foto : `${appUrl}${item.foto}`) : null,
+          qr_token: item.qr_token,
+          ptk_induk: item.ptk_induk,
+          jenis_kelamin: item.jenis_kelamin,
+          tempat_lahir: item.tempat_lahir,
+          tanggal_lahir: item.tanggal_lahir,
+          nama_ibu_kandung: item.nama_ibu_kandung,
+          alamat_jalan: item.alamat_jalan,
+          rt: item.rt !== null && item.rt !== undefined ? String(item.rt) : null,
+          rw: item.rw !== null && item.rw !== undefined ? String(item.rw) : null,
+          nama_dusun: item.nama_dusun,
+          desa_kelurahan: item.desa_kelurahan || wilayahHierarchy.desa,
+          kode_wilayah: item.kode_wilayah,
+          provinsi: wilayahHierarchy.provinsi,
+          kabupaten_kota: wilayahHierarchy.kabupaten,
+          kecamatan: wilayahHierarchy.kecamatan,
+          kode_pos: item.kode_pos,
+          lintang: item.lintang !== null && item.lintang !== undefined ? String(item.lintang) : null,
+          bujur: item.bujur !== null && item.bujur !== undefined ? String(item.bujur) : null,
+          status_perkawinan: item.status_perkawinan !== null && item.status_perkawinan !== undefined ? String(item.status_perkawinan) : null,
+          nama_suami_istri: item.nama_suami_istri,
+          pekerjaan_suami_istri: item.pekerjaan_suami_istri !== null && item.pekerjaan_suami_istri !== undefined ? String(item.pekerjaan_suami_istri) : null,
+          nm_wp: item.nm_wp,
+          npwp: item.npwp,
+          id_bank: item.id_bank,
+          rekening_bank: item.rekening_bank,
+          rekening_atas_nama: item.rekening_atas_nama,
+          nama_kcp: item.nama_kcp,
+          no_whatsapp: item.no_whatsapp,
+          id_telegram: item.id_telegram,
+          tanggal_surat_tugas: item.tanggal_surat_tugas,
+          status: item.status,
+          no_kk: item.no_kk,
+          no_hp: item.no_hp,
+          email: item.email,
+          sk_pengangkatan: item.sk_pengangkatan,
+          tmt_pengangkatan: item.tmt_pengangkatan,
+          jabatan_ptk_id_str: item.jabatan_ptk?.jabatan_ptk || null,
+          jenis_ptk_id_str: item.jenis_ptk?.jenis_ptk || null,
+          status_kepegawaian_id_str: item.status_kepegawaian?.nama || null,
+          sumber_gaji: item.sumber_gaji?.nama || null,
+          agama_id_str: item.agama?.nama || null,
+          memilikiSertifikasi: item.rwy_sertifikasi && item.rwy_sertifikasi.length > 0 ? "Ya" : "Tidak",
+          pendidikan_terakhir: getPendidikanTerakhir(item.riwayat_pendidikan_formal),
+          updated_at: item.last_update,
+        };
+      }));
+
+      return { total: totalCount, data: mappedData };
+    }
   }
 
   async getGtkById(sekolahId: string, id: string) {

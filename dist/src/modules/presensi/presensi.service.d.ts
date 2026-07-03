@@ -8,9 +8,9 @@ export declare class PresensiService {
         created_at: Date;
         updated_at: Date;
         aktif: boolean;
+        keterangan: string | null;
         tanggal_mulai: Date;
         tanggal_selesai: Date;
-        keterangan: string | null;
         hari_libur_id: string;
     }[]>;
     createHariLibur(sekolahId: string, data: {
@@ -24,9 +24,9 @@ export declare class PresensiService {
         created_at: Date;
         updated_at: Date;
         aktif: boolean;
+        keterangan: string | null;
         tanggal_mulai: Date;
         tanggal_selesai: Date;
-        keterangan: string | null;
         hari_libur_id: string;
     }>;
     deleteHariLibur(sekolahId: string, hariLiburId: string): Promise<import("@prisma/client").Prisma.BatchPayload>;
@@ -97,11 +97,11 @@ export declare class PresensiService {
             nama: string;
             peserta_didik_id: string;
             foto: string;
+            nisn: string;
             rombongan_belajar_id: string;
             rombongan_belajar: {
                 nama: string;
             };
-            nisn: string;
         };
         activeIzinKeluar: {
             sekolah_id: string;
@@ -109,8 +109,8 @@ export declare class PresensiService {
             updated_at: Date;
             ptk_id: string | null;
             peserta_didik_id: string | null;
-            jenis: number;
             keterangan: string;
+            jenis: number;
             tanggal: Date;
             izin_id: string;
             disetujui: boolean;
@@ -133,8 +133,8 @@ export declare class PresensiService {
             updated_at: Date;
             ptk_id: string | null;
             peserta_didik_id: string | null;
-            jenis: number;
             keterangan: string;
+            jenis: number;
             tanggal: Date;
             izin_id: string;
             disetujui: boolean;
@@ -197,8 +197,8 @@ export declare class PresensiService {
             updated_at: Date;
             ptk_id: string | null;
             peserta_didik_id: string | null;
-            jenis: number;
             keterangan: string;
+            jenis: number;
             tanggal: Date;
             izin_id: string;
             disetujui: boolean;
@@ -219,8 +219,8 @@ export declare class PresensiService {
         updated_at: Date;
         ptk_id: string | null;
         peserta_didik_id: string | null;
-        jenis: number;
         keterangan: string;
+        jenis: number;
         tanggal: Date;
         izin_id: string;
         disetujui: boolean;
@@ -234,8 +234,8 @@ export declare class PresensiService {
         updated_at: Date;
         ptk_id: string | null;
         peserta_didik_id: string | null;
-        jenis: number;
         keterangan: string;
+        jenis: number;
         tanggal: Date;
         izin_id: string;
         disetujui: boolean;

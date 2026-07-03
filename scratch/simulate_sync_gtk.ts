@@ -58,10 +58,10 @@ async function main() {
     ptk.ptk_terdaftar = ptkTerdaftarRes.rows[0] || null;
     ptk.status = ptk.ptk_terdaftar?.ket_keluar || 'Aktif';
     
-    // Fetch all active tugas_tambahan (simulating new main.js logic)
+    // Fetch all tugas_tambahan (simulating new main.js logic)
     const tugasRes = await localPool.query(`
       SELECT * FROM tugas_tambahan 
-      WHERE ptk_id = $1 AND soft_delete = 0 AND tst_tambahan IS NULL
+      WHERE ptk_id = $1 AND soft_delete = 0
     `, [ptk.ptk_id]);
     ptk.tugas_tambahan = tugasRes.rows;
     

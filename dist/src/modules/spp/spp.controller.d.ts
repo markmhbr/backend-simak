@@ -104,10 +104,10 @@ export declare class SppController {
             };
             peserta_didik: {
                 nama: string;
+                nisn: string;
                 rombongan_belajar: {
                     nama: string;
                 };
-                nisn: string;
             };
             riwayat_transaksi: {
                 sekolah_id: string;

@@ -621,12 +621,12 @@ export declare class MandalaController {
             peserta_didik: {
                 nama: string;
                 foto: string;
+                nisn: string;
+                nipd: string;
                 rombongan_belajar: {
                     nama: string;
                     tingkat_pendidikan_id: import("@prisma/client-runtime-utils").Decimal;
                 };
-                nisn: string;
-                nipd: string;
             };
             sekolah_id: string;
             created_at: Date;

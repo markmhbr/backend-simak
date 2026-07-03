@@ -234,8 +234,8 @@ export declare class JadwalService {
             updater_id: string | null;
             ptk_id: string | null;
             ptk_terdaftar_id: string | null;
-            status_di_kurikulum: import("@prisma/client-runtime-utils").Decimal | null;
             rombongan_belajar_id: string;
+            status_di_kurikulum: import("@prisma/client-runtime-utils").Decimal | null;
             semester_id: string | null;
             pembelajaran_id: string;
             mata_pelajaran_id: number | null;

@@ -320,7 +320,7 @@ let DapodikController = class DapodikController {
             data,
         };
     }
-    async getPesertaDidikList(req, limit, search, page, rombelName, status, tingkat, sekolahIdQuery) {
+    async getPesertaDidikList(req, limit, search, page, rombelName, status, tingkat, completeness, sekolahIdQuery) {
         if (req['isMandala']) {
             if (!sekolahIdQuery) {
                 throw new common_1.BadRequestException('sekolah_id query parameter is required for Mandala integration.');
@@ -337,7 +337,7 @@ let DapodikController = class DapodikController {
         const { sekolahId, namaApp } = this.getSekolahInfo(req);
         const take = limit ? parseInt(limit, 10) : 10;
         const skipPage = page ? parseInt(page, 10) : 1;
-        const { data, total } = await this.dapodikService.getPesertaDidik(sekolahId, take, search, skipPage, rombelName, status, tingkat);
+        const { data, total } = await this.dapodikService.getPesertaDidik(sekolahId, take, search, skipPage, rombelName, status, tingkat, completeness);
         return {
             status: 'success',
             klien: namaApp,
@@ -432,11 +432,11 @@ let DapodikController = class DapodikController {
         const data = await this.dapodikService.getAllPembelajaran(sekolahId);
         return { status: 'success', klien: namaApp, data };
     }
-    async getGtkList(req, limit, search, page, type, status) {
+    async getGtkList(req, limit, search, page, type, status, completeness) {
         const { sekolahId, namaApp } = this.getSekolahInfo(req);
         const take = limit ? parseInt(limit, 10) : 10;
         const skipPage = page ? parseInt(page, 10) : 1;
-        const { data, total } = await this.dapodikService.getGtk(sekolahId, take, search, skipPage, type, status);
+        const { data, total } = await this.dapodikService.getGtk(sekolahId, take, search, skipPage, type, status, completeness);
         return {
             status: 'success',
             klien: namaApp,
@@ -733,9 +733,10 @@ __decorate([
     __param(4, (0, common_1.Query)('rombel')),
     __param(5, (0, common_1.Query)('status')),
     __param(6, (0, common_1.Query)('tingkat')),
-    __param(7, (0, common_1.Query)('sekolah_id')),
+    __param(7, (0, common_1.Query)('completeness')),
+    __param(8, (0, common_1.Query)('sekolah_id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [Object, String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], DapodikController.prototype, "getPesertaDidikList", null);
 __decorate([
@@ -818,8 +819,9 @@ __decorate([
     __param(3, (0, common_1.Query)('page')),
     __param(4, (0, common_1.Query)('type')),
     __param(5, (0, common_1.Query)('status')),
+    __param(6, (0, common_1.Query)('completeness')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, String, String, String, String]),
+    __metadata("design:paramtypes", [Object, String, String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], DapodikController.prototype, "getGtkList", null);
 __decorate([

@@ -81,7 +81,7 @@ async function main() {
         ptk.status = ptk.ptk_terdaftar?.ket_keluar || 'Aktif';
         const tugasRes = await localPool.query(`
       SELECT * FROM tugas_tambahan 
-      WHERE ptk_id = $1 AND soft_delete = 0 AND tst_tambahan IS NULL
+      WHERE ptk_id = $1 AND soft_delete = 0
     `, [ptk.ptk_id]);
         ptk.tugas_tambahan = tugasRes.rows;
         const rwyRes = await localPool.query(`

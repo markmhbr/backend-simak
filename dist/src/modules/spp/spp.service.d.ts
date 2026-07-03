@@ -90,10 +90,10 @@ export declare class SppService {
         };
         peserta_didik: {
             nama: string;
+            nisn: string;
             rombongan_belajar: {
                 nama: string;
             };
-            nisn: string;
         };
         riwayat_transaksi: {
             sekolah_id: string;
