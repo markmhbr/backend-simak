@@ -78,6 +78,7 @@ model Sekolah {
   surat_keluar           SuratKeluar[]
   surat_masuk            SuratMasuk[]
   template_surat         TemplateSurat[]
+  mandala_surat_keluar   MandalaSuratKeluar[]
   pengaturan_umum        PengaturanUmum?
 
   @@map("sekolah")
@@ -1058,10 +1059,14 @@ model Cadisdik {
   sekolah            Sekolah[]
   antrian            Antrian[]
   kategori_keperluan KategoriKeperluan[]
-  layanan            Layanan[]
-  pegawai            Pegawai[]
-  pelaporan          Pelaporan[]
-  permohonan_layanan PermohonanLayanan[]
+  layanan                  Layanan[]
+  pegawai                  Pegawai[]
+  pelaporan                Pelaporan[]
+  permohonan_layanan       PermohonanLayanan[]
+  mandala_pengaturan_nomor MandalaPengaturanNomorSurat[]
+  mandala_template_surat   MandalaTemplateSurat[]
+  mandala_surat_masuk      MandalaSuratMasuk[]
+  mandala_surat_keluar     MandalaSuratKeluar[]
 
   @@map("cadisdik")
   @@schema("mandala")
@@ -1179,6 +1184,7 @@ model Pegawai {
   mapping_pengawas       MappingPengawas[]
   cadisdik               Cadisdik               @relation(fields: [cadisdik_id], references: [cadisdik_id])
   permohonan_layanan_log PermohonanLayananLog[]
+  mandala_surat_keluar   MandalaSuratKeluar[]
 
   @@index([cadisdik_id])
   @@index([nik])
@@ -1201,6 +1207,111 @@ model MappingPengawas {
   @@index([pegawai_id])
   @@index([sekolah_id])
   @@map("mapping_pengawas")
+  @@schema("mandala")
+}
+
+model MandalaPengaturanNomorSurat {
+  pengaturan_nomor_surat_id String               @id @default(uuid()) @db.Uuid
+  cadisdik_id               String               @db.Uuid
+  kategori                  Int                  @db.SmallInt
+  nama_label                String               @db.VarChar(100)
+  format_nomor              String               @db.VarChar(255)
+  counter                   Int                  @default(0)
+  aktif                     Boolean              @default(true)
+  created_at                DateTime             @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime             @updatedAt @db.Timestamptz(6)
+  cadisdik                  Cadisdik             @relation(fields: [cadisdik_id], references: [cadisdik_id], onDelete: Cascade)
+  mandala_surat_keluar      MandalaSuratKeluar[]
+
+  @@unique([cadisdik_id, kategori, nama_label])
+  @@index([cadisdik_id])
+  @@index([kategori])
+  @@index([aktif])
+  @@map("pengaturan_nomor_surat")
+  @@schema("mandala")
+}
+
+model MandalaTemplateSurat {
+  template_surat_id    String               @id @default(uuid()) @db.Uuid
+  cadisdik_id          String               @db.Uuid
+  nama_template        String               @db.VarChar(150)
+  kategori             Int                  @db.SmallInt
+  ukuran_kertas        Int                  @db.SmallInt
+  margin_atas          Int                  @default(20) @db.SmallInt
+  margin_bawah         Int                  @default(20) @db.SmallInt
+  margin_kiri          Int                  @default(20) @db.SmallInt
+  margin_kanan         Int                  @default(20) @db.SmallInt
+  konten_html          String
+  aktif                Boolean              @default(true)
+  created_at           DateTime             @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime             @updatedAt @db.Timestamptz(6)
+  cadisdik             Cadisdik             @relation(fields: [cadisdik_id], references: [cadisdik_id], onDelete: Cascade)
+  mandala_surat_keluar MandalaSuratKeluar[]
+
+  @@index([cadisdik_id])
+  @@index([kategori])
+  @@index([aktif])
+  @@map("template_surat")
+  @@schema("mandala")
+}
+
+model MandalaSuratMasuk {
+  surat_masuk_id   String   @id @default(uuid()) @db.Uuid
+  cadisdik_id      String   @db.Uuid
+  tanggal_surat    DateTime @db.Date
+  tanggal_diterima DateTime @db.Date
+  nomor_agenda     String   @db.VarChar(50)
+  nomor_surat      String   @db.VarChar(100)
+  asal_surat       String   @db.VarChar(255)
+  tujuan_disposisi String   @db.VarChar(255)
+  perihal          String   @db.VarChar(255)
+  keterangan       String?
+  file_url         String   @db.VarChar(500)
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime @updatedAt @db.Timestamptz(6)
+  cadisdik         Cadisdik @relation(fields: [cadisdik_id], references: [cadisdik_id], onDelete: Cascade)
+
+  @@unique([cadisdik_id, nomor_agenda])
+  @@index([cadisdik_id])
+  @@index([tanggal_surat])
+  @@index([tanggal_diterima])
+  @@index([nomor_agenda])
+  @@index([nomor_surat])
+  @@map("surat_masuk")
+  @@schema("mandala")
+}
+
+model MandalaSuratKeluar {
+  surat_keluar_id           String                      @id @default(uuid()) @db.Uuid
+  cadisdik_id               String                      @db.Uuid
+  template_surat_id         String                      @db.Uuid
+  pengaturan_nomor_surat_id String                      @db.Uuid
+  kategori                  Int                         @db.SmallInt
+  pegawai_id                String?                     @db.Uuid
+  sekolah_id                String?                     @db.Uuid
+  nomor_surat               String?                     @db.VarChar(255)
+  tanggal_surat             DateTime                    @db.Date
+  perihal                   String                      @db.VarChar(255)
+  isi_final_html            String
+  file_pdf                  String?                     @db.VarChar(500)
+  status                    Int                         @default(1) @db.SmallInt
+  created_at                DateTime                    @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime                    @updatedAt @db.Timestamptz(6)
+  pengaturan_nomor_surat    MandalaPengaturanNomorSurat @relation(fields: [pengaturan_nomor_surat_id], references: [pengaturan_nomor_surat_id])
+  pegawai                   Pegawai?                    @relation(fields: [pegawai_id], references: [pegawai_id])
+  sekolah                   Sekolah?                    @relation(fields: [sekolah_id], references: [sekolah_id])
+  template_surat            MandalaTemplateSurat        @relation(fields: [template_surat_id], references: [template_surat_id])
+  cadisdik                  Cadisdik                    @relation(fields: [cadisdik_id], references: [cadisdik_id], onDelete: Cascade)
+
+  @@unique([cadisdik_id, nomor_surat])
+  @@index([cadisdik_id])
+  @@index([template_surat_id])
+  @@index([pengaturan_nomor_surat_id])
+  @@index([pegawai_id])
+  @@index([sekolah_id])
+  @@index([tanggal_surat])
+  @@index([status])
+  @@map("surat_keluar")
   @@schema("mandala")
 }
 

@@ -14,12 +14,12 @@ export declare class ReferenceController {
                 nm_bank: string;
             }[];
             jabatan_ptk: {
-                jabatan_ptk: string;
                 jabatan_ptk_id: import("@prisma/client-runtime-utils").Decimal;
+                jabatan_ptk: string;
             }[];
             jenis_ptk: {
-                jenis_ptk: string;
                 jenis_ptk_id: import("@prisma/client-runtime-utils").Decimal;
+                jenis_ptk: string;
             }[];
             keahlian_laboratorium: {
                 nama: string;
@@ -104,15 +104,15 @@ export declare class ReferenceController {
     getJabatanPtk(): Promise<{
         status: string;
         data: {
-            jabatan_ptk: string;
             jabatan_ptk_id: import("@prisma/client-runtime-utils").Decimal;
+            jabatan_ptk: string;
         }[];
     }>;
     getJenisPtk(): Promise<{
         status: string;
         data: {
-            jenis_ptk: string;
             jenis_ptk_id: import("@prisma/client-runtime-utils").Decimal;
+            jenis_ptk: string;
         }[];
     }>;
     getKeahlianLaboratorium(): Promise<{

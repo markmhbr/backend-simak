@@ -229,6 +229,8 @@ let AuthService = class AuthService {
                 nama: user.nama,
                 email: user.email,
                 role: role,
+                ptk_id: user.ptk_id,
+                peserta_didik_id: user.peserta_didik_id,
             },
         };
     }
@@ -313,6 +315,28 @@ let AuthService = class AuthService {
             data: { google2fa_secret: null },
         });
         return { status: 'success', message: 'Authenticator berhasil diset ulang' };
+    }
+    async getMe(penggunaId) {
+        const user = await this.prisma.pengguna.findUnique({
+            where: { pengguna_id: penggunaId },
+            select: {
+                pengguna_id: true,
+                sekolah_id: true,
+                username: true,
+                nama: true,
+                email: true,
+                peran_nama: true,
+                peran_id: true,
+                alamat: true,
+                no_telepon: true,
+                no_hp: true,
+                ptk_id: true,
+                peserta_didik_id: true,
+            }
+        });
+        if (!user)
+            throw new common_1.BadRequestException('Pengguna tidak ditemukan');
+        return user;
     }
 };
 exports.AuthService = AuthService;

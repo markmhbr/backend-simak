@@ -238,6 +238,8 @@ export class AuthService {
         nama: user.nama,
         email: user.email,
         role: role,
+        ptk_id: user.ptk_id,
+        peserta_didik_id: user.peserta_didik_id,
       },
     };
   }
@@ -346,5 +348,27 @@ export class AuthService {
     });
 
     return { status: 'success', message: 'Authenticator berhasil diset ulang' };
+  }
+
+  async getMe(penggunaId: string) {
+    const user = await this.prisma.pengguna.findUnique({
+      where: { pengguna_id: penggunaId },
+      select: {
+        pengguna_id: true,
+        sekolah_id: true,
+        username: true,
+        nama: true,
+        email: true,
+        peran_nama: true,
+        peran_id: true,
+        alamat: true,
+        no_telepon: true,
+        no_hp: true,
+        ptk_id: true,
+        peserta_didik_id: true,
+      }
+    });
+    if (!user) throw new BadRequestException('Pengguna tidak ditemukan');
+    return user;
   }
 }

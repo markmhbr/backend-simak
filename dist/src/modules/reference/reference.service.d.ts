@@ -11,12 +11,12 @@ export declare class ReferenceService {
         nm_bank: string;
     }[]>;
     getJabatanPtk(): Promise<{
-        jabatan_ptk: string;
         jabatan_ptk_id: import("@prisma/client-runtime-utils").Decimal;
+        jabatan_ptk: string;
     }[]>;
     getJenisPtk(): Promise<{
-        jenis_ptk: string;
         jenis_ptk_id: import("@prisma/client-runtime-utils").Decimal;
+        jenis_ptk: string;
     }[]>;
     getKeahlianLaboratorium(): Promise<{
         nama: string;
@@ -101,12 +101,12 @@ export declare class ReferenceService {
             nm_bank: string;
         }[];
         jabatan_ptk: {
-            jabatan_ptk: string;
             jabatan_ptk_id: import("@prisma/client-runtime-utils").Decimal;
+            jabatan_ptk: string;
         }[];
         jenis_ptk: {
-            jenis_ptk: string;
             jenis_ptk_id: import("@prisma/client-runtime-utils").Decimal;
+            jenis_ptk: string;
         }[];
         keahlian_laboratorium: {
             nama: string;

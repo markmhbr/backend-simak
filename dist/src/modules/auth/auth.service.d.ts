@@ -18,6 +18,8 @@ export declare class AuthService {
             nama: any;
             email: any;
             role: string;
+            ptk_id: any;
+            peserta_didik_id: any;
         };
         requires2FA: boolean;
         is2FASetup?: undefined;
@@ -45,6 +47,8 @@ export declare class AuthService {
             nama: any;
             email: any;
             role: string;
+            ptk_id: any;
+            peserta_didik_id: any;
         };
     }>;
     private determineRole;
@@ -73,6 +77,8 @@ export declare class AuthService {
             nama: any;
             email: any;
             role: string;
+            ptk_id: any;
+            peserta_didik_id: any;
         };
     }>;
     reset2FA(body: {
@@ -82,5 +88,19 @@ export declare class AuthService {
     }): Promise<{
         status: string;
         message: string;
+    }>;
+    getMe(penggunaId: string): Promise<{
+        sekolah_id: string;
+        nama: string;
+        email: string;
+        pengguna_id: string;
+        username: string;
+        peran_nama: string;
+        peran_id: number;
+        alamat: string;
+        no_telepon: string;
+        no_hp: string;
+        ptk_id: string;
+        peserta_didik_id: string;
     }>;
 }

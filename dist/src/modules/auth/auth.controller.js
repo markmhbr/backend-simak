@@ -57,6 +57,12 @@ let AuthController = class AuthController {
     async reset2fa(body) {
         return this.authService.reset2FA(body);
     }
+    async getMe(request) {
+        const user = request['user'];
+        if (!user)
+            throw new common_1.UnauthorizedException('Sesi berakhir');
+        return this.authService.getMe(user.sub);
+    }
     async getSystemInfo(request) {
         const domain = this.getRequestDomain(request);
         return this.authService.getSystemInfo(domain);
@@ -138,6 +144,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "reset2fa", null);
+__decorate([
+    (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
+    (0, common_1.Get)('me'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "getMe", null);
 __decorate([
     (0, common_1.Get)('system-info'),
     __param(0, (0, common_1.Req)()),

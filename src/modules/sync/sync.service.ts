@@ -1,6 +1,7 @@
 import { Injectable, Logger, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../core/prisma/prisma.service';
 import { AppKeyService } from '../../core/app-key/app-key.service';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class SyncService {
@@ -59,7 +60,7 @@ export class SyncService {
           data: {
             sekolah_id: sekolahId,
             nama_app: 'DAPODIK_AUTO_SYNC',
-            key_api: `simak_api_${Math.random().toString(36).substring(2, 15)}`,
+            key_api: `simak_api_${crypto.randomBytes(24).toString('hex')}`,
             key_webService: rawApiKey,
             is_active: true,
           }

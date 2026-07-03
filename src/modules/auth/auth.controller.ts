@@ -69,6 +69,14 @@ export class AuthController {
     return this.authService.reset2FA(body);
   }
 
+  @UseGuards(ApiKeyGuard)
+  @Get('me')
+  async getMe(@Req() request: Request) {
+    const user = request['user'] as any;
+    if (!user) throw new UnauthorizedException('Sesi berakhir');
+    return this.authService.getMe(user.sub);
+  }
+
   // Endpoint untuk mendapatkan identitas sekolah (Public)
   @Get('system-info')
   async getSystemInfo(@Req() request: Request) {
