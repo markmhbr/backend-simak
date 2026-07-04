@@ -15,6 +15,7 @@ const jwt_1 = require("@nestjs/jwt");
 const config_1 = require("@nestjs/config");
 const crypto_module_1 = require("../../core/crypto/crypto.module");
 const mandala_surat_module_1 = require("./surat/mandala-surat.module");
+const system_setting_module_1 = require("./system-setting/system-setting.module");
 let MandalaModule = class MandalaModule {
 };
 exports.MandalaModule = MandalaModule;
@@ -24,6 +25,7 @@ exports.MandalaModule = MandalaModule = __decorate([
             prisma_module_1.PrismaModule,
             crypto_module_1.CryptoModule,
             mandala_surat_module_1.MandalaSuratModule,
+            system_setting_module_1.MandalaSystemSettingModule,
             jwt_1.JwtModule.registerAsync({
                 imports: [config_1.ConfigModule],
                 useFactory: async (configService) => ({

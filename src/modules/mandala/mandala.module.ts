@@ -6,12 +6,14 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CryptoModule } from '../../core/crypto/crypto.module';
 import { MandalaSuratModule } from './surat/mandala-surat.module';
+import { MandalaSystemSettingModule } from './system-setting/system-setting.module';
 
 @Module({
   imports: [
     PrismaModule,
     CryptoModule,
     MandalaSuratModule,
+    MandalaSystemSettingModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
