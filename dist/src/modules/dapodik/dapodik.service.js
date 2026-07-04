@@ -1749,21 +1749,37 @@ let DapodikService = class DapodikService {
             select: { rombongan_belajar_id: true },
         });
         const rombelIds = relatedRombels.map((r) => r.rombongan_belajar_id);
-        return this.prisma.pembelajaran.findMany({
+        const pembelajarans = await this.prisma.pembelajaran.findMany({
             where: { rombongan_belajar_id: { in: rombelIds } },
             select: {
                 pembelajaran_id: true,
                 nama_mata_pelajaran: true,
                 jam_mengajar_per_minggu: true,
                 ptk_id: true,
-                gtk: {
-                    select: {
-                        nama: true,
-                        sekolah_id: true,
-                    },
-                },
+                ptk_terdaftar_id: true,
             },
             orderBy: { nama_mata_pelajaran: 'asc' },
+        });
+        const gtks = await this.prisma.gtk.findMany({
+            where: { sekolah_id: rombel.sekolah_id },
+            select: {
+                ptk_id: true,
+                ptk_terdaftar_id: true,
+                nama: true,
+            },
+        });
+        const gtkMap = new Map();
+        gtks.forEach((g) => {
+            if (g.ptk_terdaftar_id) {
+                gtkMap.set(g.ptk_terdaftar_id, g);
+            }
+        });
+        return pembelajarans.map((p) => {
+            const match = p.ptk_terdaftar_id ? gtkMap.get(p.ptk_terdaftar_id) : null;
+            return {
+                ...p,
+                gtk: match || null,
+            };
         });
     }
     async getEkstrakurikuler(sekolahId, search) {
@@ -1881,7 +1897,7 @@ let DapodikService = class DapodikService {
     }
     async getAllPembelajaran(sekolahId) {
         const filter = this.getSekolahFilter(sekolahId);
-        return this.prisma.pembelajaran.findMany({
+        const pembelajarans = await this.prisma.pembelajaran.findMany({
             where: { sekolah_id: filter.sekolah_id },
             select: {
                 pembelajaran_id: true,
@@ -1889,11 +1905,7 @@ let DapodikService = class DapodikService {
                 nama_mata_pelajaran: true,
                 jam_mengajar_per_minggu: true,
                 ptk_id: true,
-                gtk: {
-                    select: {
-                        nama: true,
-                    },
-                },
+                ptk_terdaftar_id: true,
                 rombongan_belajar: {
                     select: {
                         rombongan_belajar_id: true,
@@ -1902,6 +1914,29 @@ let DapodikService = class DapodikService {
                 },
             },
             orderBy: { nama_mata_pelajaran: 'asc' },
+        });
+        if (pembelajarans.length === 0)
+            return [];
+        const gtks = await this.prisma.gtk.findMany({
+            where: { sekolah_id: filter.sekolah_id },
+            select: {
+                ptk_id: true,
+                ptk_terdaftar_id: true,
+                nama: true,
+            },
+        });
+        const gtkMap = new Map();
+        gtks.forEach((g) => {
+            if (g.ptk_terdaftar_id) {
+                gtkMap.set(g.ptk_terdaftar_id, g);
+            }
+        });
+        return pembelajarans.map((p) => {
+            const match = p.ptk_terdaftar_id ? gtkMap.get(p.ptk_terdaftar_id) : null;
+            return {
+                ...p,
+                gtk: match || null,
+            };
         });
     }
     async getGtk(sekolahId, limit = 10, search, page = 1, type, status, completeness) {
@@ -3246,9 +3281,23 @@ let DapodikService = class DapodikService {
             tst_tambahan: data.tst_tambahan ? new Date(data.tst_tambahan) : null,
             soft_delete: new client_1.Prisma.Decimal(0),
         };
-        return this.prisma.tugasTambahan.create({
+        const created = await this.prisma.tugasTambahan.create({
             data: payload,
         });
+        if (payload.jabatan && payload.jumlah_jam && payload.jabatan_ptk_id === null) {
+            await this.prisma.tugasTambahan.updateMany({
+                where: {
+                    sekolah_id: filter.sekolah_id,
+                    jabatan: payload.jabatan,
+                    jabatan_ptk_id: null,
+                    ptk_tugas_tambahan_id: { not: created.ptk_tugas_tambahan_id }
+                },
+                data: {
+                    jumlah_jam: payload.jumlah_jam
+                }
+            });
+        }
+        return created;
     }
     async updateTugasTambahan(id, data) {
         const payload = {
@@ -3263,10 +3312,31 @@ let DapodikService = class DapodikService {
             tst_tambahan: data.tst_tambahan !== undefined ? (data.tst_tambahan ? new Date(data.tst_tambahan) : null) : undefined,
             soft_delete: data.soft_delete !== undefined ? new client_1.Prisma.Decimal(data.soft_delete) : undefined,
         };
-        return this.prisma.tugasTambahan.update({
+        const currentTask = await this.prisma.tugasTambahan.findUnique({
+            where: { ptk_tugas_tambahan_id: id },
+            select: { sekolah_id: true, jabatan: true, jabatan_ptk_id: true }
+        });
+        const updatedTask = await this.prisma.tugasTambahan.update({
             where: { ptk_tugas_tambahan_id: id },
             data: payload,
         });
+        const targetJabatan = payload.jabatan !== undefined ? payload.jabatan : (currentTask ? currentTask.jabatan : null);
+        const newJam = payload.jumlah_jam;
+        const isCustom = currentTask ? currentTask.jabatan_ptk_id === null : true;
+        if (isCustom && targetJabatan && newJam !== undefined) {
+            await this.prisma.tugasTambahan.updateMany({
+                where: {
+                    sekolah_id: currentTask?.sekolah_id,
+                    jabatan: targetJabatan,
+                    jabatan_ptk_id: null,
+                    ptk_tugas_tambahan_id: { not: id }
+                },
+                data: {
+                    jumlah_jam: newJam
+                }
+            });
+        }
+        return updatedTask;
     }
     async deleteTugasTambahan(id) {
         const task = await this.prisma.tugasTambahan.findUnique({
@@ -3302,6 +3372,26 @@ let DapodikService = class DapodikService {
             orderBy: { jabatan: 'asc' },
         });
         return result.map(r => r.jabatan);
+    }
+    async getUniqueCustomJumlahJam(sekolahId, index) {
+        const filter = this.getSekolahFilter(sekolahId);
+        let whereClause = {
+            sekolah_id: filter.sekolah_id,
+            jumlah_jam: { not: null },
+            jabatan_ptk_id: null,
+        };
+        if (index !== undefined && !isNaN(index)) {
+            whereClause.index = index;
+        }
+        const result = await this.prisma.tugasTambahan.findMany({
+            where: whereClause,
+            select: {
+                jumlah_jam: true,
+            },
+            distinct: ['jumlah_jam'],
+            orderBy: { jumlah_jam: 'asc' },
+        });
+        return result.map(r => Number(r.jumlah_jam));
     }
 };
 exports.DapodikService = DapodikService;

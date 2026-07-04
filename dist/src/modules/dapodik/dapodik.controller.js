@@ -534,6 +534,12 @@ let DapodikController = class DapodikController {
         const data = await this.dapodikService.getUniqueCustomJabatans(sekolahId, idxVal);
         return { status: 'success', data };
     }
+    async getCustomJumlahJam(req, index) {
+        const { sekolahId } = this.getSekolahInfo(req);
+        const idxVal = index !== undefined && index !== '' ? parseInt(index, 10) : undefined;
+        const data = await this.dapodikService.getUniqueCustomJumlahJam(sekolahId, idxVal);
+        return { status: 'success', data };
+    }
 };
 exports.DapodikController = DapodikController;
 __decorate([
@@ -977,6 +983,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], DapodikController.prototype, "getCustomJabatans", null);
+__decorate([
+    (0, common_1.Get)('tugas-tambahan/custom-jumlah-jam'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('index')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "getCustomJumlahJam", null);
 exports.DapodikController = DapodikController = __decorate([
     (0, common_1.Controller)('dapodik'),
     (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),

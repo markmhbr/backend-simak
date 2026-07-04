@@ -375,14 +375,10 @@ let JadwalService = class JadwalService {
         if (rombelId) {
             whereClause.rombongan_belajar_id = rombelId;
         }
-        return this.prisma.jadwalPelajaran.findMany({
+        const list = await this.prisma.jadwalPelajaran.findMany({
             where: whereClause,
             include: {
-                pembelajaran: {
-                    include: {
-                        gtk: true,
-                    },
-                },
+                pembelajaran: true,
                 rombongan_belajar: {
                     select: {
                         rombongan_belajar_id: true,
@@ -392,6 +388,35 @@ let JadwalService = class JadwalService {
                 },
             },
             orderBy: [{ hari: 'asc' }, { urutan: 'asc' }],
+        });
+        const gtks = await this.prisma.gtk.findMany({
+            where: { sekolah_id: sekolahId },
+            select: {
+                ptk_id: true,
+                ptk_terdaftar_id: true,
+                nama: true,
+            },
+        });
+        const gtkMap = new Map();
+        gtks.forEach((g) => {
+            if (g.ptk_terdaftar_id) {
+                gtkMap.set(g.ptk_terdaftar_id, g);
+            }
+        });
+        return list.map((item) => {
+            if (item.pembelajaran) {
+                const match = item.pembelajaran.ptk_terdaftar_id
+                    ? gtkMap.get(item.pembelajaran.ptk_terdaftar_id)
+                    : null;
+                return {
+                    ...item,
+                    pembelajaran: {
+                        ...item.pembelajaran,
+                        gtk: match || null,
+                    },
+                };
+            }
+            return item;
         });
     }
     async upsertJadwalPelajaran(sekolahId, data) {
@@ -420,13 +445,13 @@ let JadwalService = class JadwalService {
         if (!pembelajaran) {
             throw new common_1.NotFoundException('Data pembelajaran tidak ditemukan');
         }
-        if (pembelajaran.ptk_id) {
+        if (pembelajaran.ptk_terdaftar_id) {
             const guruConflict = await this.prisma.jadwalPelajaran.findFirst({
                 where: {
                     sekolah_id: sekolahId,
                     jenis_jadwal_id: data.jenis_jadwal_id,
                     pembelajaran: {
-                        ptk_id: pembelajaran.ptk_id,
+                        ptk_terdaftar_id: pembelajaran.ptk_terdaftar_id,
                     },
                     hari: data.hari,
                     urutan: data.urutan,
@@ -437,18 +462,20 @@ let JadwalService = class JadwalService {
                 include: { pembelajaran: true },
             });
             if (guruConflict) {
-                throw new common_1.ConflictException(`Guru sudah mengajar di kelas lain pada hari ${data.hari} urutan ${data.urutan}`);
+                const dayNames = ["", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
+                const dayName = dayNames[data.hari] || `ke-${data.hari}`;
+                throw new common_1.ConflictException(`Guru sudah mengajar di kelas lain pada hari ${dayName} urutan ke-${data.urutan}`);
             }
         }
         const jamMengajar = parseInt(pembelajaran.jam_mengajar_per_minggu?.toString() || '0');
         if (jamMengajar > 0) {
             const existingCount = await this.prisma.jadwalPelajaran.count({
                 where: {
+                    sekolah_id: sekolahId,
+                    jenis_jadwal_id: data.jenis_jadwal_id,
                     pembelajaran_id: data.pembelajaran_id,
                     NOT: {
                         AND: {
-                            sekolah_id: sekolahId,
-                            jenis_jadwal_id: data.jenis_jadwal_id,
                             rombongan_belajar_id: data.rombongan_belajar_id,
                             hari: data.hari,
                             urutan: data.urutan,

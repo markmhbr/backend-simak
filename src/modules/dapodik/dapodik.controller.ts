@@ -723,4 +723,12 @@ export class DapodikController {
     const data = await this.dapodikService.getUniqueCustomJabatans(sekolahId, idxVal);
     return { status: 'success', data };
   }
+
+  @Get('tugas-tambahan/custom-jumlah-jam')
+  async getCustomJumlahJam(@Req() req: Request, @Query('index') index?: string) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    const idxVal = index !== undefined && index !== '' ? parseInt(index, 10) : undefined;
+    const data = await this.dapodikService.getUniqueCustomJumlahJam(sekolahId, idxVal);
+    return { status: 'success', data };
+  }
 }

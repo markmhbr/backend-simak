@@ -574,11 +574,9 @@ export declare class DapodikService {
         nipd: string;
     }[]>;
     getRombelPembelajaran(rombelId: string): Promise<{
+        gtk: any;
         ptk_id: string;
-        gtk: {
-            sekolah_id: string;
-            nama: string;
-        };
+        ptk_terdaftar_id: string;
         pembelajaran_id: string;
         jam_mengajar_per_minggu: Prisma.Decimal;
         nama_mata_pelajaran: string;
@@ -608,10 +606,9 @@ export declare class DapodikService {
         }[];
     }>;
     getAllPembelajaran(sekolahId: string | null): Promise<{
+        gtk: any;
         ptk_id: string;
-        gtk: {
-            nama: string;
-        };
+        ptk_terdaftar_id: string;
         rombongan_belajar_id: string;
         rombongan_belajar: {
             nama: string;
@@ -707,6 +704,7 @@ export declare class DapodikService {
         nik: string | null;
         tanggal_lahir: Date | null;
         tempat_lahir: string | null;
+        ptk_terdaftar_id: string | null;
         no_kk: string | null;
         niy_nigk: string | null;
         nuptk: string | null;
@@ -744,7 +742,6 @@ export declare class DapodikService {
         id_bank: string | null;
         rekening_bank: string | null;
         blob_id: string | null;
-        ptk_terdaftar_id: string | null;
         jenis_keluar_id: string | null;
         jabatan_ptk_id: Prisma.Decimal | null;
         tahun_ajaran_id: Prisma.Decimal | null;
@@ -1090,4 +1087,5 @@ export declare class DapodikService {
         index: number;
     }>;
     getUniqueCustomJabatans(sekolahId: string | null, index?: number): Promise<string[]>;
+    getUniqueCustomJumlahJam(sekolahId: string | null, index?: number): Promise<number[]>;
 }
