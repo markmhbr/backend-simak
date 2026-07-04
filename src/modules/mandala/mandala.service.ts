@@ -855,6 +855,8 @@ export class MandalaService implements OnModuleInit {
           tanggal_lahir: pd.tanggal_lahir,
           agama: pd.agama?.nama || pd.agama_id || '',
           jenis_pendaftaran_id_str: pd.jenis_pendaftaran_id?.toString() || '',
+          foto: pd.foto || '',
+          last_update: pd.updated_at,
         },
         akademik: {
           nama_rombel: activeRombel?.nama || '',
@@ -1055,6 +1057,8 @@ export class MandalaService implements OnModuleInit {
           tempat_lahir: g.tempat_lahir || '',
           tanggal_lahir: g.tanggal_lahir || null,
           agama: g.agama?.nama || g.agama_id?.toString() || '',
+          foto: g.foto || '',
+          last_update: g.last_update,
         },
         kepegawaian: {
           jenis_ptk: g.jenis_ptk?.jenis_ptk || '',

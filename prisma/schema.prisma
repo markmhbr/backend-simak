@@ -193,9 +193,11 @@ model Pembelajaran {
 
 model TugasTambahan {
   ptk_tugas_tambahan_id String    @id @default(uuid()) @db.Uuid
-  ptk_id                String    @db.Uuid
+  ptk_id                String?   @db.Uuid
+  peserta_didik_id      String?   @db.Uuid
   sekolah_id            String?   @db.Uuid
   jabatan_ptk_id        Decimal?  @db.Decimal
+  jabatan               String?
   jumlah_jam            Decimal?  @db.Decimal
   nomor_sk              String?
   tmt_tambahan          DateTime? @db.Date
@@ -205,10 +207,13 @@ model TugasTambahan {
   last_update           DateTime  @updatedAt
   last_sync             DateTime?
   updater_id            String?   @db.Uuid
+  index                 Int       @default(0) // 0 for GTK, 1 for Peserta Didik
 
-  gtk                  Gtk       @relation(fields: [ptk_id], references: [ptk_id])
+  gtk                  Gtk?          @relation(fields: [ptk_id], references: [ptk_id])
+  peserta_didik        PesertaDidik? @relation(fields: [peserta_didik_id], references: [peserta_didik_id])
 
   @@index([ptk_id])
+  @@index([peserta_didik_id])
   @@index([sekolah_id])
   @@map("tugas_tambahan")
   @@schema("dapodik")
@@ -335,6 +340,7 @@ model PesertaDidik {
   anggota_akt_pd        AnggotaAktPd[]
   anggota_rombel        AnggotaRombel[]
   agama                 agama?                 @relation(fields: [agama_id], references: [agama_id], onDelete: NoAction, onUpdate: NoAction)
+  tugas_tambahan        TugasTambahan[]
 
   @@index([sekolah_id])
   @@index([rombongan_belajar_id])
@@ -1067,6 +1073,7 @@ model Cadisdik {
   mandala_template_surat   MandalaTemplateSurat[]
   mandala_surat_masuk      MandalaSuratMasuk[]
   mandala_surat_keluar     MandalaSuratKeluar[]
+  system_setting           SystemSetting?
 
   @@map("cadisdik")
   @@schema("mandala")
@@ -1181,6 +1188,7 @@ model Pegawai {
   nik                    String?                @unique @db.VarChar(16)
   tanggal_lahir          DateTime?              @db.Date
   tempat_lahir           String?                @db.VarChar(100)
+  golongan               Int?                   @db.SmallInt
   mapping_pengawas       MappingPengawas[]
   cadisdik               Cadisdik               @relation(fields: [cadisdik_id], references: [cadisdik_id])
   permohonan_layanan_log PermohonanLayananLog[]
@@ -1191,6 +1199,30 @@ model Pegawai {
   @@index([nip])
   @@index([email])
   @@map("pegawai")
+  @@schema("mandala")
+}
+
+model SystemSetting {
+  system_setting_id    String   @id @default(uuid()) @db.Uuid
+  cadisdik_id          String   @unique @db.Uuid
+  appName              String   @default("SIMAK") @map("app_name")
+  appShortName         String   @default("Mandala") @map("app_short_name")
+  appLogo              String?  @map("app_logo")
+  appLogoDark          String?  @map("app_logo_dark")
+  appFavicon           String?  @map("app_favicon")
+  contactEmail         String?  @map("contact_email")
+  contactPhone         String?  @map("contact_phone")
+  contactAddress       String?  @db.Text @map("contact_address")
+  copyrightText        String   @default("© 2026 SIMAK. All Rights Reserved.") @map("copyright_text")
+  metaDescription      String?  @db.Text @map("meta_description")
+  metaKeywords         String?  @map("meta_keywords")
+  maintenanceMode      Boolean  @default(false) @map("maintenance_mode")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+  
+  cadisdik             Cadisdik @relation(fields: [cadisdik_id], references: [cadisdik_id], onDelete: Cascade)
+
+  @@map("system_settings")
   @@schema("mandala")
 }
 

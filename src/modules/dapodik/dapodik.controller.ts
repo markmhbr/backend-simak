@@ -680,4 +680,47 @@ export class DapodikController {
     res.setHeader('Content-Disposition', `attachment; filename="backup_simak_${sekolahId}_${new Date().toISOString().split('T')[0]}.sql"`);
     return res.send(sql);
   }
+
+  @Get('tugas-tambahan')
+  async getTugasTambahan(
+    @Req() req: Request,
+    @Query('index') index?: string,
+    @Query('search') search?: string,
+    @Query('limit') limit?: string,
+    @Query('page') page?: string
+  ) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    const take = limit ? parseInt(limit, 10) : 10;
+    const skipPage = page ? parseInt(page, 10) : 1;
+    const idxVal = index !== undefined && index !== '' ? parseInt(index, 10) : undefined;
+    const data = await this.dapodikService.getTugasTambahan(sekolahId, idxVal, search, take, skipPage);
+    return { status: 'success', ...data };
+  }
+
+  @Post('tugas-tambahan')
+  async createTugasTambahan(@Req() req: Request, @Body() body: any) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.createTugasTambahan(sekolahId, body);
+    return { status: 'success', data };
+  }
+
+  @Patch('tugas-tambahan/:id')
+  async updateTugasTambahan(@Param('id') id: string, @Body() body: any) {
+    const data = await this.dapodikService.updateTugasTambahan(id, body);
+    return { status: 'success', data };
+  }
+
+  @Delete('tugas-tambahan/:id')
+  async deleteTugasTambahan(@Param('id') id: string) {
+    await this.dapodikService.deleteTugasTambahan(id);
+    return { status: 'success' };
+  }
+
+  @Get('tugas-tambahan/custom-jabatans')
+  async getCustomJabatans(@Req() req: Request, @Query('index') index?: string) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    const idxVal = index !== undefined && index !== '' ? parseInt(index, 10) : undefined;
+    const data = await this.dapodikService.getUniqueCustomJabatans(sekolahId, idxVal);
+    return { status: 'success', data };
+  }
 }

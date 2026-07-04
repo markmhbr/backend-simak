@@ -13,6 +13,7 @@ exports.DapodikService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../core/prisma/prisma.service");
 const reference_service_1 = require("../reference/reference.service");
+const client_1 = require("@prisma/client");
 let DapodikService = class DapodikService {
     prisma;
     referenceService;
@@ -2885,7 +2886,30 @@ let DapodikService = class DapodikService {
             peran_id: 2000 + Number(j.jabatan_ptk_id),
             peran_nama: j.nama,
         }));
-        return [...baseRoles, ...ptkRoles, ...tugasRoles];
+        const distinctCustomTugas = await this.prisma.tugasTambahan.findMany({
+            select: {
+                jabatan: true,
+            },
+            where: {
+                sekolah_id: sekolahId ? sekolahId : undefined,
+                jabatan: { not: null, notIn: [''] },
+                jabatan_ptk_id: null,
+            },
+            distinct: ['jabatan'],
+        });
+        const customRoles = distinctCustomTugas.map((t) => {
+            const name = t.jabatan;
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) {
+                hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const hashId = 30000 + (Math.abs(hash) % 10000);
+            return {
+                peran_id: hashId,
+                peran_nama: name,
+            };
+        });
+        return [...tugasRoles, ...customRoles];
     }
     async getMenuRoles() {
         return this.prisma.menuRole.findMany();
@@ -3114,6 +3138,170 @@ let DapodikService = class DapodikService {
         }
         sqlLines.push("SET session_replication_role = 'origin';");
         return sqlLines.join('\n');
+    }
+    async getTugasTambahan(sekolahId, index, search, limit = 10, page = 1) {
+        const filter = this.getSekolahFilter(sekolahId);
+        const skip = (page - 1) * limit;
+        let whereClause = {
+            AND: [{ sekolah_id: filter.sekolah_id }],
+        };
+        if (index !== undefined && !isNaN(index)) {
+            whereClause.AND.push({ index });
+        }
+        if (search) {
+            whereClause.AND.push({
+                OR: [
+                    { nomor_sk: { contains: search, mode: 'insensitive' } },
+                    { jabatan: { contains: search, mode: 'insensitive' } },
+                    {
+                        gtk: {
+                            nama: { contains: search, mode: 'insensitive' },
+                        },
+                    },
+                    {
+                        peserta_didik: {
+                            nama: { contains: search, mode: 'insensitive' },
+                        },
+                    },
+                ],
+            });
+        }
+        const [total, tasks, refJabatan] = await Promise.all([
+            this.prisma.tugasTambahan.count({ where: whereClause }),
+            this.prisma.tugasTambahan.findMany({
+                where: whereClause,
+                include: {
+                    gtk: {
+                        select: {
+                            nama: true,
+                            nuptk: true,
+                            nip: true,
+                        },
+                    },
+                    peserta_didik: {
+                        select: {
+                            nama: true,
+                            nisn: true,
+                        },
+                    },
+                },
+                take: limit,
+                skip: skip,
+                orderBy: { create_date: 'desc' },
+            }),
+            this.prisma.jabatan_tugas_ptk.findMany({
+                select: {
+                    jabatan_ptk_id: true,
+                    nama: true,
+                    jumlah_jam_diakui: true,
+                },
+            }),
+        ]);
+        const formattedData = tasks.map((t) => {
+            let roleName = '';
+            let displayJam = t.jumlah_jam !== null && t.jumlah_jam !== undefined ? Number(t.jumlah_jam) : 0;
+            if (t.jabatan_ptk_id !== null && t.jabatan_ptk_id !== undefined) {
+                const jId = Number(t.jabatan_ptk_id);
+                const match = refJabatan.find(rj => Number(rj.jabatan_ptk_id) === jId);
+                roleName = match ? match.nama : `Jabatan ID ${jId}`;
+                if (displayJam === 0 && match && match.jumlah_jam_diakui !== null && match.jumlah_jam_diakui !== undefined) {
+                    displayJam = Number(match.jumlah_jam_diakui);
+                }
+            }
+            else {
+                roleName = t.jabatan || '';
+            }
+            const entityName = t.index === 1 ? t.peserta_didik?.nama || '' : t.gtk?.nama || '';
+            const entityIdCode = t.index === 1
+                ? (t.peserta_didik?.nisn ? `NISN: ${t.peserta_didik.nisn}` : '-')
+                : (t.gtk?.nip ? `NIP: ${t.gtk.nip}` : (t.gtk?.nuptk ? `NUPTK: ${t.gtk.nuptk}` : '-'));
+            return {
+                ...t,
+                role_name: roleName,
+                jumlah_jam: displayJam,
+                nama: entityName,
+                nip_nisn: entityIdCode,
+            };
+        });
+        return {
+            data: formattedData,
+            total,
+            limit,
+            page,
+            totalPages: Math.ceil(total / limit),
+        };
+    }
+    async createTugasTambahan(sekolahId, data) {
+        const filter = this.getSekolahFilter(sekolahId);
+        const payload = {
+            sekolah_id: filter.sekolah_id,
+            index: Number(data.index) || 0,
+            ptk_id: data.index === 0 ? data.ptk_id : null,
+            peserta_didik_id: data.index === 1 ? data.peserta_didik_id : null,
+            jabatan_ptk_id: data.jabatan_ptk_id !== undefined && data.jabatan_ptk_id !== null ? new client_1.Prisma.Decimal(data.jabatan_ptk_id) : null,
+            jabatan: data.jabatan || null,
+            jumlah_jam: data.jumlah_jam !== undefined && data.jumlah_jam !== null ? new client_1.Prisma.Decimal(data.jumlah_jam) : null,
+            nomor_sk: data.nomor_sk || null,
+            tmt_tambahan: data.tmt_tambahan ? new Date(data.tmt_tambahan) : null,
+            tst_tambahan: data.tst_tambahan ? new Date(data.tst_tambahan) : null,
+            soft_delete: new client_1.Prisma.Decimal(0),
+        };
+        return this.prisma.tugasTambahan.create({
+            data: payload,
+        });
+    }
+    async updateTugasTambahan(id, data) {
+        const payload = {
+            index: Number(data.index) !== undefined ? Number(data.index) : undefined,
+            ptk_id: data.index === 0 ? data.ptk_id : (data.index === 1 ? null : undefined),
+            peserta_didik_id: data.index === 1 ? data.peserta_didik_id : (data.index === 0 ? null : undefined),
+            jabatan_ptk_id: data.jabatan_ptk_id !== undefined ? (data.jabatan_ptk_id !== null ? new client_1.Prisma.Decimal(data.jabatan_ptk_id) : null) : undefined,
+            jabatan: data.jabatan !== undefined ? (data.jabatan || null) : undefined,
+            jumlah_jam: data.jumlah_jam !== undefined ? (data.jumlah_jam !== null ? new client_1.Prisma.Decimal(data.jumlah_jam) : null) : undefined,
+            nomor_sk: data.nomor_sk !== undefined ? (data.nomor_sk || null) : undefined,
+            tmt_tambahan: data.tmt_tambahan !== undefined ? (data.tmt_tambahan ? new Date(data.tmt_tambahan) : null) : undefined,
+            tst_tambahan: data.tst_tambahan !== undefined ? (data.tst_tambahan ? new Date(data.tst_tambahan) : null) : undefined,
+            soft_delete: data.soft_delete !== undefined ? new client_1.Prisma.Decimal(data.soft_delete) : undefined,
+        };
+        return this.prisma.tugasTambahan.update({
+            where: { ptk_tugas_tambahan_id: id },
+            data: payload,
+        });
+    }
+    async deleteTugasTambahan(id) {
+        const task = await this.prisma.tugasTambahan.findUnique({
+            where: { ptk_tugas_tambahan_id: id },
+            select: { last_sync: true }
+        });
+        if (!task) {
+            throw new common_1.BadRequestException('Tugas tambahan tidak ditemukan.');
+        }
+        if (task.last_sync !== null) {
+            throw new common_1.BadRequestException('Tugas tambahan dari Dapodik tidak dapat dihapus.');
+        }
+        return this.prisma.tugasTambahan.delete({
+            where: { ptk_tugas_tambahan_id: id },
+        });
+    }
+    async getUniqueCustomJabatans(sekolahId, index) {
+        const filter = this.getSekolahFilter(sekolahId);
+        let whereClause = {
+            sekolah_id: filter.sekolah_id,
+            jabatan: { not: null, notIn: [''] },
+            jabatan_ptk_id: null,
+        };
+        if (index !== undefined && !isNaN(index)) {
+            whereClause.index = index;
+        }
+        const result = await this.prisma.tugasTambahan.findMany({
+            where: whereClause,
+            select: {
+                jabatan: true,
+            },
+            distinct: ['jabatan'],
+            orderBy: { jabatan: 'asc' },
+        });
+        return result.map(r => r.jabatan);
     }
 };
 exports.DapodikService = DapodikService;

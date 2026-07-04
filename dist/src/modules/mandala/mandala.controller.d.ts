@@ -314,6 +314,7 @@ export declare class MandalaController {
             nik: string | null;
             tanggal_lahir: Date | null;
             tempat_lahir: string | null;
+            golongan: number | null;
         })[];
     }>;
     getPegawaiDetail(id: string): Promise<{
@@ -349,6 +350,7 @@ export declare class MandalaController {
             nik: string | null;
             tanggal_lahir: Date | null;
             tempat_lahir: string | null;
+            golongan: number | null;
         };
     }>;
     createPegawai(body: any): Promise<{
@@ -373,6 +375,7 @@ export declare class MandalaController {
             nik: string | null;
             tanggal_lahir: Date | null;
             tempat_lahir: string | null;
+            golongan: number | null;
         };
     }>;
     updatePegawai(id: string, body: any): Promise<{
@@ -397,6 +400,7 @@ export declare class MandalaController {
             nik: string | null;
             tanggal_lahir: Date | null;
             tempat_lahir: string | null;
+            golongan: number | null;
         };
     }>;
     deletePegawai(id: string): Promise<{
@@ -516,6 +520,8 @@ export declare class MandalaController {
                 tanggal_lahir: any;
                 agama: any;
                 jenis_pendaftaran_id_str: any;
+                foto: any;
+                last_update: any;
             };
             akademik: {
                 nama_rombel: any;
@@ -586,6 +592,8 @@ export declare class MandalaController {
                 tempat_lahir: any;
                 tanggal_lahir: any;
                 agama: any;
+                foto: any;
+                last_update: any;
             };
             kepegawaian: {
                 jenis_ptk: any;

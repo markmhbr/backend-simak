@@ -245,6 +245,7 @@ export declare class MandalaService implements OnModuleInit {
         nik: string | null;
         tanggal_lahir: Date | null;
         tempat_lahir: string | null;
+        golongan: number | null;
     })[]>;
     getPegawaiById(id: string): Promise<{
         cadisdik: {
@@ -277,6 +278,7 @@ export declare class MandalaService implements OnModuleInit {
         nik: string | null;
         tanggal_lahir: Date | null;
         tempat_lahir: string | null;
+        golongan: number | null;
     }>;
     createPegawai(data: any): Promise<{
         nomor_telepon: string | null;
@@ -297,6 +299,7 @@ export declare class MandalaService implements OnModuleInit {
         nik: string | null;
         tanggal_lahir: Date | null;
         tempat_lahir: string | null;
+        golongan: number | null;
     }>;
     updatePegawai(id: string, data: any): Promise<{
         nomor_telepon: string | null;
@@ -317,6 +320,7 @@ export declare class MandalaService implements OnModuleInit {
         nik: string | null;
         tanggal_lahir: Date | null;
         tempat_lahir: string | null;
+        golongan: number | null;
     }>;
     deletePegawai(id: string): Promise<{
         nomor_telepon: string | null;
@@ -337,6 +341,7 @@ export declare class MandalaService implements OnModuleInit {
         nik: string | null;
         tanggal_lahir: Date | null;
         tempat_lahir: string | null;
+        golongan: number | null;
     }>;
     getMappingPengawas(pegawaiId?: string, sekolahId?: string): Promise<({
         sekolah: {
@@ -493,6 +498,8 @@ export declare class MandalaService implements OnModuleInit {
                 tanggal_lahir: any;
                 agama: any;
                 jenis_pendaftaran_id_str: any;
+                foto: any;
+                last_update: any;
             };
             akademik: {
                 nama_rombel: any;
@@ -535,6 +542,8 @@ export declare class MandalaService implements OnModuleInit {
                 tempat_lahir: any;
                 tanggal_lahir: any;
                 agama: any;
+                foto: any;
+                last_update: any;
             };
             kepegawaian: {
                 jenis_ptk: any;

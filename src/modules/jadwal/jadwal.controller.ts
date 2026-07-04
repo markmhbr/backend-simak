@@ -123,7 +123,7 @@ export class JadwalController {
   async getJadwalPelajaran(
     @Req() req: Request,
     @Query('jenisJadwalId') jenisJadwalId: string,
-    @Query('rombelId') rombelId: string,
+    @Query('rombelId') rombelId?: string,
   ) {
     const { sekolahId, namaApp } = this.getSekolahInfo(req);
     const data = await this.jadwalService.getJadwalPelajaran(sekolahId, jenisJadwalId, rombelId);

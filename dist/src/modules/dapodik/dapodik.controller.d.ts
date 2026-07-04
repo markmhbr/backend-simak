@@ -1168,8 +1168,8 @@ export declare class DapodikController {
     getRoles(req: Request): Promise<{
         status: string;
         data: {
-            peran_nama: string;
             peran_id: number;
+            peran_nama: string;
         }[];
     }>;
     getMenuRoles(): Promise<{
@@ -1196,4 +1196,61 @@ export declare class DapodikController {
         data: string[];
     }>;
     generateBackup(req: Request, res: Response): Promise<Response<any, Record<string, any>>>;
+    getTugasTambahan(req: Request, index?: string, search?: string, limit?: string, page?: string): Promise<{
+        data: any[];
+        total: number;
+        limit: number;
+        page: number;
+        totalPages: number;
+        status: string;
+    }>;
+    createTugasTambahan(req: Request, body: any): Promise<{
+        status: string;
+        data: {
+            sekolah_id: string | null;
+            create_date: Date;
+            last_update: Date;
+            soft_delete: import("@prisma/client-runtime-utils").Decimal | null;
+            last_sync: Date | null;
+            updater_id: string | null;
+            ptk_id: string | null;
+            peserta_didik_id: string | null;
+            jabatan: string | null;
+            jabatan_ptk_id: import("@prisma/client-runtime-utils").Decimal | null;
+            ptk_tugas_tambahan_id: string;
+            jumlah_jam: import("@prisma/client-runtime-utils").Decimal | null;
+            nomor_sk: string | null;
+            tmt_tambahan: Date | null;
+            tst_tambahan: Date | null;
+            index: number;
+        };
+    }>;
+    updateTugasTambahan(id: string, body: any): Promise<{
+        status: string;
+        data: {
+            sekolah_id: string | null;
+            create_date: Date;
+            last_update: Date;
+            soft_delete: import("@prisma/client-runtime-utils").Decimal | null;
+            last_sync: Date | null;
+            updater_id: string | null;
+            ptk_id: string | null;
+            peserta_didik_id: string | null;
+            jabatan: string | null;
+            jabatan_ptk_id: import("@prisma/client-runtime-utils").Decimal | null;
+            ptk_tugas_tambahan_id: string;
+            jumlah_jam: import("@prisma/client-runtime-utils").Decimal | null;
+            nomor_sk: string | null;
+            tmt_tambahan: Date | null;
+            tst_tambahan: Date | null;
+            index: number;
+        };
+    }>;
+    deleteTugasTambahan(id: string): Promise<{
+        status: string;
+    }>;
+    getCustomJabatans(req: Request, index?: string): Promise<{
+        status: string;
+        data: string[];
+    }>;
 }

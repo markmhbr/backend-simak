@@ -592,8 +592,10 @@ export class SyncService {
             if (!tt.ptk_tugas_tambahan_id) continue;
             const ttPayload = {
               ptk_id: g.ptk_id,
+              peserta_didik_id: null,
               sekolah_id: sekolahId,
               jabatan_ptk_id: this.parseNumber(tt.jabatan_ptk_id),
+              jabatan: null,
               jumlah_jam: this.parseNumber(tt.jumlah_jam),
               nomor_sk: tt.nomor_sk || null,
               tmt_tambahan: this.parseDate(tt.tmt_tambahan),
@@ -601,6 +603,7 @@ export class SyncService {
               soft_delete: this.parseNumber(tt.soft_delete),
               last_sync: this.parseDate(tt.last_sync),
               updater_id: tt.updater_id || null,
+              index: 0,
             };
             await this.prisma.tugasTambahan.upsert({
               where: { ptk_tugas_tambahan_id: tt.ptk_tugas_tambahan_id },

@@ -507,6 +507,33 @@ let DapodikController = class DapodikController {
         res.setHeader('Content-Disposition', `attachment; filename="backup_simak_${sekolahId}_${new Date().toISOString().split('T')[0]}.sql"`);
         return res.send(sql);
     }
+    async getTugasTambahan(req, index, search, limit, page) {
+        const { sekolahId } = this.getSekolahInfo(req);
+        const take = limit ? parseInt(limit, 10) : 10;
+        const skipPage = page ? parseInt(page, 10) : 1;
+        const idxVal = index !== undefined && index !== '' ? parseInt(index, 10) : undefined;
+        const data = await this.dapodikService.getTugasTambahan(sekolahId, idxVal, search, take, skipPage);
+        return { status: 'success', ...data };
+    }
+    async createTugasTambahan(req, body) {
+        const { sekolahId } = this.getSekolahInfo(req);
+        const data = await this.dapodikService.createTugasTambahan(sekolahId, body);
+        return { status: 'success', data };
+    }
+    async updateTugasTambahan(id, body) {
+        const data = await this.dapodikService.updateTugasTambahan(id, body);
+        return { status: 'success', data };
+    }
+    async deleteTugasTambahan(id) {
+        await this.dapodikService.deleteTugasTambahan(id);
+        return { status: 'success' };
+    }
+    async getCustomJabatans(req, index) {
+        const { sekolahId } = this.getSekolahInfo(req);
+        const idxVal = index !== undefined && index !== '' ? parseInt(index, 10) : undefined;
+        const data = await this.dapodikService.getUniqueCustomJabatans(sekolahId, idxVal);
+        return { status: 'success', data };
+    }
 };
 exports.DapodikController = DapodikController;
 __decorate([
@@ -908,6 +935,48 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], DapodikController.prototype, "generateBackup", null);
+__decorate([
+    (0, common_1.Get)('tugas-tambahan'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('index')),
+    __param(2, (0, common_1.Query)('search')),
+    __param(3, (0, common_1.Query)('limit')),
+    __param(4, (0, common_1.Query)('page')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String, String, String]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "getTugasTambahan", null);
+__decorate([
+    (0, common_1.Post)('tugas-tambahan'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "createTugasTambahan", null);
+__decorate([
+    (0, common_1.Patch)('tugas-tambahan/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "updateTugasTambahan", null);
+__decorate([
+    (0, common_1.Delete)('tugas-tambahan/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "deleteTugasTambahan", null);
+__decorate([
+    (0, common_1.Get)('tugas-tambahan/custom-jabatans'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('index')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "getCustomJabatans", null);
 exports.DapodikController = DapodikController = __decorate([
     (0, common_1.Controller)('dapodik'),
     (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),

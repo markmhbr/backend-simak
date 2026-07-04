@@ -140,7 +140,7 @@ export declare class JadwalService {
         tipe: number;
         durasi_menit: number;
     }>;
-    getJadwalPelajaran(sekolahId: string, jenisJadwalId: string, rombelId: string): Promise<({
+    getJadwalPelajaran(sekolahId: string, jenisJadwalId: string, rombelId?: string): Promise<({
         pembelajaran: {
             gtk: {
                 sekolah_id: string | null;
@@ -244,6 +244,11 @@ export declare class JadwalService {
             jam_mengajar_per_minggu: import("@prisma/client-runtime-utils").Decimal | null;
             nama_mata_pelajaran: string | null;
             induk_pembelajaran_id: string | null;
+        };
+        rombongan_belajar: {
+            nama: string;
+            rombongan_belajar_id: string;
+            tingkat_pendidikan_id: import("@prisma/client-runtime-utils").Decimal;
         };
     } & {
         sekolah_id: string;

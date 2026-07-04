@@ -438,17 +438,27 @@ export class JadwalService {
   // JADWAL PELAJARAN
   // =====================
 
-  async getJadwalPelajaran(sekolahId: string, jenisJadwalId: string, rombelId: string) {
+  async getJadwalPelajaran(sekolahId: string, jenisJadwalId: string, rombelId?: string) {
+    const whereClause: any = {
+      sekolah_id: sekolahId,
+      jenis_jadwal_id: jenisJadwalId,
+    };
+    if (rombelId) {
+      whereClause.rombongan_belajar_id = rombelId;
+    }
     return this.prisma.jadwalPelajaran.findMany({
-      where: {
-        sekolah_id: sekolahId,
-        jenis_jadwal_id: jenisJadwalId,
-        rombongan_belajar_id: rombelId,
-      },
+      where: whereClause,
       include: {
         pembelajaran: {
           include: {
             gtk: true,
+          },
+        },
+        rombongan_belajar: {
+          select: {
+            rombongan_belajar_id: true,
+            nama: true,
+            tingkat_pendidikan_id: true,
           },
         },
       },

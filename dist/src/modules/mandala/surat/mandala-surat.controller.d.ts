@@ -338,6 +338,7 @@ export declare class MandalaSuratController {
                 nik: string | null;
                 tanggal_lahir: Date | null;
                 tempat_lahir: string | null;
+                golongan: number | null;
             };
         } & {
             sekolah_id: string | null;
