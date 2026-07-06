@@ -43,6 +43,7 @@ const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const config_1 = require("@nestjs/config");
 const common_1 = require("@nestjs/common");
 const path = __importStar(require("path"));
+const helmet_1 = __importDefault(require("helmet"));
 async function bootstrap() {
     BigInt.prototype.toJSON = function () {
         return this.toString();
@@ -50,6 +51,21 @@ async function bootstrap() {
     const logger = new common_1.Logger('Bootstrap');
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     const configService = app.get(config_1.ConfigService);
+    app.use((0, helmet_1.default)({
+        contentSecurityPolicy: {
+            directives: {
+                defaultSrc: ["'self'", "https:"],
+                scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https:"],
+                styleSrc: ["'self'", "'unsafe-inline'", "https:"],
+                imgSrc: ["'self'", "data:", "https:", "blob:"],
+                connectSrc: ["'self'", "https:", "wss:", "ws:"],
+                fontSrc: ["'self'", "https:", "data:"],
+                objectSrc: ["'none'"],
+                upgradeInsecureRequests: [],
+            },
+        },
+        crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }));
     app.setGlobalPrefix('api');
     app.enableCors({
         origin: true,

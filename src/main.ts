@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import { ConfigService } from '@nestjs/config';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import * as path from 'path';
+import helmet from 'helmet';
 
 async function bootstrap() {
   (BigInt.prototype as any).toJSON = function () {
@@ -13,6 +14,25 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+
+  // Add security headers using helmet
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'", "https:"],
+          scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https:"],
+          styleSrc: ["'self'", "'unsafe-inline'", "https:"],
+          imgSrc: ["'self'", "data:", "https:", "blob:"],
+          connectSrc: ["'self'", "https:", "wss:", "ws:"],
+          fontSrc: ["'self'", "https:", "data:"],
+          objectSrc: ["'none'"],
+          upgradeInsecureRequests: [],
+        },
+      },
+      crossOriginResourcePolicy: { policy: 'cross-origin' }, // Allow frontend subdomains to load static files from backend
+    }),
+  );
   
   // Best practice: Add API prefix
   app.setGlobalPrefix('api');
