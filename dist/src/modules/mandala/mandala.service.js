@@ -159,6 +159,7 @@ let MandalaService = MandalaService_1 = class MandalaService {
                 total_gtk: totalGtk,
                 nomor_telepon: school.nomor_telepon,
                 kode_wilayah: school.kode_wilayah,
+                last_update: school.last_update,
                 cadisdik: school.cadisdik ? {
                     id: school.cadisdik.cadisdik_id,
                     nama: school.cadisdik.nama_instansi,

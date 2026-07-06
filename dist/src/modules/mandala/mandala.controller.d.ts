@@ -51,6 +51,7 @@ export declare class MandalaController {
             total_gtk: number;
             nomor_telepon: string;
             kode_wilayah: string;
+            last_update: Date;
             cadisdik: {
                 id: string;
                 nama: string;
