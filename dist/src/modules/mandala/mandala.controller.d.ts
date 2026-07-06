@@ -515,6 +515,8 @@ export declare class MandalaController {
                 nama: any;
                 nisn: any;
                 nik: any;
+                nipd: any;
+                desa: any;
                 jenis_kelamin: any;
                 tempat_lahir: any;
                 tanggal_lahir: any;
@@ -530,6 +532,7 @@ export declare class MandalaController {
             };
             data_pendukung: {
                 alamat_lengkap: string;
+                desa: any;
                 nama_ayah: any;
                 nama_ibu: any;
                 hp_orang_tua: any;
@@ -588,6 +591,7 @@ export declare class MandalaController {
                 nip: any;
                 nik: any;
                 nuptk: any;
+                desa: any;
                 jenis_kelamin: any;
                 tempat_lahir: any;
                 tanggal_lahir: any;
@@ -605,6 +609,7 @@ export declare class MandalaController {
             };
             data_pendukung: {
                 alamat_lengkap: string;
+                desa: any;
                 no_hp: any;
                 no_wa: string;
                 email: any;

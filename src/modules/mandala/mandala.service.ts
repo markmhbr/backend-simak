@@ -850,6 +850,8 @@ export class MandalaService implements OnModuleInit {
           nama: pd.nama,
           nisn: pd.nisn,
           nik: pd.nik,
+          nipd: pd.nipd || '',
+          desa: pd.desa_kelurahan || '',
           jenis_kelamin: pd.jenis_kelamin,
           tempat_lahir: pd.tempat_lahir,
           tanggal_lahir: pd.tanggal_lahir,
@@ -865,6 +867,7 @@ export class MandalaService implements OnModuleInit {
         },
         data_pendukung: {
           alamat_lengkap: alamatLengkap,
+          desa: pd.desa_kelurahan || '',
           nama_ayah: pd.nama_ayah || '',
           nama_ibu: pd.nama_ibu_kandung || '',
           hp_orang_tua: hpOrangTua,
@@ -1053,6 +1056,7 @@ export class MandalaService implements OnModuleInit {
           nip: g.nip || '',
           nik: g.nik || '',
           nuptk: g.nuptk || '',
+          desa: g.desa_kelurahan || '',
           jenis_kelamin: g.jenis_kelamin || '',
           tempat_lahir: g.tempat_lahir || '',
           tanggal_lahir: g.tanggal_lahir || null,
@@ -1070,6 +1074,7 @@ export class MandalaService implements OnModuleInit {
         },
         data_pendukung: {
           alamat_lengkap: alamatLengkap,
+          desa: g.desa_kelurahan || '',
           no_hp: g.no_hp || '',
           no_wa: '',
           email: g.email || '',
