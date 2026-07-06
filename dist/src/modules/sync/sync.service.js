@@ -77,7 +77,19 @@ let SyncService = SyncService_1 = class SyncService {
     parseDate(d) {
         if (!d || d === '1901-01-01' || d.startsWith('1900') || d.startsWith('1901'))
             return null;
-        const date = new Date(d);
+        let dateStr = d.trim();
+        if (!dateStr.endsWith('Z') && !/[+-]\d{2}:?\d{2}$/.test(dateStr)) {
+            if (dateStr.includes(' ') || dateStr.includes('T')) {
+                const parts = dateStr.includes('T') ? dateStr.split('T') : dateStr.split(' ');
+                if (parts[1]) {
+                    dateStr = `${parts[0]}T${parts[1]}+07:00`;
+                }
+            }
+            else {
+                dateStr = `${dateStr}T00:00:00+07:00`;
+            }
+        }
+        const date = new Date(dateStr);
         return isNaN(date.getTime()) ? null : date;
     }
     parseNumber(val) {
