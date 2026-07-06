@@ -36,19 +36,19 @@ export async function compressAndSaveImage(
   }
 
   try {
-    // Set dimensi maksimal (lebar/tinggi) ke 1000px agar hemat memori & space
-    let quality = 80;
+    // Set dimensi maksimal (lebar/tinggi) ke 2000px agar dokumen tetap tajam & terbaca
+    let quality = 90;
     let compressedBuffer = await sharp(fileBuffer)
-      .resize(1000, 1000, { fit: 'inside', withoutEnlargement: true })
+      .resize(2000, 2000, { fit: 'inside', withoutEnlargement: true })
       .flatten({ background: '#ffffff' })
       .jpeg({ quality })
       .toBuffer();
 
-    // Loop kompresi jika ukuran file di atas 100 KB dan quality masih di atas 20
-    while (compressedBuffer.length > 100 * 1024 && quality > 20) {
-      quality -= 10;
+    // Loop kompresi jika ukuran file di atas 500 KB dan quality masih di atas 60
+    while (compressedBuffer.length > 500 * 1024 && quality > 60) {
+      quality -= 5;
       compressedBuffer = await sharp(fileBuffer)
-        .resize(1000, 1000, { fit: 'inside', withoutEnlargement: true })
+        .resize(2000, 2000, { fit: 'inside', withoutEnlargement: true })
         .flatten({ background: '#ffffff' })
         .jpeg({ quality })
         .toBuffer();

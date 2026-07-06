@@ -56,16 +56,16 @@ async function compressAndSaveImage(fileBuffer, destinationDir, fileName) {
         return fullPath;
     }
     try {
-        let quality = 80;
+        let quality = 90;
         let compressedBuffer = await sharp(fileBuffer)
-            .resize(1000, 1000, { fit: 'inside', withoutEnlargement: true })
+            .resize(2000, 2000, { fit: 'inside', withoutEnlargement: true })
             .flatten({ background: '#ffffff' })
             .jpeg({ quality })
             .toBuffer();
-        while (compressedBuffer.length > 100 * 1024 && quality > 20) {
-            quality -= 10;
+        while (compressedBuffer.length > 500 * 1024 && quality > 60) {
+            quality -= 5;
             compressedBuffer = await sharp(fileBuffer)
-                .resize(1000, 1000, { fit: 'inside', withoutEnlargement: true })
+                .resize(2000, 2000, { fit: 'inside', withoutEnlargement: true })
                 .flatten({ background: '#ffffff' })
                 .jpeg({ quality })
                 .toBuffer();

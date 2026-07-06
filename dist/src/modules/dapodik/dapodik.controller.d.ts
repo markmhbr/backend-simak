@@ -673,6 +673,8 @@ export declare class DapodikController {
             l: any;
             p: any;
             total: any;
+            baru: any;
+            pindahan: any;
         }[];
     }>;
     getPesertaDidikList(req: Request, limit?: string, search?: string, page?: string, rombelName?: string, status?: 'aktif' | 'non-aktif', tingkat?: string, completeness?: string, sekolahIdQuery?: string): Promise<{

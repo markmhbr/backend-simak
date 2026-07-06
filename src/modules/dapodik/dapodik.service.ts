@@ -1517,17 +1517,18 @@ export class DapodikService {
       select: {
         tanggal_lahir: true,
         jenis_kelamin: true,
+        jenis_pendaftaran_id: true,
       }
     });
 
     const now = new Date();
     const result = {
-      '< 15 Tahun': { l: 0, p: 0, total: 0 },
-      '15 Tahun': { l: 0, p: 0, total: 0 },
-      '16 Tahun': { l: 0, p: 0, total: 0 },
-      '17 Tahun': { l: 0, p: 0, total: 0 },
-      '18 Tahun': { l: 0, p: 0, total: 0 },
-      '> 18 Tahun': { l: 0, p: 0, total: 0 }
+      '< 15 Tahun': { l: 0, p: 0, total: 0, baru: 0, pindahan: 0 },
+      '15 Tahun': { l: 0, p: 0, total: 0, baru: 0, pindahan: 0 },
+      '16 Tahun': { l: 0, p: 0, total: 0, baru: 0, pindahan: 0 },
+      '17 Tahun': { l: 0, p: 0, total: 0, baru: 0, pindahan: 0 },
+      '18 Tahun': { l: 0, p: 0, total: 0, baru: 0, pindahan: 0 },
+      '> 18 Tahun': { l: 0, p: 0, total: 0, baru: 0, pindahan: 0 }
     };
 
     students.forEach(pd => {
@@ -1553,6 +1554,13 @@ export class DapodikService {
       if (pd.jenis_kelamin === 'L') data.l += 1;
       if (pd.jenis_kelamin === 'P') data.p += 1;
       data.total += 1;
+
+      const jp = pd.jenis_pendaftaran_id ? Number(pd.jenis_pendaftaran_id) : 1;
+      if (jp === 1) {
+        data.baru += 1;
+      } else {
+        data.pindahan += 1;
+      }
     });
 
     return Object.keys(result).map(key => ({
@@ -1562,9 +1570,13 @@ export class DapodikService {
       // @ts-ignore
       p: result[key].p,
       // @ts-ignore
-      total: result[key].total
+      total: result[key].total,
+      // @ts-ignore
+      baru: result[key].baru,
+      // @ts-ignore
+      pindahan: result[key].pindahan
     }));
-    }
+  }
 
     async getCadisdiks() {
     return await this.prisma.cadisdik.findMany({

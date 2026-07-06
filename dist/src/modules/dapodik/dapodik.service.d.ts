@@ -405,6 +405,8 @@ export declare class DapodikService {
         l: any;
         p: any;
         total: any;
+        baru: any;
+        pindahan: any;
     }[]>;
     getCadisdiks(): Promise<{
         nomor_telepon: string | null;

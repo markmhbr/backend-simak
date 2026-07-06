@@ -1353,16 +1353,17 @@ let DapodikService = class DapodikService {
             select: {
                 tanggal_lahir: true,
                 jenis_kelamin: true,
+                jenis_pendaftaran_id: true,
             }
         });
         const now = new Date();
         const result = {
-            '< 15 Tahun': { l: 0, p: 0, total: 0 },
-            '15 Tahun': { l: 0, p: 0, total: 0 },
-            '16 Tahun': { l: 0, p: 0, total: 0 },
-            '17 Tahun': { l: 0, p: 0, total: 0 },
-            '18 Tahun': { l: 0, p: 0, total: 0 },
-            '> 18 Tahun': { l: 0, p: 0, total: 0 }
+            '< 15 Tahun': { l: 0, p: 0, total: 0, baru: 0, pindahan: 0 },
+            '15 Tahun': { l: 0, p: 0, total: 0, baru: 0, pindahan: 0 },
+            '16 Tahun': { l: 0, p: 0, total: 0, baru: 0, pindahan: 0 },
+            '17 Tahun': { l: 0, p: 0, total: 0, baru: 0, pindahan: 0 },
+            '18 Tahun': { l: 0, p: 0, total: 0, baru: 0, pindahan: 0 },
+            '> 18 Tahun': { l: 0, p: 0, total: 0, baru: 0, pindahan: 0 }
         };
         students.forEach(pd => {
             if (!pd.tanggal_lahir)
@@ -1392,12 +1393,21 @@ let DapodikService = class DapodikService {
             if (pd.jenis_kelamin === 'P')
                 data.p += 1;
             data.total += 1;
+            const jp = pd.jenis_pendaftaran_id ? Number(pd.jenis_pendaftaran_id) : 1;
+            if (jp === 1) {
+                data.baru += 1;
+            }
+            else {
+                data.pindahan += 1;
+            }
         });
         return Object.keys(result).map(key => ({
             usia: key,
             l: result[key].l,
             p: result[key].p,
-            total: result[key].total
+            total: result[key].total,
+            baru: result[key].baru,
+            pindahan: result[key].pindahan
         }));
     }
     async getCadisdiks() {
