@@ -936,6 +936,12 @@ let DapodikService = class DapodikService {
                 nama: true
             }
         });
+        const refJenisKeluar = await this.prisma.jenis_keluar.findMany({
+            select: {
+                jenis_keluar_id: true,
+                ket_keluar: true
+            }
+        });
         const checkStudentCompleteness = (item) => {
             const allFields = [
                 'nama', 'jenis_kelamin', 'nik', 'tempat_lahir', 'tanggal_lahir',
@@ -984,6 +990,7 @@ let DapodikService = class DapodikService {
             const wilayahCache = new Map();
             const mappedAll = await Promise.all(rawData.map(async (item) => {
                 const jp = refJenisPendaftaran.find((r) => String(r.jenis_pendaftaran_id) === String(item.jenis_pendaftaran_id));
+                const jk = refJenisKeluar.find((r) => String(r.jenis_keluar_id) === String(item.jenis_keluar_id));
                 const rombel = item.rombongan_belajar || item.anggota_rombel?.[0]?.rombongan_belajar;
                 const wilayahHierarchy = await this.resolveWilayahHierarchy(item.kode_wilayah, wilayahCache);
                 return {
@@ -1000,6 +1007,7 @@ let DapodikService = class DapodikService {
                     tinggi_badan: item.tinggi_badan !== null && item.tinggi_badan !== undefined ? Number(item.tinggi_badan) : null,
                     berat_badan: item.berat_badan !== null && item.berat_badan !== undefined ? Number(item.berat_badan) : null,
                     jenis_pendaftaran_id_str: jp?.nama || null,
+                    jenis_keluar_id_str: jk?.ket_keluar || null,
                     rt: item.rt !== null && item.rt !== undefined ? String(item.rt) : null,
                     rw: item.rw !== null && item.rw !== undefined ? String(item.rw) : null,
                     is_wali: item.is_wali === true || item.is_wali === 1 || item.is_wali === "1" || !!(item.nama_wali || item.nik_wali),
@@ -1053,6 +1061,7 @@ let DapodikService = class DapodikService {
             const wilayahCache = new Map();
             const mappedData = await Promise.all(rawData.map(async (item) => {
                 const jp = refJenisPendaftaran.find((r) => String(r.jenis_pendaftaran_id) === String(item.jenis_pendaftaran_id));
+                const jk = refJenisKeluar.find((r) => String(r.jenis_keluar_id) === String(item.jenis_keluar_id));
                 const rombel = item.rombongan_belajar || item.anggota_rombel?.[0]?.rombongan_belajar;
                 const wilayahHierarchy = await this.resolveWilayahHierarchy(item.kode_wilayah, wilayahCache);
                 return {
@@ -1069,6 +1078,7 @@ let DapodikService = class DapodikService {
                     tinggi_badan: item.tinggi_badan !== null && item.tinggi_badan !== undefined ? Number(item.tinggi_badan) : null,
                     berat_badan: item.berat_badan !== null && item.berat_badan !== undefined ? Number(item.berat_badan) : null,
                     jenis_pendaftaran_id_str: jp?.nama || null,
+                    jenis_keluar_id_str: jk?.ket_keluar || null,
                     rt: item.rt !== null && item.rt !== undefined ? String(item.rt) : null,
                     rw: item.rw !== null && item.rw !== undefined ? String(item.rw) : null,
                     is_wali: item.is_wali === true || item.is_wali === 1 || item.is_wali === "1" || !!(item.nama_wali || item.nik_wali),

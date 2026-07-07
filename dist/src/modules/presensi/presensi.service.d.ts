@@ -3,14 +3,14 @@ export declare class PresensiService {
     private readonly prisma;
     constructor(prisma: PrismaService);
     getHariLibur(sekolahId: string): Promise<{
-        sekolah_id: string;
         nama: string;
+        sekolah_id: string;
+        keterangan: string | null;
         created_at: Date;
         updated_at: Date;
-        aktif: boolean;
-        keterangan: string | null;
         tanggal_mulai: Date;
         tanggal_selesai: Date;
+        aktif: boolean;
         hari_libur_id: string;
     }[]>;
     createHariLibur(sekolahId: string, data: {
@@ -19,14 +19,14 @@ export declare class PresensiService {
         tanggal_selesai: string;
         keterangan?: string;
     }): Promise<{
-        sekolah_id: string;
         nama: string;
+        sekolah_id: string;
+        keterangan: string | null;
         created_at: Date;
         updated_at: Date;
-        aktif: boolean;
-        keterangan: string | null;
         tanggal_mulai: Date;
         tanggal_selesai: Date;
+        aktif: boolean;
         hari_libur_id: string;
     }>;
     deleteHariLibur(sekolahId: string, hariLiburId: string): Promise<import("@prisma/client").Prisma.BatchPayload>;
@@ -37,10 +37,10 @@ export declare class PresensiService {
         waktu: string;
         tipe: 'masuk' | 'pulang';
     }): Promise<{
+        peserta_didik_id: string;
         sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        peserta_didik_id: string;
         jam_masuk: Date | null;
         jam_pulang: Date | null;
         tanggal: Date;
@@ -68,10 +68,10 @@ export declare class PresensiService {
         tanggal: string;
         status: number;
     }): Promise<{
-        sekolah_id: string;
-        created_at: Date;
         peserta_didik_id: string;
+        sekolah_id: string;
         status: number;
+        created_at: Date;
         jadwal_pelajaran_id: string;
         tanggal: Date;
         waktu_absen: Date;
@@ -94,22 +94,22 @@ export declare class PresensiService {
         type: string;
         data: {
             nama_rombel: string;
-            nama: string;
             peserta_didik_id: string;
-            foto: string;
+            nama: string;
             nisn: string;
+            foto: string;
             rombongan_belajar_id: string;
             rombongan_belajar: {
                 nama: string;
             };
         };
         activeIzinKeluar: {
+            peserta_didik_id: string | null;
             sekolah_id: string;
+            keterangan: string;
             created_at: Date;
             updated_at: Date;
             ptk_id: string | null;
-            peserta_didik_id: string | null;
-            keterangan: string;
             jenis: number;
             tanggal: Date;
             izin_id: string;
@@ -123,17 +123,17 @@ export declare class PresensiService {
         data: {
             jenis_ptk_id_str: string;
             nama: string;
-            ptk_id: string;
             foto: string;
+            ptk_id: string;
             nuptk: string;
         };
         activeIzinKeluar: {
+            peserta_didik_id: string | null;
             sekolah_id: string;
+            keterangan: string;
             created_at: Date;
             updated_at: Date;
             ptk_id: string | null;
-            peserta_didik_id: string | null;
-            keterangan: string;
             jenis: number;
             tanggal: Date;
             izin_id: string;
@@ -151,10 +151,10 @@ export declare class PresensiService {
             rombongan_belajar_id: string;
             nama_rombel: string;
         };
+        peserta_didik_id: string;
         sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        peserta_didik_id: string;
         jam_masuk: Date | null;
         jam_pulang: Date | null;
         tanggal: Date;
@@ -192,12 +192,12 @@ export declare class PresensiService {
             status_pulang: number | null;
         };
         izin: {
+            peserta_didik_id: string | null;
             sekolah_id: string;
+            keterangan: string;
             created_at: Date;
             updated_at: Date;
             ptk_id: string | null;
-            peserta_didik_id: string | null;
-            keterangan: string;
             jenis: number;
             tanggal: Date;
             izin_id: string;
@@ -207,19 +207,19 @@ export declare class PresensiService {
             jam_kembali_estimasi: Date | null;
         };
         nama: string;
-        ptk_id: string;
         foto: string;
+        ptk_id: string;
         nuptk: string;
     }[]>;
     private getDistance;
     getIzinKeluarHariIni(sekolahId: string, dateStr?: string): Promise<any[]>;
     catatKembali(sekolahId: string, izinId: string): Promise<{
+        peserta_didik_id: string | null;
         sekolah_id: string;
+        keterangan: string;
         created_at: Date;
         updated_at: Date;
         ptk_id: string | null;
-        peserta_didik_id: string | null;
-        keterangan: string;
         jenis: number;
         tanggal: Date;
         izin_id: string;
@@ -229,12 +229,12 @@ export declare class PresensiService {
         jam_kembali_estimasi: Date | null;
     }>;
     setujuiIzin(sekolahId: string, izinId: string): Promise<{
+        peserta_didik_id: string | null;
         sekolah_id: string;
+        keterangan: string;
         created_at: Date;
         updated_at: Date;
         ptk_id: string | null;
-        peserta_didik_id: string | null;
-        keterangan: string;
         jenis: number;
         tanggal: Date;
         izin_id: string;

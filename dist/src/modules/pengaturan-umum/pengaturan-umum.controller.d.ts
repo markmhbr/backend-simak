@@ -5,9 +5,9 @@ export declare class PengaturanUmumController {
     getSettings(sekolahId: string): Promise<{
         status: string;
         data: {
-            sekolah_id: string;
             create_date: Date;
             last_update: Date;
+            sekolah_id: string;
             pengaturan_umum_id: string;
             background_gtk: string | null;
             background_pd: string | null;
@@ -30,9 +30,9 @@ export declare class PengaturanUmumController {
         status: string;
         message: string;
         data: {
-            sekolah_id: string;
             create_date: Date;
             last_update: Date;
+            sekolah_id: string;
             pengaturan_umum_id: string;
             background_gtk: string | null;
             background_pd: string | null;

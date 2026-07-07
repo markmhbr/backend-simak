@@ -98,10 +98,6 @@ export declare class SppController {
     getTagihanSpp(sekolahId: string, pesertaDidikId?: string, status?: number): Promise<{
         status: string;
         data: ({
-            pengaturan_tagihan: {
-                tipe: number;
-                nama_tagihan: string;
-            };
             peserta_didik: {
                 nama: string;
                 nisn: string;
@@ -109,11 +105,15 @@ export declare class SppController {
                     nama: string;
                 };
             };
+            pengaturan_tagihan: {
+                tipe: number;
+                nama_tagihan: string;
+            };
             riwayat_transaksi: {
-                sekolah_id: string;
-                created_at: Date;
                 peserta_didik_id: string;
+                sekolah_id: string;
                 keterangan: string | null;
+                created_at: Date;
                 nominal: bigint;
                 spp_id: string;
                 jenis_transaksi: number;
@@ -122,11 +122,11 @@ export declare class SppController {
                 riwayat_transaksi_spp_id: string;
             }[];
         } & {
+            peserta_didik_id: string;
             sekolah_id: string;
+            status: number;
             created_at: Date;
             updated_at: Date;
-            peserta_didik_id: string;
-            status: number;
             pengaturan_tagihan_id: string;
             spp_id: string;
             nominal_tagihan: bigint;
@@ -138,10 +138,10 @@ export declare class SppController {
         status: string;
         message: string;
         data: {
-            sekolah_id: string;
-            created_at: Date;
             peserta_didik_id: string;
+            sekolah_id: string;
             keterangan: string | null;
+            created_at: Date;
             nominal: bigint;
             spp_id: string;
             jenis_transaksi: number;

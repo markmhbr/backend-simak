@@ -3,9 +3,9 @@ export declare class PengaturanUmumService {
     private readonly prisma;
     constructor(prisma: PrismaService);
     getSettings(sekolahId: string): Promise<{
-        sekolah_id: string;
         create_date: Date;
         last_update: Date;
+        sekolah_id: string;
         pengaturan_umum_id: string;
         background_gtk: string | null;
         background_pd: string | null;
@@ -24,9 +24,9 @@ export declare class PengaturanUmumService {
         waktu_mulai_pengajuan?: string | null;
         waktu_sampai_pengajuan?: string | null;
     }): Promise<{
-        sekolah_id: string;
         create_date: Date;
         last_update: Date;
+        sekolah_id: string;
         pengaturan_umum_id: string;
         background_gtk: string | null;
         background_pd: string | null;

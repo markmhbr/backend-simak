@@ -534,6 +534,7 @@ export class SyncService {
         id_bank: g.id_bank || null,
         rekening_bank: g.rekening_bank || null,
         rekening_atas_nama: g.rekening_atas_nama || null,
+        nama_kcp: g.nama_kcp || null,
         blob_id: g.blob_id || null,
         soft_delete: this.parseNumber(g.soft_delete),
         last_sync: this.parseDate(g.last_sync),
@@ -558,10 +559,12 @@ export class SyncService {
       };
 
       try {
+        const { id_bank, rekening_bank, nama_kcp, rekening_atas_nama, ...cleanPayload } = payload;
+
         await this.prisma.gtk.upsert({
           where: { ptk_id: g.ptk_id },
-          create: { ...payload, ptk_id: g.ptk_id },
-          update: { ...payload, status: g.status || 'Aktif' },
+          create: { ...cleanPayload, ptk_id: g.ptk_id },
+          update: { ...cleanPayload, status: g.status || 'Aktif' },
         });
 
         // Sync formal education history

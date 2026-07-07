@@ -70,9 +70,11 @@ export declare class AuthController {
         message: string;
     }>;
     getMe(request: Request): Promise<{
-        sekolah_id: string;
+        peserta_didik_id: string;
         nama: string;
         email: string;
+        sekolah_id: string;
+        ptk_id: string;
         pengguna_id: string;
         username: string;
         peran_nama: string;
@@ -80,8 +82,6 @@ export declare class AuthController {
         alamat: string;
         no_telepon: string;
         no_hp: string;
-        ptk_id: string;
-        peserta_didik_id: string;
     }>;
     getSystemInfo(request: Request): Promise<{
         isConfigured: boolean;
@@ -89,9 +89,9 @@ export declare class AuthController {
     }>;
     systemSetup(apiKey: string, request: Request): Promise<{
         sekolah_id: string;
-        id: string;
         created_at: Date;
         updated_at: Date;
+        id: string;
         nama_app: string;
         key_api: string;
         key_webService: string | null;

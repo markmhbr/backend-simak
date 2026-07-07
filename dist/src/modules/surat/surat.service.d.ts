@@ -102,9 +102,9 @@ export declare class SuratService {
     deleteTemplate(id: string): Promise<void>;
     createSuratMasuk(sekolahId: string, dto: any): Promise<{
         sekolah_id: string;
+        keterangan: string | null;
         created_at: Date;
         updated_at: Date;
-        keterangan: string | null;
         file_url: string;
         surat_masuk_id: string;
         tanggal_surat: Date;
@@ -119,9 +119,9 @@ export declare class SuratService {
         status: string;
         data: {
             sekolah_id: string;
+            keterangan: string | null;
             created_at: Date;
             updated_at: Date;
-            keterangan: string | null;
             file_url: string;
             surat_masuk_id: string;
             tanggal_surat: Date;
@@ -140,9 +140,9 @@ export declare class SuratService {
     }>;
     updateSuratMasuk(id: string, dto: any): Promise<{
         sekolah_id: string;
+        keterangan: string | null;
         created_at: Date;
         updated_at: Date;
-        keterangan: string | null;
         file_url: string;
         surat_masuk_id: string;
         tanggal_surat: Date;
@@ -155,12 +155,12 @@ export declare class SuratService {
     }>;
     deleteSuratMasuk(id: string): Promise<void>;
     createSuratKeluar(sekolahId: string, dto: any): Promise<{
+        peserta_didik_id: string | null;
         sekolah_id: string;
+        status: number;
         created_at: Date;
         updated_at: Date;
         ptk_id: string | null;
-        peserta_didik_id: string | null;
-        status: number;
         kategori: number;
         pengaturan_nomor_surat_id: string;
         template_surat_id: string;
@@ -174,9 +174,6 @@ export declare class SuratService {
     getSuratKeluarList(sekolahId: string, query: any): Promise<{
         status: string;
         data: (({
-            template_surat: {
-                nama_template: string;
-            };
             peserta_didik: {
                 nama: string;
             };
@@ -186,13 +183,16 @@ export declare class SuratService {
                     jenis_ptk: string;
                 };
             };
+            template_surat: {
+                nama_template: string;
+            };
         } & {
+            peserta_didik_id: string | null;
             sekolah_id: string;
+            status: number;
             created_at: Date;
             updated_at: Date;
             ptk_id: string | null;
-            peserta_didik_id: string | null;
-            status: number;
             kategori: number;
             pengaturan_nomor_surat_id: string;
             template_surat_id: string;
@@ -207,18 +207,18 @@ export declare class SuratService {
                 jenis_ptk_id_str: string;
                 nama: string;
             };
-            template_surat: {
-                nama_template: string;
-            };
             peserta_didik: {
                 nama: string;
             };
+            template_surat: {
+                nama_template: string;
+            };
+            peserta_didik_id: string | null;
             sekolah_id: string;
+            status: number;
             created_at: Date;
             updated_at: Date;
             ptk_id: string | null;
-            peserta_didik_id: string | null;
-            status: number;
             kategori: number;
             pengaturan_nomor_surat_id: string;
             template_surat_id: string;
@@ -236,24 +236,18 @@ export declare class SuratService {
         };
     }>;
     getSuratKeluarDetail(id: string): Promise<{
-        template_surat: {
-            sekolah_id: string;
-            created_at: Date;
-            updated_at: Date;
-            aktif: boolean;
-            kategori: number;
-            template_surat_id: string;
-            nama_template: string;
-            ukuran_kertas: number;
-            margin_atas: number;
-            margin_bawah: number;
-            margin_kiri: number;
-            margin_kanan: number;
-            konten_html: string;
-        };
         peserta_didik: {
-            sekolah_id: string | null;
+            jenis_keluar_id: string | null;
+            peserta_didik_id: string;
             nama: string;
+            jenis_kelamin: string | null;
+            nisn: string | null;
+            nik: string | null;
+            no_kk: string | null;
+            tempat_lahir: string | null;
+            tanggal_lahir: Date | null;
+            agama_id: number | null;
+            kebutuhan_khusus_id: number | null;
             alamat_jalan: string | null;
             rt: import("@prisma/client-runtime-utils").Decimal | null;
             rw: import("@prisma/client-runtime-utils").Decimal | null;
@@ -263,31 +257,6 @@ export declare class SuratService {
             kode_pos: string | null;
             lintang: import("@prisma/client-runtime-utils").Decimal | null;
             bujur: import("@prisma/client-runtime-utils").Decimal | null;
-            email: string | null;
-            kebutuhan_khusus_id: number | null;
-            rekening_atas_nama: string | null;
-            soft_delete: import("@prisma/client-runtime-utils").Decimal | null;
-            created_at: Date;
-            updated_at: Date;
-            peserta_didik_id: string;
-            jenis_kelamin: string | null;
-            foto: string | null;
-            nik: string | null;
-            tanggal_lahir: Date | null;
-            tempat_lahir: string | null;
-            no_kk: string | null;
-            agama_id: number | null;
-            nama_ibu_kandung: string | null;
-            status_data: number | null;
-            kewarganegaraan: string | null;
-            id_bank: string | null;
-            rekening_bank: string | null;
-            jenis_keluar_id: string | null;
-            qr_token: string | null;
-            status: string;
-            no_whatsapp: string | null;
-            nama_kcp: string | null;
-            nisn: string | null;
             jenis_tinggal_id: import("@prisma/client-runtime-utils").Decimal | null;
             alat_transportasi_id: import("@prisma/client-runtime-utils").Decimal | null;
             nik_ayah: string | null;
@@ -296,6 +265,7 @@ export declare class SuratService {
             nik_wali: string | null;
             nomor_telepon_rumah: string | null;
             nomor_telepon_seluler: string | null;
+            email: string | null;
             penerima_kps: import("@prisma/client-runtime-utils").Decimal | null;
             no_kps: string | null;
             layak_pip: import("@prisma/client-runtime-utils").Decimal | null;
@@ -305,12 +275,18 @@ export declare class SuratService {
             no_kks: string | null;
             reg_akta_lahir: string | null;
             id_layak_pip: import("@prisma/client-runtime-utils").Decimal | null;
+            id_bank: string | null;
+            rekening_bank: string | null;
+            nama_kcp: string | null;
+            rekening_atas_nama: string | null;
+            status_data: number | null;
             nama_ayah: string | null;
             tahun_lahir_ayah: import("@prisma/client-runtime-utils").Decimal | null;
             jenjang_pendidikan_ayah: import("@prisma/client-runtime-utils").Decimal | null;
             pekerjaan_id_ayah: number | null;
             penghasilan_id_ayah: number | null;
             kebutuhan_khusus_id_ayah: number | null;
+            nama_ibu_kandung: string | null;
             tahun_lahir_ibu: import("@prisma/client-runtime-utils").Decimal | null;
             jenjang_pendidikan_ibu: import("@prisma/client-runtime-utils").Decimal | null;
             penghasilan_id_ibu: number | null;
@@ -321,9 +297,12 @@ export declare class SuratService {
             jenjang_pendidikan_wali: import("@prisma/client-runtime-utils").Decimal | null;
             pekerjaan_id_wali: number | null;
             penghasilan_id_wali: number | null;
+            kewarganegaraan: string | null;
             pekerjaan_id: number | null;
+            soft_delete: import("@prisma/client-runtime-utils").Decimal | null;
             registrasi_id: string | null;
             jurusan_sp_id: string | null;
+            sekolah_id: string | null;
             jenis_pendaftaran_id: import("@prisma/client-runtime-utils").Decimal | null;
             nipd: string | null;
             tanggal_masuk_sekolah: Date | null;
@@ -345,15 +324,31 @@ export declare class SuratService {
             waktu_tempuh_ke_sekolah: import("@prisma/client-runtime-utils").Decimal | null;
             menit_tempuh_ke_sekolah: import("@prisma/client-runtime-utils").Decimal | null;
             jumlah_saudara_kandung: import("@prisma/client-runtime-utils").Decimal | null;
+            qr_token: string | null;
+            foto: string | null;
+            status: string;
             telegram_chat_id: string | null;
             telegram_token: string | null;
+            no_whatsapp: string | null;
             email_aktif: string | null;
             is_wali: boolean | null;
+            created_at: Date;
+            updated_at: Date;
             rombongan_belajar_id: string | null;
         };
         gtk: {
-            sekolah_id: string | null;
+            jenis_keluar_id: string | null;
+            create_date: Date;
+            last_update: Date;
+            last_sync: Date | null;
             nama: string;
+            jenis_kelamin: string | null;
+            nik: string | null;
+            no_kk: string | null;
+            tempat_lahir: string | null;
+            tanggal_lahir: Date | null;
+            agama_id: number | null;
+            kebutuhan_khusus_id: number | null;
             alamat_jalan: string | null;
             rt: import("@prisma/client-runtime-utils").Decimal | null;
             rw: import("@prisma/client-runtime-utils").Decimal | null;
@@ -364,31 +359,29 @@ export declare class SuratService {
             lintang: import("@prisma/client-runtime-utils").Decimal | null;
             bujur: import("@prisma/client-runtime-utils").Decimal | null;
             email: string | null;
-            kebutuhan_khusus_id: number | null;
+            id_bank: string | null;
+            rekening_bank: string | null;
+            nama_kcp: string | null;
             rekening_atas_nama: string | null;
-            npwp: string | null;
-            nm_wp: string | null;
-            create_date: Date;
-            last_update: Date;
+            status_data: number | null;
+            nama_ibu_kandung: string | null;
+            kewarganegaraan: string | null;
             soft_delete: import("@prisma/client-runtime-utils").Decimal | null;
-            last_sync: Date | null;
+            sekolah_id: string | null;
+            qr_token: string | null;
+            foto: string | null;
+            status: string;
+            no_whatsapp: string | null;
+            ptk_id: string;
             updater_id: string | null;
             no_hp: string | null;
-            ptk_id: string;
             nip: string | null;
-            jenis_kelamin: string | null;
-            foto: string | null;
-            nik: string | null;
-            tanggal_lahir: Date | null;
-            tempat_lahir: string | null;
-            no_kk: string | null;
             niy_nigk: string | null;
             nuptk: string | null;
             nrg: string | null;
             nuks: string | null;
             status_kepegawaian_id: number | null;
             pengawas_bidang_studi_id: number | null;
-            agama_id: number | null;
             no_telepon_rumah: string | null;
             status_keaktifan_id: import("@prisma/client-runtime-utils").Decimal | null;
             sk_cpns: string | null;
@@ -399,7 +392,6 @@ export declare class SuratService {
             pangkat_golongan_id: import("@prisma/client-runtime-utils").Decimal | null;
             keahlian_laboratorium_id: number | null;
             sumber_gaji_id: import("@prisma/client-runtime-utils").Decimal | null;
-            nama_ibu_kandung: string | null;
             status_perkawinan: import("@prisma/client-runtime-utils").Decimal | null;
             nama_suami_istri: string | null;
             nip_suami_istri: string | null;
@@ -408,18 +400,15 @@ export declare class SuratService {
             sudah_lisensi_kepala_sekolah: import("@prisma/client-runtime-utils").Decimal | null;
             jumlah_sekolah_binaan: number | null;
             pernah_diklat_kepengawasan: import("@prisma/client-runtime-utils").Decimal | null;
-            status_data: number | null;
+            nm_wp: string | null;
             karpeg: string | null;
             karpas: string | null;
             mampu_handle_kk: number | null;
             keahlian_braille: import("@prisma/client-runtime-utils").Decimal | null;
             keahlian_bhs_isyarat: import("@prisma/client-runtime-utils").Decimal | null;
-            kewarganegaraan: string | null;
-            id_bank: string | null;
-            rekening_bank: string | null;
+            npwp: string | null;
             blob_id: string | null;
             ptk_terdaftar_id: string | null;
-            jenis_keluar_id: string | null;
             jabatan_ptk_id: import("@prisma/client-runtime-utils").Decimal | null;
             tahun_ajaran_id: import("@prisma/client-runtime-utils").Decimal | null;
             jenis_ptk_id: import("@prisma/client-runtime-utils").Decimal | null;
@@ -428,19 +417,30 @@ export declare class SuratService {
             ptk_induk: import("@prisma/client-runtime-utils").Decimal | null;
             tmt_tugas: Date | null;
             tgl_ptk_keluar: Date | null;
-            qr_token: string | null;
-            status: string;
-            no_whatsapp: string | null;
             id_telegram: string | null;
-            nama_kcp: string | null;
+        };
+        template_surat: {
+            sekolah_id: string;
+            created_at: Date;
+            updated_at: Date;
+            aktif: boolean;
+            kategori: number;
+            template_surat_id: string;
+            nama_template: string;
+            ukuran_kertas: number;
+            margin_atas: number;
+            margin_bawah: number;
+            margin_kiri: number;
+            margin_kanan: number;
+            konten_html: string;
         };
     } & {
+        peserta_didik_id: string | null;
         sekolah_id: string;
+        status: number;
         created_at: Date;
         updated_at: Date;
         ptk_id: string | null;
-        peserta_didik_id: string | null;
-        status: number;
         kategori: number;
         pengaturan_nomor_surat_id: string;
         template_surat_id: string;
@@ -452,12 +452,12 @@ export declare class SuratService {
         file_pdf: string | null;
     }>;
     updateSuratKeluar(id: string, dto: any): Promise<{
+        peserta_didik_id: string | null;
         sekolah_id: string;
+        status: number;
         created_at: Date;
         updated_at: Date;
         ptk_id: string | null;
-        peserta_didik_id: string | null;
-        status: number;
         kategori: number;
         pengaturan_nomor_surat_id: string;
         template_surat_id: string;
@@ -469,12 +469,12 @@ export declare class SuratService {
         file_pdf: string | null;
     }>;
     terbitkanSurat(id: string): Promise<{
+        peserta_didik_id: string | null;
         sekolah_id: string;
+        status: number;
         created_at: Date;
         updated_at: Date;
         ptk_id: string | null;
-        peserta_didik_id: string | null;
-        status: number;
         kategori: number;
         pengaturan_nomor_surat_id: string;
         template_surat_id: string;

@@ -10,10 +10,31 @@ async function checkTables() {
     const adapter = new adapter_pg_1.PrismaPg(pool);
     const prisma = new client_1.PrismaClient({ adapter });
     try {
-        const schoolCount = await prisma.sekolah.count();
-        console.log('Total schools in Sekolah table:', schoolCount);
-        const schools = await prisma.sekolah.findMany();
-        console.log('Schools detail:', JSON.stringify(schools, null, 2));
+        const refJenisKeluar = await prisma.jenis_keluar.findMany({
+            select: { jenis_keluar_id: true, ket_keluar: true }
+        });
+        console.log('refJenisKeluar:', refJenisKeluar);
+        const students = await prisma.pesertaDidik.findMany({
+            where: { NOT: { status: 'Aktif' } },
+            take: 5,
+            select: {
+                peserta_didik_id: true,
+                nama: true,
+                jenis_keluar_id: true,
+                keterangan: true
+            }
+        });
+        console.log('Raw students from DB:', students);
+        const mapped = students.map((item) => {
+            const jk = refJenisKeluar.find((r) => String(r.jenis_keluar_id) === String(item.jenis_keluar_id));
+            return {
+                nama: item.nama,
+                jenis_keluar_id: item.jenis_keluar_id,
+                jenis_keluar_id_str: jk?.ket_keluar || null,
+                keterangan: item.keterangan
+            };
+        });
+        console.log('Mapped students:', JSON.stringify(mapped, null, 2));
     }
     catch (error) {
         console.error('Error checking tables:', error);

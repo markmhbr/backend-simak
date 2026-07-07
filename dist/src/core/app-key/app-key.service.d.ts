@@ -5,9 +5,9 @@ export declare class AppKeyService {
     private generateSecureToken;
     validateApiKey(keyApi: string): Promise<{
         sekolah_id: string;
-        id: string;
         created_at: Date;
         updated_at: Date;
+        id: string;
         nama_app: string;
         key_api: string;
         key_webService: string | null;
@@ -17,9 +17,9 @@ export declare class AppKeyService {
     }>;
     findByDomain(domain: string): Promise<{
         sekolah_id: string;
-        id: string;
         created_at: Date;
         updated_at: Date;
+        id: string;
         nama_app: string;
         key_api: string;
         key_webService: string | null;
@@ -29,9 +29,9 @@ export declare class AppKeyService {
     }>;
     createKey(namaApp: string, sekolahId: string): Promise<{
         sekolah_id: string;
-        id: string;
         created_at: Date;
         updated_at: Date;
+        id: string;
         nama_app: string;
         key_api: string;
         key_webService: string | null;
@@ -41,9 +41,9 @@ export declare class AppKeyService {
     }>;
     updateWebServiceKey(sekolahId: string, keyWs: string): Promise<{
         sekolah_id: string;
-        id: string;
         created_at: Date;
         updated_at: Date;
+        id: string;
         nama_app: string;
         key_api: string;
         key_webService: string | null;
@@ -53,9 +53,9 @@ export declare class AppKeyService {
     }>;
     updateAdminPanelKey(sekolahId: string, keyAdm: string): Promise<{
         sekolah_id: string;
-        id: string;
         created_at: Date;
         updated_at: Date;
+        id: string;
         nama_app: string;
         key_api: string;
         key_webService: string | null;
@@ -65,9 +65,9 @@ export declare class AppKeyService {
     }>;
     getAllKeys(): Promise<{
         sekolah_id: string;
-        id: string;
         created_at: Date;
         updated_at: Date;
+        id: string;
         nama_app: string;
         key_api: string;
         key_webService: string | null;
@@ -77,9 +77,9 @@ export declare class AppKeyService {
     }[]>;
     regenerateKeys(id: string): Promise<{
         sekolah_id: string;
-        id: string;
         created_at: Date;
         updated_at: Date;
+        id: string;
         nama_app: string;
         key_api: string;
         key_webService: string | null;
@@ -89,9 +89,9 @@ export declare class AppKeyService {
     }>;
     updateSchoolDomain(sekolahId: string, domain: string): Promise<{
         sekolah_id: string;
-        id: string;
         created_at: Date;
         updated_at: Date;
+        id: string;
         nama_app: string;
         key_api: string;
         key_webService: string | null;
@@ -101,9 +101,9 @@ export declare class AppKeyService {
     }>;
     toggleActive(id: string): Promise<{
         sekolah_id: string;
-        id: string;
         created_at: Date;
         updated_at: Date;
+        id: string;
         nama_app: string;
         key_api: string;
         key_webService: string | null;

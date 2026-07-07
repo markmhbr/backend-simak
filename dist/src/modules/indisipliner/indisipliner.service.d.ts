@@ -7,8 +7,8 @@ export declare class IndisiplinerService {
     private readonly prisma;
     constructor(prisma: PrismaService);
     getJenisPelanggaran(sekolahId: string): Promise<{
-        sekolah_id: string;
         nama: string;
+        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
         aktif: boolean;
@@ -17,8 +17,8 @@ export declare class IndisiplinerService {
         jenis_pelanggaran_id: string;
     }[]>;
     createJenisPelanggaran(dto: CreateJenisPelanggaranDto): Promise<{
-        sekolah_id: string;
         nama: string;
+        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
         aktif: boolean;
@@ -27,8 +27,8 @@ export declare class IndisiplinerService {
         jenis_pelanggaran_id: string;
     }>;
     getJenisTindakLanjut(sekolahId: string): Promise<{
-        sekolah_id: string;
         nama: string;
+        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
         aktif: boolean;
@@ -36,8 +36,8 @@ export declare class IndisiplinerService {
         jenis_tindak_lanjut_id: string;
     }[]>;
     createJenisTindakLanjut(dto: CreateJenisTindakLanjutDto): Promise<{
-        sekolah_id: string;
         nama: string;
+        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
         aktif: boolean;
@@ -50,13 +50,13 @@ export declare class IndisiplinerService {
         status?: number;
     }): Promise<any[]>;
     createPelanggaran(dto: CreatePelanggaranDto): Promise<{
+        peserta_didik_id: string | null;
         sekolah_id: string;
+        keterangan: string | null;
+        status: number;
         created_at: Date;
         updated_at: Date;
         ptk_id: string | null;
-        peserta_didik_id: string | null;
-        status: number;
-        keterangan: string | null;
         tanggal: Date;
         poin: number;
         jenis_pelanggaran_id: string;
@@ -65,13 +65,13 @@ export declare class IndisiplinerService {
         pelanggaran_id: string;
     }>;
     updatePelanggaranStatus(id: string, status: number): Promise<{
+        peserta_didik_id: string | null;
         sekolah_id: string;
+        keterangan: string | null;
+        status: number;
         created_at: Date;
         updated_at: Date;
         ptk_id: string | null;
-        peserta_didik_id: string | null;
-        status: number;
-        keterangan: string | null;
         tanggal: Date;
         poin: number;
         jenis_pelanggaran_id: string;
@@ -80,9 +80,9 @@ export declare class IndisiplinerService {
         pelanggaran_id: string;
     }>;
     createTindakLanjut(dto: CreateTindakLanjutDto): Promise<{
+        keterangan: string | null;
         created_at: Date;
         updated_at: Date;
-        keterangan: string | null;
         tanggal: Date;
         pelanggaran_id: string;
         jenis_tindak_lanjut_id: string;

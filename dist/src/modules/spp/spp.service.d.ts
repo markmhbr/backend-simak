@@ -84,10 +84,6 @@ export declare class SppService {
         peserta_didik_id?: string;
         status?: number;
     }): Promise<({
-        pengaturan_tagihan: {
-            tipe: number;
-            nama_tagihan: string;
-        };
         peserta_didik: {
             nama: string;
             nisn: string;
@@ -95,11 +91,15 @@ export declare class SppService {
                 nama: string;
             };
         };
+        pengaturan_tagihan: {
+            tipe: number;
+            nama_tagihan: string;
+        };
         riwayat_transaksi: {
-            sekolah_id: string;
-            created_at: Date;
             peserta_didik_id: string;
+            sekolah_id: string;
             keterangan: string | null;
+            created_at: Date;
             nominal: bigint;
             spp_id: string;
             jenis_transaksi: number;
@@ -108,11 +108,11 @@ export declare class SppService {
             riwayat_transaksi_spp_id: string;
         }[];
     } & {
+        peserta_didik_id: string;
         sekolah_id: string;
+        status: number;
         created_at: Date;
         updated_at: Date;
-        peserta_didik_id: string;
-        status: number;
         pengaturan_tagihan_id: string;
         spp_id: string;
         nominal_tagihan: bigint;
@@ -120,10 +120,10 @@ export declare class SppService {
         jatuh_tempo: Date | null;
     })[]>;
     createTransaksiSpp(dto: CreateTransaksiSppDto): Promise<{
-        sekolah_id: string;
-        created_at: Date;
         peserta_didik_id: string;
+        sekolah_id: string;
         keterangan: string | null;
+        created_at: Date;
         nominal: bigint;
         spp_id: string;
         jenis_transaksi: number;

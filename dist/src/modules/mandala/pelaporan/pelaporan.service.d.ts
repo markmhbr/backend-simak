@@ -4,12 +4,12 @@ export declare class PelaporanService {
     private prisma;
     constructor(prisma: PrismaService);
     createPelaporan(cadisdikId: string, dto: CreatePelaporanDto): Promise<{
-        cadisdik_id: string;
         created_at: Date;
         updated_at: Date;
-        aktif: boolean;
         tanggal_mulai: Date | null;
         tanggal_selesai: Date | null;
+        cadisdik_id: string;
+        aktif: boolean;
         judul: string;
         deskripsi: string | null;
         pelaporan_id: string;
