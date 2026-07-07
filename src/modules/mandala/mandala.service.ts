@@ -1471,4 +1471,26 @@ export class MandalaService implements OnModuleInit {
 
     return result;
   }
+
+  async getSemestersForMandala() {
+    const semesters = await this.prisma.semester.findMany({
+      where: { periode_aktif: 1 },
+      orderBy: { semester_id: 'desc' },
+    });
+
+    return semesters.map((s) => {
+      const nama = s.nama ? s.nama.trim() : '';
+      const parts = nama.split(' ');
+      const tahun_ajaran = parts[0] || '';
+      const semester_nama = parts.slice(1).join(' ') || '';
+
+      return {
+        semester_id: s.semester_id,
+        nama: s.nama,
+        tahun_ajaran: tahun_ajaran,
+        semester: semester_nama,
+        periode_aktif: Number(s.periode_aktif) === 1,
+      };
+    });
+  }
 }

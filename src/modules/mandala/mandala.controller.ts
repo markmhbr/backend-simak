@@ -486,4 +486,14 @@ export class MandalaController {
       data,
     };
   }
+
+  @Get('dapodik/semester_id')
+  @UseGuards(MandalaKeyGuard)
+  async getSemesterIds() {
+    const data = await this.mandalaService.getSemestersForMandala();
+    return {
+      status: 'success',
+      data,
+    };
+  }
 }

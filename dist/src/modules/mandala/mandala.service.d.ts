@@ -671,4 +671,11 @@ export declare class MandalaService implements OnModuleInit {
     }[]>;
     private calculateMonthlySummary;
     private resolveWilayahHierarchy;
+    getSemestersForMandala(): Promise<{
+        semester_id: string;
+        nama: string;
+        tahun_ajaran: string;
+        semester: string;
+        periode_aktif: boolean;
+    }[]>;
 }

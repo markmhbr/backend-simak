@@ -353,6 +353,13 @@ let MandalaController = class MandalaController {
             data,
         };
     }
+    async getSemesterIds() {
+        const data = await this.mandalaService.getSemestersForMandala();
+        return {
+            status: 'success',
+            data,
+        };
+    }
 };
 exports.MandalaController = MandalaController;
 __decorate([
@@ -653,6 +660,13 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], MandalaController.prototype, "getGtkPresenceSummary", null);
+__decorate([
+    (0, common_1.Get)('dapodik/semester_id'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "getSemesterIds", null);
 exports.MandalaController = MandalaController = __decorate([
     (0, common_1.Controller)('mandala'),
     __metadata("design:paramtypes", [mandala_service_1.MandalaService])

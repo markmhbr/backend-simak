@@ -694,4 +694,14 @@ export declare class MandalaController {
             alpha: number;
         }[];
     }>;
+    getSemesterIds(): Promise<{
+        status: string;
+        data: {
+            semester_id: string;
+            nama: string;
+            tahun_ajaran: string;
+            semester: string;
+            periode_aktif: boolean;
+        }[];
+    }>;
 }
