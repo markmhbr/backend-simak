@@ -24,25 +24,6 @@ let PengajuanPerbaikanService = class PengajuanPerbaikanService {
         if (payload.tipe === 'GTK' && !payload.ptk_id) {
             throw new common_1.BadRequestException('ptk_id harus diisi untuk tipe pengajuan GTK.');
         }
-        const settings = await this.prisma.pengaturanUmum.findUnique({
-            where: { sekolah_id: sekolahId },
-        });
-        if (!settings || !settings.waktu_mulai_pengajuan || !settings.waktu_sampai_pengajuan) {
-            throw new common_1.BadRequestException('Pengajuan perbaikan belum dibuka oleh sekolah (waktu pengajuan belum diatur).');
-        }
-        const now = new Date();
-        const formatter = new Intl.DateTimeFormat('en-CA', {
-            timeZone: 'Asia/Jakarta',
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-        });
-        const currentDateStr = formatter.format(now);
-        const start = settings.waktu_mulai_pengajuan;
-        const end = settings.waktu_sampai_pengajuan;
-        if (currentDateStr < start || currentDateStr > end) {
-            throw new common_1.BadRequestException(`Pengajuan perbaikan ditutup. Pengajuan hanya diperbolehkan dari tanggal ${start} s.d ${end}. Saat ini tanggal ${currentDateStr}.`);
-        }
         return this.prisma.pengajuanPerbaikan.create({
             data: {
                 sekolah_id: sekolahId,
