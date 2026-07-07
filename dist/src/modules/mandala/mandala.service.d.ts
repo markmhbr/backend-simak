@@ -502,6 +502,8 @@ export declare class MandalaService implements OnModuleInit {
                 agama: any;
                 jenis_pendaftaran_id_str: any;
                 foto: any;
+                tanggal_masuk_sekolah: any;
+                tanggal_keluar: any;
                 last_update: any;
             };
             akademik: {

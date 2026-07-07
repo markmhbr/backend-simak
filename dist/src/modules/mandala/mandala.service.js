@@ -784,6 +784,8 @@ let MandalaService = MandalaService_1 = class MandalaService {
                     agama: pd.agama?.nama || pd.agama_id || '',
                     jenis_pendaftaran_id_str: pd.jenis_pendaftaran_id?.toString() || '',
                     foto: pd.foto || '',
+                    tanggal_masuk_sekolah: pd.tanggal_masuk_sekolah || null,
+                    tanggal_keluar: pd.tanggal_keluar || null,
                     last_update: pd.updated_at,
                 },
                 akademik: {
