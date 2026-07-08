@@ -459,6 +459,21 @@ let DapodikController = class DapodikController {
         const data = await this.dapodikService.updateGtk(sekolahId, id, body);
         return { status: 'success', data };
     }
+    async createGtkAnak(req, id, body) {
+        const { sekolahId } = this.getSekolahInfo(req);
+        const data = await this.dapodikService.createGtkAnak(sekolahId, id, body);
+        return { status: 'success', data };
+    }
+    async updateGtkAnak(req, id, anakId, body) {
+        const { sekolahId } = this.getSekolahInfo(req);
+        const data = await this.dapodikService.updateGtkAnak(sekolahId, id, anakId, body);
+        return { status: 'success', data };
+    }
+    async deleteGtkAnak(req, id, anakId) {
+        const { sekolahId } = this.getSekolahInfo(req);
+        const data = await this.dapodikService.deleteGtkAnak(sekolahId, id, anakId);
+        return { status: 'success', data };
+    }
     async getPesertaDidikDetail(req, id) {
         const { sekolahId } = this.getSekolahInfo(req);
         const data = await this.dapodikService.getPesertaDidikById(sekolahId, id);
@@ -874,6 +889,34 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Promise)
 ], DapodikController.prototype, "updateGtkDetail", null);
+__decorate([
+    (0, common_1.Post)('gtk/:id/anak'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, Object]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "createGtkAnak", null);
+__decorate([
+    (0, common_1.Patch)('gtk/:id/anak/:anakId'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Param)('anakId')),
+    __param(3, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String, Object]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "updateGtkAnak", null);
+__decorate([
+    (0, common_1.Delete)('gtk/:id/anak/:anakId'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Param)('anakId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "deleteGtkAnak", null);
 __decorate([
     (0, common_1.Get)('peserta-didik/:id'),
     __param(0, (0, common_1.Req)()),

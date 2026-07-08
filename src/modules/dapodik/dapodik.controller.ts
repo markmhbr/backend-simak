@@ -610,6 +610,27 @@ export class DapodikController {
     return { status: 'success', data };
   }
 
+  @Post('gtk/:id/anak')
+  async createGtkAnak(@Req() req: Request, @Param('id') id: string, @Body() body: any) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.createGtkAnak(sekolahId, id, body);
+    return { status: 'success', data };
+  }
+
+  @Patch('gtk/:id/anak/:anakId')
+  async updateGtkAnak(@Req() req: Request, @Param('id') id: string, @Param('anakId') anakId: string, @Body() body: any) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.updateGtkAnak(sekolahId, id, anakId, body);
+    return { status: 'success', data };
+  }
+
+  @Delete('gtk/:id/anak/:anakId')
+  async deleteGtkAnak(@Req() req: Request, @Param('id') id: string, @Param('anakId') anakId: string) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.deleteGtkAnak(sekolahId, id, anakId);
+    return { status: 'success', data };
+  }
+
   @Get('peserta-didik/:id')
   async getPesertaDidikDetail(@Req() req: Request, @Param('id') id: string) {
     const { sekolahId } = this.getSekolahInfo(req);

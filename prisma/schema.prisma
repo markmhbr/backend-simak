@@ -80,6 +80,7 @@ model Sekolah {
   template_surat         TemplateSurat[]
   mandala_surat_keluar   MandalaSuratKeluar[]
   pengaturan_umum        PengaturanUmum?
+  anak                   Anak[]
 
   @@map("sekolah")
   @@schema("dapodik")
@@ -456,10 +457,42 @@ model Gtk {
   surat_keluar              SuratKeluar[]
   tindak_lanjut_petugas     TindakLanjut[]            @relation("PetugasTindakLanjut")
   bimbing_pd                BimbingPd[]
+  anak                      Anak[]
 
   @@index([sekolah_id])
   @@index([qr_token])
   @@map("gtks")
+  @@schema("dapodik")
+}
+
+model Anak {
+  anak_id              String             @id @default(uuid()) @db.Uuid
+  sekolah_id           String             @db.Uuid
+  ptk_id               String             @db.Uuid
+  status_anak_id       Decimal            @db.Decimal(1, 0)
+  jenjang_pendidikan_id Decimal           @db.Decimal(2, 0)
+  nik                  String?            @db.Char(16)
+  nisn                 String?            @db.Char(10)
+  nama                 String             @db.VarChar(100)
+  jenis_kelamin        String             @db.Char(1)
+  tempat_lahir         String?            @db.VarChar(32)
+  tanggal_lahir        DateTime           @db.Date
+  tahun_masuk          Int?
+  create_date          DateTime           @default(now())
+  last_update          DateTime           @updatedAt
+  soft_delete          Decimal            @db.Decimal(1, 0)
+  last_sync            DateTime           @default(now())
+  updater_id           String             @db.Uuid
+
+  // Relations
+  sekolah              Sekolah            @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
+  gtk                  Gtk                @relation(fields: [ptk_id], references: [ptk_id], onDelete: Cascade)
+  status_anak          status_anak        @relation(fields: [status_anak_id], references: [status_anak_id], onUpdate: Restrict)
+  jenjang_pendidikan   jenjang_pendidikan @relation(fields: [jenjang_pendidikan_id], references: [jenjang_pendidikan_id], onUpdate: Restrict)
+
+  @@index([sekolah_id])
+  @@index([ptk_id])
+  @@map("anak")
   @@schema("dapodik")
 }
 
@@ -2464,6 +2497,7 @@ model jenjang_pendidikan {
   template_un           template_un[]
   tingkat_pendidikan    tingkat_pendidikan[]
   riwayat_pendidikan_formal RiwayatPendidikanFormal[]
+  anak                      Anak[]
 
   @@schema("ref")
 }
@@ -3054,6 +3088,7 @@ model status_anak {
   last_update    DateTime  @default(dbgenerated("'2019-09-10 14:29:59.359947'::timestamp without time zone")) @db.Timestamp(6)
   expired_date   DateTime? @db.Timestamp(6)
   last_sync      DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  anak           Anak[]
 
   @@schema("ref")
 }

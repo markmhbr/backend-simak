@@ -627,6 +627,61 @@ export class SyncService {
           }
         }
 
+        // Sync Anak
+        const anakRaw = g.anak;
+        if (anakRaw) {
+          const anakList = Array.isArray(anakRaw) ? anakRaw : [anakRaw];
+          for (const a of anakList) {
+            if (!a || !a.anak_id) continue;
+            const existing = await this.prisma.anak.findFirst({
+              where: { anak_id: a.anak_id },
+            });
+            if (existing) {
+              await this.prisma.anak.update({
+                where: { anak_id: a.anak_id },
+                data: {
+                  status_anak_id: this.parseNumber(a.status_anak_id),
+                  jenjang_pendidikan_id: this.parseNumber(a.jenjang_pendidikan_id),
+                  nik: a.nik || null,
+                  nisn: a.nisn || null,
+                  nama: a.nama,
+                  jenis_kelamin: a.jenis_kelamin,
+                  tempat_lahir: a.tempat_lahir || null,
+                  tanggal_lahir: this.parseDate(a.tanggal_lahir),
+                  tahun_masuk: this.parseNumber(a.tahun_masuk),
+                  create_date: this.parseDate(a.create_date),
+                  last_update: this.parseDate(a.last_update),
+                  soft_delete: this.parseNumber(a.soft_delete),
+                  last_sync: this.parseDate(a.last_sync),
+                  updater_id: a.updater_id || null,
+                },
+              });
+            } else {
+              await this.prisma.anak.create({
+                data: {
+                  anak_id: a.anak_id,
+                  sekolah_id: sekolahId,
+                  ptk_id: g.ptk_id,
+                  status_anak_id: this.parseNumber(a.status_anak_id),
+                  jenjang_pendidikan_id: this.parseNumber(a.jenjang_pendidikan_id),
+                  nik: a.nik || null,
+                  nisn: a.nisn || null,
+                  nama: a.nama,
+                  jenis_kelamin: a.jenis_kelamin,
+                  tempat_lahir: a.tempat_lahir || null,
+                  tanggal_lahir: this.parseDate(a.tanggal_lahir),
+                  tahun_masuk: this.parseNumber(a.tahun_masuk),
+                  create_date: this.parseDate(a.create_date),
+                  last_update: this.parseDate(a.last_update),
+                  soft_delete: this.parseNumber(a.soft_delete),
+                  last_sync: this.parseDate(a.last_sync),
+                  updater_id: a.updater_id || null,
+                },
+              });
+            }
+          }
+        }
+
         successCount++;
       } catch (err) {
         this.logger.error(`Error upsert GTK ${g.ptk_id}: ${err.message}`);

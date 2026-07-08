@@ -2303,6 +2303,12 @@ let DapodikService = class DapodikService {
                 rwy_sertifikasi: true,
                 rwy_kepangkatan: true,
                 tugas_tambahan: true,
+                anak: {
+                    include: {
+                        status_anak: true,
+                        jenjang_pendidikan: true
+                    }
+                },
             },
         });
         if (gtk) {
@@ -2434,6 +2440,70 @@ let DapodikService = class DapodikService {
             };
         }
         return null;
+    }
+    async createGtkAnak(sekolahId, ptkId, body) {
+        const ptk = await this.prisma.gtk.findFirst({
+            where: { ptk_id: ptkId, sekolah_id: sekolahId },
+        });
+        if (!ptk) {
+            throw new common_1.NotFoundException(`GTK not found.`);
+        }
+        return await this.prisma.anak.create({
+            data: {
+                sekolah_id: sekolahId,
+                ptk_id: ptkId,
+                nama: body.nama,
+                nik: body.nik || null,
+                nisn: body.nisn || null,
+                jenis_kelamin: body.jenis_kelamin,
+                tempat_lahir: body.tempat_lahir || null,
+                tanggal_lahir: new Date(body.tanggal_lahir),
+                status_anak_id: Number(body.status_anak_id),
+                jenjang_pendidikan_id: Number(body.jenjang_pendidikan_id),
+                tahun_masuk: body.tahun_masuk ? Number(body.tahun_masuk) : null,
+                soft_delete: 0,
+                updater_id: ptkId,
+            },
+        });
+    }
+    async updateGtkAnak(sekolahId, ptkId, anakId, body) {
+        const child = await this.prisma.anak.findFirst({
+            where: { anak_id: anakId, ptk_id: ptkId, sekolah_id: sekolahId },
+        });
+        if (!child) {
+            throw new common_1.NotFoundException(`Child record not found.`);
+        }
+        return await this.prisma.anak.update({
+            where: { anak_id: anakId },
+            data: {
+                nama: body.nama,
+                nik: body.nik || null,
+                nisn: body.nisn || null,
+                jenis_kelamin: body.jenis_kelamin,
+                tempat_lahir: body.tempat_lahir || null,
+                tanggal_lahir: new Date(body.tanggal_lahir),
+                status_anak_id: Number(body.status_anak_id),
+                jenjang_pendidikan_id: Number(body.jenjang_pendidikan_id),
+                tahun_masuk: body.tahun_masuk ? Number(body.tahun_masuk) : null,
+                soft_delete: body.soft_delete !== undefined ? Number(body.soft_delete) : child.soft_delete,
+                last_update: new Date(),
+            },
+        });
+    }
+    async deleteGtkAnak(sekolahId, ptkId, anakId) {
+        const child = await this.prisma.anak.findFirst({
+            where: { anak_id: anakId, ptk_id: ptkId, sekolah_id: sekolahId },
+        });
+        if (!child) {
+            throw new common_1.NotFoundException(`Child record not found.`);
+        }
+        return await this.prisma.anak.update({
+            where: { anak_id: anakId },
+            data: {
+                soft_delete: 1,
+                last_update: new Date(),
+            },
+        });
     }
     async updateGtk(sekolahId, id, data) {
         const updateData = { ...data };
@@ -3067,6 +3137,23 @@ let DapodikService = class DapodikService {
                 no_hp: true,
                 nm_wp: true,
                 npwp: true,
+                anak: {
+                    select: {
+                        anak_id: true,
+                        ptk_id: true,
+                        status_anak_id: true,
+                        jenjang_pendidikan_id: true,
+                        nik: true,
+                        nisn: true,
+                        nama: true,
+                        jenis_kelamin: true,
+                        tempat_lahir: true,
+                        tanggal_lahir: true,
+                        tahun_masuk: true,
+                        soft_delete: true,
+                        updater_id: true,
+                    }
+                }
             },
         });
     }

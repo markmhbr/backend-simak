@@ -24,6 +24,21 @@ export declare class DapodikController {
         pekerjaan_suami_istri: number;
         nm_wp: string;
         npwp: string;
+        anak: {
+            nama: string;
+            jenis_kelamin: string;
+            nisn: string;
+            nik: string;
+            tempat_lahir: string;
+            tanggal_lahir: Date;
+            soft_delete: import("@prisma/client-runtime-utils").Decimal;
+            ptk_id: string;
+            updater_id: string;
+            jenjang_pendidikan_id: import("@prisma/client-runtime-utils").Decimal;
+            tahun_masuk: number;
+            anak_id: string;
+            status_anak_id: import("@prisma/client-runtime-utils").Decimal;
+        }[];
     }[]>;
     dapatkanUpdatePesertaDidik(req: Request): Promise<{
         peserta_didik_id: string;
@@ -1000,6 +1015,72 @@ export declare class DapodikController {
             tmt_tugas: Date | null;
             tgl_ptk_keluar: Date | null;
             id_telegram: string | null;
+        };
+    }>;
+    createGtkAnak(req: Request, id: string, body: any): Promise<{
+        status: string;
+        data: {
+            create_date: Date;
+            last_update: Date;
+            last_sync: Date;
+            nama: string;
+            jenis_kelamin: string;
+            nisn: string | null;
+            nik: string | null;
+            tempat_lahir: string | null;
+            tanggal_lahir: Date;
+            soft_delete: import("@prisma/client-runtime-utils").Decimal;
+            sekolah_id: string;
+            ptk_id: string;
+            updater_id: string;
+            jenjang_pendidikan_id: import("@prisma/client-runtime-utils").Decimal;
+            tahun_masuk: number | null;
+            anak_id: string;
+            status_anak_id: import("@prisma/client-runtime-utils").Decimal;
+        };
+    }>;
+    updateGtkAnak(req: Request, id: string, anakId: string, body: any): Promise<{
+        status: string;
+        data: {
+            create_date: Date;
+            last_update: Date;
+            last_sync: Date;
+            nama: string;
+            jenis_kelamin: string;
+            nisn: string | null;
+            nik: string | null;
+            tempat_lahir: string | null;
+            tanggal_lahir: Date;
+            soft_delete: import("@prisma/client-runtime-utils").Decimal;
+            sekolah_id: string;
+            ptk_id: string;
+            updater_id: string;
+            jenjang_pendidikan_id: import("@prisma/client-runtime-utils").Decimal;
+            tahun_masuk: number | null;
+            anak_id: string;
+            status_anak_id: import("@prisma/client-runtime-utils").Decimal;
+        };
+    }>;
+    deleteGtkAnak(req: Request, id: string, anakId: string): Promise<{
+        status: string;
+        data: {
+            create_date: Date;
+            last_update: Date;
+            last_sync: Date;
+            nama: string;
+            jenis_kelamin: string;
+            nisn: string | null;
+            nik: string | null;
+            tempat_lahir: string | null;
+            tanggal_lahir: Date;
+            soft_delete: import("@prisma/client-runtime-utils").Decimal;
+            sekolah_id: string;
+            ptk_id: string;
+            updater_id: string;
+            jenjang_pendidikan_id: import("@prisma/client-runtime-utils").Decimal;
+            tahun_masuk: number | null;
+            anak_id: string;
+            status_anak_id: import("@prisma/client-runtime-utils").Decimal;
         };
     }>;
     getPesertaDidikDetail(req: Request, id: string): Promise<{

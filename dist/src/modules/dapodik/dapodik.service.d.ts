@@ -676,6 +676,63 @@ export declare class DapodikService {
         }[];
     }>;
     getGtkById(sekolahId: string, id: string): Promise<any>;
+    createGtkAnak(sekolahId: string, ptkId: string, body: any): Promise<{
+        create_date: Date;
+        last_update: Date;
+        last_sync: Date;
+        nama: string;
+        jenis_kelamin: string;
+        nisn: string | null;
+        nik: string | null;
+        tempat_lahir: string | null;
+        tanggal_lahir: Date;
+        soft_delete: Prisma.Decimal;
+        sekolah_id: string;
+        ptk_id: string;
+        updater_id: string;
+        jenjang_pendidikan_id: Prisma.Decimal;
+        tahun_masuk: number | null;
+        anak_id: string;
+        status_anak_id: Prisma.Decimal;
+    }>;
+    updateGtkAnak(sekolahId: string, ptkId: string, anakId: string, body: any): Promise<{
+        create_date: Date;
+        last_update: Date;
+        last_sync: Date;
+        nama: string;
+        jenis_kelamin: string;
+        nisn: string | null;
+        nik: string | null;
+        tempat_lahir: string | null;
+        tanggal_lahir: Date;
+        soft_delete: Prisma.Decimal;
+        sekolah_id: string;
+        ptk_id: string;
+        updater_id: string;
+        jenjang_pendidikan_id: Prisma.Decimal;
+        tahun_masuk: number | null;
+        anak_id: string;
+        status_anak_id: Prisma.Decimal;
+    }>;
+    deleteGtkAnak(sekolahId: string, ptkId: string, anakId: string): Promise<{
+        create_date: Date;
+        last_update: Date;
+        last_sync: Date;
+        nama: string;
+        jenis_kelamin: string;
+        nisn: string | null;
+        nik: string | null;
+        tempat_lahir: string | null;
+        tanggal_lahir: Date;
+        soft_delete: Prisma.Decimal;
+        sekolah_id: string;
+        ptk_id: string;
+        updater_id: string;
+        jenjang_pendidikan_id: Prisma.Decimal;
+        tahun_masuk: number | null;
+        anak_id: string;
+        status_anak_id: Prisma.Decimal;
+    }>;
     updateGtk(sekolahId: string, id: string, data: any): Promise<{
         jenis_keluar_id: string | null;
         create_date: Date;
@@ -974,6 +1031,21 @@ export declare class DapodikService {
         pekerjaan_suami_istri: number;
         nm_wp: string;
         npwp: string;
+        anak: {
+            nama: string;
+            jenis_kelamin: string;
+            nisn: string;
+            nik: string;
+            tempat_lahir: string;
+            tanggal_lahir: Date;
+            soft_delete: Prisma.Decimal;
+            ptk_id: string;
+            updater_id: string;
+            jenjang_pendidikan_id: Prisma.Decimal;
+            tahun_masuk: number;
+            anak_id: string;
+            status_anak_id: Prisma.Decimal;
+        }[];
     }[]>;
     getUpdatePesertaDidik(sekolahId: string): Promise<{
         peserta_didik_id: string;
