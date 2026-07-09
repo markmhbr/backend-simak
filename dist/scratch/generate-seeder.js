@@ -34,14 +34,132 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs = __importStar(require("fs"));
-const jsonPath = 'c:\\Users\\hexa8\\Downloads\\pegawai_kcds.json';
+const sqlPath = 'c:\\Users\\hexa8\\Downloads\\pegawai_kcds (1).sql';
+const jsonOutputPath = 'c:\\Users\\hexa8\\Downloads\\pegawai_kcds.json';
 const seederPath = 'c:\\backend-simak\\prisma\\seed-pegawai.ts';
-function main() {
-    if (!fs.existsSync(jsonPath)) {
-        throw new Error(`JSON file not found at: ${jsonPath}`);
+function parseSqlFile(filePath) {
+    const content = fs.readFileSync(filePath, 'utf-8');
+    const valuesStart = content.indexOf('VALUES');
+    if (valuesStart === -1) {
+        throw new Error('Could not find VALUES clause in SQL file.');
     }
-    const pegawais = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
-    console.log(`Loaded ${pegawais.length} records.`);
+    const valuesText = content.substring(valuesStart + 6).trim();
+    const rows = [];
+    let currentWord = '';
+    let inQuotes = false;
+    let quoteChar = '';
+    let inRow = false;
+    let currentRowValues = [];
+    for (let i = 0; i < valuesText.length; i++) {
+        const char = valuesText[i];
+        if (inQuotes) {
+            if (char === '\\') {
+                currentWord += char + (valuesText[i + 1] || '');
+                i++;
+            }
+            else if (char === quoteChar) {
+                inQuotes = false;
+            }
+            else {
+                currentWord += char;
+            }
+        }
+        else {
+            if (char === "'" || char === '"') {
+                inQuotes = true;
+                quoteChar = char;
+            }
+            else if (char === '(') {
+                if (!inRow) {
+                    inRow = true;
+                    currentRowValues = [];
+                    currentWord = '';
+                }
+                else {
+                    currentWord += char;
+                }
+            }
+            else if (char === ')') {
+                if (inRow) {
+                    currentRowValues.push(currentWord.trim());
+                    rows.push(currentRowValues);
+                    inRow = false;
+                }
+            }
+            else if (char === ',') {
+                if (inRow) {
+                    currentRowValues.push(currentWord.trim());
+                    currentWord = '';
+                }
+            }
+            else if (char === ';') {
+                if (inRow) {
+                    currentRowValues.push(currentWord.trim());
+                    rows.push(currentRowValues);
+                    inRow = false;
+                }
+                break;
+            }
+            else {
+                currentWord += char;
+            }
+        }
+    }
+    return rows;
+}
+function cleanValue(val) {
+    if (!val || val === 'NULL')
+        return null;
+    return val;
+}
+function main() {
+    const parsed = parseSqlFile(sqlPath);
+    console.log(`Parsed ${parsed.length} rows from SQL.`);
+    const mapped = parsed.map((row) => {
+        const id = cleanValue(row[0]);
+        const name = cleanValue(row[2]);
+        const rawNik = cleanValue(row[3]);
+        const rawTempatLahir = cleanValue(row[4]);
+        const rawTanggalLahir = cleanValue(row[5]);
+        const jenisKelaminStr = cleanValue(row[6]);
+        let nip = cleanValue(row[7]);
+        const rawEmail = cleanValue(row[11]);
+        const rawAlamat = cleanValue(row[12]);
+        if (!nip) {
+            nip = '999999' + String(id).padStart(12, '0');
+        }
+        const nik = rawNik || nip.substring(0, 16);
+        const tempat_lahir = rawTempatLahir || 'Bandung';
+        let tanggal_lahir = rawTanggalLahir;
+        if (!tanggal_lahir && nip && nip.length >= 8 && !nip.startsWith('9999')) {
+            const yyyy = nip.substring(0, 4);
+            const mm = nip.substring(4, 6);
+            const dd = nip.substring(6, 8);
+            tanggal_lahir = `${yyyy}-${mm}-${dd}`;
+        }
+        if (!tanggal_lahir) {
+            tanggal_lahir = '1985-01-01';
+        }
+        const alamat_lengkap = rawAlamat || '-';
+        const email = rawEmail || `${nip}@simak.go.id`;
+        const jenis_kelamin = jenisKelaminStr === 'P' ? 2 : 1;
+        const jabatan = 5;
+        return {
+            cadisdik_id: 'a7d04456-3fc8-4153-b0f3-b30a730075d8',
+            nama_lengkap: name,
+            nik,
+            tempat_lahir,
+            tanggal_lahir,
+            alamat_lengkap,
+            nip,
+            email,
+            password: 'mandala123',
+            jabatan,
+            jenis_kelamin
+        };
+    });
+    fs.writeFileSync(jsonOutputPath, JSON.stringify(mapped, null, 2), 'utf-8');
+    console.log(`Saved JSON with ${mapped.length} records to ${jsonOutputPath}`);
     const code = `import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
@@ -53,7 +171,7 @@ const pool = new Pool({ connectionString });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
-const PEGAWAIS = ${JSON.stringify(pegawais, null, 2)};
+const PEGAWAIS = ${JSON.stringify(mapped, null, 2)};
 
 async function main() {
   const targetCadisdikId = 'a7d04456-3fc8-4153-b0f3-b30a730075d8';
