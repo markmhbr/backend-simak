@@ -221,6 +221,21 @@ let AuthService = class AuthService {
             secret: this.configService.get('JWT_REFRESH_SECRET'),
             expiresIn: this.configService.get('JWT_REFRESH_EXPIRATION'),
         });
+        let foto = null;
+        if (user.ptk_id) {
+            const gtk = await this.prisma.gtk.findUnique({
+                where: { ptk_id: user.ptk_id },
+                select: { foto: true }
+            });
+            foto = gtk?.foto || null;
+        }
+        else if (user.peserta_didik_id) {
+            const pd = await this.prisma.pesertaDidik.findUnique({
+                where: { peserta_didik_id: user.peserta_didik_id },
+                select: { foto: true }
+            });
+            foto = pd?.foto || null;
+        }
         return {
             accessToken,
             refreshToken,
@@ -231,6 +246,7 @@ let AuthService = class AuthService {
                 role: role,
                 ptk_id: user.ptk_id,
                 peserta_didik_id: user.peserta_didik_id,
+                foto: foto,
             },
         };
     }
@@ -336,7 +352,25 @@ let AuthService = class AuthService {
         });
         if (!user)
             throw new common_1.BadRequestException('Pengguna tidak ditemukan');
-        return user;
+        let foto = null;
+        if (user.ptk_id) {
+            const gtk = await this.prisma.gtk.findUnique({
+                where: { ptk_id: user.ptk_id },
+                select: { foto: true }
+            });
+            foto = gtk?.foto || null;
+        }
+        else if (user.peserta_didik_id) {
+            const pd = await this.prisma.pesertaDidik.findUnique({
+                where: { peserta_didik_id: user.peserta_didik_id },
+                select: { foto: true }
+            });
+            foto = pd?.foto || null;
+        }
+        return {
+            ...user,
+            foto,
+        };
     }
 };
 exports.AuthService = AuthService;

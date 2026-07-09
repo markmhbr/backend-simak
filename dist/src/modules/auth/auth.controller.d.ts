@@ -14,6 +14,7 @@ export declare class AuthController {
             role: string;
             ptk_id: any;
             peserta_didik_id: any;
+            foto: string;
         };
         requires2FA: boolean;
         is2FASetup?: undefined;
@@ -43,6 +44,7 @@ export declare class AuthController {
             role: string;
             ptk_id: any;
             peserta_didik_id: any;
+            foto: string;
         };
     }>;
     refresh(request: Request, response: Response): Promise<{
@@ -55,6 +57,7 @@ export declare class AuthController {
             role: string;
             ptk_id: any;
             peserta_didik_id: any;
+            foto: string;
         };
     }>;
     logout(response: Response): Promise<{
@@ -70,6 +73,7 @@ export declare class AuthController {
         message: string;
     }>;
     getMe(request: Request): Promise<{
+        foto: string;
         peserta_didik_id: string;
         nama: string;
         email: string;

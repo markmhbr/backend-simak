@@ -400,6 +400,50 @@ export class DapodikService {
 
     const avgStudentCompleteness = mappedStudents.length > 0 ? Math.round((completedStudentCount / mappedStudents.length) * 100) : 0;
 
+    // Calculate weekly attendance stats for Monday to Saturday of this week
+    const today = new Date();
+    const currentDay = today.getDay();
+    const startOfWeek = new Date(today);
+    const distanceToMonday = currentDay === 0 ? -6 : 1 - currentDay;
+    startOfWeek.setDate(today.getDate() + distanceToMonday);
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const weeklyGtkAttendance: number[] = [];
+    const weeklyPdAttendance: number[] = [];
+
+    for (let i = 0; i < 6; i++) {
+      const targetDate = new Date(startOfWeek);
+      targetDate.setDate(startOfWeek.getDate() + i);
+      const nextDate = new Date(targetDate);
+      nextDate.setDate(targetDate.getDate() + 1);
+
+      const presentGTK = await this.prisma.presensiGtk.count({
+        where: {
+          sekolah_id: sekolahId,
+          tanggal: {
+            gte: targetDate,
+            lt: nextDate,
+          },
+          status_masuk: { in: [1, 2] },
+        },
+      });
+      const gtkRate = totalGtk > 0 ? Math.round((presentGTK / totalGtk) * 100) : 0;
+      weeklyGtkAttendance.push(gtkRate);
+
+      const presentPD = await this.prisma.presensiPesertaDidik.count({
+        where: {
+          sekolah_id: sekolahId,
+          tanggal: {
+            gte: targetDate,
+            lt: nextDate,
+          },
+          status_masuk: { in: [1, 2] },
+        },
+      });
+      const pdRate = totalSiswa > 0 ? Math.round((presentPD / totalSiswa) * 100) : 0;
+      weeklyPdAttendance.push(pdRate);
+    }
+
     return {
       sekolah_id: sekolahId,
       total_tanah: totalTanah,
@@ -413,6 +457,8 @@ export class DapodikService {
       avg_gtk_completeness: avgGtkCompleteness,
       completed_pd: completedStudentCount,
       avg_pd_completeness: avgStudentCompleteness,
+      weekly_gtk_attendance: weeklyGtkAttendance,
+      weekly_pd_attendance: weeklyPdAttendance,
     };
   }
 

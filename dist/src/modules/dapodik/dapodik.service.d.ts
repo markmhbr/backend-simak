@@ -21,6 +21,8 @@ export declare class DapodikService {
         avg_gtk_completeness: number;
         completed_pd: number;
         avg_pd_completeness: number;
+        weekly_gtk_attendance: number[];
+        weekly_pd_attendance: number[];
     }>;
     getSekolah(sekolahId: string | null): Promise<{
         bentuk_pendidikan_id_str: any;
