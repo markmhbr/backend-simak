@@ -82,11 +82,11 @@ let SyncService = SyncService_1 = class SyncService {
             if (dateStr.includes(' ') || dateStr.includes('T')) {
                 const parts = dateStr.includes('T') ? dateStr.split('T') : dateStr.split(' ');
                 if (parts[1]) {
-                    dateStr = `${parts[0]}T${parts[1]}+07:00`;
+                    dateStr = `${parts[0]}T${parts[1]}+00:00`;
                 }
             }
             else {
-                dateStr = `${dateStr}T00:00:00+07:00`;
+                dateStr = `${dateStr}T00:00:00+00:00`;
             }
         }
         const date = new Date(dateStr);
@@ -420,7 +420,7 @@ let SyncService = SyncService_1 = class SyncService {
                 status: rpd.jenis_keluar_id ? (rpd.ket_keluar || 'Non-Aktif') : (p.status || 'Aktif'),
                 telegram_chat_id: p.telegram_chat_id || null,
                 telegram_token: p.telegram_token || null,
-                rombongan_belajar_id: p.rombongan_belajar_id || null,
+                rombongan_belajar_id: p.rombongan_belajar_id || p.anggota_rombel?.rombongan_belajar_id || null,
             };
             try {
                 await this.prisma.pesertaDidik.upsert({

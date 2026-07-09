@@ -504,6 +504,7 @@ export declare class MandalaService implements OnModuleInit {
                 foto: any;
                 tanggal_masuk_sekolah: any;
                 tanggal_keluar: any;
+                jenis_keluar_id: any;
                 last_update: any;
             };
             akademik: {
@@ -550,6 +551,7 @@ export declare class MandalaService implements OnModuleInit {
                 tanggal_lahir: any;
                 agama: any;
                 foto: any;
+                jenis_keluar_id: any;
                 last_update: any;
             };
             kepegawaian: {

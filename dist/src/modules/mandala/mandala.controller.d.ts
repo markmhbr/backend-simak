@@ -526,6 +526,7 @@ export declare class MandalaController {
                 foto: any;
                 tanggal_masuk_sekolah: any;
                 tanggal_keluar: any;
+                jenis_keluar_id: any;
                 last_update: any;
             };
             akademik: {
@@ -600,6 +601,7 @@ export declare class MandalaController {
                 tanggal_lahir: any;
                 agama: any;
                 foto: any;
+                jenis_keluar_id: any;
                 last_update: any;
             };
             kepegawaian: {

@@ -850,6 +850,23 @@ export class PresensiService {
       where: {
         sekolah_id: sekolahId,
         status: 'Aktif',
+        OR: [
+          {
+            rombongan_belajar: {
+              jenis_rombel: 1,
+            }
+          },
+          {
+            anggota_rombel: {
+              some: {
+                soft_delete: 0,
+                rombongan_belajar: {
+                  jenis_rombel: 1,
+                }
+              }
+            }
+          }
+        ]
       },
       select: {
         peserta_didik_id: true,
@@ -858,6 +875,22 @@ export class PresensiService {
         rombongan_belajar: {
           select: {
             nama: true,
+          }
+        },
+        anggota_rombel: {
+          where: {
+            soft_delete: 0,
+            rombongan_belajar: {
+              jenis_rombel: 1,
+            }
+          },
+          take: 1,
+          select: {
+            rombongan_belajar: {
+              select: {
+                nama: true
+              }
+            }
           }
         },
         foto: true,
@@ -893,7 +926,7 @@ export class PresensiService {
       const iz = izinMap.get(student.peserta_didik_id);
       return {
         ...student,
-        nama_rombel: student.rombongan_belajar?.nama || '',
+        nama_rombel: student.rombongan_belajar?.nama || student.anggota_rombel?.[0]?.rombongan_belajar?.nama || '',
         presensi: att || null,
         izin: iz || null,
       };
