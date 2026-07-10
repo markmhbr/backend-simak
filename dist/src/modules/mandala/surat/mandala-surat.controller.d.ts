@@ -313,13 +313,13 @@ export declare class MandalaSuratController {
                 foto: string | null;
                 created_at: Date;
                 updated_at: Date;
-                password: string;
                 cadisdik_id: string;
                 nomor_telepon: string | null;
                 aktif: boolean;
                 pegawai_id: string;
                 nama_lengkap: string;
                 nip: string;
+                password: string;
                 authenticator_secret: string | null;
                 jabatan: number;
                 alamat_lengkap: string | null;

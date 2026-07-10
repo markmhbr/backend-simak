@@ -414,9 +414,9 @@ export declare class DapodikService {
         email: string | null;
         created_at: Date;
         updated_at: Date;
-        alamat: string | null;
         cadisdik_id: string;
         nama_instansi: string;
+        alamat: string | null;
         nomor_telepon: string | null;
         website: string | null;
         aktif: boolean;
@@ -773,8 +773,8 @@ export declare class DapodikService {
         no_whatsapp: string | null;
         ptk_id: string;
         updater_id: string | null;
-        no_hp: string | null;
         nip: string | null;
+        no_hp: string | null;
         niy_nigk: string | null;
         nuptk: string | null;
         nrg: string | null;

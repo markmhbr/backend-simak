@@ -377,28 +377,44 @@ let MandalaService = MandalaService_1 = class MandalaService {
         return data;
     }
     async createPegawai(data) {
-        const existing = await this.prisma.pegawai.findFirst({
-            where: {
-                OR: [
-                    { nip: data.nip },
-                    { email: data.email },
-                    { nik: data.nik },
-                ],
-            },
-        });
-        if (existing) {
-            throw new common_1.BadRequestException('Pegawai with this NIP, Email, or NIK already exists.');
+        const orConditions = [];
+        if (data.nip && data.nip.trim() !== '') {
+            orConditions.push({ nip: data.nip });
+        }
+        if (data.email && data.email.trim() !== '') {
+            orConditions.push({ email: data.email });
+        }
+        if (data.nik && data.nik.trim() !== '') {
+            orConditions.push({ nik: data.nik });
+        }
+        if (orConditions.length > 0) {
+            const existing = await this.prisma.pegawai.findFirst({
+                where: {
+                    OR: orConditions,
+                },
+            });
+            if (existing) {
+                if (data.nip && existing.nip === data.nip) {
+                    throw new common_1.BadRequestException('Pegawai with this NIP already exists.');
+                }
+                if (data.email && existing.email === data.email) {
+                    throw new common_1.BadRequestException('Pegawai with this Email already exists.');
+                }
+                if (data.nik && existing.nik === data.nik) {
+                    throw new common_1.BadRequestException('Pegawai with this NIK already exists.');
+                }
+            }
         }
         const hashedPassword = await bcrypt.hash(data.password, 10);
         return await this.prisma.pegawai.create({
             data: {
                 cadisdik_id: data.cadisdik_id,
                 nama_lengkap: data.nama_lengkap,
-                nik: data.nik,
+                nik: data.nik && data.nik.trim() !== '' ? data.nik : null,
                 tempat_lahir: data.tempat_lahir,
                 tanggal_lahir: new Date(data.tanggal_lahir),
                 alamat_lengkap: data.alamat_lengkap,
-                nip: data.nip,
+                nip: data.nip && data.nip.trim() !== '' ? data.nip : null,
                 email: data.email,
                 password: hashedPassword,
                 jabatan: data.jabatan,
@@ -414,11 +430,11 @@ let MandalaService = MandalaService_1 = class MandalaService {
         const updateData = {
             cadisdik_id: data.cadisdik_id,
             nama_lengkap: data.nama_lengkap,
-            nik: data.nik,
+            nik: data.nik !== undefined ? (data.nik && data.nik.trim() !== '' ? data.nik : null) : undefined,
             tempat_lahir: data.tempat_lahir,
             tanggal_lahir: data.tanggal_lahir ? new Date(data.tanggal_lahir) : undefined,
             alamat_lengkap: data.alamat_lengkap,
-            nip: data.nip,
+            nip: data.nip !== undefined ? (data.nip && data.nip.trim() !== '' ? data.nip : null) : undefined,
             email: data.email,
             jabatan: data.jabatan,
             jenis_kelamin: data.jenis_kelamin,

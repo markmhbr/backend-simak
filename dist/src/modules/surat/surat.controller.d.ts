@@ -421,8 +421,8 @@ export declare class SuratController {
                 no_whatsapp: string | null;
                 ptk_id: string;
                 updater_id: string | null;
-                no_hp: string | null;
                 nip: string | null;
+                no_hp: string | null;
                 niy_nigk: string | null;
                 nuptk: string | null;
                 nrg: string | null;

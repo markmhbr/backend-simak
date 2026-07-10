@@ -268,14 +268,13 @@ export class MandalaController {
       !body.tempat_lahir ||
       !body.tanggal_lahir ||
       !body.alamat_lengkap ||
-      !body.nip ||
       !body.email ||
       !body.password ||
       body.jabatan === undefined ||
       body.jenis_kelamin === undefined
     ) {
       throw new BadRequestException(
-        'Required fields: cadisdik_id, nama_lengkap, nik, tempat_lahir, tanggal_lahir, alamat_lengkap, nip, email, password, jabatan, jenis_kelamin.',
+        'Required fields: cadisdik_id, nama_lengkap, nik, tempat_lahir, tanggal_lahir, alamat_lengkap, email, password, jabatan, jenis_kelamin.',
       );
     }
     const data = await this.mandalaService.createPegawai(body);

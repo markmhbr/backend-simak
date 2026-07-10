@@ -79,11 +79,11 @@ export declare class AuthController {
         email: string;
         sekolah_id: string;
         ptk_id: string;
+        alamat: string;
         pengguna_id: string;
         username: string;
         peran_nama: string;
         peran_id: number;
-        alamat: string;
         no_telepon: string;
         no_hp: string;
     }>;

@@ -1206,7 +1206,7 @@ model Pegawai {
   pegawai_id             String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   cadisdik_id            String                 @db.Uuid
   nama_lengkap           String                 @db.VarChar(255)
-  nip                    String                 @unique @db.VarChar(30)
+  nip                    String?                @unique @db.VarChar(30)
   email                  String                 @unique @db.VarChar(255)
   password               String                 @db.VarChar(255)
   authenticator_secret   String?                @db.VarChar(255)
