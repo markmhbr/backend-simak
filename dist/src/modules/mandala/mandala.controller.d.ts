@@ -267,28 +267,20 @@ export declare class MandalaController {
             accessToken: string;
             refreshToken: string;
             pegawai: {
-                id: string;
-                nama: string;
-                nip: string;
-                nik: string;
-                email: string;
+                id: any;
+                nama: any;
+                nip: any;
+                nik: any;
+                email: any;
                 role: string;
-                cadisdik: string;
+                cadisdik: any;
             };
         };
     }>;
     refresh(refreshToken: string): Promise<{
         accessToken: string;
         refreshToken: string;
-        pegawai: {
-            id: string;
-            nama: string;
-            nip: string;
-            nik: string;
-            email: string;
-            role: string;
-            cadisdik: string;
-        };
+        pegawai: any;
     }>;
     getPegawais(cadisdikId?: string): Promise<{
         status: string;

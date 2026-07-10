@@ -536,7 +536,6 @@ export class MandalaService implements OnModuleInit {
         OR: [
           { nip: identifier },
           { email: identifier },
-          { nik: identifier },
         ],
       },
       include: {
@@ -544,23 +543,41 @@ export class MandalaService implements OnModuleInit {
       },
     });
 
-    if (!pegawai) {
+    let userType: 'pegawai' | 'operator' = 'pegawai';
+    let userEntity: any = pegawai;
+
+    if (!userEntity) {
+      // Check in pengguna table for Operator Sekolah
+      const operator = await this.prisma.pengguna.findFirst({
+        where: {
+          email: identifier,
+          peran_nama: 'Operator Sekolah',
+        },
+      });
+
+      if (operator) {
+        userType = 'operator';
+        userEntity = operator;
+      }
+    }
+
+    if (!userEntity) {
       throw new UnauthorizedException('Kredensial tidak valid (User tidak ditemukan).');
     }
 
-    if (!pegawai.aktif) {
+    if (userType === 'pegawai' && !userEntity.aktif) {
       throw new ForbiddenException('Akun Anda telah dinonaktifkan.');
     }
 
-    const isMatch = await bcrypt.compare(password, pegawai.password);
+    const isMatch = await bcrypt.compare(password, userEntity.password);
     if (!isMatch) {
       throw new UnauthorizedException('Kredensial tidak valid (Password salah).');
     }
 
     // Stage 1: Success, generate temp token for 2FA
     const payload = { 
-      sub: pegawai.pegawai_id, 
-      type: '2fa_pending_mandala' 
+      sub: userType === 'pegawai' ? userEntity.pegawai_id : userEntity.pengguna_id, 
+      type: userType === 'pegawai' ? '2fa_pending_mandala' : '2fa_pending_mandala_operator' 
     };
     
     const tempToken = this.jwtService.sign(payload, { 
@@ -568,11 +585,13 @@ export class MandalaService implements OnModuleInit {
       expiresIn: '10m' 
     });
 
-    if (!pegawai.authenticator_secret) {
+    const userSecret = userType === 'pegawai' ? userEntity.authenticator_secret : userEntity.google2fa_secret;
+
+    if (!userSecret) {
       // Generate new secret for first time setup
       const secret = generateSecret();
       const otpauthUrl = generateURI({
-        label: pegawai.nip,
+        label: userType === 'pegawai' ? userEntity.nip : userEntity.email,
         issuer: 'MANDALA',
         secret
       });
@@ -601,26 +620,37 @@ export class MandalaService implements OnModuleInit {
         secret: this.configService.get('JWT_SECRET')
       });
       
-      if (payload.type !== '2fa_pending_mandala') {
+      if (payload.type !== '2fa_pending_mandala' && payload.type !== '2fa_pending_mandala_operator') {
         throw new UnauthorizedException('Token tidak valid');
       }
 
-      const pegawai = await this.prisma.pegawai.findUnique({
-        where: { pegawai_id: payload.sub },
-        include: { cadisdik: true }
-      });
+      const isOperator = payload.type === '2fa_pending_mandala_operator';
 
-      if (!pegawai) throw new UnauthorizedException('Pegawai tidak ditemukan');
-
+      let userEntity: any;
       let secret: string;
 
-      if (!pegawai.authenticator_secret) {
+      if (isOperator) {
+        userEntity = await this.prisma.pengguna.findUnique({
+          where: { pengguna_id: payload.sub },
+        });
+      } else {
+        userEntity = await this.prisma.pegawai.findUnique({
+          where: { pegawai_id: payload.sub },
+          include: { cadisdik: true }
+        });
+      }
+
+      if (!userEntity) throw new UnauthorizedException('User tidak ditemukan');
+
+      const currentSecret = isOperator ? userEntity.google2fa_secret : userEntity.authenticator_secret;
+
+      if (!currentSecret) {
         if (!secretToSave) {
           throw new UnauthorizedException('Setup 2FA belum selesai');
         }
         secret = secretToSave;
       } else {
-        secret = this.cryptoService.decrypt(pegawai.authenticator_secret);
+        secret = this.cryptoService.decrypt(currentSecret);
       }
 
       const result = await verify({
@@ -634,23 +664,52 @@ export class MandalaService implements OnModuleInit {
       }
 
       // If setup, save secret
-      if (!pegawai.authenticator_secret && secretToSave) {
+      if (!currentSecret && secretToSave) {
         const encryptedSecret = this.cryptoService.encrypt(secretToSave);
-        await this.prisma.pegawai.update({
-          where: { pegawai_id: pegawai.pegawai_id },
-          data: { authenticator_secret: encryptedSecret }
-        });
+        if (isOperator) {
+          await this.prisma.pengguna.update({
+            where: { pengguna_id: userEntity.pengguna_id },
+            data: { google2fa_secret: encryptedSecret }
+          });
+        } else {
+          await this.prisma.pegawai.update({
+            where: { pegawai_id: userEntity.pegawai_id },
+            data: { authenticator_secret: encryptedSecret }
+          });
+        }
       }
 
       // Generate final tokens
-      const finalPayload = {
-        sub: pegawai.pegawai_id,
-        email: pegawai.email,
-        nip: pegawai.nip,
-        nik: pegawai.nik,
+      let cadisdikId: string | null = null;
+      let cadisdikNama: string | null = null;
+
+      if (isOperator) {
+        if (userEntity.sekolah_id) {
+          const sekolah = await this.prisma.sekolah.findUnique({
+            where: { sekolah_id: userEntity.sekolah_id },
+            include: { cadisdik: true }
+          });
+          cadisdikId = sekolah?.cadisdik_id || null;
+          cadisdikNama = sekolah?.cadisdik?.nama_instansi || null;
+        }
+      }
+
+      const finalPayload = isOperator ? {
+        sub: userEntity.pengguna_id,
+        email: userEntity.email,
+        nip: '',
+        nik: '',
+        role: 'Operator Sekolah',
+        cadisdik_id: cadisdikId,
+        cadisdik_nama: cadisdikNama,
+      } : {
+        sub: userEntity.pegawai_id,
+        email: userEntity.email,
+        nip: userEntity.nip,
+        nik: userEntity.nik,
         role: 'Mandala Pegawai',
-        cadisdik_id: pegawai.cadisdik_id,
-        cadisdik_nama: pegawai.cadisdik?.nama_instansi,
+        cadisdik_id: userEntity.cadisdik_id,
+        cadisdik_nama: userEntity.cadisdik?.nama_instansi,
       };
 
       const accessToken = this.jwtService.sign(finalPayload);
@@ -664,14 +723,22 @@ export class MandalaService implements OnModuleInit {
         data: {
           accessToken,
           refreshToken,
-          pegawai: {
-            id: pegawai.pegawai_id,
-            nama: pegawai.nama_lengkap,
-            nip: pegawai.nip,
-            nik: pegawai.nik || '',
-            email: pegawai.email,
+          pegawai: isOperator ? {
+            id: userEntity.pengguna_id,
+            nama: userEntity.nama,
+            nip: '',
+            nik: '',
+            email: userEntity.email,
+            role: 'Operator Sekolah',
+            cadisdik: cadisdikNama || '',
+          } : {
+            id: userEntity.pegawai_id,
+            nama: userEntity.nama_lengkap,
+            nip: userEntity.nip,
+            nik: userEntity.nik || '',
+            email: userEntity.email,
             role: 'Mandala Pegawai',
-            cadisdik: pegawai.cadisdik?.nama_instansi,
+            cadisdik: userEntity.cadisdik?.nama_instansi,
           },
         },
       };
@@ -688,24 +755,76 @@ export class MandalaService implements OnModuleInit {
         secret: this.configService.get('JWT_REFRESH_SECRET'),
       });
 
-      const pegawai = await this.prisma.pegawai.findUnique({
-        where: { pegawai_id: payload.sub },
-        include: { cadisdik: true }
-      });
+      const isOperator = payload.role === 'Operator Sekolah';
+      
+      let finalPayload: any;
+      let userResponse: any;
 
-      if (!pegawai) throw new UnauthorizedException('Pegawai tidak ditemukan');
-      if (!pegawai.aktif) throw new ForbiddenException('Akun Anda telah dinonaktifkan.');
+      if (isOperator) {
+        const operator = await this.prisma.pengguna.findUnique({
+          where: { pengguna_id: payload.sub },
+        });
+        if (!operator) throw new UnauthorizedException('User tidak ditemukan');
+        
+        let cadisdikId: string | null = null;
+        let cadisdikNama: string | null = null;
 
-      // Generate final tokens
-      const finalPayload = {
-        sub: pegawai.pegawai_id,
-        email: pegawai.email,
-        nip: pegawai.nip,
-        nik: pegawai.nik,
-        role: 'Mandala Pegawai',
-        cadisdik_id: pegawai.cadisdik_id,
-        cadisdik_nama: pegawai.cadisdik?.nama_instansi,
-      };
+        if (operator.sekolah_id) {
+          const sekolah = await this.prisma.sekolah.findUnique({
+            where: { sekolah_id: operator.sekolah_id },
+            include: { cadisdik: true }
+          });
+          cadisdikId = sekolah?.cadisdik_id || null;
+          cadisdikNama = sekolah?.cadisdik?.nama_instansi || null;
+        }
+
+        finalPayload = {
+          sub: operator.pengguna_id,
+          email: operator.email,
+          nip: '',
+          nik: '',
+          role: 'Operator Sekolah',
+          cadisdik_id: cadisdikId,
+          cadisdik_nama: cadisdikNama,
+        };
+
+        userResponse = {
+          id: operator.pengguna_id,
+          nama: operator.nama,
+          nip: '',
+          nik: '',
+          email: operator.email,
+          role: 'Operator Sekolah',
+          cadisdik: cadisdikNama || '',
+        };
+      } else {
+        const pegawai = await this.prisma.pegawai.findUnique({
+          where: { pegawai_id: payload.sub },
+          include: { cadisdik: true }
+        });
+        if (!pegawai) throw new UnauthorizedException('Pegawai tidak ditemukan');
+        if (!pegawai.aktif) throw new ForbiddenException('Akun Anda telah dinonaktifkan.');
+
+        finalPayload = {
+          sub: pegawai.pegawai_id,
+          email: pegawai.email,
+          nip: pegawai.nip,
+          nik: pegawai.nik,
+          role: 'Mandala Pegawai',
+          cadisdik_id: pegawai.cadisdik_id,
+          cadisdik_nama: pegawai.cadisdik?.nama_instansi,
+        };
+
+        userResponse = {
+          id: pegawai.pegawai_id,
+          nama: pegawai.nama_lengkap,
+          nip: pegawai.nip,
+          nik: pegawai.nik || '',
+          email: pegawai.email,
+          role: 'Mandala Pegawai',
+          cadisdik: pegawai.cadisdik?.nama_instansi,
+        };
+      }
 
       const accessToken = this.jwtService.sign(finalPayload);
       const newRefreshToken = this.jwtService.sign(finalPayload, {
@@ -716,15 +835,7 @@ export class MandalaService implements OnModuleInit {
       return {
         accessToken,
         refreshToken: newRefreshToken,
-        pegawai: {
-          id: pegawai.pegawai_id,
-          nama: pegawai.nama_lengkap,
-          nip: pegawai.nip,
-          nik: pegawai.nik || '',
-          email: pegawai.email,
-          role: 'Mandala Pegawai',
-          cadisdik: pegawai.cadisdik?.nama_instansi,
-        },
+        pegawai: userResponse,
       };
     } catch (e) {
       throw new UnauthorizedException('Sesi telah berakhir, silakan login kembali');

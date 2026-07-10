@@ -509,35 +509,49 @@ let MandalaService = MandalaService_1 = class MandalaService {
                 OR: [
                     { nip: identifier },
                     { email: identifier },
-                    { nik: identifier },
                 ],
             },
             include: {
                 cadisdik: true,
             },
         });
-        if (!pegawai) {
+        let userType = 'pegawai';
+        let userEntity = pegawai;
+        if (!userEntity) {
+            const operator = await this.prisma.pengguna.findFirst({
+                where: {
+                    email: identifier,
+                    peran_nama: 'Operator Sekolah',
+                },
+            });
+            if (operator) {
+                userType = 'operator';
+                userEntity = operator;
+            }
+        }
+        if (!userEntity) {
             throw new common_1.UnauthorizedException('Kredensial tidak valid (User tidak ditemukan).');
         }
-        if (!pegawai.aktif) {
+        if (userType === 'pegawai' && !userEntity.aktif) {
             throw new common_1.ForbiddenException('Akun Anda telah dinonaktifkan.');
         }
-        const isMatch = await bcrypt.compare(password, pegawai.password);
+        const isMatch = await bcrypt.compare(password, userEntity.password);
         if (!isMatch) {
             throw new common_1.UnauthorizedException('Kredensial tidak valid (Password salah).');
         }
         const payload = {
-            sub: pegawai.pegawai_id,
-            type: '2fa_pending_mandala'
+            sub: userType === 'pegawai' ? userEntity.pegawai_id : userEntity.pengguna_id,
+            type: userType === 'pegawai' ? '2fa_pending_mandala' : '2fa_pending_mandala_operator'
         };
         const tempToken = this.jwtService.sign(payload, {
             secret: this.configService.get('JWT_SECRET'),
             expiresIn: '10m'
         });
-        if (!pegawai.authenticator_secret) {
+        const userSecret = userType === 'pegawai' ? userEntity.authenticator_secret : userEntity.google2fa_secret;
+        if (!userSecret) {
             const secret = generateSecret();
             const otpauthUrl = generateURI({
-                label: pegawai.nip,
+                label: userType === 'pegawai' ? userEntity.nip : userEntity.email,
                 issuer: 'MANDALA',
                 secret
             });
@@ -562,24 +576,34 @@ let MandalaService = MandalaService_1 = class MandalaService {
             const payload = this.jwtService.verify(tempToken, {
                 secret: this.configService.get('JWT_SECRET')
             });
-            if (payload.type !== '2fa_pending_mandala') {
+            if (payload.type !== '2fa_pending_mandala' && payload.type !== '2fa_pending_mandala_operator') {
                 throw new common_1.UnauthorizedException('Token tidak valid');
             }
-            const pegawai = await this.prisma.pegawai.findUnique({
-                where: { pegawai_id: payload.sub },
-                include: { cadisdik: true }
-            });
-            if (!pegawai)
-                throw new common_1.UnauthorizedException('Pegawai tidak ditemukan');
+            const isOperator = payload.type === '2fa_pending_mandala_operator';
+            let userEntity;
             let secret;
-            if (!pegawai.authenticator_secret) {
+            if (isOperator) {
+                userEntity = await this.prisma.pengguna.findUnique({
+                    where: { pengguna_id: payload.sub },
+                });
+            }
+            else {
+                userEntity = await this.prisma.pegawai.findUnique({
+                    where: { pegawai_id: payload.sub },
+                    include: { cadisdik: true }
+                });
+            }
+            if (!userEntity)
+                throw new common_1.UnauthorizedException('User tidak ditemukan');
+            const currentSecret = isOperator ? userEntity.google2fa_secret : userEntity.authenticator_secret;
+            if (!currentSecret) {
                 if (!secretToSave) {
                     throw new common_1.UnauthorizedException('Setup 2FA belum selesai');
                 }
                 secret = secretToSave;
             }
             else {
-                secret = this.cryptoService.decrypt(pegawai.authenticator_secret);
+                secret = this.cryptoService.decrypt(currentSecret);
             }
             const result = await verify({
                 token: code,
@@ -589,21 +613,49 @@ let MandalaService = MandalaService_1 = class MandalaService {
             if (!result || !result.valid) {
                 throw new common_1.UnauthorizedException('Kode 2FA tidak valid');
             }
-            if (!pegawai.authenticator_secret && secretToSave) {
+            if (!currentSecret && secretToSave) {
                 const encryptedSecret = this.cryptoService.encrypt(secretToSave);
-                await this.prisma.pegawai.update({
-                    where: { pegawai_id: pegawai.pegawai_id },
-                    data: { authenticator_secret: encryptedSecret }
-                });
+                if (isOperator) {
+                    await this.prisma.pengguna.update({
+                        where: { pengguna_id: userEntity.pengguna_id },
+                        data: { google2fa_secret: encryptedSecret }
+                    });
+                }
+                else {
+                    await this.prisma.pegawai.update({
+                        where: { pegawai_id: userEntity.pegawai_id },
+                        data: { authenticator_secret: encryptedSecret }
+                    });
+                }
             }
-            const finalPayload = {
-                sub: pegawai.pegawai_id,
-                email: pegawai.email,
-                nip: pegawai.nip,
-                nik: pegawai.nik,
+            let cadisdikId = null;
+            let cadisdikNama = null;
+            if (isOperator) {
+                if (userEntity.sekolah_id) {
+                    const sekolah = await this.prisma.sekolah.findUnique({
+                        where: { sekolah_id: userEntity.sekolah_id },
+                        include: { cadisdik: true }
+                    });
+                    cadisdikId = sekolah?.cadisdik_id || null;
+                    cadisdikNama = sekolah?.cadisdik?.nama_instansi || null;
+                }
+            }
+            const finalPayload = isOperator ? {
+                sub: userEntity.pengguna_id,
+                email: userEntity.email,
+                nip: '',
+                nik: '',
+                role: 'Operator Sekolah',
+                cadisdik_id: cadisdikId,
+                cadisdik_nama: cadisdikNama,
+            } : {
+                sub: userEntity.pegawai_id,
+                email: userEntity.email,
+                nip: userEntity.nip,
+                nik: userEntity.nik,
                 role: 'Mandala Pegawai',
-                cadisdik_id: pegawai.cadisdik_id,
-                cadisdik_nama: pegawai.cadisdik?.nama_instansi,
+                cadisdik_id: userEntity.cadisdik_id,
+                cadisdik_nama: userEntity.cadisdik?.nama_instansi,
             };
             const accessToken = this.jwtService.sign(finalPayload);
             const refreshToken = this.jwtService.sign(finalPayload, {
@@ -615,14 +667,22 @@ let MandalaService = MandalaService_1 = class MandalaService {
                 data: {
                     accessToken,
                     refreshToken,
-                    pegawai: {
-                        id: pegawai.pegawai_id,
-                        nama: pegawai.nama_lengkap,
-                        nip: pegawai.nip,
-                        nik: pegawai.nik || '',
-                        email: pegawai.email,
+                    pegawai: isOperator ? {
+                        id: userEntity.pengguna_id,
+                        nama: userEntity.nama,
+                        nip: '',
+                        nik: '',
+                        email: userEntity.email,
+                        role: 'Operator Sekolah',
+                        cadisdik: cadisdikNama || '',
+                    } : {
+                        id: userEntity.pegawai_id,
+                        nama: userEntity.nama_lengkap,
+                        nip: userEntity.nip,
+                        nik: userEntity.nik || '',
+                        email: userEntity.email,
                         role: 'Mandala Pegawai',
-                        cadisdik: pegawai.cadisdik?.nama_instansi,
+                        cadisdik: userEntity.cadisdik?.nama_instansi,
                     },
                 },
             };
@@ -639,23 +699,72 @@ let MandalaService = MandalaService_1 = class MandalaService {
             const payload = this.jwtService.verify(refreshToken, {
                 secret: this.configService.get('JWT_REFRESH_SECRET'),
             });
-            const pegawai = await this.prisma.pegawai.findUnique({
-                where: { pegawai_id: payload.sub },
-                include: { cadisdik: true }
-            });
-            if (!pegawai)
-                throw new common_1.UnauthorizedException('Pegawai tidak ditemukan');
-            if (!pegawai.aktif)
-                throw new common_1.ForbiddenException('Akun Anda telah dinonaktifkan.');
-            const finalPayload = {
-                sub: pegawai.pegawai_id,
-                email: pegawai.email,
-                nip: pegawai.nip,
-                nik: pegawai.nik,
-                role: 'Mandala Pegawai',
-                cadisdik_id: pegawai.cadisdik_id,
-                cadisdik_nama: pegawai.cadisdik?.nama_instansi,
-            };
+            const isOperator = payload.role === 'Operator Sekolah';
+            let finalPayload;
+            let userResponse;
+            if (isOperator) {
+                const operator = await this.prisma.pengguna.findUnique({
+                    where: { pengguna_id: payload.sub },
+                });
+                if (!operator)
+                    throw new common_1.UnauthorizedException('User tidak ditemukan');
+                let cadisdikId = null;
+                let cadisdikNama = null;
+                if (operator.sekolah_id) {
+                    const sekolah = await this.prisma.sekolah.findUnique({
+                        where: { sekolah_id: operator.sekolah_id },
+                        include: { cadisdik: true }
+                    });
+                    cadisdikId = sekolah?.cadisdik_id || null;
+                    cadisdikNama = sekolah?.cadisdik?.nama_instansi || null;
+                }
+                finalPayload = {
+                    sub: operator.pengguna_id,
+                    email: operator.email,
+                    nip: '',
+                    nik: '',
+                    role: 'Operator Sekolah',
+                    cadisdik_id: cadisdikId,
+                    cadisdik_nama: cadisdikNama,
+                };
+                userResponse = {
+                    id: operator.pengguna_id,
+                    nama: operator.nama,
+                    nip: '',
+                    nik: '',
+                    email: operator.email,
+                    role: 'Operator Sekolah',
+                    cadisdik: cadisdikNama || '',
+                };
+            }
+            else {
+                const pegawai = await this.prisma.pegawai.findUnique({
+                    where: { pegawai_id: payload.sub },
+                    include: { cadisdik: true }
+                });
+                if (!pegawai)
+                    throw new common_1.UnauthorizedException('Pegawai tidak ditemukan');
+                if (!pegawai.aktif)
+                    throw new common_1.ForbiddenException('Akun Anda telah dinonaktifkan.');
+                finalPayload = {
+                    sub: pegawai.pegawai_id,
+                    email: pegawai.email,
+                    nip: pegawai.nip,
+                    nik: pegawai.nik,
+                    role: 'Mandala Pegawai',
+                    cadisdik_id: pegawai.cadisdik_id,
+                    cadisdik_nama: pegawai.cadisdik?.nama_instansi,
+                };
+                userResponse = {
+                    id: pegawai.pegawai_id,
+                    nama: pegawai.nama_lengkap,
+                    nip: pegawai.nip,
+                    nik: pegawai.nik || '',
+                    email: pegawai.email,
+                    role: 'Mandala Pegawai',
+                    cadisdik: pegawai.cadisdik?.nama_instansi,
+                };
+            }
             const accessToken = this.jwtService.sign(finalPayload);
             const newRefreshToken = this.jwtService.sign(finalPayload, {
                 secret: this.configService.get('JWT_REFRESH_SECRET'),
@@ -664,15 +773,7 @@ let MandalaService = MandalaService_1 = class MandalaService {
             return {
                 accessToken,
                 refreshToken: newRefreshToken,
-                pegawai: {
-                    id: pegawai.pegawai_id,
-                    nama: pegawai.nama_lengkap,
-                    nip: pegawai.nip,
-                    nik: pegawai.nik || '',
-                    email: pegawai.email,
-                    role: 'Mandala Pegawai',
-                    cadisdik: pegawai.cadisdik?.nama_instansi,
-                },
+                pegawai: userResponse,
             };
         }
         catch (e) {

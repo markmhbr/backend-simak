@@ -398,28 +398,20 @@ export declare class MandalaService implements OnModuleInit {
             accessToken: string;
             refreshToken: string;
             pegawai: {
-                id: string;
-                nama: string;
-                nip: string;
-                nik: string;
-                email: string;
+                id: any;
+                nama: any;
+                nip: any;
+                nik: any;
+                email: any;
                 role: string;
-                cadisdik: string;
+                cadisdik: any;
             };
         };
     }>;
     refreshTokensPegawai(refreshToken: string): Promise<{
         accessToken: string;
         refreshToken: string;
-        pegawai: {
-            id: string;
-            nama: string;
-            nip: string;
-            nik: string;
-            email: string;
-            role: string;
-            cadisdik: string;
-        };
+        pegawai: any;
     }>;
     getSchoolDetail(sekolahId: string): Promise<{
         nama_kepala_sekolah: string;
