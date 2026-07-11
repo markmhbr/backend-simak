@@ -35,11 +35,13 @@ class EnvironmentVariables {
   @IsString()
   ENCRYPTION_KEY: string;
 
+  @IsOptional()
   @IsString()
-  REDIS_HOST: string;
+  REDIS_HOST?: string;
 
+  @IsOptional()
   @IsNumber()
-  REDIS_PORT: number;
+  REDIS_PORT?: number;
 
   @IsOptional()
   @IsString()
