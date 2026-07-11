@@ -23,6 +23,7 @@ export class ApiKeyGuard implements CanActivate {
       mandalaKey = request.query.key as string;
     }
 
+    let isMandalaValid = false;
     if (mandalaKey) {
       const connection = await this.prisma.mandala.findUnique({
         where: { key: mandalaKey },
@@ -30,9 +31,10 @@ export class ApiKeyGuard implements CanActivate {
       if (connection) {
         request['mandala'] = connection;
         request['isMandala'] = true;
-        return true;
+        isMandalaValid = true;
+      } else {
+        throw new UnauthorizedException('Invalid Mandala API key.');
       }
-      throw new UnauthorizedException('Invalid Mandala API key.');
     }
 
     // Cek apakah ada Bearer token di header (Untuk akses dari browser)
@@ -101,6 +103,10 @@ export class ApiKeyGuard implements CanActivate {
         // Token tidak valid atau kedaluwarsa, lemparkan UnauthorizedException agar Axios interceptor di frontend dapat memicu refresh token!
         throw new UnauthorizedException('Token kedaluwarsa atau tidak valid. Silakan login kembali.');
       }
+    }
+
+    if (isMandalaValid) {
+      return true;
     }
     
     // 1. Cek dari header 'x-api-key' atau 'x-sync-token'

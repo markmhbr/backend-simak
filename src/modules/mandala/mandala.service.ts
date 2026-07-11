@@ -231,7 +231,71 @@ export class MandalaService implements OnModuleInit {
     return data;
   }
 
+  async validateKabupatenDuplication(kabupatenList: string[], excludeId?: string) {
+    if (!kabupatenList || kabupatenList.length === 0) return;
+    
+    // Check if any of the kabupaten in the list are already taken by another Cadisdik
+    const existing = await this.prisma.cadisdik.findFirst({
+      where: {
+        cadisdik_id: excludeId ? { not: excludeId } : undefined,
+        kabupaten: {
+          hasSome: kabupatenList
+        }
+      },
+      select: {
+        nama_instansi: true,
+        kabupaten: true
+      }
+    });
+
+    if (existing) {
+      const dup = kabupatenList.find(k => existing.kabupaten.includes(k));
+      throw new BadRequestException(`Kabupaten/Kota "${dup}" sudah terdaftar di instansi lain (${existing.nama_instansi})`);
+    }
+  }
+
+  async getAllProvinsi() {
+    const list = await this.prisma.mst_wilayah.findMany({
+      where: {
+        id_level_wilayah: 1,
+      },
+      orderBy: { nama: 'asc' },
+      select: { nama: true }
+    });
+    return list.map(item => item.nama.trim());
+  }
+
+  async getKabupatenByProvinsi(provinsiNama: string) {
+    if (!provinsiNama) return [];
+    const prov = await this.prisma.mst_wilayah.findFirst({
+      where: {
+        id_level_wilayah: 1,
+        nama: {
+          equals: provinsiNama.trim(),
+          mode: 'insensitive'
+        }
+      },
+      select: { kode_wilayah: true }
+    });
+
+    if (!prov) return [];
+
+    const list = await this.prisma.mst_wilayah.findMany({
+      where: {
+        id_level_wilayah: 2,
+        mst_kode_wilayah: prov.kode_wilayah
+      },
+      orderBy: { nama: 'asc' },
+      select: { nama: true }
+    });
+
+    return list.map(item => item.nama.trim());
+  }
+
   async createCadisdik(data: any) {
+    const kabupatenList = Array.isArray(data.kabupaten) ? data.kabupaten : [];
+    await this.validateKabupatenDuplication(kabupatenList);
+
     return await this.prisma.cadisdik.create({
       data: {
         nama_instansi: data.nama_instansi,
@@ -239,6 +303,8 @@ export class MandalaService implements OnModuleInit {
         email: data.email,
         nomor_telepon: data.nomor_telepon,
         website: data.website,
+        provinsi: data.provinsi || null,
+        kabupaten: kabupatenList,
         aktif: data.aktif !== undefined ? data.aktif : true,
       },
     });
@@ -246,6 +312,9 @@ export class MandalaService implements OnModuleInit {
 
   async updateCadisdik(id: string, data: any) {
     await this.getCadisdikById(id); // Ensure exists
+    const kabupatenList = Array.isArray(data.kabupaten) ? data.kabupaten : [];
+    await this.validateKabupatenDuplication(kabupatenList, id);
+
     return await this.prisma.cadisdik.update({
       where: { cadisdik_id: id },
       data: {
@@ -254,6 +323,8 @@ export class MandalaService implements OnModuleInit {
         email: data.email,
         nomor_telepon: data.nomor_telepon,
         website: data.website,
+        provinsi: data.provinsi || null,
+        kabupaten: kabupatenList,
         aktif: data.aktif,
         updated_at: new Date(),
       },

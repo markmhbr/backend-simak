@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../../core/prisma/prisma.service';
 import { CreatePelaporanDto } from './dto/create-pelaporan.dto';
 import * as path from 'path';
 import * as fs from 'fs';
-import { validateExcelHeader, parseExcelData, generateHtmlTable, generateHtmlTableRows, validateDynamicExcel, parseDynamicExcel, generateDynamicHtmlTable, getTemplateHeaders } from '../../../common/utils/excel-html-generator.helper';
+import { validateExcelHeader, parseExcelData, generateHtmlTable, generateHtmlTableRows, validateDynamicExcel, parseDynamicExcel, generateDynamicHtmlTable, getTemplateHeaders, isAutoField } from '../../../common/utils/excel-html-generator.helper';
 
 @Injectable()
 export class PelaporanService {
@@ -277,6 +277,43 @@ export class PelaporanService {
     return uploadedDocs;
   }
 
+  private async resolveWilayahHierarchy(kodeWilayah: string | null) {
+    const result = {
+      desa: null as string | null,
+      kecamatan: null as string | null,
+      kabupaten_kota: null as string | null,
+      provinsi: null as string | null,
+    };
+
+    if (!kodeWilayah) return result;
+    try {
+      let currentKode: string | null = kodeWilayah.trim();
+      let maxDepth = 6;
+
+      while (currentKode && maxDepth > 0) {
+        const wil = await this.prisma.mst_wilayah.findUnique({
+          where: { kode_wilayah: currentKode },
+          select: { nama: true, id_level_wilayah: true, mst_kode_wilayah: true },
+        });
+
+        if (!wil) break;
+
+        switch (wil.id_level_wilayah) {
+          case 4: result.desa = wil.nama; break;
+          case 3: result.kecamatan = wil.nama; break;
+          case 2: result.kabupaten_kota = wil.nama; break;
+          case 1: result.provinsi = wil.nama; break;
+        }
+
+        currentKode = wil.mst_kode_wilayah?.trim() || null;
+        maxDepth--;
+      }
+    } catch (e) {
+      console.error("Gagal resolve wilayah:", e);
+    }
+    return result;
+  }
+
   async renderPelaporanHtml(cadisdikId: string, pelaporanId: string, sekolahId: string): Promise<string> {
     const pelaporan = await this.prisma.pelaporan.findFirst({
       where: { pelaporan_id: pelaporanId, cadisdik_id: cadisdikId }
@@ -299,10 +336,16 @@ export class PelaporanService {
       throw new NotFoundException('Sekolah tidak ditemukan');
     }
 
+    const wilayah = await this.resolveWilayahHierarchy(sekolah.kode_wilayah);
+
     const schoolData = {
       ...sekolah,
       total_siswa: totalSiswa,
-      total_gtk: totalGtk
+      total_gtk: totalGtk,
+      provinsi: wilayah.provinsi || '',
+      kabupaten_kota: wilayah.kabupaten_kota || '',
+      kecamatan: wilayah.kecamatan || '',
+      desa_kelurahan: wilayah.desa || sekolah.desa_kelurahan || ''
     };
 
     const pelaporanSekolah = await this.prisma.pelaporanSekolah.findFirst({
@@ -362,7 +405,7 @@ export class PelaporanService {
           const expectedHeaders = getTemplateHeaders(pelaporan.template_konten || '');
           if (expectedHeaders && expectedHeaders.length > 0) {
             const rows = parseDynamicExcel(filePath, expectedHeaders, schoolData);
-            tableHtml = generateDynamicHtmlTable(expectedHeaders, rows);
+            tableHtml = generateDynamicHtmlTable(expectedHeaders, rows, pelaporan.judul);
             tableRowsHtml = rows.map((r, idx) => {
               let tds = `<td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${idx + 1}</td>`;
               expectedHeaders.forEach(h => {
@@ -401,16 +444,76 @@ export class PelaporanService {
     }
 
     // Replace placeholders
-    const rendered = template
+    let rendered = template;
+    const excelWrapperIndex = rendered.indexOf('<div class="excel-template-wrapper"');
+    if (excelWrapperIndex !== -1) {
+      const lastCloseDivIndex = rendered.lastIndexOf('</div>');
+      if (lastCloseDivIndex > excelWrapperIndex) {
+        rendered = rendered.substring(0, excelWrapperIndex) + '<div style="page-break-after: always; break-after: page;"></div>' + tableHtml + rendered.substring(lastCloseDivIndex + 6);
+      }
+    } else {
+      rendered = rendered.replaceAll("{tabel_siswa}", tableHtml);
+    }
+
+    rendered = rendered
       .replaceAll("{judul}", pelaporan.judul || '')
       .replaceAll("{deskripsi}", pelaporan.deskripsi || '')
       .replaceAll("{nama_sekolah}", sekolah?.nama || '')
       .replaceAll("{npsn}", sekolah?.npsn || '')
       .replaceAll("{tanggal_cetak}", new Date().toLocaleDateString("id-ID"))
-      .replaceAll("{tabel_siswa}", tableHtml)
       .replaceAll("{tabel_siswa_rows}", tableRowsHtml);
 
-    return rendered;
+    const styledHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            @media screen {
+              body {
+                background-color: #f3f4f6;
+                margin: 0;
+                padding: 40px 20px;
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+                font-family: Arial, sans-serif;
+              }
+              .document-page {
+                background-color: #ffffff;
+                width: 210mm;
+                min-height: 297mm;
+                padding: 20mm;
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+                box-sizing: border-box;
+                border-radius: 8px;
+                border: 1px solid #e5e7eb;
+              }
+            }
+            @media print {
+              body {
+                background-color: #ffffff;
+                margin: 0;
+                padding: 0;
+              }
+              .document-page {
+                width: 100%;
+                padding: 0;
+                box-shadow: none;
+                border: none;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="document-page">
+            ${rendered}
+          </div>
+        </body>
+      </html>
+    `;
+
+    return styledHtml;
   }
 
   async deleteDokumenSimak(sekolahId: string, dokumenId: string) {
@@ -487,6 +590,174 @@ export class PelaporanService {
       await tx.pelaporan.delete({
         where: { pelaporan_id: id }
       });
+    });
+  }
+
+  async exportAllSekolahExcel(cadisdikId: string, pelaporanId: string): Promise<Buffer> {
+    const pelaporan = await this.prisma.pelaporan.findFirst({
+      where: { pelaporan_id: pelaporanId, cadisdik_id: cadisdikId },
+      include: {
+        pelaporan_sekolah: {
+          include: {
+            pelaporan_dokumen: {
+              orderBy: { created_at: 'desc' }
+            }
+          }
+        }
+      }
+    });
+
+    if (!pelaporan) {
+      throw new NotFoundException('Pelaporan tidak ditemukan');
+    }
+
+    const expectedHeaders = getTemplateHeaders(pelaporan.template_konten || '');
+    if (!expectedHeaders || expectedHeaders.length === 0) {
+      throw new BadRequestException('Template pelaporan ini tidak memiliki format kolom Excel.');
+    }
+
+    // Fetch all sekolah details at once
+    const sekolahIds = pelaporan.pelaporan_sekolah.map(ps => ps.sekolah_id);
+    const sekolahData = await this.prisma.sekolah.findMany({
+      where: { sekolah_id: { in: sekolahIds } },
+      include: { cadisdik: true }
+    });
+
+    const totalSiswaCounts = await this.prisma.pesertaDidik.groupBy({
+      by: ['sekolah_id'],
+      _count: true
+    });
+    const totalGtkCounts = await this.prisma.gtk.groupBy({
+      by: ['sekolah_id'],
+      _count: true
+    });
+
+    const totalSiswaMap = new Map(totalSiswaCounts.map(c => [c.sekolah_id, c._count]));
+    const totalGtkMap = new Map(totalGtkCounts.map(c => [c.sekolah_id, c._count]));
+    const sekolahMap = new Map(sekolahData.map(s => [s.sekolah_id, s]));
+
+    const allRows: any[] = [];
+
+    // Parse each school's upload
+    for (const ps of pelaporan.pelaporan_sekolah) {
+      const excelDoc = ps.pelaporan_dokumen.find(doc => 
+        doc.nama_file.toLowerCase().endsWith('.xlsx') || 
+        doc.nama_file.toLowerCase().endsWith('.xls')
+      );
+
+      if (!excelDoc) continue;
+
+      const filePath = path.join(process.cwd(), excelDoc.file_url);
+      if (!fs.existsSync(filePath)) continue;
+
+      const sData = sekolahMap.get(ps.sekolah_id);
+      if (!sData) continue;
+
+      const totalSiswa = totalSiswaMap.get(ps.sekolah_id) || 0;
+      const totalGtk = totalGtkMap.get(ps.sekolah_id) || 0;
+      const wilayah = await this.resolveWilayahHierarchy(sData.kode_wilayah);
+
+      const schoolDataResolved = {
+        ...sData,
+        total_siswa: totalSiswa,
+        total_gtk: totalGtk,
+        provinsi: wilayah.provinsi || '',
+        kabupaten_kota: wilayah.kabupaten_kota || '',
+        kecamatan: wilayah.kecamatan || '',
+        desa_kelurahan: wilayah.desa || sData.desa_kelurahan || ''
+      };
+
+      try {
+        const rows = parseDynamicExcel(filePath, expectedHeaders, schoolDataResolved);
+        rows.forEach(r => {
+          allRows.push(r);
+        });
+      } catch (err) {
+        console.error(`Gagal parsing Excel sekolah ${sData.nama}:`, err);
+      }
+    }
+
+    // Generate Combined XLSX
+    const XLSX = require('xlsx');
+    const wb = XLSX.utils.book_new();
+
+    // Map rows to match columns and ensure Text formatting
+    const formattedData = allRows.map((r, index) => {
+      const rowObj: any = { 'No': String(index + 1) };
+      expectedHeaders.forEach(h => {
+        rowObj[h] = r[h] !== undefined && r[h] !== null ? String(r[h]).trim() : '';
+      });
+      return rowObj;
+    });
+
+    const ws = XLSX.utils.json_to_sheet(formattedData, {
+      header: ['No', ...expectedHeaders]
+    });
+
+    // Ensure all cells are treated as Text format (@) to preserve leading zeros
+    const range = XLSX.utils.decode_range(ws['!ref'] || 'A1:A1');
+    for (let R = range.s.r; R <= range.e.r; ++R) {
+      for (let C = range.s.c; C <= range.e.c; ++C) {
+        const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
+        if (ws[cellRef]) {
+          ws[cellRef].t = 's'; // force text type
+          ws[cellRef].z = '@'; // force text number format
+        }
+      }
+    }
+
+    XLSX.utils.book_append_sheet(wb, ws, 'Rekapitulasi');
+    const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+    return buffer;
+  }
+
+  async updatePelaporan(cadisdikId: string, pelaporanId: string, dto: CreatePelaporanDto) {
+    // 1. Check if any school has already uploaded documents
+    const uploadedDocsCount = await this.prisma.pelaporanDokumen.count({
+      where: {
+        pelaporan_sekolah: {
+          pelaporan_id: pelaporanId
+        }
+      }
+    });
+
+    if (uploadedDocsCount > 0) {
+      throw new BadRequestException('Tidak dapat mengubah data pelaporan karena sudah ada sekolah yang mengunggah dokumen.');
+    }
+
+    return await this.prisma.$transaction(async (tx) => {
+      // Update pelaporan fields
+      const pelaporan = await tx.pelaporan.update({
+        where: { pelaporan_id: pelaporanId, cadisdik_id: cadisdikId },
+        data: {
+          judul: dto.judul,
+          deskripsi: dto.deskripsi,
+          template_konten: dto.template_konten,
+          tanggal_mulai: dto.tanggal_mulai ? new Date(dto.tanggal_mulai) : null,
+          tanggal_selesai: dto.tanggal_selesai ? new Date(dto.tanggal_selesai) : null,
+        },
+      });
+
+      // Update target schools
+      // First, delete existing pelaporanSekolah associations
+      await tx.pelaporanSekolah.deleteMany({
+        where: { pelaporan_id: pelaporanId }
+      });
+
+      // Then create the new ones
+      const pelaporanSekolahData = dto.sekolah_ids.map((sekolah_id) => ({
+        pelaporan_id: pelaporanId,
+        sekolah_id,
+      }));
+
+      if (pelaporanSekolahData.length > 0) {
+        await tx.pelaporanSekolah.createMany({
+          data: pelaporanSekolahData,
+          skipDuplicates: true,
+        });
+      }
+
+      return pelaporan;
     });
   }
 }

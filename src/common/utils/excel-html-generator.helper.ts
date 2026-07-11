@@ -241,8 +241,29 @@ export function parseDynamicExcel(filePathOrBuffer: string | Buffer, expectedHea
 
     const rows: any[] = [];
     for (const rawRow of rawData as any[]) {
-      const parsedRow: Record<string, string> = {};
       const rowKeys = Object.keys(rawRow);
+
+      // Check if the row has any manual data filled (ignore if all manual fields are empty)
+      const hasManualData = expectedHeaders.some(header => {
+        if (isAutoField(header)) return false;
+        const norm = header.toLowerCase().replace(/[^a-z0-9]/g, "");
+        const matchKey = rowKeys.find(rk => {
+          const cleanK = rk.toLowerCase().replace(/[^a-z0-9]/g, "");
+          return cleanK === norm || cleanK === 'no' || cleanK === 'nomor';
+        });
+        // Skip comparing the index/no column itself as manual data
+        const cleanHeaderNorm = header.toLowerCase().replace(/[^a-z0-9]/g, "");
+        if (cleanHeaderNorm === 'no' || cleanHeaderNorm === 'nomor') return false;
+        
+        const val = matchKey ? rawRow[matchKey]?.toString().trim() : '';
+        return val && val !== '' && val !== '[OTOMATIS DARI DB]';
+      });
+
+      if (!hasManualData) {
+        continue;
+      }
+
+      const parsedRow: Record<string, string> = {};
 
       expectedHeaders.forEach(header => {
         const norm = header.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -277,35 +298,48 @@ export function parseDynamicExcel(filePathOrBuffer: string | Buffer, expectedHea
   }
 }
 
-export function generateDynamicHtmlTable(headers: string[], rows: any[]): string {
+export function generateDynamicHtmlTable(headers: string[], rows: any[], title?: string): string {
   if (rows.length === 0) {
     return `<div style="text-align: center; color: #888; padding: 15px; border: 1px dashed #ccc; border-radius: 6px;">Tidak ada data isian terlampir / Excel kosong</div>`;
   }
 
-  let headCols = `<th style="padding: 10px; border: 1px solid #cbd5e1; font-weight: 600; text-align: center; font-size: 14px; width: 8%;">No</th>`;
+  let headCols = `<th style="padding: 6px 8px; border: 1px solid #272727ff; font-weight: 600; text-align: center; font-size: 10px; width: 6%;">No</th>`;
   headers.forEach(h => {
-    headCols += `<th style="padding: 10px; border: 1px solid #cbd5e1; font-weight: 600; text-align: left; font-size: 14px;">${h}</th>`;
+    headCols += `<th style="padding: 6px 8px; border: 1px solid #272727ff; font-weight: 600; text-align: left; font-size: 10px;">${h}</th>`;
   });
 
-  let rowLines = '';
-  rows.forEach((row, index) => {
-    let cells = `<td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center; font-size: 14px;">${index + 1}</td>`;
-    headers.forEach(h => {
-      cells += `<td style="padding: 8px; border: 1px solid #cbd5e1; text-align: left; font-size: 14px;">${row[h] || ''}</td>`;
+  const theadHtml = `<thead><tr style="background-color: #f8fafc; border-bottom: 1px solid #272727ff;">${headCols}</tr></thead>`;
+
+  // Split rows into chunks of ~25 rows per A4 page
+  const ROWS_PER_PAGE = 25;
+  const chunks: any[][] = [];
+  for (let i = 0; i < rows.length; i += ROWS_PER_PAGE) {
+    chunks.push(rows.slice(i, i + ROWS_PER_PAGE));
+  }
+
+  const tables = chunks.map((chunk, chunkIdx) => {
+    const firstTableTitle = chunkIdx === 0 && title ? `<div style="font-family: Arial, sans-serif; font-size: 11px; font-weight: bold; margin-bottom: 8px; color: #333;">Lampiran : ${title}</div>` : '';
+    let rowLines = '';
+    chunk.forEach((row, index) => {
+      const globalIndex = chunkIdx * ROWS_PER_PAGE + index + 1;
+      let cells = `<td style="padding: 4px 6px; border: 1px solid #272727ff; text-align: center; font-size: 10px;">${globalIndex}</td>`;
+      headers.forEach(h => {
+        cells += `<td style="padding: 4px 6px; border: 1px solid #272727ff; text-align: left; font-size: 10px;">${row[h] || ''}</td>`;
+      });
+      rowLines += `<tr>${cells}</tr>`;
     });
-    rowLines += `<tr style="border-bottom: 1px solid #e2e8f0;">${cells}</tr>`;
+
+    return `
+      ${firstTableTitle}
+      <table style="width: 100%; border-collapse: collapse; border: 1px solid #272727ff; margin-top: 10px; margin-bottom: 10px;">
+        ${theadHtml}
+        <tbody>
+          ${rowLines}
+        </tbody>
+      </table>
+    `;
   });
 
-  return `
-    <table style="width: 100%; border-collapse: collapse; border: 1px solid #cbd5e1; margin-top: 15px; margin-bottom: 15px;">
-      <thead>
-        <tr style="background-color: #f8fafc; border-bottom: 2px solid #cbd5e1;">
-          ${headCols}
-        </tr>
-      </thead>
-      <tbody>
-        ${rowLines}
-      </tbody>
-    </table>
-  `;
+  // Join tables with page-break dividers between them
+  return tables.join('<div style="page-break-after: always; break-after: page;"></div>');
 }

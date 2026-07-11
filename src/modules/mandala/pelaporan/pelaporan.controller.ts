@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Delete, Body, Param, Query, UseGuards, Req, Res, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Patch, Body, Param, Query, UseGuards, Req, Res, BadRequestException } from '@nestjs/common';
 import { PelaporanService } from './pelaporan.service';
 import { MandalaKeyGuard } from '../../../core/mandala/mandala-key.guard';
 import { CreatePelaporanDto } from './dto/create-pelaporan.dto';
@@ -80,6 +80,34 @@ export class PelaporanController {
     const html = await this.pelaporanService.renderPelaporanHtml(cadisdikId, id, sekolahId);
     res.setHeader('Content-Type', 'text/html');
     return res.send(html);
+  }
+
+  @Get(':id/export')
+  async exportPelaporan(
+    @Req() req: Request,
+    @Res() res: any,
+    @Param('id') id: string,
+  ) {
+    const cadisdikId = this.getCadisdikId(req);
+    const buffer = await this.pelaporanService.exportAllSekolahExcel(cadisdikId, id);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename=rekap_laporan_${id}.xlsx`);
+    return res.send(buffer);
+  }
+
+  @Patch(':id')
+  async updatePelaporan(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body() dto: CreatePelaporanDto
+  ) {
+    const cadisdikId = this.getCadisdikId(req);
+    const data = await this.pelaporanService.updatePelaporan(cadisdikId, id, dto);
+    return {
+      status: 'success',
+      message: 'Pelaporan berhasil diperbarui',
+      data,
+    };
   }
 
   @Delete(':id')

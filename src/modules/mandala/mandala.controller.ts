@@ -45,6 +45,26 @@ export class MandalaController {
     };
   }
 
+  @Get('wilayah/provinsi')
+  @UseGuards(MandalaKeyGuard)
+  async getProvinsiList() {
+    const data = await this.mandalaService.getAllProvinsi();
+    return {
+      status: 'success',
+      data,
+    };
+  }
+
+  @Get('wilayah/kabupaten')
+  @UseGuards(MandalaKeyGuard)
+  async getKabupatenList(@Query('provinsi') provinsiNama: string) {
+    const data = await this.mandalaService.getKabupatenByProvinsi(provinsiNama);
+    return {
+      status: 'success',
+      data,
+    };
+  }
+
   // --- CADISDIK ENDPOINTS ---
 
   @Get('cadisdik')
