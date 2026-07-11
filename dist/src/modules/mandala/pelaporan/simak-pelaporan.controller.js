@@ -57,6 +57,14 @@ let SimakPelaporanController = class SimakPelaporanController {
             data,
         };
     }
+    async deleteDokumen(req, dokumenId) {
+        const sekolahId = this.getSekolahInfo(req);
+        await this.pelaporanService.deleteDokumenSimak(sekolahId, dokumenId);
+        return {
+            status: 'success',
+            message: 'Dokumen berhasil dihapus',
+        };
+    }
 };
 exports.SimakPelaporanController = SimakPelaporanController;
 __decorate([
@@ -88,6 +96,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, Array]),
     __metadata("design:returntype", Promise)
 ], SimakPelaporanController.prototype, "uploadDokumen", null);
+__decorate([
+    (0, common_1.Delete)('dokumen/:dokumenId'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('dokumenId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], SimakPelaporanController.prototype, "deleteDokumen", null);
 exports.SimakPelaporanController = SimakPelaporanController = __decorate([
     (0, common_1.Controller)('simak/pelaporan'),
     (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),

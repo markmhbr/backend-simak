@@ -383,6 +383,28 @@ export class DapodikController {
     };
   }
 
+  @Get('peserta-didik/rekap-agama')
+  async getPdRekapAgama(@Req() req: Request) {
+    const { sekolahId, namaApp } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.getPdRekapAgama(sekolahId);
+    return {
+      status: 'success',
+      klien: namaApp,
+      data,
+    };
+  }
+
+  @Get('peserta-didik/rekap-masuk-aktif')
+  async getPdRekapMasukAktif(@Req() req: Request) {
+    const { sekolahId, namaApp } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.getPdRekapMasukAktif(sekolahId);
+    return {
+      status: 'success',
+      klien: namaApp,
+      data,
+    };
+  }
+
   @Get('peserta-didik/rekap-kompetensi')
   async getPdRekapKompetensi(@Req() req: Request) {
     const { sekolahId, namaApp } = this.getSekolahInfo(req);

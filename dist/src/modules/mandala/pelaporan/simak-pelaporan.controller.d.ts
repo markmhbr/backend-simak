@@ -24,6 +24,7 @@ export declare class SimakPelaporanController {
             pelaporan_sekolah_id: string;
             judul: string;
             deskripsi: string;
+            template_konten: string;
             tanggal_mulai: Date;
             tanggal_selesai: Date;
             dokumen: {
@@ -40,5 +41,9 @@ export declare class SimakPelaporanController {
         status: string;
         message: string;
         data: any[];
+    }>;
+    deleteDokumen(req: Request, dokumenId: string): Promise<{
+        status: string;
+        message: string;
     }>;
 }

@@ -401,6 +401,8 @@ export declare class DapodikService {
         };
     }>;
     getPdRekapTingkat(sekolahId: string | null): Promise<any[]>;
+    getPdRekapAgama(sekolahId: string | null): Promise<any[]>;
+    getPdRekapMasukAktif(sekolahId: string | null): Promise<any[]>;
     getPdRekapKompetensi(sekolahId: string | null): Promise<any[]>;
     getPdRekapUsia(sekolahId: string | null): Promise<{
         usia: string;
@@ -419,6 +421,8 @@ export declare class DapodikService {
         alamat: string | null;
         nomor_telepon: string | null;
         website: string | null;
+        provinsi: string | null;
+        kabupaten: string[];
         aktif: boolean;
     }[]>;
     getLayananMaster(sekolahId: string | null, kategori?: number): Promise<({

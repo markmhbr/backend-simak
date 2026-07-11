@@ -59,6 +59,8 @@ export declare class MandalaService implements OnModuleInit {
         alamat: string | null;
         nomor_telepon: string | null;
         website: string | null;
+        provinsi: string | null;
+        kabupaten: string[];
         aktif: boolean;
     }[]>;
     getCadisdikById(id: string): Promise<{
@@ -76,6 +78,8 @@ export declare class MandalaService implements OnModuleInit {
         alamat: string | null;
         nomor_telepon: string | null;
         website: string | null;
+        provinsi: string | null;
+        kabupaten: string[];
         aktif: boolean;
     }>;
     createCadisdik(data: any): Promise<{
@@ -87,6 +91,8 @@ export declare class MandalaService implements OnModuleInit {
         alamat: string | null;
         nomor_telepon: string | null;
         website: string | null;
+        provinsi: string | null;
+        kabupaten: string[];
         aktif: boolean;
     }>;
     updateCadisdik(id: string, data: any): Promise<{
@@ -98,6 +104,8 @@ export declare class MandalaService implements OnModuleInit {
         alamat: string | null;
         nomor_telepon: string | null;
         website: string | null;
+        provinsi: string | null;
+        kabupaten: string[];
         aktif: boolean;
     }>;
     deleteCadisdik(id: string): Promise<{
@@ -109,6 +117,8 @@ export declare class MandalaService implements OnModuleInit {
         alamat: string | null;
         nomor_telepon: string | null;
         website: string | null;
+        provinsi: string | null;
+        kabupaten: string[];
         aktif: boolean;
     }>;
     getKategoriKeperluan(cadisdikId?: string): Promise<{
@@ -241,7 +251,7 @@ export declare class MandalaService implements OnModuleInit {
         aktif: boolean;
         pegawai_id: string;
         nama_lengkap: string;
-        nip: string;
+        nip: string | null;
         password: string;
         authenticator_secret: string | null;
         jabatan: number;
@@ -258,6 +268,8 @@ export declare class MandalaService implements OnModuleInit {
             alamat: string | null;
             nomor_telepon: string | null;
             website: string | null;
+            provinsi: string | null;
+            kabupaten: string[];
             aktif: boolean;
         };
     } & {
@@ -274,7 +286,7 @@ export declare class MandalaService implements OnModuleInit {
         aktif: boolean;
         pegawai_id: string;
         nama_lengkap: string;
-        nip: string;
+        nip: string | null;
         password: string;
         authenticator_secret: string | null;
         jabatan: number;
@@ -295,7 +307,7 @@ export declare class MandalaService implements OnModuleInit {
         aktif: boolean;
         pegawai_id: string;
         nama_lengkap: string;
-        nip: string;
+        nip: string | null;
         password: string;
         authenticator_secret: string | null;
         jabatan: number;
@@ -316,7 +328,7 @@ export declare class MandalaService implements OnModuleInit {
         aktif: boolean;
         pegawai_id: string;
         nama_lengkap: string;
-        nip: string;
+        nip: string | null;
         password: string;
         authenticator_secret: string | null;
         jabatan: number;
@@ -337,7 +349,7 @@ export declare class MandalaService implements OnModuleInit {
         aktif: boolean;
         pegawai_id: string;
         nama_lengkap: string;
-        nip: string;
+        nip: string | null;
         password: string;
         authenticator_secret: string | null;
         jabatan: number;

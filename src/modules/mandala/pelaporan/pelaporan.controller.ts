@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query, UseGuards, Req, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, Query, UseGuards, Req, Res, BadRequestException } from '@nestjs/common';
 import { PelaporanService } from './pelaporan.service';
 import { MandalaKeyGuard } from '../../../core/mandala/mandala-key.guard';
 import { CreatePelaporanDto } from './dto/create-pelaporan.dto';
@@ -66,6 +66,32 @@ export class PelaporanController {
     return {
       status: 'success',
       data,
+    };
+  }
+
+  @Get(':id/sekolah/:sekolahId/preview')
+  async previewPelaporan(
+    @Req() req: Request,
+    @Res() res: any,
+    @Param('id') id: string,
+    @Param('sekolahId') sekolahId: string,
+  ) {
+    const cadisdikId = this.getCadisdikId(req);
+    const html = await this.pelaporanService.renderPelaporanHtml(cadisdikId, id, sekolahId);
+    res.setHeader('Content-Type', 'text/html');
+    return res.send(html);
+  }
+
+  @Delete(':id')
+  async deletePelaporan(
+    @Req() req: Request,
+    @Param('id') id: string,
+  ) {
+    const cadisdikId = this.getCadisdikId(req);
+    await this.pelaporanService.deletePelaporan(cadisdikId, id);
+    return {
+      status: 'success',
+      message: 'Pelaporan berhasil dihapus',
     };
   }
 }

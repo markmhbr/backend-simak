@@ -47,6 +47,7 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../../core/prisma/prisma.service");
 const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
+const excel_html_generator_helper_1 = require("../../../common/utils/excel-html-generator.helper");
 let PelaporanService = class PelaporanService {
     prisma;
     constructor(prisma) {
@@ -59,6 +60,7 @@ let PelaporanService = class PelaporanService {
                     cadisdik_id: cadisdikId,
                     judul: dto.judul,
                     deskripsi: dto.deskripsi,
+                    template_konten: dto.template_konten,
                     tanggal_mulai: dto.tanggal_mulai ? new Date(dto.tanggal_mulai) : null,
                     tanggal_selesai: dto.tanggal_selesai ? new Date(dto.tanggal_selesai) : null,
                 },
@@ -145,6 +147,7 @@ let PelaporanService = class PelaporanService {
             pelaporan_id: pelaporan.pelaporan_id,
             judul: pelaporan.judul,
             deskripsi: pelaporan.deskripsi,
+            template_konten: pelaporan.template_konten,
             tanggal_mulai: pelaporan.tanggal_mulai,
             tanggal_selesai: pelaporan.tanggal_selesai,
             aktif: pelaporan.aktif,
@@ -222,6 +225,7 @@ let PelaporanService = class PelaporanService {
             pelaporan_sekolah_id: pelaporanSekolah.pelaporan_sekolah_id,
             judul: pelaporanSekolah.pelaporan.judul,
             deskripsi: pelaporanSekolah.pelaporan.deskripsi,
+            template_konten: pelaporanSekolah.pelaporan.template_konten,
             tanggal_mulai: pelaporanSekolah.pelaporan.tanggal_mulai,
             tanggal_selesai: pelaporanSekolah.pelaporan.tanggal_selesai,
             dokumen: pelaporanSekolah.pelaporan_dokumen,
@@ -244,6 +248,12 @@ let PelaporanService = class PelaporanService {
             if (!allowedExts.includes(ext)) {
                 throw new Error(`Format file ${file.originalname} tidak didukung`);
             }
+            if (ext === '.xlsx' || ext === '.xls') {
+                const isValid = (0, excel_html_generator_helper_1.validateExcelHeader)(file.buffer);
+                if (!isValid) {
+                    throw new Error(`Struktur kolom Excel tidak valid. Baris pertama (A1) harus 'nisn' dan (B1) harus 'nama siswa'.`);
+                }
+            }
             if (file.size > 10 * 1024 * 1024) {
                 throw new Error(`File ${file.originalname} terlalu besar (Max 10MB)`);
             }
@@ -262,6 +272,164 @@ let PelaporanService = class PelaporanService {
             uploadedDocs.push(doc);
         }
         return uploadedDocs;
+    }
+    async renderPelaporanHtml(cadisdikId, pelaporanId, sekolahId) {
+        const pelaporan = await this.prisma.pelaporan.findFirst({
+            where: { pelaporan_id: pelaporanId, cadisdik_id: cadisdikId }
+        });
+        if (!pelaporan) {
+            throw new common_1.NotFoundException('Pelaporan tidak ditemukan');
+        }
+        const sekolah = await this.prisma.sekolah.findUnique({
+            where: { sekolah_id: sekolahId },
+            select: { nama: true, npsn: true }
+        });
+        const pelaporanSekolah = await this.prisma.pelaporanSekolah.findFirst({
+            where: { pelaporan_id: pelaporanId, sekolah_id: sekolahId },
+            include: {
+                pelaporan_dokumen: {
+                    orderBy: { created_at: 'desc' }
+                }
+            }
+        });
+        let template = pelaporan.template_konten;
+        if (!template) {
+            template = `
+        <div style="font-family: Arial, sans-serif; padding: 20px; line-height: 1.5; color: #333;">
+          <h2 style="text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px;">LAPORAN DATA DOKUMEN</h2>
+          <table style="width: 100%; margin-bottom: 20px;">
+            <tr>
+              <td style="width: 20%; font-weight: bold;">Judul Laporan</td>
+              <td style="width: 2%;">:</td>
+              <td>{judul}</td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold;">Sekolah</td>
+              <td>:</td>
+              <td>{nama_sekolah} ({npsn})</td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold;">Tanggal Cetak</td>
+              <td>:</td>
+              <td>{tanggal_cetak}</td>
+            </tr>
+          </table>
+          <p>{deskripsi}</p>
+          <div style="margin-top: 20px;">
+            {tabel_siswa}
+          </div>
+        </div>
+      `;
+        }
+        let tableHtml = '';
+        let tableRowsHtml = '';
+        if (pelaporanSekolah && pelaporanSekolah.pelaporan_dokumen.length > 0) {
+            const excelDoc = pelaporanSekolah.pelaporan_dokumen.find(doc => doc.nama_file.toLowerCase().endsWith('.xlsx') ||
+                doc.nama_file.toLowerCase().endsWith('.xls'));
+            if (excelDoc) {
+                const filePath = path.join(process.cwd(), excelDoc.file_url);
+                if (fs.existsSync(filePath)) {
+                    const students = (0, excel_html_generator_helper_1.parseExcelData)(filePath);
+                    tableHtml = (0, excel_html_generator_helper_1.generateHtmlTable)(students);
+                    tableRowsHtml = (0, excel_html_generator_helper_1.generateHtmlTableRows)(students);
+                }
+                else {
+                    tableHtml = `<div style="text-align: center; color: #d9534f; padding: 10px; border: 1px dashed #d9534f;">Berkas Excel tidak ditemukan pada server</div>`;
+                    tableRowsHtml = `<tr><td colspan="3" style="text-align: center; color: #d9534f;">Berkas Excel tidak ditemukan pada server</td></tr>`;
+                }
+            }
+            else {
+                const fileNames = pelaporanSekolah.pelaporan_dokumen.map(doc => doc.nama_file).join(', ');
+                tableHtml = `
+          <div style="padding: 15px; border: 1px dashed #3b82f6; background-color: #eff6ff; border-radius: 6px; text-align: center; color: #1e3a8a;">
+            <p style="margin: 0; font-weight: 600;">Sekolah Mengunggah Dokumen Lampiran (Non-Excel):</p>
+            <p style="margin: 5px 0 0 0; font-size: 14px; font-family: monospace;">${fileNames}</p>
+          </div>
+        `;
+                tableRowsHtml = `<tr><td colspan="3" style="text-align: center; color: #1e3a8a;">Dokumen Lampiran: ${fileNames}</td></tr>`;
+            }
+        }
+        else {
+            tableHtml = `
+        <div style="padding: 15px; border: 1px dashed #ef4444; background-color: #fef2f2; border-radius: 6px; text-align: center; color: #991b1b;">
+          Belum ada dokumen/Excel yang diunggah oleh sekolah untuk pelaporan ini.
+        </div>
+      `;
+            tableRowsHtml = `<tr><td colspan="3" style="text-align: center; color: #991b1b;">Belum ada dokumen yang diunggah</td></tr>`;
+        }
+        const rendered = template
+            .replaceAll("{judul}", pelaporan.judul || '')
+            .replaceAll("{deskripsi}", pelaporan.deskripsi || '')
+            .replaceAll("{nama_sekolah}", sekolah?.nama || '')
+            .replaceAll("{npsn}", sekolah?.npsn || '')
+            .replaceAll("{tanggal_cetak}", new Date().toLocaleDateString("id-ID"))
+            .replaceAll("{tabel_siswa}", tableHtml)
+            .replaceAll("{tabel_siswa_rows}", tableRowsHtml);
+        return rendered;
+    }
+    async deleteDokumenSimak(sekolahId, dokumenId) {
+        const doc = await this.prisma.pelaporanDokumen.findFirst({
+            where: {
+                pelaporan_dokumen_id: dokumenId,
+                pelaporan_sekolah: { sekolah_id: sekolahId }
+            }
+        });
+        if (!doc) {
+            throw new common_1.NotFoundException('Dokumen tidak ditemukan');
+        }
+        const filePath = path.join(process.cwd(), doc.file_url);
+        if (fs.existsSync(filePath)) {
+            try {
+                fs.unlinkSync(filePath);
+            }
+            catch (err) {
+                console.error('Gagal menghapus file fisik:', err);
+            }
+        }
+        await this.prisma.pelaporanDokumen.delete({
+            where: { pelaporan_dokumen_id: dokumenId }
+        });
+    }
+    async deletePelaporan(cadisdikId, id) {
+        const pelaporan = await this.prisma.pelaporan.findFirst({
+            where: { pelaporan_id: id, cadisdik_id: cadisdikId },
+            include: {
+                pelaporan_sekolah: {
+                    include: {
+                        pelaporan_dokumen: true
+                    }
+                }
+            }
+        });
+        if (!pelaporan) {
+            throw new common_1.NotFoundException('Pelaporan tidak ditemukan');
+        }
+        for (const ps of pelaporan.pelaporan_sekolah) {
+            for (const doc of ps.pelaporan_dokumen) {
+                const filePath = path.join(process.cwd(), doc.file_url);
+                if (fs.existsSync(filePath)) {
+                    try {
+                        fs.unlinkSync(filePath);
+                    }
+                    catch (err) {
+                        console.error('Gagal menghapus file fisik:', err);
+                    }
+                }
+            }
+        }
+        await this.prisma.$transaction(async (tx) => {
+            for (const ps of pelaporan.pelaporan_sekolah) {
+                await tx.pelaporanDokumen.deleteMany({
+                    where: { pelaporan_sekolah_id: ps.pelaporan_sekolah_id }
+                });
+            }
+            await tx.pelaporanSekolah.deleteMany({
+                where: { pelaporan_id: id }
+            });
+            await tx.pelaporan.delete({
+                where: { pelaporan_id: id }
+            });
+        });
     }
 };
 exports.PelaporanService = PelaporanService;

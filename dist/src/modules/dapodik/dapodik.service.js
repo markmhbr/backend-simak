@@ -1290,6 +1290,97 @@ let DapodikService = class DapodikService {
         });
         return Array.from(rekapMap.values());
     }
+    async getPdRekapAgama(sekolahId) {
+        const filter = this.getSekolahFilter(sekolahId);
+        const students = await this.prisma.pesertaDidik.findMany({
+            where: {
+                sekolah_id: filter.sekolah_id,
+                status: 'Aktif',
+            },
+            select: {
+                jenis_kelamin: true,
+                jenis_pendaftaran_id: true,
+                agama: {
+                    select: {
+                        nama: true,
+                    }
+                }
+            }
+        });
+        const rekapMap = new Map();
+        ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Khonghucu'].forEach(agama => {
+            rekapMap.set(agama, { agama, l: 0, p: 0, total: 0, siswaBaru: 0, pindahan: 0, mengulang: 0 });
+        });
+        students.forEach((pd) => {
+            const agamaName = pd.agama?.nama || 'Lainnya';
+            if (!rekapMap.has(agamaName)) {
+                rekapMap.set(agamaName, { agama: agamaName, l: 0, p: 0, total: 0, siswaBaru: 0, pindahan: 0, mengulang: 0 });
+            }
+            const data = rekapMap.get(agamaName);
+            if (pd.jenis_kelamin === 'L')
+                data.l += 1;
+            if (pd.jenis_kelamin === 'P')
+                data.p += 1;
+            data.total += 1;
+            const jpNum = pd.jenis_pendaftaran_id ? Number(pd.jenis_pendaftaran_id) : 1;
+            if (jpNum === 1)
+                data.siswaBaru += 1;
+            else if (jpNum === 2)
+                data.pindahan += 1;
+            else
+                data.mengulang += 1;
+        });
+        return Array.from(rekapMap.values());
+    }
+    async getPdRekapMasukAktif(sekolahId) {
+        const filter = this.getSekolahFilter(sekolahId);
+        const semesterId = await this.getLatestSemesterId(sekolahId) || '20252';
+        const startYear = parseInt(semesterId.substring(0, 4), 10);
+        const startDate = new Date(startYear, 6, 1);
+        const endDate = new Date(startYear + 1, 5, 30, 23, 59, 59);
+        const students = await this.prisma.pesertaDidik.findMany({
+            where: {
+                sekolah_id: filter.sekolah_id,
+                status: 'Aktif',
+                tanggal_masuk_sekolah: {
+                    gte: startDate,
+                    lte: endDate,
+                }
+            },
+            select: {
+                jenis_kelamin: true,
+                jenis_pendaftaran_id: true,
+            }
+        });
+        const refJenisPendaftaran = await this.prisma.jenis_pendaftaran.findMany({
+            select: {
+                jenis_pendaftaran_id: true,
+                nama: true,
+            }
+        });
+        const jpMap = new Map();
+        refJenisPendaftaran.forEach(ref => {
+            jpMap.set(Number(ref.jenis_pendaftaran_id), ref.nama);
+        });
+        const rekapMap = new Map();
+        refJenisPendaftaran.forEach(ref => {
+            rekapMap.set(ref.nama, { statusMasuk: ref.nama, l: 0, p: 0, total: 0 });
+        });
+        students.forEach((pd) => {
+            const jpId = pd.jenis_pendaftaran_id ? Number(pd.jenis_pendaftaran_id) : 1;
+            const jpName = jpMap.get(jpId) || 'Siswa Baru';
+            if (!rekapMap.has(jpName)) {
+                rekapMap.set(jpName, { statusMasuk: jpName, l: 0, p: 0, total: 0 });
+            }
+            const data = rekapMap.get(jpName);
+            if (pd.jenis_kelamin === 'L')
+                data.l += 1;
+            if (pd.jenis_kelamin === 'P')
+                data.p += 1;
+            data.total += 1;
+        });
+        return Array.from(rekapMap.values()).filter((item) => item.total > 0);
+    }
     async getPdRekapKompetensi(sekolahId) {
         const filter = this.getSekolahFilter(sekolahId);
         const rombels = await this.prisma.rombonganBelajar.findMany({
@@ -2604,6 +2695,29 @@ let DapodikService = class DapodikService {
             include: {
                 penggunas: {
                     select: { email: true },
+                },
+                rombongan_belajar: {
+                    select: {
+                        nama: true,
+                        tingkat_pendidikan_id: true,
+                        semester_id: true,
+                    }
+                },
+                anggota_rombel: {
+                    where: {
+                        rombongan_belajar: {
+                            jenis_rombel: 1,
+                        }
+                    },
+                    select: {
+                        rombongan_belajar: {
+                            select: {
+                                nama: true,
+                                tingkat_pendidikan_id: true,
+                                semester_id: true,
+                            }
+                        }
+                    }
                 },
             },
         });

@@ -21,4 +21,8 @@ export class CreatePelaporanDto {
   @IsString({ each: true })
   @IsNotEmpty()
   sekolah_ids: string[];
+
+  @IsString()
+  @IsOptional()
+  template_konten?: string;
 }

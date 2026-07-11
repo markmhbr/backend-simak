@@ -318,7 +318,7 @@ export declare class MandalaSuratController {
                 aktif: boolean;
                 pegawai_id: string;
                 nama_lengkap: string;
-                nip: string;
+                nip: string | null;
                 password: string;
                 authenticator_secret: string | null;
                 jabatan: number;

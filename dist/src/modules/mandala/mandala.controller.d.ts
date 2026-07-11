@@ -69,6 +69,8 @@ export declare class MandalaController {
             alamat: string | null;
             nomor_telepon: string | null;
             website: string | null;
+            provinsi: string | null;
+            kabupaten: string[];
             aktif: boolean;
         }[];
     }>;
@@ -89,6 +91,8 @@ export declare class MandalaController {
             alamat: string | null;
             nomor_telepon: string | null;
             website: string | null;
+            provinsi: string | null;
+            kabupaten: string[];
             aktif: boolean;
         };
     }>;
@@ -104,6 +108,8 @@ export declare class MandalaController {
             alamat: string | null;
             nomor_telepon: string | null;
             website: string | null;
+            provinsi: string | null;
+            kabupaten: string[];
             aktif: boolean;
         };
     }>;
@@ -119,6 +125,8 @@ export declare class MandalaController {
             alamat: string | null;
             nomor_telepon: string | null;
             website: string | null;
+            provinsi: string | null;
+            kabupaten: string[];
             aktif: boolean;
         };
     }>;
@@ -302,7 +310,7 @@ export declare class MandalaController {
             aktif: boolean;
             pegawai_id: string;
             nama_lengkap: string;
-            nip: string;
+            nip: string | null;
             password: string;
             authenticator_secret: string | null;
             jabatan: number;
@@ -322,6 +330,8 @@ export declare class MandalaController {
                 alamat: string | null;
                 nomor_telepon: string | null;
                 website: string | null;
+                provinsi: string | null;
+                kabupaten: string[];
                 aktif: boolean;
             };
         } & {
@@ -338,7 +348,7 @@ export declare class MandalaController {
             aktif: boolean;
             pegawai_id: string;
             nama_lengkap: string;
-            nip: string;
+            nip: string | null;
             password: string;
             authenticator_secret: string | null;
             jabatan: number;
@@ -363,7 +373,7 @@ export declare class MandalaController {
             aktif: boolean;
             pegawai_id: string;
             nama_lengkap: string;
-            nip: string;
+            nip: string | null;
             password: string;
             authenticator_secret: string | null;
             jabatan: number;
@@ -388,7 +398,7 @@ export declare class MandalaController {
             aktif: boolean;
             pegawai_id: string;
             nama_lengkap: string;
-            nip: string;
+            nip: string | null;
             password: string;
             authenticator_secret: string | null;
             jabatan: number;

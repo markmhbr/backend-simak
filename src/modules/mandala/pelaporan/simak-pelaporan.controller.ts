@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Query, UseGuards, Req, UseInterceptors, UploadedFiles, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Query, UseGuards, Req, UseInterceptors, UploadedFiles, BadRequestException } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { PelaporanService } from './pelaporan.service';
 import { ApiKeyGuard } from '../../../core/app-key/api-key.guard';
@@ -63,6 +63,19 @@ export class SimakPelaporanController {
       status: 'success',
       message: 'Dokumen berhasil diunggah',
       data,
+    };
+  }
+
+  @Delete('dokumen/:dokumenId')
+  async deleteDokumen(
+    @Req() req: Request,
+    @Param('dokumenId') dokumenId: string,
+  ) {
+    const sekolahId = this.getSekolahInfo(req);
+    await this.pelaporanService.deleteDokumenSimak(sekolahId, dokumenId);
+    return {
+      status: 'success',
+      message: 'Dokumen berhasil dihapus',
     };
   }
 }

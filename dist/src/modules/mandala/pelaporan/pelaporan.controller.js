@@ -62,6 +62,20 @@ let PelaporanController = class PelaporanController {
             data,
         };
     }
+    async previewPelaporan(req, res, id, sekolahId) {
+        const cadisdikId = this.getCadisdikId(req);
+        const html = await this.pelaporanService.renderPelaporanHtml(cadisdikId, id, sekolahId);
+        res.setHeader('Content-Type', 'text/html');
+        return res.send(html);
+    }
+    async deletePelaporan(req, id) {
+        const cadisdikId = this.getCadisdikId(req);
+        await this.pelaporanService.deletePelaporan(cadisdikId, id);
+        return {
+            status: 'success',
+            message: 'Pelaporan berhasil dihapus',
+        };
+    }
 };
 exports.PelaporanController = PelaporanController;
 __decorate([
@@ -98,6 +112,24 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], PelaporanController.prototype, "getDokumenSekolah", null);
+__decorate([
+    (0, common_1.Get)(':id/sekolah/:sekolahId/preview'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Res)()),
+    __param(2, (0, common_1.Param)('id')),
+    __param(3, (0, common_1.Param)('sekolahId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object, String, String]),
+    __metadata("design:returntype", Promise)
+], PelaporanController.prototype, "previewPelaporan", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], PelaporanController.prototype, "deletePelaporan", null);
 exports.PelaporanController = PelaporanController = __decorate([
     (0, common_1.Controller)('mandala/pelaporan'),
     (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),

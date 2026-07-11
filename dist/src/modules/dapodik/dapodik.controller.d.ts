@@ -101,6 +101,8 @@ export declare class DapodikController {
             alamat: string | null;
             nomor_telepon: string | null;
             website: string | null;
+            provinsi: string | null;
+            kabupaten: string[];
             aktif: boolean;
         }[];
     }>;
@@ -673,6 +675,16 @@ export declare class DapodikController {
         };
     }>;
     getPdRekapTingkat(req: Request): Promise<{
+        status: string;
+        klien: any;
+        data: any[];
+    }>;
+    getPdRekapAgama(req: Request): Promise<{
+        status: string;
+        klien: any;
+        data: any[];
+    }>;
+    getPdRekapMasukAktif(req: Request): Promise<{
         status: string;
         klien: any;
         data: any[];

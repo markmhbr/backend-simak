@@ -302,6 +302,24 @@ let DapodikController = class DapodikController {
             data,
         };
     }
+    async getPdRekapAgama(req) {
+        const { sekolahId, namaApp } = this.getSekolahInfo(req);
+        const data = await this.dapodikService.getPdRekapAgama(sekolahId);
+        return {
+            status: 'success',
+            klien: namaApp,
+            data,
+        };
+    }
+    async getPdRekapMasukAktif(req) {
+        const { sekolahId, namaApp } = this.getSekolahInfo(req);
+        const data = await this.dapodikService.getPdRekapMasukAktif(sekolahId);
+        return {
+            status: 'success',
+            klien: namaApp,
+            data,
+        };
+    }
     async getPdRekapKompetensi(req) {
         const { sekolahId, namaApp } = this.getSekolahInfo(req);
         const data = await this.dapodikService.getPdRekapKompetensi(sekolahId);
@@ -758,6 +776,20 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], DapodikController.prototype, "getPdRekapTingkat", null);
+__decorate([
+    (0, common_1.Get)('peserta-didik/rekap-agama'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "getPdRekapAgama", null);
+__decorate([
+    (0, common_1.Get)('peserta-didik/rekap-masuk-aktif'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "getPdRekapMasukAktif", null);
 __decorate([
     (0, common_1.Get)('peserta-didik/rekap-kompetensi'),
     __param(0, (0, common_1.Req)()),

@@ -12,6 +12,7 @@ export declare class PelaporanService {
         aktif: boolean;
         judul: string;
         deskripsi: string | null;
+        template_konten: string | null;
         pelaporan_id: string;
     }>;
     getListPelaporan(cadisdikId: string, page?: number, limit?: number): Promise<{
@@ -31,6 +32,7 @@ export declare class PelaporanService {
         pelaporan_id: string;
         judul: string;
         deskripsi: string;
+        template_konten: string;
         tanggal_mulai: Date;
         tanggal_selesai: Date;
         aktif: boolean;
@@ -71,6 +73,7 @@ export declare class PelaporanService {
         pelaporan_sekolah_id: string;
         judul: string;
         deskripsi: string;
+        template_konten: string;
         tanggal_mulai: Date;
         tanggal_selesai: Date;
         dokumen: {
@@ -83,4 +86,7 @@ export declare class PelaporanService {
         }[];
     }>;
     uploadDokumenSimak(sekolahId: string, pelaporanId: string, files: Express.Multer.File[]): Promise<any[]>;
+    renderPelaporanHtml(cadisdikId: string, pelaporanId: string, sekolahId: string): Promise<string>;
+    deleteDokumenSimak(sekolahId: string, dokumenId: string): Promise<void>;
+    deletePelaporan(cadisdikId: string, id: string): Promise<void>;
 }

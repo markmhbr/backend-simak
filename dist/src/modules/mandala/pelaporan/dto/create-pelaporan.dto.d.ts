@@ -4,4 +4,5 @@ export declare class CreatePelaporanDto {
     tanggal_mulai?: string;
     tanggal_selesai?: string;
     sekolah_ids: string[];
+    template_konten?: string;
 }

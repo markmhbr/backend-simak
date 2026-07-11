@@ -17,6 +17,7 @@ export declare class PelaporanController {
             aktif: boolean;
             judul: string;
             deskripsi: string | null;
+            template_konten: string | null;
             pelaporan_id: string;
         };
     }>;
@@ -40,6 +41,7 @@ export declare class PelaporanController {
             pelaporan_id: string;
             judul: string;
             deskripsi: string;
+            template_konten: string;
             tanggal_mulai: Date;
             tanggal_selesai: Date;
             aktif: boolean;
@@ -66,5 +68,10 @@ export declare class PelaporanController {
                 ukuran_file: bigint | null;
             }[];
         };
+    }>;
+    previewPelaporan(req: Request, res: any, id: string, sekolahId: string): Promise<any>;
+    deletePelaporan(req: Request, id: string): Promise<{
+        status: string;
+        message: string;
     }>;
 }

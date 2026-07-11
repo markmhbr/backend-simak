@@ -17,6 +17,7 @@ class CreatePelaporanDto {
     tanggal_mulai;
     tanggal_selesai;
     sekolah_ids;
+    template_konten;
 }
 exports.CreatePelaporanDto = CreatePelaporanDto;
 __decorate([
@@ -45,4 +46,9 @@ __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", Array)
 ], CreatePelaporanDto.prototype, "sekolah_ids", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreatePelaporanDto.prototype, "template_konten", void 0);
 //# sourceMappingURL=create-pelaporan.dto.js.map
