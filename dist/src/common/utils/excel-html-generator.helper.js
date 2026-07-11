@@ -37,6 +37,11 @@ exports.validateExcelHeader = validateExcelHeader;
 exports.parseExcelData = parseExcelData;
 exports.generateHtmlTable = generateHtmlTable;
 exports.generateHtmlTableRows = generateHtmlTableRows;
+exports.getTemplateHeaders = getTemplateHeaders;
+exports.isAutoField = isAutoField;
+exports.validateDynamicExcel = validateDynamicExcel;
+exports.parseDynamicExcel = parseDynamicExcel;
+exports.generateDynamicHtmlTable = generateDynamicHtmlTable;
 const XLSX = __importStar(require("xlsx"));
 const fs = __importStar(require("fs"));
 function validateExcelHeader(filePathOrBuffer) {
@@ -141,5 +146,178 @@ function generateHtmlTableRows(students) {
     `;
     });
     return rows;
+}
+function getTemplateHeaders(templateKonten) {
+    if (!templateKonten)
+        return null;
+    const match = templateKonten.match(/data-excel-headers="([^"]+)"/);
+    if (!match)
+        return null;
+    return match[1].split(',').map(h => h.trim()).filter(Boolean);
+}
+const AUTO_FIELDS_MAP = {
+    cadisdikwilayah: "cadisdik",
+    cadisdik: "cadisdik",
+    provinsi: "provinsi",
+    kabupatenkota: "kabupaten_kota",
+    kabupaten: "kabupaten_kota",
+    kota: "kabupaten_kota",
+    kecamatan: "kecamatan",
+    desakelurahan: "desa_kelurahan",
+    desa: "desa_kelurahan",
+    kelurahan: "desa_kelurahan",
+    npsn: "npsn",
+    npsnsekolah: "npsn",
+    namasekolah: "nama",
+    sekolah: "nama",
+    nama: "nama",
+    bentukpendidikan: "bentuk_pendidikan",
+    statussekolah: "status_sekolah",
+    alamatjalan: "alamat_jalan",
+    alamat: "alamat_jalan",
+    emailsekolah: "email",
+    email: "email",
+    nomortelepon: "nomor_telepon",
+    telepon: "nomor_telepon",
+    website: "website",
+    totalsiswa: "total_siswa",
+    siswa: "total_siswa",
+    totalgurugtk: "total_gtk",
+    gtk: "total_gtk",
+    guru: "total_gtk"
+};
+function isAutoField(header) {
+    const norm = header.toLowerCase().replace(/[^a-z0-9]/g, "");
+    return norm in AUTO_FIELDS_MAP;
+}
+function validateDynamicExcel(filePathOrBuffer, expectedHeaders) {
+    try {
+        let workbook;
+        if (Buffer.isBuffer(filePathOrBuffer)) {
+            workbook = XLSX.read(filePathOrBuffer, { type: 'buffer' });
+        }
+        else {
+            if (!fs.existsSync(filePathOrBuffer)) {
+                return { isValid: false, error: 'Berkas tidak ditemukan' };
+            }
+            workbook = XLSX.readFile(filePathOrBuffer);
+        }
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        const rawData = XLSX.utils.sheet_to_json(worksheet);
+        if (rawData.length === 0) {
+            const firstRowKeys = [];
+            const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1:A1');
+            for (let col = range.s.c; col <= range.e.c; col++) {
+                const cellRef = XLSX.utils.encode_cell({ r: range.s.r, c: col });
+                const cellVal = worksheet[cellRef]?.v?.toString().trim();
+                if (cellVal)
+                    firstRowKeys.push(cellVal.toLowerCase().replace(/[^a-z0-9]/g, ""));
+            }
+            const manualExpected = expectedHeaders.filter(h => !isAutoField(h)).map(h => h.toLowerCase().replace(/[^a-z0-9]/g, ""));
+            const missing = manualExpected.filter(exp => !firstRowKeys.includes(exp));
+            if (missing.length > 0) {
+                return {
+                    isValid: false,
+                    error: `Header kolom tidak sesuai template. Pastikan kolom manual berikut ada di baris pertama Excel Anda: ${expectedHeaders.filter(h => !isAutoField(h)).join(", ")}`
+                };
+            }
+            return { isValid: true };
+        }
+        const keys = Object.keys(rawData[0]).map(k => k.toLowerCase().replace(/[^a-z0-9]/g, ""));
+        const manualExpected = expectedHeaders.filter(h => !isAutoField(h)).map(h => h.toLowerCase().replace(/[^a-z0-9]/g, ""));
+        const missing = manualExpected.filter(exp => !keys.includes(exp));
+        if (missing.length > 0) {
+            return {
+                isValid: false,
+                error: `Kolom wajib pengisian sekolah tidak lengkap. Kolom berikut harus ada: ${expectedHeaders.filter(h => !isAutoField(h)).join(", ")}`
+            };
+        }
+        return { isValid: true };
+    }
+    catch (error) {
+        return { isValid: false, error: error.message || 'Gagal membaca berkas Excel' };
+    }
+}
+function parseDynamicExcel(filePathOrBuffer, expectedHeaders, schoolData) {
+    try {
+        let workbook;
+        if (Buffer.isBuffer(filePathOrBuffer)) {
+            workbook = XLSX.read(filePathOrBuffer, { type: 'buffer' });
+        }
+        else {
+            if (!fs.existsSync(filePathOrBuffer))
+                return [];
+            workbook = XLSX.readFile(filePathOrBuffer);
+        }
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        const rawData = XLSX.utils.sheet_to_json(worksheet);
+        const rows = [];
+        for (const rawRow of rawData) {
+            const parsedRow = {};
+            const rowKeys = Object.keys(rawRow);
+            expectedHeaders.forEach(header => {
+                const norm = header.toLowerCase().replace(/[^a-z0-9]/g, "");
+                if (isAutoField(header)) {
+                    const dbKey = AUTO_FIELDS_MAP[norm];
+                    let val = schoolData[dbKey] || '';
+                    if (dbKey === 'bentuk_pendidikan') {
+                        const map = {
+                            1: 'TK', 5: 'SD', 6: 'SMP', 13: 'SMA', 15: 'SMK', 16: 'PNF', 17: 'SLB',
+                            34: 'SPK SD', 35: 'SPK SMP', 36: 'SPK SMA',
+                        };
+                        val = map[schoolData.bentuk_pendidikan_id] || '';
+                    }
+                    else if (dbKey === 'status_sekolah') {
+                        val = schoolData.status_sekolah === '1' ? 'Negeri' : (schoolData.status_sekolah === '2' ? 'Swasta' : schoolData.status_sekolah);
+                    }
+                    else if (dbKey === 'cadisdik') {
+                        val = schoolData.cadisdik?.nama_instansi || '';
+                    }
+                    parsedRow[header] = val.toString();
+                }
+                else {
+                    const matchKey = rowKeys.find(rk => rk.toLowerCase().replace(/[^a-z0-9]/g, "") === norm);
+                    parsedRow[header] = matchKey ? rawRow[matchKey]?.toString().trim() || '' : '';
+                }
+            });
+            rows.push(parsedRow);
+        }
+        return rows;
+    }
+    catch (error) {
+        console.error('Error parsing dynamic Excel data:', error);
+        return [];
+    }
+}
+function generateDynamicHtmlTable(headers, rows) {
+    if (rows.length === 0) {
+        return `<div style="text-align: center; color: #888; padding: 15px; border: 1px dashed #ccc; border-radius: 6px;">Tidak ada data isian terlampir / Excel kosong</div>`;
+    }
+    let headCols = `<th style="padding: 10px; border: 1px solid #cbd5e1; font-weight: 600; text-align: center; font-size: 14px; width: 8%;">No</th>`;
+    headers.forEach(h => {
+        headCols += `<th style="padding: 10px; border: 1px solid #cbd5e1; font-weight: 600; text-align: left; font-size: 14px;">${h}</th>`;
+    });
+    let rowLines = '';
+    rows.forEach((row, index) => {
+        let cells = `<td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center; font-size: 14px;">${index + 1}</td>`;
+        headers.forEach(h => {
+            cells += `<td style="padding: 8px; border: 1px solid #cbd5e1; text-align: left; font-size: 14px;">${row[h] || ''}</td>`;
+        });
+        rowLines += `<tr style="border-bottom: 1px solid #e2e8f0;">${cells}</tr>`;
+    });
+    return `
+    <table style="width: 100%; border-collapse: collapse; border: 1px solid #cbd5e1; margin-top: 15px; margin-bottom: 15px;">
+      <thead>
+        <tr style="background-color: #f8fafc; border-bottom: 2px solid #cbd5e1;">
+          ${headCols}
+        </tr>
+      </thead>
+      <tbody>
+        ${rowLines}
+      </tbody>
+    </table>
+  `;
 }
 //# sourceMappingURL=excel-html-generator.helper.js.map

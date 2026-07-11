@@ -63,6 +63,28 @@ let ApiKeyGuard = class ApiKeyGuard {
                         };
                         return true;
                     }
+                    if (decoded.role === 'Operator Sekolah' || decoded.role === 'operator_sekolah' || decoded.role?.toLowerCase()?.includes('operator')) {
+                        let resolvedSekolahId = decoded.sekolahId || decoded.sekolah_id;
+                        if (!resolvedSekolahId && decoded.sub) {
+                            const pengguna = await this.prisma.pengguna.findUnique({
+                                where: { pengguna_id: decoded.sub },
+                                select: { sekolah_id: true }
+                            });
+                            resolvedSekolahId = pengguna?.sekolah_id;
+                        }
+                        if (resolvedSekolahId) {
+                            request['appKey'] = {
+                                id: 'operator-school-bypass',
+                                nama_app: 'Operator Sekolah Portal',
+                                sekolah_id: resolvedSekolahId,
+                                key_api: 'operator-school-bypass-key',
+                                domain: '*',
+                                is_active: true,
+                            };
+                            request['user'] = decoded;
+                            return true;
+                        }
+                    }
                     if (decoded.sekolahId) {
                         const appKey = await this.prisma.appKey.findUnique({
                             where: { sekolah_id: decoded.sekolahId }

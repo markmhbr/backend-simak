@@ -42,11 +42,12 @@ export declare class MandalaController {
             website: string;
             bentuk_pendidikan_is_str: string;
             bentuk_pendidikan_id_str: string;
-            kabupaten_kota: string;
-            kecamatan: string;
+            kabupaten_kota: any;
+            kecamatan: any;
+            provinsi: any;
             lintang: import("@prisma/client-runtime-utils").Decimal;
             bujur: import("@prisma/client-runtime-utils").Decimal;
-            desa_kelurahan: string;
+            desa_kelurahan: any;
             total_siswa: number;
             total_gtk: number;
             nomor_telepon: string;

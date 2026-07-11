@@ -133,13 +133,83 @@ let MandalaService = MandalaService_1 = class MandalaService {
             };
             return map[id] || null;
         };
+        const [studentCounts, gtkCounts, bentukPendidikanList] = await Promise.all([
+            this.prisma.pesertaDidik.groupBy({
+                by: ['sekolah_id'],
+                _count: { sekolah_id: true },
+            }),
+            this.prisma.gtk.groupBy({
+                by: ['sekolah_id'],
+                _count: { sekolah_id: true },
+            }),
+            this.prisma.bentuk_pendidikan.findMany(),
+        ]);
+        const studentCountMap = new Map();
+        for (const c of studentCounts) {
+            if (c.sekolah_id) {
+                studentCountMap.set(c.sekolah_id, c._count.sekolah_id);
+            }
+        }
+        const gtkCountMap = new Map();
+        for (const c of gtkCounts) {
+            if (c.sekolah_id) {
+                gtkCountMap.set(c.sekolah_id, c._count.sekolah_id);
+            }
+        }
+        const bentukPendMap = new Map(bentukPendidikanList.map((b) => [b.bentuk_pendidikan_id, b.nama]));
+        const wilayahCache = new Map();
+        const resolveCachedWilayah = async (kodeWilayah) => {
+            const result = {
+                desa: null,
+                kecamatan: null,
+                kabupaten: null,
+                provinsi: null,
+                negara: null,
+            };
+            if (!kodeWilayah)
+                return result;
+            const trimmed = kodeWilayah.trim();
+            if (wilayahCache.has(trimmed)) {
+                return wilayahCache.get(trimmed);
+            }
+            try {
+                let currentKode = trimmed;
+                let maxDepth = 6;
+                while (currentKode && maxDepth > 0) {
+                    const wil = await this.prisma.mst_wilayah.findUnique({
+                        where: { kode_wilayah: currentKode },
+                        select: { nama: true, id_level_wilayah: true, mst_kode_wilayah: true },
+                    });
+                    if (!wil)
+                        break;
+                    switch (wil.id_level_wilayah) {
+                        case 4:
+                            result.desa = wil.nama;
+                            break;
+                        case 3:
+                            result.kecamatan = wil.nama;
+                            break;
+                        case 2:
+                            result.kabupaten = wil.nama;
+                            break;
+                        case 1:
+                            result.provinsi = wil.nama;
+                            break;
+                        case 0:
+                            result.negara = wil.nama;
+                            break;
+                    }
+                    currentKode = wil.mst_kode_wilayah?.trim() || null;
+                    maxDepth--;
+                }
+            }
+            catch (e) {
+            }
+            wilayahCache.set(trimmed, result);
+            return result;
+        };
         const richSchools = await Promise.all(schools.map(async (school) => {
-            const [totalSiswa, totalGtk, bentukPend, wilayahHierarchy] = await Promise.all([
-                this.prisma.pesertaDidik.count({ where: { sekolah_id: school.sekolah_id } }),
-                this.prisma.gtk.count({ where: { sekolah_id: school.sekolah_id } }),
-                school.bentuk_pendidikan_id ? this.prisma.bentuk_pendidikan.findUnique({ where: { bentuk_pendidikan_id: school.bentuk_pendidikan_id } }) : null,
-                this.resolveWilayahHierarchy(school.kode_wilayah),
-            ]);
+            const wilayahHierarchy = await resolveCachedWilayah(school.kode_wilayah);
             return {
                 sekolah_id: school.sekolah_id,
                 nama: school.nama,
@@ -148,15 +218,16 @@ let MandalaService = MandalaService_1 = class MandalaService {
                 alamat: school.alamat_jalan,
                 email: school.email,
                 website: school.website,
-                bentuk_pendidikan_is_str: bentukPend?.nama || getBentukNama(school.bentuk_pendidikan_id) || null,
+                bentuk_pendidikan_is_str: bentukPendMap.get(school.bentuk_pendidikan_id || 0) || getBentukNama(school.bentuk_pendidikan_id) || null,
                 bentuk_pendidikan_id_str: school.bentuk_pendidikan_id?.toString() || null,
                 kabupaten_kota: wilayahHierarchy.kabupaten,
                 kecamatan: wilayahHierarchy.kecamatan,
+                provinsi: wilayahHierarchy.provinsi,
                 lintang: school.lintang,
                 bujur: school.bujur,
                 desa_kelurahan: school.desa_kelurahan || wilayahHierarchy.desa,
-                total_siswa: totalSiswa,
-                total_gtk: totalGtk,
+                total_siswa: studentCountMap.get(school.sekolah_id) || 0,
+                total_gtk: gtkCountMap.get(school.sekolah_id) || 0,
                 nomor_telepon: school.nomor_telepon,
                 kode_wilayah: school.kode_wilayah,
                 last_update: school.last_update,
@@ -422,6 +493,7 @@ let MandalaService = MandalaService_1 = class MandalaService {
                 nomor_telepon: data.nomor_telepon,
                 foto: data.foto,
                 aktif: data.aktif !== undefined ? data.aktif : true,
+                golongan: data.golongan !== undefined && data.golongan !== null && data.golongan !== '' ? parseInt(data.golongan, 10) : null,
             },
         });
     }
@@ -441,6 +513,7 @@ let MandalaService = MandalaService_1 = class MandalaService {
             nomor_telepon: data.nomor_telepon,
             foto: data.foto,
             aktif: data.aktif,
+            golongan: data.golongan !== undefined ? (data.golongan !== null && data.golongan !== '' ? parseInt(data.golongan, 10) : null) : undefined,
             updated_at: new Date(),
         };
         if (data.password) {
@@ -648,6 +721,7 @@ let MandalaService = MandalaService_1 = class MandalaService {
                 role: 'Operator Sekolah',
                 cadisdik_id: cadisdikId,
                 cadisdik_nama: cadisdikNama,
+                sekolahId: userEntity.sekolah_id,
             } : {
                 sub: userEntity.pegawai_id,
                 email: userEntity.email,

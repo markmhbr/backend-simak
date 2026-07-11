@@ -234,6 +234,7 @@ let PelaporanService = class PelaporanService {
     async uploadDokumenSimak(sekolahId, pelaporanId, files) {
         const pelaporanSekolah = await this.prisma.pelaporanSekolah.findFirst({
             where: { sekolah_id: sekolahId, pelaporan_id: pelaporanId },
+            include: { pelaporan: true }
         });
         if (!pelaporanSekolah)
             throw new common_1.NotFoundException('Pelaporan tidak valid untuk sekolah ini');
@@ -249,9 +250,18 @@ let PelaporanService = class PelaporanService {
                 throw new Error(`Format file ${file.originalname} tidak didukung`);
             }
             if (ext === '.xlsx' || ext === '.xls') {
-                const isValid = (0, excel_html_generator_helper_1.validateExcelHeader)(file.buffer);
-                if (!isValid) {
-                    throw new Error(`Struktur kolom Excel tidak valid. Baris pertama (A1) harus 'nisn' dan (B1) harus 'nama siswa'.`);
+                const expectedHeaders = (0, excel_html_generator_helper_1.getTemplateHeaders)(pelaporanSekolah.pelaporan.template_konten || '');
+                if (expectedHeaders && expectedHeaders.length > 0) {
+                    const res = (0, excel_html_generator_helper_1.validateDynamicExcel)(file.buffer, expectedHeaders);
+                    if (!res.isValid) {
+                        throw new Error(res.error || `Struktur kolom Excel tidak valid.`);
+                    }
+                }
+                else {
+                    const isValid = (0, excel_html_generator_helper_1.validateExcelHeader)(file.buffer);
+                    if (!isValid) {
+                        throw new Error(`Struktur kolom Excel tidak valid. Baris pertama (A1) harus 'nisn' dan (B1) harus 'nama siswa'.`);
+                    }
                 }
             }
             if (file.size > 10 * 1024 * 1024) {
@@ -280,10 +290,22 @@ let PelaporanService = class PelaporanService {
         if (!pelaporan) {
             throw new common_1.NotFoundException('Pelaporan tidak ditemukan');
         }
-        const sekolah = await this.prisma.sekolah.findUnique({
-            where: { sekolah_id: sekolahId },
-            select: { nama: true, npsn: true }
-        });
+        const [sekolah, totalSiswa, totalGtk] = await Promise.all([
+            this.prisma.sekolah.findUnique({
+                where: { sekolah_id: sekolahId },
+                include: { cadisdik: true }
+            }),
+            this.prisma.pesertaDidik.count({ where: { sekolah_id: sekolahId } }),
+            this.prisma.gtk.count({ where: { sekolah_id: sekolahId } })
+        ]);
+        if (!sekolah) {
+            throw new common_1.NotFoundException('Sekolah tidak ditemukan');
+        }
+        const schoolData = {
+            ...sekolah,
+            total_siswa: totalSiswa,
+            total_gtk: totalGtk
+        };
         const pelaporanSekolah = await this.prisma.pelaporanSekolah.findFirst({
             where: { pelaporan_id: pelaporanId, sekolah_id: sekolahId },
             include: {
@@ -329,9 +351,23 @@ let PelaporanService = class PelaporanService {
             if (excelDoc) {
                 const filePath = path.join(process.cwd(), excelDoc.file_url);
                 if (fs.existsSync(filePath)) {
-                    const students = (0, excel_html_generator_helper_1.parseExcelData)(filePath);
-                    tableHtml = (0, excel_html_generator_helper_1.generateHtmlTable)(students);
-                    tableRowsHtml = (0, excel_html_generator_helper_1.generateHtmlTableRows)(students);
+                    const expectedHeaders = (0, excel_html_generator_helper_1.getTemplateHeaders)(pelaporan.template_konten || '');
+                    if (expectedHeaders && expectedHeaders.length > 0) {
+                        const rows = (0, excel_html_generator_helper_1.parseDynamicExcel)(filePath, expectedHeaders, schoolData);
+                        tableHtml = (0, excel_html_generator_helper_1.generateDynamicHtmlTable)(expectedHeaders, rows);
+                        tableRowsHtml = rows.map((r, idx) => {
+                            let tds = `<td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">${idx + 1}</td>`;
+                            expectedHeaders.forEach(h => {
+                                tds += `<td style="padding: 8px; border: 1px solid #cbd5e1; text-align: left;">${r[h] || ''}</td>`;
+                            });
+                            return `<tr>${tds}</tr>`;
+                        }).join('');
+                    }
+                    else {
+                        const students = (0, excel_html_generator_helper_1.parseExcelData)(filePath);
+                        tableHtml = (0, excel_html_generator_helper_1.generateHtmlTable)(students);
+                        tableRowsHtml = (0, excel_html_generator_helper_1.generateHtmlTableRows)(students);
+                    }
                 }
                 else {
                     tableHtml = `<div style="text-align: center; color: #d9534f; padding: 10px; border: 1px dashed #d9534f;">Berkas Excel tidak ditemukan pada server</div>`;
