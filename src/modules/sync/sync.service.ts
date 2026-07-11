@@ -142,10 +142,24 @@ export class SyncService {
       };
 
       try {
+        // Fetch existing record to prevent overwriting specific fields with null
+        const existingSekolah = await this.prisma.sekolah.findUnique({
+          where: { sekolah_id: targetId },
+          select: { logo: true, cadisdik_id: true, social_media: true, radius: true }
+        });
+
+        const updatePayload = {
+          ...payload,
+          logo: row.logo || existingSekolah?.logo || null,
+          cadisdik_id: row.cadisdik_id || existingSekolah?.cadisdik_id || null,
+          social_media: row.social_media || existingSekolah?.social_media || null,
+          radius: this.parseNumber(row.radius) || existingSekolah?.radius || 100,
+        };
+
         await this.prisma.sekolah.upsert({
           where: { sekolah_id: targetId },
           create: payload,
-          update: payload,
+          update: updatePayload,
         });
         successCount++;
       } catch (err) {
