@@ -142,23 +142,74 @@ export class SyncService {
       };
 
       try {
+        // Resolve cadisdik_id based on kabupaten_kota if not directly provided
+        let resolvedCadisdikId = row.cadisdik_id || null;
+        if (!resolvedCadisdikId && row.kode_wilayah) {
+          try {
+            let currentKode = String(row.kode_wilayah).trim();
+            let resolvedKabupaten: string | null = null;
+            let maxDepth = 6;
+
+            while (currentKode && maxDepth > 0) {
+              const wil = await this.prisma.mst_wilayah.findUnique({
+                where: { kode_wilayah: currentKode },
+                select: { nama: true, id_level_wilayah: true, mst_kode_wilayah: true },
+              });
+
+              if (!wil) break;
+
+              if (wil.id_level_wilayah === 2) {
+                resolvedKabupaten = wil.nama.trim();
+                break;
+              }
+
+              currentKode = wil.mst_kode_wilayah?.trim() || null;
+              maxDepth--;
+            }
+
+            if (resolvedKabupaten) {
+              const matchingCadisdik = await this.prisma.cadisdik.findFirst({
+                where: {
+                  kabupaten: {
+                    has: resolvedKabupaten
+                  }
+                },
+                select: { cadisdik_id: true }
+              });
+
+              if (matchingCadisdik) {
+                resolvedCadisdikId = matchingCadisdik.cadisdik_id;
+              }
+            }
+          } catch (e) {
+            this.logger.error(`Error resolving cadisdik_id for sekolah ${targetId}: ${e.message}`);
+          }
+        }
+
         // Fetch existing record to prevent overwriting specific fields with null
         const existingSekolah = await this.prisma.sekolah.findUnique({
           where: { sekolah_id: targetId },
           select: { logo: true, cadisdik_id: true, social_media: true, radius: true }
         });
 
+        const finalCadisdikId = resolvedCadisdikId || existingSekolah?.cadisdik_id || null;
+
+        const createPayload = {
+          ...payload,
+          cadisdik_id: finalCadisdikId,
+        };
+
         const updatePayload = {
           ...payload,
           logo: row.logo || existingSekolah?.logo || null,
-          cadisdik_id: row.cadisdik_id || existingSekolah?.cadisdik_id || null,
+          cadisdik_id: finalCadisdikId,
           social_media: row.social_media || existingSekolah?.social_media || null,
           radius: this.parseNumber(row.radius) || existingSekolah?.radius || 100,
         };
 
         await this.prisma.sekolah.upsert({
           where: { sekolah_id: targetId },
-          create: payload,
+          create: createPayload,
           update: updatePayload,
         });
         successCount++;
