@@ -602,6 +602,7 @@ let DapodikService = class DapodikService {
         };
     }
     async uploadSiswaDokumen(sekolahId, uuidSiswa, file, docName) {
+        const fs = require('fs');
         const path = require('path');
         const { compressAndSaveImage, saveDocument } = require('../../common/utils/upload.util');
         const siswa = await this.prisma.pesertaDidik.findFirst({
@@ -614,6 +615,15 @@ let DapodikService = class DapodikService {
         const fileExt = path.extname(file.originalname).toLowerCase();
         const cleanDocName = docName.replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
         const finalFileName = `${cleanDocName}${fileExt}`;
+        if (fs.existsSync(destDir)) {
+            const existingFiles = fs.readdirSync(destDir);
+            for (const existingFile of existingFiles) {
+                const existingBase = path.parse(existingFile).name;
+                if (existingBase === cleanDocName) {
+                    fs.unlinkSync(path.join(destDir, existingFile));
+                }
+            }
+        }
         let savedPath = '';
         let isCompressed = false;
         if (['.jpg', '.jpeg', '.png', '.webp'].includes(fileExt)) {
@@ -636,6 +646,7 @@ let DapodikService = class DapodikService {
         };
     }
     async uploadGtkDokumen(sekolahId, uuidGtk, file, docName) {
+        const fs = require('fs');
         const path = require('path');
         const { compressAndSaveImage, saveDocument } = require('../../common/utils/upload.util');
         const gtk = await this.prisma.gtk.findFirst({
@@ -648,6 +659,15 @@ let DapodikService = class DapodikService {
         const fileExt = path.extname(file.originalname).toLowerCase();
         const cleanDocName = docName.replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
         const finalFileName = `${cleanDocName}${fileExt}`;
+        if (fs.existsSync(destDir)) {
+            const existingFiles = fs.readdirSync(destDir);
+            for (const existingFile of existingFiles) {
+                const existingBase = path.parse(existingFile).name;
+                if (existingBase === cleanDocName) {
+                    fs.unlinkSync(path.join(destDir, existingFile));
+                }
+            }
+        }
         let savedPath = '';
         let isCompressed = false;
         if (['.jpg', '.jpeg', '.png', '.webp'].includes(fileExt)) {

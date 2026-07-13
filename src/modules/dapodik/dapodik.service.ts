@@ -676,6 +676,7 @@ export class DapodikService {
   }
 
   async uploadSiswaDokumen(sekolahId: string, uuidSiswa: string, file: Express.Multer.File, docName: string) {
+    const fs = require('fs');
     const path = require('path');
     const { compressAndSaveImage, saveDocument } = require('../../common/utils/upload.util');
 
@@ -691,6 +692,17 @@ export class DapodikService {
     const fileExt = path.extname(file.originalname).toLowerCase();
     const cleanDocName = docName.replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
     const finalFileName = `${cleanDocName}${fileExt}`;
+
+    // Hapus file lama dengan nama dokumen yang sama (ekstensi apapun) sebelum menyimpan yang baru
+    if (fs.existsSync(destDir)) {
+      const existingFiles = fs.readdirSync(destDir) as string[];
+      for (const existingFile of existingFiles) {
+        const existingBase = path.parse(existingFile).name;
+        if (existingBase === cleanDocName) {
+          fs.unlinkSync(path.join(destDir, existingFile));
+        }
+      }
+    }
 
     let savedPath = '';
     let isCompressed = false;
@@ -718,6 +730,7 @@ export class DapodikService {
   }
 
   async uploadGtkDokumen(sekolahId: string, uuidGtk: string, file: Express.Multer.File, docName: string) {
+    const fs = require('fs');
     const path = require('path');
     const { compressAndSaveImage, saveDocument } = require('../../common/utils/upload.util');
 
@@ -733,6 +746,17 @@ export class DapodikService {
     const fileExt = path.extname(file.originalname).toLowerCase();
     const cleanDocName = docName.replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
     const finalFileName = `${cleanDocName}${fileExt}`;
+
+    // Hapus file lama dengan nama dokumen yang sama (ekstensi apapun) sebelum menyimpan yang baru
+    if (fs.existsSync(destDir)) {
+      const existingFiles = fs.readdirSync(destDir) as string[];
+      for (const existingFile of existingFiles) {
+        const existingBase = path.parse(existingFile).name;
+        if (existingBase === cleanDocName) {
+          fs.unlinkSync(path.join(destDir, existingFile));
+        }
+      }
+    }
 
     let savedPath = '';
     let isCompressed = false;
