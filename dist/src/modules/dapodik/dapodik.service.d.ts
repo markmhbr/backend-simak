@@ -636,7 +636,7 @@ export declare class DapodikService {
             nuptk: any;
             nik: any;
             nip: any;
-            foto: any;
+            foto: string;
             qr_token: any;
             ptk_induk: any;
             jenis_kelamin: any;

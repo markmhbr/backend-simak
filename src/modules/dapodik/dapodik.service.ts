@@ -1031,6 +1031,7 @@ export class DapodikService {
     // Select fields for query
     const querySelect = {
       peserta_didik_id: true,
+      sekolah_id: true,
       nama: true,
       nisn: true,
       nipd: true,
@@ -1135,6 +1136,8 @@ export class DapodikService {
     });
 
     const checkStudentCompleteness = (item: any) => {
+      const fs = require('fs');
+      const path = require('path');
       const allFields = [
         'nama', 'jenis_kelamin', 'nik', 'tempat_lahir', 'tanggal_lahir',
         'agama_id_str', 'no_kk', 'reg_akta_lahir', 'anak_keberapa',
@@ -1175,7 +1178,31 @@ export class DapodikService {
           filled++;
         }
       });
-      return Math.round((filled / fields.length) * 100);
+
+      // Scan dokumen fisik di storage (5 dokumen wajib: ijazah_sekolah_asal, kartu_keluarga, akta_kelahiran, ktp_ayah, ktp_ibu)
+      const docTypes = ["ijazah_sekolah_asal", "kartu_keluarga", "akta_kelahiran", "ktp_ayah", "ktp_ibu"];
+      const destDir = path.join(process.cwd(), 'storage', String(item.sekolah_id), 'siswa', String(item.peserta_didik_id), 'dokumen');
+      let uploadedDocs: string[] = [];
+      if (fs.existsSync(destDir)) {
+        try {
+          uploadedDocs = fs.readdirSync(destDir);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      // Tambahkan total 5 dokumen wajib ke basis perhitungan fields
+      const totalFieldsCount = fields.length + docTypes.length;
+      
+      let docFilled = 0;
+      docTypes.forEach(docType => {
+        const hasDoc = uploadedDocs.some(f => f.startsWith(docType));
+        if (hasDoc) {
+          docFilled++;
+        }
+      });
+
+      return Math.round(((filled + docFilled) / totalFieldsCount) * 100);
     };
 
     if (hasCompletenessFilter) {
@@ -1199,7 +1226,7 @@ export class DapodikService {
 
         return {
           ...item,
-          foto: item.foto ? (item.foto.startsWith('http') ? item.foto : `${appUrl}${item.foto}`) : null,
+          foto: item.foto ? (item.foto.startsWith('http') ? `${item.foto}${item.foto.includes('?') ? '&' : '?'}t=${Date.now()}` : `${appUrl}${item.foto}?t=${Date.now()}`) : null,
           nama_rombel: rombel?.nama || null,
           tingkat_pendidikan_id: rombel?.tingkat_pendidikan_id ? String(rombel.tingkat_pendidikan_id) : null,
           agama_id_str: item.agama?.nama || null,
@@ -1209,6 +1236,16 @@ export class DapodikService {
           kabupaten_kota: wilayahHierarchy.kabupaten,
           kecamatan: wilayahHierarchy.kecamatan,
           tinggi_badan: item.tinggi_badan !== null && item.tinggi_badan !== undefined ? Number(item.tinggi_badan) : null,
+          lengkapData: checkStudentCompleteness(item),
+          uploaded_docs: (() => {
+            const fs = require('fs');
+            const path = require('path');
+            const destDir = path.join(process.cwd(), 'storage', String(item.sekolah_id), 'siswa', String(item.peserta_didik_id), 'dokumen');
+            if (fs.existsSync(destDir)) {
+              try { return fs.readdirSync(destDir); } catch(e) { return []; }
+            }
+            return [];
+          })(),
           berat_badan: item.berat_badan !== null && item.berat_badan !== undefined ? Number(item.berat_badan) : null,
           jenis_pendaftaran_id_str: jp?.nama || null,
           jenis_keluar_id_str: jk?.ket_keluar || null,
@@ -1280,7 +1317,7 @@ export class DapodikService {
 
         return {
           ...item,
-          foto: item.foto ? (item.foto.startsWith('http') ? item.foto : `${appUrl}${item.foto}`) : null,
+          foto: item.foto ? (item.foto.startsWith('http') ? `${item.foto}${item.foto.includes('?') ? '&' : '?'}t=${Date.now()}` : `${appUrl}${item.foto}?t=${Date.now()}`) : null,
           nama_rombel: rombel?.nama || null,
           tingkat_pendidikan_id: rombel?.tingkat_pendidikan_id ? String(rombel.tingkat_pendidikan_id) : null,
           agama_id_str: item.agama?.nama || null,
@@ -1290,6 +1327,16 @@ export class DapodikService {
           kabupaten_kota: wilayahHierarchy.kecamatan,
           kecamatan: wilayahHierarchy.kecamatan,
           tinggi_badan: item.tinggi_badan !== null && item.tinggi_badan !== undefined ? Number(item.tinggi_badan) : null,
+          lengkapData: checkStudentCompleteness(item),
+          uploaded_docs: (() => {
+            const fs = require('fs');
+            const path = require('path');
+            const destDir = path.join(process.cwd(), 'storage', String(item.sekolah_id), 'siswa', String(item.peserta_didik_id), 'dokumen');
+            if (fs.existsSync(destDir)) {
+              try { return fs.readdirSync(destDir); } catch(e) { return []; }
+            }
+            return [];
+          })(),
           berat_badan: item.berat_badan !== null && item.berat_badan !== undefined ? Number(item.berat_badan) : null,
           jenis_pendaftaran_id_str: jp?.nama || null,
           jenis_keluar_id_str: jk?.ket_keluar || null,
@@ -2568,7 +2615,7 @@ export class DapodikService {
           nuptk: item.nuptk,
           nik: item.nik,
           nip: item.nip,
-          foto: item.foto ? (item.foto.startsWith('http') ? item.foto : `${appUrl}${item.foto}`) : null,
+          foto: item.foto ? (item.foto.startsWith('http') ? `${item.foto}${item.foto.includes('?') ? '&' : '?'}t=${Date.now()}` : `${appUrl}${item.foto}?t=${Date.now()}`) : null,
           qr_token: item.qr_token,
           ptk_induk: item.ptk_induk,
           jenis_kelamin: item.jenis_kelamin,
@@ -2656,7 +2703,7 @@ export class DapodikService {
           nuptk: item.nuptk,
           nik: item.nik,
           nip: item.nip,
-          foto: item.foto ? (item.foto.startsWith('http') ? item.foto : `${appUrl}${item.foto}`) : null,
+          foto: item.foto ? (item.foto.startsWith('http') ? `${item.foto}${item.foto.includes('?') ? '&' : '?'}t=${Date.now()}` : `${appUrl}${item.foto}?t=${Date.now()}`) : null,
           qr_token: item.qr_token,
           ptk_induk: item.ptk_induk,
           jenis_kelamin: item.jenis_kelamin,
