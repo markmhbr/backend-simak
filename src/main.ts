@@ -44,8 +44,15 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
-  // Serve static files from storage directory
-  app.use('/storage', express.static(path.join(process.cwd(), 'storage')));
+  // Serve static files from storage directory with disabled caching
+  app.use('/storage', express.static(path.join(process.cwd(), 'storage'), {
+    setHeaders: (res) => {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      res.setHeader('Surrogate-Control', 'no-store');
+    }
+  }));
 
   // Tambahkan ValidationPipe global
   app.useGlobalPipes(new ValidationPipe({
