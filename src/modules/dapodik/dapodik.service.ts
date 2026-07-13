@@ -691,15 +691,18 @@ export class DapodikService {
     
     const fileExt = path.extname(file.originalname).toLowerCase();
     const cleanDocName = docName.replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
-    const finalFileName = `${cleanDocName}${fileExt}`;
+    const finalFileName = `${cleanDocName}_${Date.now()}${fileExt}`;
 
-    // Hapus file lama dengan nama dokumen yang sama (ekstensi apapun) sebelum menyimpan yang baru
+    // Hapus file lama dengan nama dokumen yang diawali cleanDocName (contoh: ijazah_*.pdf)
     if (fs.existsSync(destDir)) {
       const existingFiles = fs.readdirSync(destDir) as string[];
       for (const existingFile of existingFiles) {
-        const existingBase = path.parse(existingFile).name;
-        if (existingBase === cleanDocName) {
-          fs.unlinkSync(path.join(destDir, existingFile));
+        if (existingFile.startsWith(`${cleanDocName}_`) || existingFile === `${cleanDocName}.pdf` || existingFile === `${cleanDocName}.jpg` || existingFile === `${cleanDocName}.png` || existingFile === `${cleanDocName}.jpeg`) {
+          try {
+            fs.unlinkSync(path.join(destDir, existingFile));
+          } catch (e) {
+            console.error('Gagal menghapus file lama:', e);
+          }
         }
       }
     }
@@ -742,15 +745,18 @@ export class DapodikService {
     
     const fileExt = path.extname(file.originalname).toLowerCase();
     const cleanDocName = docName.replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
-    const finalFileName = `${cleanDocName}${fileExt}`;
+    const finalFileName = `${cleanDocName}_${Date.now()}${fileExt}`;
 
-    // Hapus file lama dengan nama dokumen yang sama (ekstensi apapun) sebelum menyimpan yang baru
+    // Hapus file lama dengan nama dokumen yang diawali cleanDocName (contoh: ijazah_*.pdf)
     if (fs.existsSync(destDir)) {
       const existingFiles = fs.readdirSync(destDir) as string[];
       for (const existingFile of existingFiles) {
-        const existingBase = path.parse(existingFile).name;
-        if (existingBase === cleanDocName) {
-          fs.unlinkSync(path.join(destDir, existingFile));
+        if (existingFile.startsWith(`${cleanDocName}_`) || existingFile === `${cleanDocName}.pdf` || existingFile === `${cleanDocName}.jpg` || existingFile === `${cleanDocName}.png` || existingFile === `${cleanDocName}.jpeg`) {
+          try {
+            fs.unlinkSync(path.join(destDir, existingFile));
+          } catch (e) {
+            console.error('Gagal menghapus file lama:', e);
+          }
         }
       }
     }
