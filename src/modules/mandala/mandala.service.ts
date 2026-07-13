@@ -857,6 +857,7 @@ export class MandalaService implements OnModuleInit {
         nip: userEntity.nip,
         nik: userEntity.nik,
         role: 'Mandala Pegawai',
+        jabatan: userEntity.jabatan,
         cadisdik_id: userEntity.cadisdik_id,
         cadisdik_nama: userEntity.cadisdik?.nama_instansi,
       };
@@ -887,6 +888,7 @@ export class MandalaService implements OnModuleInit {
             nik: userEntity.nik || '',
             email: userEntity.email,
             role: 'Mandala Pegawai',
+            jabatan: userEntity.jabatan,
             cadisdik: userEntity.cadisdik?.nama_instansi,
           },
         },
@@ -960,6 +962,7 @@ export class MandalaService implements OnModuleInit {
           nip: pegawai.nip,
           nik: pegawai.nik,
           role: 'Mandala Pegawai',
+          jabatan: pegawai.jabatan,
           cadisdik_id: pegawai.cadisdik_id,
           cadisdik_nama: pegawai.cadisdik?.nama_instansi,
         };
@@ -971,6 +974,7 @@ export class MandalaService implements OnModuleInit {
           nik: pegawai.nik || '',
           email: pegawai.email,
           role: 'Mandala Pegawai',
+          jabatan: pegawai.jabatan,
           cadisdik: pegawai.cadisdik?.nama_instansi,
         };
       }
@@ -1771,5 +1775,26 @@ export class MandalaService implements OnModuleInit {
         periode_aktif: Number(s.periode_aktif) === 1,
       };
     });
+  }
+
+  async getMenuRoles() {
+    return this.prisma.mandalaMenuRole.findMany();
+  }
+
+  async updateMenuRoles(roles: Array<{ menu_key: string; jabatan_id: number; jabatan_nama?: string }>) {
+    await this.prisma.mandalaMenuRole.deleteMany();
+
+    const createdRoles = [];
+    for (const role of roles) {
+      const created = await this.prisma.mandalaMenuRole.create({
+        data: {
+          menu_key: role.menu_key,
+          jabatan_id: role.jabatan_id,
+          jabatan_nama: role.jabatan_nama || null,
+        },
+      });
+      createdRoles.push(created);
+    }
+    return createdRoles;
   }
 }

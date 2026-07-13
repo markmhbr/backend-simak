@@ -573,6 +573,128 @@ let PelaporanService = class PelaporanService {
             });
         });
     }
+    async renderAllSekolahPelaporanHtml(cadisdikId, pelaporanId) {
+        const pelaporan = await this.prisma.pelaporan.findFirst({
+            where: { pelaporan_id: pelaporanId, cadisdik_id: cadisdikId },
+            include: {
+                pelaporan_sekolah: {
+                    include: {
+                        pelaporan_dokumen: {
+                            orderBy: { created_at: 'desc' }
+                        }
+                    }
+                }
+            }
+        });
+        if (!pelaporan) {
+            throw new common_1.NotFoundException('Pelaporan tidak ditemukan');
+        }
+        const expectedHeaders = (0, excel_html_generator_helper_1.getTemplateHeaders)(pelaporan.template_konten || '');
+        if (!expectedHeaders || expectedHeaders.length === 0) {
+            throw new common_1.BadRequestException('Template pelaporan ini tidak memiliki format kolom Excel.');
+        }
+        const sekolahIds = pelaporan.pelaporan_sekolah.map(ps => ps.sekolah_id);
+        const sekolahData = await this.prisma.sekolah.findMany({
+            where: { sekolah_id: { in: sekolahIds } },
+            include: { cadisdik: true }
+        });
+        const totalSiswaCounts = await this.prisma.pesertaDidik.groupBy({
+            by: ['sekolah_id'],
+            _count: true
+        });
+        const totalGtkCounts = await this.prisma.gtk.groupBy({
+            by: ['sekolah_id'],
+            _count: true
+        });
+        const totalSiswaMap = new Map(totalSiswaCounts.map(c => [c.sekolah_id, c._count]));
+        const totalGtkMap = new Map(totalGtkCounts.map(c => [c.sekolah_id, c._count]));
+        const sekolahMap = new Map(sekolahData.map(s => [s.sekolah_id, s]));
+        const allRows = [];
+        for (const ps of pelaporan.pelaporan_sekolah) {
+            const excelDoc = ps.pelaporan_dokumen.find(doc => doc.nama_file.toLowerCase().endsWith('.xlsx') ||
+                doc.nama_file.toLowerCase().endsWith('.xls'));
+            if (!excelDoc)
+                continue;
+            const filePath = path.join(process.cwd(), excelDoc.file_url);
+            if (!fs.existsSync(filePath))
+                continue;
+            const sData = sekolahMap.get(ps.sekolah_id);
+            if (!sData)
+                continue;
+            const totalSiswa = totalSiswaMap.get(ps.sekolah_id) || 0;
+            const totalGtk = totalGtkMap.get(ps.sekolah_id) || 0;
+            const wilayah = await this.resolveWilayahHierarchy(sData.kode_wilayah);
+            const schoolDataResolved = {
+                ...sData,
+                total_siswa: totalSiswa,
+                total_gtk: totalGtk,
+                provinsi: wilayah.provinsi || '',
+                kabupaten_kota: wilayah.kabupaten_kota || '',
+                kecamatan: wilayah.kecamatan || '',
+                desa_kelurahan: wilayah.desa || sData.desa_kelurahan || ''
+            };
+            try {
+                const rows = (0, excel_html_generator_helper_1.parseDynamicExcel)(filePath, expectedHeaders, schoolDataResolved);
+                rows.forEach(r => {
+                    allRows.push(r);
+                });
+            }
+            catch (err) {
+                console.error(`Gagal parsing Excel sekolah ${sData.nama}:`, err);
+            }
+        }
+        const tableHtml = (0, excel_html_generator_helper_1.generateDynamicHtmlTable)(expectedHeaders, allRows, pelaporan.judul);
+        const styledHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            @media screen {
+              body {
+                background-color: #f3f4f6;
+                margin: 0;
+                padding: 40px 20px;
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+                font-family: Arial, sans-serif;
+              }
+              .document-page {
+                background-color: #ffffff;
+                width: 210mm;
+                min-height: 297mm;
+                padding: 20mm;
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+                box-sizing: border-box;
+                border-radius: 8px;
+                border: 1px solid #e5e7eb;
+              }
+            }
+            @media print {
+              body {
+                background-color: #ffffff;
+                margin: 0;
+                padding: 0;
+              }
+              .document-page {
+                width: 100%;
+                padding: 0;
+                box-shadow: none;
+                border: none;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="document-page">
+            ${tableHtml}
+          </div>
+        </body>
+      </html>
+    `;
+        return styledHtml;
+    }
     async exportAllSekolahExcel(cadisdikId, pelaporanId) {
         const pelaporan = await this.prisma.pelaporan.findFirst({
             where: { pelaporan_id: pelaporanId, cadisdik_id: cadisdikId },

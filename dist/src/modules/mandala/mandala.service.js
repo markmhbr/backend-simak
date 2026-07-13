@@ -791,6 +791,7 @@ let MandalaService = MandalaService_1 = class MandalaService {
                 nip: userEntity.nip,
                 nik: userEntity.nik,
                 role: 'Mandala Pegawai',
+                jabatan: userEntity.jabatan,
                 cadisdik_id: userEntity.cadisdik_id,
                 cadisdik_nama: userEntity.cadisdik?.nama_instansi,
             };
@@ -819,6 +820,7 @@ let MandalaService = MandalaService_1 = class MandalaService {
                         nik: userEntity.nik || '',
                         email: userEntity.email,
                         role: 'Mandala Pegawai',
+                        jabatan: userEntity.jabatan,
                         cadisdik: userEntity.cadisdik?.nama_instansi,
                     },
                 },
@@ -889,6 +891,7 @@ let MandalaService = MandalaService_1 = class MandalaService {
                     nip: pegawai.nip,
                     nik: pegawai.nik,
                     role: 'Mandala Pegawai',
+                    jabatan: pegawai.jabatan,
                     cadisdik_id: pegawai.cadisdik_id,
                     cadisdik_nama: pegawai.cadisdik?.nama_instansi,
                 };
@@ -899,6 +902,7 @@ let MandalaService = MandalaService_1 = class MandalaService {
                     nik: pegawai.nik || '',
                     email: pegawai.email,
                     role: 'Mandala Pegawai',
+                    jabatan: pegawai.jabatan,
                     cadisdik: pegawai.cadisdik?.nama_instansi,
                 };
             }
@@ -1628,6 +1632,24 @@ let MandalaService = MandalaService_1 = class MandalaService {
                 periode_aktif: Number(s.periode_aktif) === 1,
             };
         });
+    }
+    async getMenuRoles() {
+        return this.prisma.mandalaMenuRole.findMany();
+    }
+    async updateMenuRoles(roles) {
+        await this.prisma.mandalaMenuRole.deleteMany();
+        const createdRoles = [];
+        for (const role of roles) {
+            const created = await this.prisma.mandalaMenuRole.create({
+                data: {
+                    menu_key: role.menu_key,
+                    jabatan_id: role.jabatan_id,
+                    jabatan_nama: role.jabatan_nama || null,
+                },
+            });
+            createdRoles.push(created);
+        }
+        return createdRoles;
     }
 };
 exports.MandalaService = MandalaService;

@@ -68,6 +68,12 @@ let PelaporanController = class PelaporanController {
         res.setHeader('Content-Type', 'text/html');
         return res.send(html);
     }
+    async previewRekap(req, res, id) {
+        const cadisdikId = this.getCadisdikId(req);
+        const html = await this.pelaporanService.renderAllSekolahPelaporanHtml(cadisdikId, id);
+        res.setHeader('Content-Type', 'text/html');
+        return res.send(html);
+    }
     async exportPelaporan(req, res, id) {
         const cadisdikId = this.getCadisdikId(req);
         const buffer = await this.pelaporanService.exportAllSekolahExcel(cadisdikId, id);
@@ -138,6 +144,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object, String, String]),
     __metadata("design:returntype", Promise)
 ], PelaporanController.prototype, "previewPelaporan", null);
+__decorate([
+    (0, common_1.Get)(':id/preview-rekap'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Res)()),
+    __param(2, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object, String]),
+    __metadata("design:returntype", Promise)
+], PelaporanController.prototype, "previewRekap", null);
 __decorate([
     (0, common_1.Get)(':id/export'),
     __param(0, (0, common_1.Req)()),

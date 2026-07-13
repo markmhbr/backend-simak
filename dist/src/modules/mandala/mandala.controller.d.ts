@@ -286,10 +286,20 @@ export declare class MandalaController {
             pegawai: {
                 id: any;
                 nama: any;
+                nip: string;
+                nik: string;
+                email: any;
+                role: string;
+                cadisdik: string;
+                jabatan?: undefined;
+            } | {
+                id: any;
+                nama: any;
                 nip: any;
                 nik: any;
                 email: any;
                 role: string;
+                jabatan: any;
                 cadisdik: any;
             };
         };
@@ -716,5 +726,25 @@ export declare class MandalaController {
             semester: string;
             periode_aktif: boolean;
         }[];
+    }>;
+    getMenuRoles(): Promise<{
+        status: string;
+        data: {
+            menu_role_id: string;
+            menu_key: string;
+            jabatan_id: number;
+            jabatan_nama: string | null;
+        }[];
+    }>;
+    updateMenuRoles(body: {
+        roles: Array<{
+            menu_key: string;
+            jabatan_id: number;
+            jabatan_nama?: string;
+        }>;
+    }): Promise<{
+        status: string;
+        message: string;
+        data: any[];
     }>;
 }

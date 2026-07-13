@@ -108,7 +108,7 @@ model RombonganBelajar {
   last_sync             DateTime?
   updater_id            String?   @db.Uuid
 
-  jurusan_sp        JurusanSp? @relation("JurusanSpRombel", fields: [jurusan_sp_id], references: [jurusan_sp_id], onDelete: NoAction, onUpdate: NoAction)
+  jurusan_sp        JurusanSp?                @relation("JurusanSpRombel", fields: [jurusan_sp_id], references: [jurusan_sp_id], onDelete: NoAction, onUpdate: NoAction)
   anggota_rombel    AnggotaRombel[]
   pembelajaran      Pembelajaran[]
   peserta_didik     PesertaDidik[]            @relation("RombelPesertaDidik")
@@ -121,20 +121,20 @@ model RombonganBelajar {
 }
 
 model JurusanSp {
-  jurusan_sp_id         String    @id @default(uuid()) @db.Uuid
-  sekolah_id            String?   @db.Uuid
-  kebutuhan_khusus_id   Int
-  jurusan_id            String
-  nama_jurusan_sp       String
-  sk_izin               String?
-  tanggal_sk_izin       DateTime? @db.Date
-  create_date           DateTime  @default(now())
-  last_update           DateTime  @updatedAt
-  soft_delete           Decimal?  @db.Decimal
-  last_sync             DateTime?
-  updater_id            String?   @db.Uuid
+  jurusan_sp_id       String    @id @default(uuid()) @db.Uuid
+  sekolah_id          String?   @db.Uuid
+  kebutuhan_khusus_id Int
+  jurusan_id          String
+  nama_jurusan_sp     String
+  sk_izin             String?
+  tanggal_sk_izin     DateTime? @db.Date
+  create_date         DateTime  @default(now())
+  last_update         DateTime  @updatedAt
+  soft_delete         Decimal?  @db.Decimal
+  last_sync           DateTime?
+  updater_id          String?   @db.Uuid
 
-  rombongan_belajar     RombonganBelajar[] @relation("JurusanSpRombel")
+  rombongan_belajar RombonganBelajar[] @relation("JurusanSpRombel")
 
   @@index([sekolah_id])
   @@map("jurusan_sp")
@@ -210,8 +210,8 @@ model TugasTambahan {
   updater_id            String?   @db.Uuid
   index                 Int       @default(0) // 0 for GTK, 1 for Peserta Didik
 
-  gtk                  Gtk?          @relation(fields: [ptk_id], references: [ptk_id])
-  peserta_didik        PesertaDidik? @relation(fields: [peserta_didik_id], references: [peserta_didik_id])
+  gtk           Gtk?          @relation(fields: [ptk_id], references: [ptk_id])
+  peserta_didik PesertaDidik? @relation(fields: [peserta_didik_id], references: [peserta_didik_id])
 
   @@index([ptk_id])
   @@index([peserta_didik_id])
@@ -219,7 +219,6 @@ model TugasTambahan {
   @@map("tugas_tambahan")
   @@schema("dapodik")
 }
-
 
 model PesertaDidik {
   // --- Kolom dari tabel peserta_didik ---
@@ -306,14 +305,14 @@ model PesertaDidik {
   id_cita               Decimal?  @db.Decimal
 
   // --- Kolom dari tabel peserta_didik_longitudinal ---
-  berat_badan              Decimal?  @db.Decimal(38, 0)
-  tinggi_badan             Decimal?  @db.Decimal(38, 0)
-  lingkar_kepala           Decimal?  @db.Decimal(38, 0)
-  jarak_rumah_ke_sekolah   Decimal?  @db.Decimal(38, 0)
+  berat_badan               Decimal? @db.Decimal(38, 0)
+  tinggi_badan              Decimal? @db.Decimal(38, 0)
+  lingkar_kepala            Decimal? @db.Decimal(38, 0)
+  jarak_rumah_ke_sekolah    Decimal? @db.Decimal(38, 0)
   jarak_rumah_ke_sekolah_km Decimal? @db.Decimal(38, 0)
-  waktu_tempuh_ke_sekolah  Decimal?  @db.Decimal(38, 0)
-  menit_tempuh_ke_sekolah  Decimal?  @db.Decimal(38, 0)
-  jumlah_saudara_kandung   Decimal?  @db.Decimal(38, 0)
+  waktu_tempuh_ke_sekolah   Decimal? @db.Decimal(38, 0)
+  menit_tempuh_ke_sekolah   Decimal? @db.Decimal(38, 0)
+  jumlah_saudara_kandung    Decimal? @db.Decimal(38, 0)
 
   // --- Kolom SIMAK ---
   qr_token         String?
@@ -466,29 +465,29 @@ model Gtk {
 }
 
 model Anak {
-  anak_id              String             @id @default(uuid()) @db.Uuid
-  sekolah_id           String             @db.Uuid
-  ptk_id               String             @db.Uuid
-  status_anak_id       Decimal            @db.Decimal(1, 0)
-  jenjang_pendidikan_id Decimal           @db.Decimal(2, 0)
-  nik                  String?            @db.Char(16)
-  nisn                 String?            @db.Char(10)
-  nama                 String             @db.VarChar(100)
-  jenis_kelamin        String             @db.Char(1)
-  tempat_lahir         String?            @db.VarChar(32)
-  tanggal_lahir        DateTime           @db.Date
-  tahun_masuk          Int?
-  create_date          DateTime           @default(now())
-  last_update          DateTime           @updatedAt
-  soft_delete          Decimal            @db.Decimal(1, 0)
-  last_sync            DateTime           @default(now())
-  updater_id           String             @db.Uuid
+  anak_id               String   @id @default(uuid()) @db.Uuid
+  sekolah_id            String   @db.Uuid
+  ptk_id                String   @db.Uuid
+  status_anak_id        Decimal  @db.Decimal(1, 0)
+  jenjang_pendidikan_id Decimal  @db.Decimal(2, 0)
+  nik                   String?  @db.Char(16)
+  nisn                  String?  @db.Char(10)
+  nama                  String   @db.VarChar(100)
+  jenis_kelamin         String   @db.Char(1)
+  tempat_lahir          String?  @db.VarChar(32)
+  tanggal_lahir         DateTime @db.Date
+  tahun_masuk           Int?
+  create_date           DateTime @default(now())
+  last_update           DateTime @updatedAt
+  soft_delete           Decimal  @db.Decimal(1, 0)
+  last_sync             DateTime @default(now())
+  updater_id            String   @db.Uuid
 
   // Relations
-  sekolah              Sekolah            @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
-  gtk                  Gtk                @relation(fields: [ptk_id], references: [ptk_id], onDelete: Cascade)
-  status_anak          status_anak        @relation(fields: [status_anak_id], references: [status_anak_id], onUpdate: Restrict)
-  jenjang_pendidikan   jenjang_pendidikan @relation(fields: [jenjang_pendidikan_id], references: [jenjang_pendidikan_id], onUpdate: Restrict)
+  sekolah            Sekolah            @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
+  gtk                Gtk                @relation(fields: [ptk_id], references: [ptk_id], onDelete: Cascade)
+  status_anak        status_anak        @relation(fields: [status_anak_id], references: [status_anak_id], onUpdate: Restrict)
+  jenjang_pendidikan jenjang_pendidikan @relation(fields: [jenjang_pendidikan_id], references: [jenjang_pendidikan_id], onUpdate: Restrict)
 
   @@index([sekolah_id])
   @@index([ptk_id])
@@ -685,15 +684,15 @@ model AppKey {
 }
 
 model PengajuanPerbaikan {
-  id                String   @id @default(uuid()) @db.Uuid
-  sekolah_id        String   @db.Uuid
-  ptk_id            String?  @db.Uuid
-  peserta_didik_id  String?  @db.Uuid
-  tipe              String   // "GTK" | "SISWA"
-  perubahan         Json     // Format: { [nama_field]: { sebelumnya: any, diajukan: any } }
-  status            String   @default("PENDING") // "PENDING" | "APPROVED" | "REJECTED"
-  created_at        DateTime @default(now())
-  updated_at        DateTime @updatedAt
+  id               String   @id @default(uuid()) @db.Uuid
+  sekolah_id       String   @db.Uuid
+  ptk_id           String?  @db.Uuid
+  peserta_didik_id String?  @db.Uuid
+  tipe             String // "GTK" | "SISWA"
+  perubahan        Json // Format: { [nama_field]: { sebelumnya: any, diajukan: any } }
+  status           String   @default("PENDING") // "PENDING" | "APPROVED" | "REJECTED"
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
 
   @@map("pengajuan_perbaikan")
   @@schema("simak")
@@ -847,19 +846,19 @@ model AktPd {
 }
 
 model AnggotaAktPd {
-  anggota_akt_pd_id            String        @id @default(uuid()) @db.Uuid
-  id_akt_pd                    String        @db.Uuid
-  sekolah_id                   String?       @db.Uuid
-  registrasi_id                String?       @db.Uuid
-  peserta_didik_id             String?       @db.Uuid
-  soft_delete                  Decimal?      @db.Decimal
-  create_date                  DateTime?     @db.Timestamp(6)
-  last_update                  DateTime?     @db.Timestamp(6)
-  created_at                   DateTime      @default(now())
-  updated_at                   DateTime      @updatedAt
-  peserta_didik                PesertaDidik? @relation(fields: [peserta_didik_id], references: [peserta_didik_id])
-  aktPd                        AktPd?        @relation(fields: [aktPdId_akt_pd], references: [id_akt_pd])
-  aktPdId_akt_pd               String?       @db.Uuid
+  anggota_akt_pd_id String        @id @default(uuid()) @db.Uuid
+  id_akt_pd         String        @db.Uuid
+  sekolah_id        String?       @db.Uuid
+  registrasi_id     String?       @db.Uuid
+  peserta_didik_id  String?       @db.Uuid
+  soft_delete       Decimal?      @db.Decimal
+  create_date       DateTime?     @db.Timestamp(6)
+  last_update       DateTime?     @db.Timestamp(6)
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @updatedAt
+  peserta_didik     PesertaDidik? @relation(fields: [peserta_didik_id], references: [peserta_didik_id])
+  aktPd             AktPd?        @relation(fields: [aktPdId_akt_pd], references: [id_akt_pd])
+  aktPdId_akt_pd    String?       @db.Uuid
 
   @@index([id_akt_pd])
   @@index([sekolah_id])
@@ -1086,20 +1085,20 @@ model Mandala {
 }
 
 model Cadisdik {
-  cadisdik_id        String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  nama_instansi      String              @db.VarChar(255)
-  alamat             String?
-  email              String?             @db.VarChar(255)
-  nomor_telepon      String?             @db.VarChar(50)
-  website            String?             @db.VarChar(255)
-  provinsi           String?             @db.VarChar(255)
-  kabupaten          String[]
-  aktif              Boolean             @default(true)
-  created_at         DateTime            @default(now()) @db.Timestamptz(6)
-  updated_at         DateTime            @default(now()) @updatedAt @db.Timestamptz(6)
-  sekolah            Sekolah[]
-  antrian            Antrian[]
-  kategori_keperluan KategoriKeperluan[]
+  cadisdik_id              String                        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nama_instansi            String                        @db.VarChar(255)
+  alamat                   String?
+  email                    String?                       @db.VarChar(255)
+  nomor_telepon            String?                       @db.VarChar(50)
+  website                  String?                       @db.VarChar(255)
+  provinsi                 String?                       @db.VarChar(255)
+  kabupaten                String[]
+  aktif                    Boolean                       @default(true)
+  created_at               DateTime                      @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime                      @default(now()) @updatedAt @db.Timestamptz(6)
+  sekolah                  Sekolah[]
+  antrian                  Antrian[]
+  kategori_keperluan       KategoriKeperluan[]
   layanan                  Layanan[]
   pegawai                  Pegawai[]
   pelaporan                Pelaporan[]
@@ -1239,24 +1238,24 @@ model Pegawai {
 }
 
 model SystemSetting {
-  system_setting_id    String   @id @default(uuid()) @db.Uuid
-  cadisdik_id          String   @unique @db.Uuid
-  appName              String   @default("SIMAK") @map("app_name")
-  appShortName         String   @default("Mandala") @map("app_short_name")
-  appLogo              String?  @map("app_logo")
-  appLogoDark          String?  @map("app_logo_dark")
-  appFavicon           String?  @map("app_favicon")
-  contactEmail         String?  @map("contact_email")
-  contactPhone         String?  @map("contact_phone")
-  contactAddress       String?  @db.Text @map("contact_address")
-  copyrightText        String   @default("© 2026 SIMAK. All Rights Reserved.") @map("copyright_text")
-  metaDescription      String?  @db.Text @map("meta_description")
-  metaKeywords         String?  @map("meta_keywords")
-  maintenanceMode      Boolean  @default(false) @map("maintenance_mode")
-  createdAt            DateTime @default(now()) @map("created_at")
-  updatedAt            DateTime @updatedAt @map("updated_at")
-  
-  cadisdik             Cadisdik @relation(fields: [cadisdik_id], references: [cadisdik_id], onDelete: Cascade)
+  system_setting_id String   @id @default(uuid()) @db.Uuid
+  cadisdik_id       String   @unique @db.Uuid
+  appName           String   @default("SIMAK") @map("app_name")
+  appShortName      String   @default("Mandala") @map("app_short_name")
+  appLogo           String?  @map("app_logo")
+  appLogoDark       String?  @map("app_logo_dark")
+  appFavicon        String?  @map("app_favicon")
+  contactEmail      String?  @map("contact_email")
+  contactPhone      String?  @map("contact_phone")
+  contactAddress    String?  @map("contact_address") @db.Text
+  copyrightText     String   @default("© 2026 SIMAK. All Rights Reserved.") @map("copyright_text")
+  metaDescription   String?  @map("meta_description") @db.Text
+  metaKeywords      String?  @map("meta_keywords")
+  maintenanceMode   Boolean  @default(false) @map("maintenance_mode")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  cadisdik Cadisdik @relation(fields: [cadisdik_id], references: [cadisdik_id], onDelete: Cascade)
 
   @@map("system_settings")
   @@schema("mandala")
@@ -1654,25 +1653,25 @@ model SuratKeluar {
 }
 
 model RiwayatPendidikanFormal {
-  riwayat_pendidikan_formal_id String   @id @db.Uuid
-  ptk_id                       String   @db.Uuid
+  riwayat_pendidikan_formal_id String              @id @db.Uuid
+  ptk_id                       String              @db.Uuid
   satuan_pendidikan_formal     String
   fakultas                     String?
-  kependidikan                 Decimal? @db.Decimal(1, 0)
-  tahun_masuk                  Decimal? @db.Decimal(4, 0)
-  tahun_lulus                  Decimal? @db.Decimal(4, 0)
+  kependidikan                 Decimal?            @db.Decimal(1, 0)
+  tahun_masuk                  Decimal?            @db.Decimal(4, 0)
+  tahun_lulus                  Decimal?            @db.Decimal(4, 0)
   nim                          String?
-  status_kuliah                Decimal? @db.Decimal(1, 0)
-  semester                     Decimal? @db.Decimal(2, 0)
-  ipk                          Decimal? @db.Decimal(5, 2)
-  prodi                        String?  @db.Uuid
-  id_reg_pd                    String?  @db.Uuid
+  status_kuliah                Decimal?            @db.Decimal(1, 0)
+  semester                     Decimal?            @db.Decimal(2, 0)
+  ipk                          Decimal?            @db.Decimal(5, 2)
+  prodi                        String?             @db.Uuid
+  id_reg_pd                    String?             @db.Uuid
   bidang_studi_id              Int?
-  jenjang_pendidikan_id        Decimal? @db.Decimal(2, 0)
+  jenjang_pendidikan_id        Decimal?            @db.Decimal(2, 0)
   gelar_akademik_id            Int?
-  created_at                   DateTime @default(now())
-  updated_at                   DateTime @updatedAt
-  gtk                          Gtk      @relation(fields: [ptk_id], references: [ptk_id], onDelete: Cascade)
+  created_at                   DateTime            @default(now())
+  updated_at                   DateTime            @updatedAt
+  gtk                          Gtk                 @relation(fields: [ptk_id], references: [ptk_id], onDelete: Cascade)
   jenjang_pendidikan           jenjang_pendidikan? @relation(fields: [jenjang_pendidikan_id], references: [jenjang_pendidikan_id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([ptk_id])
@@ -2487,18 +2486,18 @@ model jenjang_kepengawasan {
 }
 
 model jenjang_pendidikan {
-  jenjang_pendidikan_id Decimal              @id(map: "pk_jenjang_pendidikan") @unique(map: "jenjang_pendidikan_pk") @db.Decimal(2, 0)
-  nama                  String               @db.VarChar(25)
-  jenjang_lembaga       Decimal              @db.Decimal(1, 0)
-  jenjang_orang         Decimal              @db.Decimal(1, 0)
-  create_date           DateTime             @default(dbgenerated("'2019-09-10 14:29:56.540627'::timestamp without time zone")) @db.Timestamp(6)
-  last_update           DateTime             @default(dbgenerated("'2019-09-10 14:29:56.540627'::timestamp without time zone")) @db.Timestamp(6)
-  expired_date          DateTime?            @db.Timestamp(6)
-  last_sync             DateTime             @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
-  jurusan               jurusan[]
-  kurikulum             kurikulum[]
-  template_un           template_un[]
-  tingkat_pendidikan    tingkat_pendidikan[]
+  jenjang_pendidikan_id     Decimal                   @id(map: "pk_jenjang_pendidikan") @unique(map: "jenjang_pendidikan_pk") @db.Decimal(2, 0)
+  nama                      String                    @db.VarChar(25)
+  jenjang_lembaga           Decimal                   @db.Decimal(1, 0)
+  jenjang_orang             Decimal                   @db.Decimal(1, 0)
+  create_date               DateTime                  @default(dbgenerated("'2019-09-10 14:29:56.540627'::timestamp without time zone")) @db.Timestamp(6)
+  last_update               DateTime                  @default(dbgenerated("'2019-09-10 14:29:56.540627'::timestamp without time zone")) @db.Timestamp(6)
+  expired_date              DateTime?                 @db.Timestamp(6)
+  last_sync                 DateTime                  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  jurusan                   jurusan[]
+  kurikulum                 kurikulum[]
+  template_un               template_un[]
+  tingkat_pendidikan        tingkat_pendidikan[]
   riwayat_pendidikan_formal RiwayatPendidikanFormal[]
   anak                      Anak[]
 
@@ -3410,10 +3409,10 @@ model waktu_penyelenggaraan {
 }
 
 model MenuRole {
-  menu_role_id String   @id @default(uuid()) @db.Uuid
-  menu_id      String   @db.VarChar(100)
+  menu_role_id String  @id @default(uuid()) @db.Uuid
+  menu_id      String  @db.VarChar(100)
   peran_id     Int
-  peran_nama   String?  @db.VarChar(100)
+  peran_nama   String? @db.VarChar(100)
 
   @@index([menu_id])
   @@index([peran_id])
@@ -3423,7 +3422,7 @@ model MenuRole {
 
 model PengaturanUmum {
   pengaturan_umum_id     String   @id @default(uuid()) @db.Uuid
-  sekolah_id             String   @db.Uuid @unique
+  sekolah_id             String   @unique @db.Uuid
   background_gtk         String?
   background_pd          String?
   waktu_mulai_pengajuan  String?
@@ -3431,8 +3430,20 @@ model PengaturanUmum {
   create_date            DateTime @default(now())
   last_update            DateTime @updatedAt
 
-  sekolah                Sekolah  @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
+  sekolah Sekolah @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
 
   @@map("pengaturan_umum")
   @@schema("simak")
+}
+
+model MandalaMenuRole {
+  menu_role_id String  @id @default(uuid()) @db.Uuid
+  menu_key     String  @db.VarChar(100)
+  jabatan_id   Int
+  jabatan_nama String? @db.VarChar(100)
+
+  @@index([menu_key])
+  @@index([jabatan_id])
+  @@map("menu_roles")
+  @@schema("mandala")
 }

@@ -82,6 +82,18 @@ export class PelaporanController {
     return res.send(html);
   }
 
+  @Get(':id/preview-rekap')
+  async previewRekap(
+    @Req() req: Request,
+    @Res() res: any,
+    @Param('id') id: string,
+  ) {
+    const cadisdikId = this.getCadisdikId(req);
+    const html = await this.pelaporanService.renderAllSekolahPelaporanHtml(cadisdikId, id);
+    res.setHeader('Content-Type', 'text/html');
+    return res.send(html);
+  }
+
   @Get(':id/export')
   async exportPelaporan(
     @Req() req: Request,

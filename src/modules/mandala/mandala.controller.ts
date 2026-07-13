@@ -515,4 +515,27 @@ export class MandalaController {
       data,
     };
   }
+
+  @Get('menu-roles')
+  async getMenuRoles() {
+    const data = await this.mandalaService.getMenuRoles();
+    return {
+      status: 'success',
+      data,
+    };
+  }
+
+  @Post('menu-roles')
+  @HttpCode(HttpStatus.OK)
+  async updateMenuRoles(@Body() body: { roles: Array<{ menu_key: string; jabatan_id: number; jabatan_nama?: string }> }) {
+    if (!body.roles || !Array.isArray(body.roles)) {
+      throw new BadRequestException('Roles array is required.');
+    }
+    const result = await this.mandalaService.updateMenuRoles(body.roles);
+    return {
+      status: 'success',
+      message: 'Menu roles successfully updated.',
+      data: result,
+    };
+  }
 }

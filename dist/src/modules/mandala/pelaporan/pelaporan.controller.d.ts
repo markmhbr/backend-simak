@@ -70,6 +70,7 @@ export declare class PelaporanController {
         };
     }>;
     previewPelaporan(req: Request, res: any, id: string, sekolahId: string): Promise<any>;
+    previewRekap(req: Request, res: any, id: string): Promise<any>;
     exportPelaporan(req: Request, res: any, id: string): Promise<any>;
     updatePelaporan(req: Request, id: string, dto: CreatePelaporanDto): Promise<{
         status: string;

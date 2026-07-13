@@ -90,6 +90,7 @@ export declare class PelaporanService {
     renderPelaporanHtml(cadisdikId: string, pelaporanId: string, sekolahId: string): Promise<string>;
     deleteDokumenSimak(sekolahId: string, dokumenId: string): Promise<void>;
     deletePelaporan(cadisdikId: string, id: string): Promise<void>;
+    renderAllSekolahPelaporanHtml(cadisdikId: string, pelaporanId: string): Promise<string>;
     exportAllSekolahExcel(cadisdikId: string, pelaporanId: string): Promise<Buffer>;
     updatePelaporan(cadisdikId: string, pelaporanId: string, dto: CreatePelaporanDto): Promise<{
         created_at: Date;

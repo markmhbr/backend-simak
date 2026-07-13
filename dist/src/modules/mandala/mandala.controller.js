@@ -373,6 +373,24 @@ let MandalaController = class MandalaController {
             data,
         };
     }
+    async getMenuRoles() {
+        const data = await this.mandalaService.getMenuRoles();
+        return {
+            status: 'success',
+            data,
+        };
+    }
+    async updateMenuRoles(body) {
+        if (!body.roles || !Array.isArray(body.roles)) {
+            throw new common_1.BadRequestException('Roles array is required.');
+        }
+        const result = await this.mandalaService.updateMenuRoles(body.roles);
+        return {
+            status: 'success',
+            message: 'Menu roles successfully updated.',
+            data: result,
+        };
+    }
 };
 exports.MandalaController = MandalaController;
 __decorate([
@@ -695,6 +713,20 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], MandalaController.prototype, "getSemesterIds", null);
+__decorate([
+    (0, common_1.Get)('menu-roles'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "getMenuRoles", null);
+__decorate([
+    (0, common_1.Post)('menu-roles'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "updateMenuRoles", null);
 exports.MandalaController = MandalaController = __decorate([
     (0, common_1.Controller)('mandala'),
     __metadata("design:paramtypes", [mandala_service_1.MandalaService])
