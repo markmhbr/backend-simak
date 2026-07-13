@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Query, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Query, UseGuards, Req, Patch } from '@nestjs/common';
 import { PresensiService } from './presensi.service';
 import { ApiKeyGuard } from '../../core/app-key/api-key.guard';
 import * as express from 'express';
@@ -39,6 +39,15 @@ export class PresensiController {
     @Body() data: { nama: string; tanggal_mulai: string; tanggal_selesai: string; keterangan?: string },
   ) {
     return this.presensiService.createHariLibur(sekolahId, data);
+  }
+
+  @Patch('hari-libur/:sekolahId/:id')
+  updateHariLibur(
+    @Param('sekolahId') sekolahId: string,
+    @Param('id') id: string,
+    @Body() data: { nama?: string; tanggal_mulai?: string; tanggal_selesai?: string; keterangan?: string },
+  ) {
+    return this.presensiService.updateHariLibur(sekolahId, id, data);
   }
 
   @Delete('hari-libur/:sekolahId/:id')
@@ -132,5 +141,16 @@ export class PresensiController {
     @Query('tanggal') tanggal?: string,
   ) {
     return this.presensiService.getPresensiGtk(sekolahId, tanggal);
+  }
+
+  @Get('rekap-periodik/:sekolahId')
+  getRekapPeriodik(
+    @Param('sekolahId') sekolahId: string,
+    @Query('rombel') rombel: string,
+    @Query('tanggal_mulai') tanggalMulai: string,
+    @Query('tanggal_selesai') tanggalSelesai: string,
+    @Query('tipe') tipe?: 'pd' | 'gtk',
+  ) {
+    return this.presensiService.getRekapPeriodik(sekolahId, rombel, tanggalMulai, tanggalSelesai, tipe || 'pd');
   }
 }

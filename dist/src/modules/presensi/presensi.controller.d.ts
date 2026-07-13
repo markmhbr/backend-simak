@@ -128,6 +128,22 @@ export declare class PresensiController {
         tanggal_selesai: Date;
         hari_libur_id: string;
     }>;
+    updateHariLibur(sekolahId: string, id: string, data: {
+        nama?: string;
+        tanggal_mulai?: string;
+        tanggal_selesai?: string;
+        keterangan?: string;
+    }): Promise<{
+        sekolah_id: string;
+        created_at: Date;
+        updated_at: Date;
+        aktif: boolean;
+        nama: string;
+        keterangan: string | null;
+        tanggal_mulai: Date;
+        tanggal_selesai: Date;
+        hari_libur_id: string;
+    }>;
     deleteHariLibur(sekolahId: string, id: string): Promise<import("@prisma/client").Prisma.BatchPayload>;
     presensiPesertaDidik(sekolahId: string, data: {
         peserta_didik_id: string;
@@ -250,4 +266,13 @@ export declare class PresensiController {
         ptk_id: string;
         nuptk: string;
     }[]>;
+    getRekapPeriodik(sekolahId: string, rombel: string, tanggalMulai: string, tanggalSelesai: string, tipe?: 'pd' | 'gtk'): Promise<{
+        data: any[];
+        holidays: {
+            nama: string;
+            tanggal_mulai: Date;
+            tanggal_selesai: Date;
+        }[];
+        activeDays: number[];
+    }>;
 }

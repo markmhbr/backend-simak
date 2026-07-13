@@ -29,6 +29,22 @@ export declare class PresensiService {
         tanggal_selesai: Date;
         hari_libur_id: string;
     }>;
+    updateHariLibur(sekolahId: string, id: string, data: {
+        nama?: string;
+        tanggal_mulai?: string;
+        tanggal_selesai?: string;
+        keterangan?: string;
+    }): Promise<{
+        sekolah_id: string;
+        created_at: Date;
+        updated_at: Date;
+        aktif: boolean;
+        nama: string;
+        keterangan: string | null;
+        tanggal_mulai: Date;
+        tanggal_selesai: Date;
+        hari_libur_id: string;
+    }>;
     deleteHariLibur(sekolahId: string, hariLiburId: string): Promise<import("@prisma/client").Prisma.BatchPayload>;
     private checkHoliday;
     private getActiveSchedule;
@@ -211,6 +227,15 @@ export declare class PresensiService {
         ptk_id: string;
         nuptk: string;
     }[]>;
+    getRekapPeriodik(sekolahId: string, rombel: string, startStr: string, endStr: string, tipe?: 'pd' | 'gtk'): Promise<{
+        data: any[];
+        holidays: {
+            nama: string;
+            tanggal_mulai: Date;
+            tanggal_selesai: Date;
+        }[];
+        activeDays: number[];
+    }>;
     private getDistance;
     getIzinKeluarHariIni(sekolahId: string, dateStr?: string): Promise<any[]>;
     catatKembali(sekolahId: string, izinId: string): Promise<{

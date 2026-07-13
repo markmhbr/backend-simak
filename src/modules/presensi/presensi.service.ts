@@ -33,6 +33,24 @@ export class PresensiService {
     });
   }
 
+  async updateHariLibur(sekolahId: string, id: string, data: {
+    nama?: string;
+    tanggal_mulai?: string;
+    tanggal_selesai?: string;
+    keterangan?: string;
+  }) {
+    const updateData: any = {};
+    if (data.nama !== undefined) updateData.nama = data.nama;
+    if (data.tanggal_mulai !== undefined) updateData.tanggal_mulai = new Date(data.tanggal_mulai);
+    if (data.tanggal_selesai !== undefined) updateData.tanggal_selesai = new Date(data.tanggal_selesai);
+    if (data.keterangan !== undefined) updateData.keterangan = data.keterangan;
+
+    return this.prisma.hariLibur.update({
+      where: { hari_libur_id: id },
+      data: updateData,
+    });
+  }
+
   async deleteHariLibur(sekolahId: string, hariLiburId: string) {
     return this.prisma.hariLibur.deleteMany({
       where: { hari_libur_id: hariLiburId, sekolah_id: sekolahId },
@@ -94,7 +112,21 @@ export class PresensiService {
       throw new BadRequestException(`Hari ini sekolah sedang libur: ${holiday.nama}`);
     }
 
-    // 2. Ambil Jadwal Aktif
+    // 2. Ambil Jadwal Aktif & Cek Hari Libur Pekanan
+    const activeSchedule = await this.prisma.jenisJadwal.findFirst({
+      where: { sekolah_id: sekolahId, aktif: true },
+      include: {
+        pengaturan_hari: {
+          where: { aktif: true },
+          select: { hari: true },
+        },
+      },
+    });
+    const activeDays = activeSchedule?.pengaturan_hari.map(h => h.hari) || [1, 2, 3, 4, 5, 6];
+    if (!activeDays.includes(dayOfWeek)) {
+      throw new BadRequestException('Hari ini merupakan libur akhir pekan. Tidak dapat melakukan presensi.');
+    }
+
     const dayConfig = await this.getActiveSchedule(sekolahId, dayOfWeek);
 
     // 3. Hitung Status
@@ -168,6 +200,21 @@ export class PresensiService {
 
     const holiday = await this.checkHoliday(sekolahId, dateOnly);
     if (holiday) throw new BadRequestException(`Hari ini sekolah sedang libur: ${holiday.nama}`);
+
+    // Cek Hari Libur Pekanan
+    const activeSchedule = await this.prisma.jenisJadwal.findFirst({
+      where: { sekolah_id: sekolahId, aktif: true },
+      include: {
+        pengaturan_hari: {
+          where: { aktif: true },
+          select: { hari: true },
+        },
+      },
+    });
+    const activeDays = activeSchedule?.pengaturan_hari.map(h => h.hari) || [1, 2, 3, 4, 5, 6];
+    if (!activeDays.includes(dayOfWeek)) {
+      throw new BadRequestException('Hari ini merupakan libur akhir pekan. Tidak dapat melakukan presensi.');
+    }
 
     const dayConfig = await this.getActiveSchedule(sekolahId, dayOfWeek);
 
@@ -274,6 +321,28 @@ export class PresensiService {
     const dateObj = new Date(data.tanggal);
     const dateOnly = new Date(dateObj.toISOString().split('T')[0]);
     const currentTimestamp = new Date();
+
+    // Cek Hari Libur Terjadwal
+    const holiday = await this.checkHoliday(sekolahId, dateOnly);
+    if (holiday) {
+      throw new BadRequestException(`Hari ini sekolah sedang libur: ${holiday.nama}. Tidak dapat mengajukan izin.`);
+    }
+
+    // Cek Hari Libur Mingguan berdasarkan activeDays sekolah
+    const activeSchedule = await this.prisma.jenisJadwal.findFirst({
+      where: { sekolah_id: sekolahId, aktif: true },
+      include: {
+        pengaturan_hari: {
+          where: { aktif: true },
+          select: { hari: true },
+        },
+      },
+    });
+    const activeDays = activeSchedule?.pengaturan_hari.map(h => h.hari) || [1, 2, 3, 4, 5, 6];
+    const dayOfWeek = dateOnly.getDay() === 0 ? 7 : dateOnly.getDay(); // 1=Mon, ..., 7=Sun
+    if (!activeDays.includes(dayOfWeek)) {
+      throw new BadRequestException('Hari ini merupakan libur akhir pekan. Tidak dapat mengajukan izin.');
+    }
 
     // Validasi: Izin Keluar (jenis = 2) & Izin Pulang Awal (jenis = 3) mewajibkan subjek sudah presensi masuk / terlambat hari ini
     if (data.jenis === 2 || data.jenis === 3) {
@@ -993,6 +1062,159 @@ export class PresensiService {
         izin: iz || null,
       };
     });
+  }
+
+  async getRekapPeriodik(sekolahId: string, rombel: string, startStr: string, endStr: string, tipe: 'pd' | 'gtk' = 'pd') {
+    const startDate = new Date(startStr);
+    const endDate = new Date(endStr);
+
+    // Get active schedule days configurations
+    const activeSchedule = await this.prisma.jenisJadwal.findFirst({
+      where: { sekolah_id: sekolahId, aktif: true },
+      include: {
+        pengaturan_hari: {
+          where: { aktif: true },
+          select: { hari: true },
+        },
+      },
+    });
+
+    const activeDays = activeSchedule?.pengaturan_hari.map(h => h.hari) || [1, 2, 3, 4, 5, 6]; // Default: Mon-Sat
+
+    const holidays = await this.prisma.hariLibur.findMany({
+      where: {
+        sekolah_id: sekolahId,
+        aktif: true,
+        tanggal_mulai: { lte: endDate },
+        tanggal_selesai: { gte: startDate },
+      },
+      select: {
+        nama: true,
+        tanggal_mulai: true,
+        tanggal_selesai: true,
+      },
+    });
+
+    let data: any[] = [];
+
+    if (tipe === 'gtk') {
+      const gtks = await this.prisma.gtk.findMany({
+        where: {
+          sekolah_id: sekolahId,
+          status: 'Aktif',
+        },
+        select: {
+          ptk_id: true,
+          nama: true,
+          nuptk: true,
+        },
+        orderBy: {
+          nama: 'asc',
+        },
+      });
+
+      const attendances = await this.prisma.presensiGtk.findMany({
+        where: {
+          sekolah_id: sekolahId,
+          tanggal: {
+            gte: startDate,
+            lte: endDate,
+          },
+        },
+      });
+
+      const izins = await this.prisma.izin.findMany({
+        where: {
+          sekolah_id: sekolahId,
+          tanggal: {
+            gte: startDate,
+            lte: endDate,
+          },
+        },
+      });
+
+      data = gtks.map((gtk) => {
+        const gtkAtts = attendances.filter(a => a.ptk_id === gtk.ptk_id);
+        const gtkIzins = izins.filter(i => i.ptk_id === gtk.ptk_id);
+
+        return {
+          peserta_didik_id: gtk.ptk_id,
+          nama: gtk.nama,
+          nisn: gtk.nuptk || '-',
+          presensi: gtkAtts,
+          izin: gtkIzins,
+        };
+      });
+    } else {
+      const students = await this.prisma.pesertaDidik.findMany({
+        where: {
+          sekolah_id: sekolahId,
+          status: 'Aktif',
+          OR: [
+            {
+              rombongan_belajar: {
+                nama: rombel,
+              }
+            },
+            {
+              anggota_rombel: {
+                some: {
+                  soft_delete: 0,
+                  rombongan_belajar: {
+                    nama: rombel,
+                  }
+                }
+              }
+            }
+          ]
+        },
+        select: {
+          peserta_didik_id: true,
+          nama: true,
+          nisn: true,
+        },
+        orderBy: {
+          nama: 'asc',
+        },
+      });
+
+      const attendances = await this.prisma.presensiPesertaDidik.findMany({
+        where: {
+          sekolah_id: sekolahId,
+          tanggal: {
+            gte: startDate,
+            lte: endDate,
+          },
+        },
+      });
+
+      const izins = await this.prisma.izin.findMany({
+        where: {
+          sekolah_id: sekolahId,
+          tanggal: {
+            gte: startDate,
+            lte: endDate,
+          },
+        },
+      });
+
+      data = students.map((student) => {
+        const studentAtts = attendances.filter(a => a.peserta_didik_id === student.peserta_didik_id);
+        const studentIzins = izins.filter(i => i.peserta_didik_id === student.peserta_didik_id);
+
+        return {
+          ...student,
+          presensi: studentAtts,
+          izin: studentIzins,
+        };
+      });
+    }
+
+    return {
+      data,
+      holidays,
+      activeDays,
+    };
   }
 
   private getDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {

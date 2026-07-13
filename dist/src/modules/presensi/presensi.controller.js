@@ -73,6 +73,9 @@ let PresensiController = class PresensiController {
     createHariLibur(sekolahId, data) {
         return this.presensiService.createHariLibur(sekolahId, data);
     }
+    updateHariLibur(sekolahId, id, data) {
+        return this.presensiService.updateHariLibur(sekolahId, id, data);
+    }
     deleteHariLibur(sekolahId, id) {
         return this.presensiService.deleteHariLibur(sekolahId, id);
     }
@@ -105,6 +108,9 @@ let PresensiController = class PresensiController {
     }
     getRekapGtk(sekolahId, tanggal) {
         return this.presensiService.getPresensiGtk(sekolahId, tanggal);
+    }
+    getRekapPeriodik(sekolahId, rombel, tanggalMulai, tanggalSelesai, tipe) {
+        return this.presensiService.getRekapPeriodik(sekolahId, rombel, tanggalMulai, tanggalSelesai, tipe || 'pd');
     }
 };
 exports.PresensiController = PresensiController;
@@ -149,6 +155,15 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], PresensiController.prototype, "createHariLibur", null);
+__decorate([
+    (0, common_1.Patch)('hari-libur/:sekolahId/:id'),
+    __param(0, (0, common_1.Param)('sekolahId')),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, Object]),
+    __metadata("design:returntype", void 0)
+], PresensiController.prototype, "updateHariLibur", null);
 __decorate([
     (0, common_1.Delete)('hari-libur/:sekolahId/:id'),
     __param(0, (0, common_1.Param)('sekolahId')),
@@ -237,6 +252,17 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], PresensiController.prototype, "getRekapGtk", null);
+__decorate([
+    (0, common_1.Get)('rekap-periodik/:sekolahId'),
+    __param(0, (0, common_1.Param)('sekolahId')),
+    __param(1, (0, common_1.Query)('rombel')),
+    __param(2, (0, common_1.Query)('tanggal_mulai')),
+    __param(3, (0, common_1.Query)('tanggal_selesai')),
+    __param(4, (0, common_1.Query)('tipe')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String, String, String]),
+    __metadata("design:returntype", void 0)
+], PresensiController.prototype, "getRekapPeriodik", null);
 exports.PresensiController = PresensiController = __decorate([
     (0, common_1.Controller)('kurikulum/presensi'),
     __metadata("design:paramtypes", [presensi_service_1.PresensiService])
