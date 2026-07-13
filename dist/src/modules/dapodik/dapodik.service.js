@@ -626,16 +626,10 @@ let DapodikService = class DapodikService {
         }
         let savedPath = '';
         let isCompressed = false;
-        if (['.jpg', '.jpeg', '.png', '.webp'].includes(fileExt)) {
-            savedPath = await compressAndSaveImage(file.buffer, destDir, finalFileName);
-            isCompressed = true;
+        if (fileExt !== '.pdf') {
+            throw new Error('Format dokumen tidak didukung. Hanya berkas PDF (.pdf) yang diperbolehkan.');
         }
-        else if (fileExt === '.pdf') {
-            savedPath = saveDocument(file.buffer, destDir, finalFileName, 200 * 1024);
-        }
-        else {
-            throw new Error('Format dokumen tidak didukung. Gunakan PDF atau Gambar (JPG, PNG, WebP).');
-        }
+        savedPath = saveDocument(file.buffer, destDir, finalFileName, 200 * 1024);
         const savedFileName = path.basename(savedPath);
         const relativePath = `/storage/${sekolahId}/siswa/${uuidSiswa}/dokumen/${savedFileName}`;
         return {
@@ -670,16 +664,10 @@ let DapodikService = class DapodikService {
         }
         let savedPath = '';
         let isCompressed = false;
-        if (['.jpg', '.jpeg', '.png', '.webp'].includes(fileExt)) {
-            savedPath = await compressAndSaveImage(file.buffer, destDir, finalFileName);
-            isCompressed = true;
+        if (fileExt !== '.pdf') {
+            throw new Error('Format dokumen tidak didukung. Hanya berkas PDF (.pdf) yang diperbolehkan.');
         }
-        else if (fileExt === '.pdf') {
-            savedPath = saveDocument(file.buffer, destDir, finalFileName, 200 * 1024);
-        }
-        else {
-            throw new Error('Format dokumen tidak didukung. Gunakan PDF atau Gambar (JPG, PNG, WebP).');
-        }
+        savedPath = saveDocument(file.buffer, destDir, finalFileName, 200 * 1024);
         const savedFileName = path.basename(savedPath);
         const relativePath = `/storage/${sekolahId}/gtk/${uuidGtk}/dokumen/${savedFileName}`;
         return {
