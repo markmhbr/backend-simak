@@ -621,7 +621,9 @@ export declare class DapodikService {
         rombongan_belajar: {
             nama: string;
             rombongan_belajar_id: string;
+            semester_id: string;
         };
+        semester_id: string;
         pembelajaran_id: string;
         jam_mengajar_per_minggu: Prisma.Decimal;
         nama_mata_pelajaran: string;

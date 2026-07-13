@@ -2057,10 +2057,12 @@ let DapodikService = class DapodikService {
                 jam_mengajar_per_minggu: true,
                 ptk_id: true,
                 ptk_terdaftar_id: true,
+                semester_id: true,
                 rombongan_belajar: {
                     select: {
                         rombongan_belajar_id: true,
                         nama: true,
+                        semester_id: true,
                     },
                 },
             },
