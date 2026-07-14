@@ -316,7 +316,7 @@ export declare class MandalaSuratController {
                 nip: string | null;
                 password: string;
                 authenticator_secret: string | null;
-                jabatan: number;
+                jabatan: number | null;
                 jenis_kelamin: number;
                 foto: string | null;
                 alamat_lengkap: string | null;
@@ -324,6 +324,7 @@ export declare class MandalaSuratController {
                 tanggal_lahir: Date | null;
                 tempat_lahir: string | null;
                 golongan: number | null;
+                jenis_jabatan_id: string | null;
             };
             template_surat: {
                 created_at: Date;

@@ -237,9 +237,49 @@ export declare class MandalaService implements OnModuleInit {
         selesai: number;
         batal: number;
     }>;
+    getJenisJabatans(): Promise<{
+        created_at: Date;
+        updated_at: Date;
+        jenis_jabatan_id: string;
+        nama: string;
+    }[]>;
+    getJenisJabatanById(id: string): Promise<{
+        created_at: Date;
+        updated_at: Date;
+        jenis_jabatan_id: string;
+        nama: string;
+    }>;
+    createJenisJabatan(data: {
+        nama: string;
+    }): Promise<{
+        created_at: Date;
+        updated_at: Date;
+        jenis_jabatan_id: string;
+        nama: string;
+    }>;
+    updateJenisJabatan(id: string, data: {
+        nama: string;
+    }): Promise<{
+        created_at: Date;
+        updated_at: Date;
+        jenis_jabatan_id: string;
+        nama: string;
+    }>;
+    deleteJenisJabatan(id: string): Promise<{
+        created_at: Date;
+        updated_at: Date;
+        jenis_jabatan_id: string;
+        nama: string;
+    }>;
     getPegawais(cadisdikId?: string): Promise<({
         cadisdik: {
             nama_instansi: string;
+        };
+        jenis_jabatan: {
+            created_at: Date;
+            updated_at: Date;
+            jenis_jabatan_id: string;
+            nama: string;
         };
     } & {
         created_at: Date;
@@ -253,7 +293,7 @@ export declare class MandalaService implements OnModuleInit {
         nip: string | null;
         password: string;
         authenticator_secret: string | null;
-        jabatan: number;
+        jabatan: number | null;
         jenis_kelamin: number;
         foto: string | null;
         alamat_lengkap: string | null;
@@ -261,6 +301,7 @@ export declare class MandalaService implements OnModuleInit {
         tanggal_lahir: Date | null;
         tempat_lahir: string | null;
         golongan: number | null;
+        jenis_jabatan_id: string | null;
     })[]>;
     getPegawaiById(id: string): Promise<{
         cadisdik: {
@@ -276,6 +317,12 @@ export declare class MandalaService implements OnModuleInit {
             kabupaten: string[];
             aktif: boolean;
         };
+        jenis_jabatan: {
+            created_at: Date;
+            updated_at: Date;
+            jenis_jabatan_id: string;
+            nama: string;
+        };
     } & {
         created_at: Date;
         updated_at: Date;
@@ -288,7 +335,7 @@ export declare class MandalaService implements OnModuleInit {
         nip: string | null;
         password: string;
         authenticator_secret: string | null;
-        jabatan: number;
+        jabatan: number | null;
         jenis_kelamin: number;
         foto: string | null;
         alamat_lengkap: string | null;
@@ -296,6 +343,7 @@ export declare class MandalaService implements OnModuleInit {
         tanggal_lahir: Date | null;
         tempat_lahir: string | null;
         golongan: number | null;
+        jenis_jabatan_id: string | null;
     }>;
     createPegawai(data: any): Promise<{
         created_at: Date;
@@ -309,7 +357,7 @@ export declare class MandalaService implements OnModuleInit {
         nip: string | null;
         password: string;
         authenticator_secret: string | null;
-        jabatan: number;
+        jabatan: number | null;
         jenis_kelamin: number;
         foto: string | null;
         alamat_lengkap: string | null;
@@ -317,6 +365,7 @@ export declare class MandalaService implements OnModuleInit {
         tanggal_lahir: Date | null;
         tempat_lahir: string | null;
         golongan: number | null;
+        jenis_jabatan_id: string | null;
     }>;
     updatePegawai(id: string, data: any): Promise<{
         created_at: Date;
@@ -330,7 +379,7 @@ export declare class MandalaService implements OnModuleInit {
         nip: string | null;
         password: string;
         authenticator_secret: string | null;
-        jabatan: number;
+        jabatan: number | null;
         jenis_kelamin: number;
         foto: string | null;
         alamat_lengkap: string | null;
@@ -338,6 +387,7 @@ export declare class MandalaService implements OnModuleInit {
         tanggal_lahir: Date | null;
         tempat_lahir: string | null;
         golongan: number | null;
+        jenis_jabatan_id: string | null;
     }>;
     deletePegawai(id: string): Promise<{
         created_at: Date;
@@ -351,7 +401,7 @@ export declare class MandalaService implements OnModuleInit {
         nip: string | null;
         password: string;
         authenticator_secret: string | null;
-        jabatan: number;
+        jabatan: number | null;
         jenis_kelamin: number;
         foto: string | null;
         alamat_lengkap: string | null;
@@ -359,6 +409,7 @@ export declare class MandalaService implements OnModuleInit {
         tanggal_lahir: Date | null;
         tempat_lahir: string | null;
         golongan: number | null;
+        jenis_jabatan_id: string | null;
     }>;
     getMappingPengawas(pegawaiId?: string, sekolahId?: string): Promise<({
         sekolah: {
@@ -698,15 +749,24 @@ export declare class MandalaService implements OnModuleInit {
         semester: string;
         periode_aktif: boolean;
     }[]>;
-    getMenuRoles(): Promise<{
+    getMenuRoles(): Promise<({
+        jenis_jabatan: {
+            created_at: Date;
+            updated_at: Date;
+            jenis_jabatan_id: string;
+            nama: string;
+        };
+    } & {
+        jenis_jabatan_id: string | null;
         menu_role_id: string;
         menu_key: string;
-        jabatan_id: number;
+        jabatan_id: number | null;
         jabatan_nama: string | null;
-    }[]>;
+    })[]>;
     updateMenuRoles(roles: Array<{
         menu_key: string;
-        jabatan_id: number;
+        jabatan_id?: number;
         jabatan_nama?: string;
+        jenis_jabatan_id?: string;
     }>): Promise<any[]>;
 }

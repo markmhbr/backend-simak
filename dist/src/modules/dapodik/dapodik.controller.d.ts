@@ -1031,6 +1031,7 @@ export declare class DapodikController {
             no_whatsapp: string | null;
             id_telegram: string | null;
             nama_kcp: string | null;
+            mode_presensi: number;
         };
     }>;
     createGtkAnak(req: Request, id: string, body: any): Promise<{

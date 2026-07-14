@@ -259,6 +259,52 @@ export declare class MandalaController {
             batal: number;
         };
     }>;
+    getJenisJabatans(): Promise<{
+        status: string;
+        data: {
+            created_at: Date;
+            updated_at: Date;
+            jenis_jabatan_id: string;
+            nama: string;
+        }[];
+    }>;
+    getJenisJabatanDetail(id: string): Promise<{
+        status: string;
+        data: {
+            created_at: Date;
+            updated_at: Date;
+            jenis_jabatan_id: string;
+            nama: string;
+        };
+    }>;
+    createJenisJabatan(body: {
+        nama: string;
+    }): Promise<{
+        status: string;
+        message: string;
+        data: {
+            created_at: Date;
+            updated_at: Date;
+            jenis_jabatan_id: string;
+            nama: string;
+        };
+    }>;
+    updateJenisJabatan(id: string, body: {
+        nama: string;
+    }): Promise<{
+        status: string;
+        message: string;
+        data: {
+            created_at: Date;
+            updated_at: Date;
+            jenis_jabatan_id: string;
+            nama: string;
+        };
+    }>;
+    deleteJenisJabatan(id: string): Promise<{
+        status: string;
+        message: string;
+    }>;
     loginPegawai(body: any): Promise<{
         status: string;
         requires2FA: boolean;
@@ -315,6 +361,12 @@ export declare class MandalaController {
             cadisdik: {
                 nama_instansi: string;
             };
+            jenis_jabatan: {
+                created_at: Date;
+                updated_at: Date;
+                jenis_jabatan_id: string;
+                nama: string;
+            };
         } & {
             created_at: Date;
             updated_at: Date;
@@ -327,7 +379,7 @@ export declare class MandalaController {
             nip: string | null;
             password: string;
             authenticator_secret: string | null;
-            jabatan: number;
+            jabatan: number | null;
             jenis_kelamin: number;
             foto: string | null;
             alamat_lengkap: string | null;
@@ -335,6 +387,7 @@ export declare class MandalaController {
             tanggal_lahir: Date | null;
             tempat_lahir: string | null;
             golongan: number | null;
+            jenis_jabatan_id: string | null;
         })[];
     }>;
     getPegawaiDetail(id: string): Promise<{
@@ -353,6 +406,12 @@ export declare class MandalaController {
                 kabupaten: string[];
                 aktif: boolean;
             };
+            jenis_jabatan: {
+                created_at: Date;
+                updated_at: Date;
+                jenis_jabatan_id: string;
+                nama: string;
+            };
         } & {
             created_at: Date;
             updated_at: Date;
@@ -365,7 +424,7 @@ export declare class MandalaController {
             nip: string | null;
             password: string;
             authenticator_secret: string | null;
-            jabatan: number;
+            jabatan: number | null;
             jenis_kelamin: number;
             foto: string | null;
             alamat_lengkap: string | null;
@@ -373,6 +432,7 @@ export declare class MandalaController {
             tanggal_lahir: Date | null;
             tempat_lahir: string | null;
             golongan: number | null;
+            jenis_jabatan_id: string | null;
         };
     }>;
     createPegawai(body: any): Promise<{
@@ -390,7 +450,7 @@ export declare class MandalaController {
             nip: string | null;
             password: string;
             authenticator_secret: string | null;
-            jabatan: number;
+            jabatan: number | null;
             jenis_kelamin: number;
             foto: string | null;
             alamat_lengkap: string | null;
@@ -398,6 +458,7 @@ export declare class MandalaController {
             tanggal_lahir: Date | null;
             tempat_lahir: string | null;
             golongan: number | null;
+            jenis_jabatan_id: string | null;
         };
     }>;
     updatePegawai(id: string, body: any): Promise<{
@@ -415,7 +476,7 @@ export declare class MandalaController {
             nip: string | null;
             password: string;
             authenticator_secret: string | null;
-            jabatan: number;
+            jabatan: number | null;
             jenis_kelamin: number;
             foto: string | null;
             alamat_lengkap: string | null;
@@ -423,6 +484,7 @@ export declare class MandalaController {
             tanggal_lahir: Date | null;
             tempat_lahir: string | null;
             golongan: number | null;
+            jenis_jabatan_id: string | null;
         };
     }>;
     deletePegawai(id: string): Promise<{
@@ -729,18 +791,27 @@ export declare class MandalaController {
     }>;
     getMenuRoles(): Promise<{
         status: string;
-        data: {
+        data: ({
+            jenis_jabatan: {
+                created_at: Date;
+                updated_at: Date;
+                jenis_jabatan_id: string;
+                nama: string;
+            };
+        } & {
+            jenis_jabatan_id: string | null;
             menu_role_id: string;
             menu_key: string;
-            jabatan_id: number;
+            jabatan_id: number | null;
             jabatan_nama: string | null;
-        }[];
+        })[];
     }>;
     updateMenuRoles(body: {
         roles: Array<{
             menu_key: string;
-            jabatan_id: number;
+            jabatan_id?: number;
             jabatan_nama?: string;
+            jenis_jabatan_id?: string;
         }>;
     }): Promise<{
         status: string;

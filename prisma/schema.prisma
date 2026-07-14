@@ -430,12 +430,13 @@ model Gtk {
   tgl_ptk_keluar      DateTime? @db.Date
 
   // --- Kolom SIMAK (dipertahankan) ---
-  qr_token    String?
-  foto        String?
-  status      String  @default("Aktif")
-  no_whatsapp String?
-  id_telegram String?
-  nama_kcp    String?
+  qr_token      String?
+  foto          String?
+  status        String  @default("Aktif")
+  no_whatsapp   String?
+  id_telegram   String?
+  nama_kcp      String?
+  mode_presensi Int     @default(0) @db.SmallInt
 
   // --- Relations ---
   jenis_ptk                 jenis_ptk?                @relation(fields: [jenis_ptk_id], references: [jenis_ptk_id], onDelete: NoAction, onUpdate: NoAction)
@@ -1204,6 +1205,18 @@ model Antrian {
   @@schema("mandala")
 }
 
+model JenisJabatan {
+  jenis_jabatan_id String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nama             String            @db.VarChar(100)
+  created_at       DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime          @default(now()) @updatedAt @db.Timestamptz(6)
+  pegawai          Pegawai[]
+  menu_roles       MandalaMenuRole[]
+
+  @@map("jenis_jabatan")
+  @@schema("mandala")
+}
+
 model Pegawai {
   pegawai_id             String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   cadisdik_id            String                 @db.Uuid
@@ -1212,7 +1225,7 @@ model Pegawai {
   email                  String                 @unique @db.VarChar(255)
   password               String                 @db.VarChar(255)
   authenticator_secret   String?                @db.VarChar(255)
-  jabatan                Int                    @db.SmallInt
+  jabatan                Int?                   @db.SmallInt
   jenis_kelamin          Int                    @db.SmallInt
   nomor_telepon          String?                @db.VarChar(30)
   foto                   String?                @db.VarChar(500)
@@ -1224,6 +1237,8 @@ model Pegawai {
   tanggal_lahir          DateTime?              @db.Date
   tempat_lahir           String?                @db.VarChar(100)
   golongan               Int?                   @db.SmallInt
+  jenis_jabatan_id       String?                @db.Uuid
+  jenis_jabatan          JenisJabatan?          @relation(fields: [jenis_jabatan_id], references: [jenis_jabatan_id], onDelete: SetNull)
   mapping_pengawas       MappingPengawas[]
   cadisdik               Cadisdik               @relation(fields: [cadisdik_id], references: [cadisdik_id])
   permohonan_layanan_log PermohonanLayananLog[]
@@ -3437,13 +3452,16 @@ model PengaturanUmum {
 }
 
 model MandalaMenuRole {
-  menu_role_id String  @id @default(uuid()) @db.Uuid
-  menu_key     String  @db.VarChar(100)
-  jabatan_id   Int
-  jabatan_nama String? @db.VarChar(100)
+  menu_role_id     String        @id @default(uuid()) @db.Uuid
+  menu_key         String        @db.VarChar(100)
+  jabatan_id       Int?
+  jabatan_nama     String?       @db.VarChar(100)
+  jenis_jabatan_id String?       @db.Uuid
+  jenis_jabatan    JenisJabatan? @relation(fields: [jenis_jabatan_id], references: [jenis_jabatan_id], onDelete: Cascade)
 
   @@index([menu_key])
   @@index([jabatan_id])
+  @@index([jenis_jabatan_id])
   @@map("menu_roles")
   @@schema("mandala")
 }

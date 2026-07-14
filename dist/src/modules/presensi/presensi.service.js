@@ -184,9 +184,64 @@ let PresensiService = class PresensiService {
             throw new common_1.BadRequestException('Hari ini merupakan libur akhir pekan. Tidak dapat melakukan presensi.');
         }
         const dayConfig = await this.getActiveSchedule(sekolahId, dayOfWeek);
+        const gtk = await this.prisma.gtk.findUnique({
+            where: { ptk_id: data.ptk_id },
+            select: { mode_presensi: true },
+        });
+        if (!gtk) {
+            throw new common_1.NotFoundException('Data GTK tidak ditemukan');
+        }
+        const baseInMinutes = dayConfig.jam_masuk.getUTCHours() * 60 + dayConfig.jam_masuk.getUTCMinutes();
+        let configInMinutes = baseInMinutes;
+        let configOutMinutes = dayConfig.jam_pulang.getUTCHours() * 60 + dayConfig.jam_pulang.getUTCMinutes();
+        if (gtk.mode_presensi === 1) {
+            const jadwalGtk = await this.prisma.jadwalPelajaran.findMany({
+                where: {
+                    sekolah_id: sekolahId,
+                    jenis_jadwal_id: activeSchedule.jenis_jadwal_id,
+                    hari: dayOfWeek,
+                    aktif: true,
+                    pembelajaran: {
+                        ptk_id: data.ptk_id,
+                    },
+                },
+                select: {
+                    urutan: true,
+                },
+                orderBy: {
+                    urutan: 'asc',
+                },
+            });
+            if (jadwalGtk.length === 0) {
+                throw new common_1.BadRequestException('Anda tidak memiliki jadwal mengajar hari ini.');
+            }
+            const firstUrutan = jadwalGtk[0].urutan;
+            const lastUrutan = jadwalGtk[jadwalGtk.length - 1].urutan;
+            const listPengaturan = await this.prisma.pengaturanJadwal.findMany({
+                where: {
+                    sekolah_id: sekolahId,
+                    jenis_jadwal_id: activeSchedule.jenis_jadwal_id,
+                    hari: dayOfWeek,
+                    aktif: true,
+                },
+                orderBy: {
+                    urutan: 'asc',
+                },
+            });
+            let startOffset = 0;
+            let endOffset = 0;
+            for (const p of listPengaturan) {
+                if (p.urutan < firstUrutan) {
+                    startOffset += p.durasi_menit;
+                }
+                if (p.urutan <= lastUrutan) {
+                    endOffset += p.durasi_menit;
+                }
+            }
+            configInMinutes = baseInMinutes + startOffset;
+            configOutMinutes = baseInMinutes + endOffset;
+        }
         const currentTimeMinutes = wibDate.getUTCHours() * 60 + wibDate.getUTCMinutes();
-        const configInMinutes = dayConfig.jam_masuk.getUTCHours() * 60 + dayConfig.jam_masuk.getUTCMinutes();
-        const configOutMinutes = dayConfig.jam_pulang.getUTCHours() * 60 + dayConfig.jam_pulang.getUTCMinutes();
         if (data.tipe === 'masuk') {
             if (currentTimeMinutes > configInMinutes) {
                 throw new common_1.BadRequestException('Batas waktu masuk sudah lewat (jam mengajar telah dimulai).');

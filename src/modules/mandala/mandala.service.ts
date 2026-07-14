@@ -498,6 +498,48 @@ export class MandalaService implements OnModuleInit {
 
   // --- EXISTING METHODS ---
 
+  // --- JENIS JABATAN CRUD ---
+
+  async getJenisJabatans() {
+    return await this.prisma.jenisJabatan.findMany({
+      orderBy: { nama: 'asc' },
+    });
+  }
+
+  async getJenisJabatanById(id: string) {
+    const data = await this.prisma.jenisJabatan.findUnique({
+      where: { jenis_jabatan_id: id },
+    });
+    if (!data) throw new NotFoundException(`Jenis Jabatan with ID ${id} not found.`);
+    return data;
+  }
+
+  async createJenisJabatan(data: { nama: string }) {
+    return await this.prisma.jenisJabatan.create({
+      data: {
+        nama: data.nama,
+      },
+    });
+  }
+
+  async updateJenisJabatan(id: string, data: { nama: string }) {
+    await this.getJenisJabatanById(id);
+    return await this.prisma.jenisJabatan.update({
+      where: { jenis_jabatan_id: id },
+      data: {
+        nama: data.nama,
+        updated_at: new Date(),
+      },
+    });
+  }
+
+  async deleteJenisJabatan(id: string) {
+    await this.getJenisJabatanById(id);
+    return await this.prisma.jenisJabatan.delete({
+      where: { jenis_jabatan_id: id },
+    });
+  }
+
   // --- PEGAWAI CRUD ---
 
   async getPegawais(cadisdikId?: string) {
@@ -512,6 +554,7 @@ export class MandalaService implements OnModuleInit {
             nama_instansi: true,
           },
         },
+        jenis_jabatan: true,
       },
       orderBy: { nama_lengkap: 'asc' },
     });
@@ -522,6 +565,7 @@ export class MandalaService implements OnModuleInit {
       where: { pegawai_id: id },
       include: {
         cadisdik: true,
+        jenis_jabatan: true,
       },
     });
     if (!data) throw new NotFoundException(`Pegawai with ID ${id} not found.`);
@@ -574,12 +618,13 @@ export class MandalaService implements OnModuleInit {
         nip: data.nip && data.nip.trim() !== '' ? data.nip : null,
         email: data.email,
         password: hashedPassword,
-        jabatan: data.jabatan,
+        jabatan: data.jenis_jabatan_id ? null : (data.jabatan !== undefined && data.jabatan !== null ? parseInt(data.jabatan, 10) : null),
         jenis_kelamin: data.jenis_kelamin,
         nomor_telepon: data.nomor_telepon,
         foto: data.foto,
         aktif: data.aktif !== undefined ? data.aktif : true,
         golongan: data.golongan !== undefined && data.golongan !== null && data.golongan !== '' ? parseInt(data.golongan, 10) : null,
+        jenis_jabatan_id: data.jenis_jabatan_id || null,
       },
     });
   }
@@ -596,12 +641,13 @@ export class MandalaService implements OnModuleInit {
       alamat_lengkap: data.alamat_lengkap,
       nip: data.nip !== undefined ? (data.nip && data.nip.trim() !== '' ? data.nip : null) : undefined,
       email: data.email,
-      jabatan: data.jabatan,
+      jabatan: data.jenis_jabatan_id ? null : (data.jabatan !== undefined ? (data.jabatan !== null && data.jabatan !== '' ? parseInt(data.jabatan, 10) : null) : undefined),
       jenis_kelamin: data.jenis_kelamin,
       nomor_telepon: data.nomor_telepon,
       foto: data.foto,
       aktif: data.aktif,
       golongan: data.golongan !== undefined ? (data.golongan !== null && data.golongan !== '' ? parseInt(data.golongan, 10) : null) : undefined,
+      jenis_jabatan_id: data.jenis_jabatan_id !== undefined ? (data.jenis_jabatan_id || null) : undefined,
       updated_at: new Date(),
     };
 
@@ -1778,10 +1824,14 @@ export class MandalaService implements OnModuleInit {
   }
 
   async getMenuRoles() {
-    return this.prisma.mandalaMenuRole.findMany();
+    return this.prisma.mandalaMenuRole.findMany({
+      include: {
+        jenis_jabatan: true,
+      },
+    });
   }
 
-  async updateMenuRoles(roles: Array<{ menu_key: string; jabatan_id: number; jabatan_nama?: string }>) {
+  async updateMenuRoles(roles: Array<{ menu_key: string; jabatan_id?: number; jabatan_nama?: string; jenis_jabatan_id?: string }>) {
     await this.prisma.mandalaMenuRole.deleteMany();
 
     const createdRoles = [];
@@ -1789,8 +1839,9 @@ export class MandalaService implements OnModuleInit {
       const created = await this.prisma.mandalaMenuRole.create({
         data: {
           menu_key: role.menu_key,
-          jabatan_id: role.jabatan_id,
+          jabatan_id: role.jabatan_id !== undefined && role.jabatan_id !== null ? role.jabatan_id : null,
           jabatan_nama: role.jabatan_nama || null,
+          jenis_jabatan_id: role.jenis_jabatan_id !== undefined && role.jenis_jabatan_id !== null ? role.jenis_jabatan_id : null,
         },
       });
       createdRoles.push(created);

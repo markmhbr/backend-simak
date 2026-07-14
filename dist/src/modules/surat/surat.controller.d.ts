@@ -465,6 +465,7 @@ export declare class SuratController {
                 no_whatsapp: string | null;
                 id_telegram: string | null;
                 nama_kcp: string | null;
+                mode_presensi: number;
             };
             template_surat: {
                 sekolah_id: string;

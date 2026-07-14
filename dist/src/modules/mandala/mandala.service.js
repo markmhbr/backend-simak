@@ -483,6 +483,42 @@ let MandalaService = MandalaService_1 = class MandalaService {
             batal,
         };
     }
+    async getJenisJabatans() {
+        return await this.prisma.jenisJabatan.findMany({
+            orderBy: { nama: 'asc' },
+        });
+    }
+    async getJenisJabatanById(id) {
+        const data = await this.prisma.jenisJabatan.findUnique({
+            where: { jenis_jabatan_id: id },
+        });
+        if (!data)
+            throw new common_1.NotFoundException(`Jenis Jabatan with ID ${id} not found.`);
+        return data;
+    }
+    async createJenisJabatan(data) {
+        return await this.prisma.jenisJabatan.create({
+            data: {
+                nama: data.nama,
+            },
+        });
+    }
+    async updateJenisJabatan(id, data) {
+        await this.getJenisJabatanById(id);
+        return await this.prisma.jenisJabatan.update({
+            where: { jenis_jabatan_id: id },
+            data: {
+                nama: data.nama,
+                updated_at: new Date(),
+            },
+        });
+    }
+    async deleteJenisJabatan(id) {
+        await this.getJenisJabatanById(id);
+        return await this.prisma.jenisJabatan.delete({
+            where: { jenis_jabatan_id: id },
+        });
+    }
     async getPegawais(cadisdikId) {
         const where = {};
         if (cadisdikId)
@@ -495,6 +531,7 @@ let MandalaService = MandalaService_1 = class MandalaService {
                         nama_instansi: true,
                     },
                 },
+                jenis_jabatan: true,
             },
             orderBy: { nama_lengkap: 'asc' },
         });
@@ -504,6 +541,7 @@ let MandalaService = MandalaService_1 = class MandalaService {
             where: { pegawai_id: id },
             include: {
                 cadisdik: true,
+                jenis_jabatan: true,
             },
         });
         if (!data)
@@ -551,12 +589,13 @@ let MandalaService = MandalaService_1 = class MandalaService {
                 nip: data.nip && data.nip.trim() !== '' ? data.nip : null,
                 email: data.email,
                 password: hashedPassword,
-                jabatan: data.jabatan,
+                jabatan: data.jenis_jabatan_id ? null : (data.jabatan !== undefined && data.jabatan !== null ? parseInt(data.jabatan, 10) : null),
                 jenis_kelamin: data.jenis_kelamin,
                 nomor_telepon: data.nomor_telepon,
                 foto: data.foto,
                 aktif: data.aktif !== undefined ? data.aktif : true,
                 golongan: data.golongan !== undefined && data.golongan !== null && data.golongan !== '' ? parseInt(data.golongan, 10) : null,
+                jenis_jabatan_id: data.jenis_jabatan_id || null,
             },
         });
     }
@@ -571,12 +610,13 @@ let MandalaService = MandalaService_1 = class MandalaService {
             alamat_lengkap: data.alamat_lengkap,
             nip: data.nip !== undefined ? (data.nip && data.nip.trim() !== '' ? data.nip : null) : undefined,
             email: data.email,
-            jabatan: data.jabatan,
+            jabatan: data.jenis_jabatan_id ? null : (data.jabatan !== undefined ? (data.jabatan !== null && data.jabatan !== '' ? parseInt(data.jabatan, 10) : null) : undefined),
             jenis_kelamin: data.jenis_kelamin,
             nomor_telepon: data.nomor_telepon,
             foto: data.foto,
             aktif: data.aktif,
             golongan: data.golongan !== undefined ? (data.golongan !== null && data.golongan !== '' ? parseInt(data.golongan, 10) : null) : undefined,
+            jenis_jabatan_id: data.jenis_jabatan_id !== undefined ? (data.jenis_jabatan_id || null) : undefined,
             updated_at: new Date(),
         };
         if (data.password) {
@@ -1634,7 +1674,11 @@ let MandalaService = MandalaService_1 = class MandalaService {
         });
     }
     async getMenuRoles() {
-        return this.prisma.mandalaMenuRole.findMany();
+        return this.prisma.mandalaMenuRole.findMany({
+            include: {
+                jenis_jabatan: true,
+            },
+        });
     }
     async updateMenuRoles(roles) {
         await this.prisma.mandalaMenuRole.deleteMany();
@@ -1643,8 +1687,9 @@ let MandalaService = MandalaService_1 = class MandalaService {
             const created = await this.prisma.mandalaMenuRole.create({
                 data: {
                     menu_key: role.menu_key,
-                    jabatan_id: role.jabatan_id,
+                    jabatan_id: role.jabatan_id !== undefined && role.jabatan_id !== null ? role.jabatan_id : null,
                     jabatan_nama: role.jabatan_nama || null,
+                    jenis_jabatan_id: role.jenis_jabatan_id !== undefined && role.jenis_jabatan_id !== null ? role.jenis_jabatan_id : null,
                 },
             });
             createdRoles.push(created);

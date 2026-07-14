@@ -229,6 +229,66 @@ export class MandalaController {
     };
   }
 
+  // --- JENIS JABATAN ENDPOINTS ---
+
+  @Get('jenis-jabatan')
+  @UseGuards(MandalaKeyGuard)
+  async getJenisJabatans() {
+    const data = await this.mandalaService.getJenisJabatans();
+    return {
+      status: 'success',
+      data,
+    };
+  }
+
+  @Get('jenis-jabatan/:id')
+  @UseGuards(MandalaKeyGuard)
+  async getJenisJabatanDetail(@Param('id') id: string) {
+    const data = await this.mandalaService.getJenisJabatanById(id);
+    return {
+      status: 'success',
+      data,
+    };
+  }
+
+  @Post('jenis-jabatan')
+  @UseGuards(MandalaKeyGuard)
+  async createJenisJabatan(@Body() body: { nama: string }) {
+    if (!body.nama || body.nama.trim() === '') {
+      throw new BadRequestException('nama is required.');
+    }
+    const data = await this.mandalaService.createJenisJabatan(body);
+    return {
+      status: 'success',
+      message: 'Jenis Jabatan successfully created.',
+      data,
+    };
+  }
+
+  @Patch('jenis-jabatan/:id')
+  @UseGuards(MandalaKeyGuard)
+  async updateJenisJabatan(@Param('id') id: string, @Body() body: { nama: string }) {
+    if (!body.nama || body.nama.trim() === '') {
+      throw new BadRequestException('nama is required.');
+    }
+    const data = await this.mandalaService.updateJenisJabatan(id, body);
+    return {
+      status: 'success',
+      message: 'Jenis Jabatan successfully updated.',
+      data,
+    };
+  }
+
+  @Delete('jenis-jabatan/:id')
+  @UseGuards(MandalaKeyGuard)
+  async deleteJenisJabatan(@Param('id') id: string) {
+    await this.mandalaService.deleteJenisJabatan(id);
+    return {
+      status: 'success',
+      message: 'Jenis Jabatan successfully deleted.',
+    };
+  }
+
   // --- PEGAWAI ENDPOINTS ---
 
   @Post('auth/login')
@@ -290,11 +350,11 @@ export class MandalaController {
       !body.alamat_lengkap ||
       !body.email ||
       !body.password ||
-      body.jabatan === undefined ||
+      (body.jabatan === undefined && !body.jenis_jabatan_id) ||
       body.jenis_kelamin === undefined
     ) {
       throw new BadRequestException(
-        'Required fields: cadisdik_id, nama_lengkap, nik, tempat_lahir, tanggal_lahir, alamat_lengkap, email, password, jabatan, jenis_kelamin.',
+        'Required fields: cadisdik_id, nama_lengkap, nik, tempat_lahir, tanggal_lahir, alamat_lengkap, email, password, jenis_kelamin. Either jabatan or jenis_jabatan_id must be provided.',
       );
     }
     const data = await this.mandalaService.createPegawai(body);
@@ -527,7 +587,7 @@ export class MandalaController {
 
   @Post('menu-roles')
   @HttpCode(HttpStatus.OK)
-  async updateMenuRoles(@Body() body: { roles: Array<{ menu_key: string; jabatan_id: number; jabatan_nama?: string }> }) {
+  async updateMenuRoles(@Body() body: { roles: Array<{ menu_key: string; jabatan_id?: number; jabatan_nama?: string; jenis_jabatan_id?: string }> }) {
     if (!body.roles || !Array.isArray(body.roles)) {
       throw new BadRequestException('Roles array is required.');
     }

@@ -823,6 +823,7 @@ export declare class DapodikService {
         no_whatsapp: string | null;
         id_telegram: string | null;
         nama_kcp: string | null;
+        mode_presensi: number;
     }>;
     getPesertaDidikById(sekolahId: string, id: string): Promise<any>;
     updatePesertaDidik(sekolahId: string, id: string, data: any): Promise<{

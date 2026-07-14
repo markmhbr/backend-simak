@@ -180,6 +180,49 @@ let MandalaController = class MandalaController {
             data,
         };
     }
+    async getJenisJabatans() {
+        const data = await this.mandalaService.getJenisJabatans();
+        return {
+            status: 'success',
+            data,
+        };
+    }
+    async getJenisJabatanDetail(id) {
+        const data = await this.mandalaService.getJenisJabatanById(id);
+        return {
+            status: 'success',
+            data,
+        };
+    }
+    async createJenisJabatan(body) {
+        if (!body.nama || body.nama.trim() === '') {
+            throw new common_1.BadRequestException('nama is required.');
+        }
+        const data = await this.mandalaService.createJenisJabatan(body);
+        return {
+            status: 'success',
+            message: 'Jenis Jabatan successfully created.',
+            data,
+        };
+    }
+    async updateJenisJabatan(id, body) {
+        if (!body.nama || body.nama.trim() === '') {
+            throw new common_1.BadRequestException('nama is required.');
+        }
+        const data = await this.mandalaService.updateJenisJabatan(id, body);
+        return {
+            status: 'success',
+            message: 'Jenis Jabatan successfully updated.',
+            data,
+        };
+    }
+    async deleteJenisJabatan(id) {
+        await this.mandalaService.deleteJenisJabatan(id);
+        return {
+            status: 'success',
+            message: 'Jenis Jabatan successfully deleted.',
+        };
+    }
     async loginPegawai(body) {
         if (!body.identifier || !body.password) {
             throw new common_1.BadRequestException('identifier (NIP/Email) and password are required.');
@@ -221,9 +264,9 @@ let MandalaController = class MandalaController {
             !body.alamat_lengkap ||
             !body.email ||
             !body.password ||
-            body.jabatan === undefined ||
+            (body.jabatan === undefined && !body.jenis_jabatan_id) ||
             body.jenis_kelamin === undefined) {
-            throw new common_1.BadRequestException('Required fields: cadisdik_id, nama_lengkap, nik, tempat_lahir, tanggal_lahir, alamat_lengkap, email, password, jabatan, jenis_kelamin.');
+            throw new common_1.BadRequestException('Required fields: cadisdik_id, nama_lengkap, nik, tempat_lahir, tanggal_lahir, alamat_lengkap, email, password, jenis_kelamin. Either jabatan or jenis_jabatan_id must be provided.');
         }
         const data = await this.mandalaService.createPegawai(body);
         return {
@@ -538,6 +581,46 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], MandalaController.prototype, "getAntrianRekap", null);
+__decorate([
+    (0, common_1.Get)('jenis-jabatan'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "getJenisJabatans", null);
+__decorate([
+    (0, common_1.Get)('jenis-jabatan/:id'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "getJenisJabatanDetail", null);
+__decorate([
+    (0, common_1.Post)('jenis-jabatan'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "createJenisJabatan", null);
+__decorate([
+    (0, common_1.Patch)('jenis-jabatan/:id'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "updateJenisJabatan", null);
+__decorate([
+    (0, common_1.Delete)('jenis-jabatan/:id'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "deleteJenisJabatan", null);
 __decorate([
     (0, common_1.Post)('auth/login'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
