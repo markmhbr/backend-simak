@@ -112,6 +112,9 @@ let PresensiController = class PresensiController {
     getRekapPeriodik(sekolahId, rombel, tanggalMulai, tanggalSelesai, tipe) {
         return this.presensiService.getRekapPeriodik(sekolahId, rombel, tanggalMulai, tanggalSelesai, tipe || 'pd');
     }
+    updateGtkMode(sekolahId, ptkId, data) {
+        return this.presensiService.updateGtkMode(sekolahId, ptkId, data.mode_presensi);
+    }
 };
 exports.PresensiController = PresensiController;
 __decorate([
@@ -263,6 +266,15 @@ __decorate([
     __metadata("design:paramtypes", [String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], PresensiController.prototype, "getRekapPeriodik", null);
+__decorate([
+    (0, common_1.Patch)('gtk-mode/:sekolahId/:ptkId'),
+    __param(0, (0, common_1.Param)('sekolahId')),
+    __param(1, (0, common_1.Param)('ptkId')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, Object]),
+    __metadata("design:returntype", void 0)
+], PresensiController.prototype, "updateGtkMode", null);
 exports.PresensiController = PresensiController = __decorate([
     (0, common_1.Controller)('kurikulum/presensi'),
     __metadata("design:paramtypes", [presensi_service_1.PresensiService])

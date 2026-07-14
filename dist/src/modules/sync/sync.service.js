@@ -477,10 +477,20 @@ let SyncService = SyncService_1 = class SyncService {
                 rombongan_belajar_id: p.rombongan_belajar_id || p.anggota_rombel?.rombongan_belajar_id || null,
             };
             try {
+                const updatePayload = { ...payload };
+                if (p.foto === undefined || p.foto === null) {
+                    delete updatePayload.foto;
+                }
+                if (p.telegram_chat_id === undefined || p.telegram_chat_id === null) {
+                    delete updatePayload.telegram_chat_id;
+                }
+                if (p.telegram_token === undefined || p.telegram_token === null) {
+                    delete updatePayload.telegram_token;
+                }
                 await this.prisma.pesertaDidik.upsert({
                     where: { peserta_didik_id: p.peserta_didik_id },
                     create: { ...payload, peserta_didik_id: p.peserta_didik_id },
-                    update: { ...payload, updated_at: new Date() },
+                    update: { ...updatePayload, updated_at: new Date() },
                 });
                 successCount++;
             }

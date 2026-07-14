@@ -81,6 +81,7 @@ model Sekolah {
   mandala_surat_keluar   MandalaSuratKeluar[]
   pengaturan_umum        PengaturanUmum?
   anak                   Anak[]
+  mutasi_pd              MutasiPd[]
 
   @@map("sekolah")
   @@schema("dapodik")
@@ -341,6 +342,7 @@ model PesertaDidik {
   anggota_rombel        AnggotaRombel[]
   agama                 agama?                 @relation(fields: [agama_id], references: [agama_id], onDelete: NoAction, onUpdate: NoAction)
   tugas_tambahan        TugasTambahan[]
+  mutasi_pd             MutasiPd[]
 
   @@index([sekolah_id])
   @@index([rombongan_belajar_id])
@@ -458,6 +460,7 @@ model Gtk {
   tindak_lanjut_petugas     TindakLanjut[]            @relation("PetugasTindakLanjut")
   bimbing_pd                BimbingPd[]
   anak                      Anak[]
+  mutasi_pd                 MutasiPd[]
 
   @@index([sekolah_id])
   @@index([qr_token])
@@ -2215,6 +2218,7 @@ model jenis_keluar {
   last_update     DateTime  @default(dbgenerated("'2019-09-10 14:29:56.240319'::timestamp without time zone")) @db.Timestamp(6)
   expired_date    DateTime? @db.Timestamp(6)
   last_sync       DateTime  @default(dbgenerated("'1901-01-01 00:00:00'::timestamp without time zone")) @db.Timestamp(6)
+  mutasi_pd       MutasiPd[]
 
   @@schema("ref")
 }
@@ -3464,4 +3468,30 @@ model MandalaMenuRole {
   @@index([jenis_jabatan_id])
   @@map("menu_roles")
   @@schema("mandala")
+}
+
+model MutasiPd {
+  mutasi_id        String        @id @default(uuid()) @db.Uuid
+  sekolah_id       String        @db.Uuid
+  peserta_didik_id String        @db.Uuid
+  jenis_keluar_id  String        @db.Char(1)
+  ptk_id           String?       @db.Uuid
+  alasan           String?       @db.Text
+  bukti            String?       @db.VarChar(500) // File PDF path
+  status           Int           @default(0) @db.SmallInt // 0: Pending, 1: Disetujui, 2: Ditolak
+  alasan_tolak     String?       @db.Text
+  created_at       DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime      @default(now()) @updatedAt @db.Timestamptz(6)
+
+  // Relations
+  sekolah          Sekolah       @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
+  peserta_didik    PesertaDidik  @relation(fields: [peserta_didik_id], references: [peserta_didik_id], onDelete: Cascade)
+  jenis_keluar     jenis_keluar  @relation(fields: [jenis_keluar_id], references: [jenis_keluar_id])
+  ptk              Gtk?          @relation(fields: [ptk_id], references: [ptk_id], onDelete: SetNull)
+
+  @@index([sekolah_id])
+  @@index([peserta_didik_id])
+  @@index([ptk_id])
+  @@map("mutasi_pd")
+  @@schema("simak")
 }

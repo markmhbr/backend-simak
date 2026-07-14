@@ -187,6 +187,27 @@ export class PresensiService {
     }
   }
 
+  async updateGtkMode(sekolahId: string, ptkId: string, modePresensi: number) {
+    const gtk = await this.prisma.gtk.findFirst({
+      where: { ptk_id: ptkId, sekolah_id: sekolahId },
+    });
+
+    if (!gtk) {
+      throw new Error('GTK not found in this school');
+    }
+
+    const updated = await this.prisma.gtk.update({
+      where: { ptk_id: ptkId },
+      data: { mode_presensi: modePresensi },
+    });
+
+    return {
+      status: 'success',
+      message: 'Mode presensi GTK berhasil diperbarui.',
+      data: updated,
+    };
+  }
+
   async presensiGtk(sekolahId: string, data: {
     ptk_id: string;
     waktu: string;

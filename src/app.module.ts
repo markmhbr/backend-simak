@@ -23,6 +23,7 @@ import { SuratModule } from './modules/surat/surat.module';
 import { ReferenceModule } from './modules/reference/reference.module';
 import { PengajuanPerbaikanModule } from './modules/pengajuan-perbaikan/pengajuan-perbaikan.module';
 import { PengaturanUmumModule } from './modules/pengaturan-umum/pengaturan-umum.module';
+import { MutasiPdModule } from './modules/mutasi-pd/mutasi-pd.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { PengaturanUmumModule } from './modules/pengaturan-umum/pengaturan-umum.
     ReferenceModule,
     PengajuanPerbaikanModule,
     PengaturanUmumModule,
+    MutasiPdModule,
   ],
 
 

@@ -217,7 +217,8 @@ export class AuthService {
       sub: user.pengguna_id, 
       email: user.email, 
       role: role,
-      sekolahId: user.sekolah_id 
+      sekolahId: user.sekolah_id,
+      ptkId: user.ptk_id
     };
 
     const accessToken = this.jwtService.sign(payload, {

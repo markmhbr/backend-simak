@@ -153,4 +153,13 @@ export class PresensiController {
   ) {
     return this.presensiService.getRekapPeriodik(sekolahId, rombel, tanggalMulai, tanggalSelesai, tipe || 'pd');
   }
+
+  @Patch('gtk-mode/:sekolahId/:ptkId')
+  updateGtkMode(
+    @Param('sekolahId') sekolahId: string,
+    @Param('ptkId') ptkId: string,
+    @Body() data: { mode_presensi: number },
+  ) {
+    return this.presensiService.updateGtkMode(sekolahId, ptkId, data.mode_presensi);
+  }
 }
