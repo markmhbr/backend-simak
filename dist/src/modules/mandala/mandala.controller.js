@@ -481,14 +481,20 @@ let MandalaController = class MandalaController {
             throw new common_1.UnauthorizedException('Invalid user token.');
         }
         const cadisdikId = user.cadisdik_id;
-        const pegawaiId = user.sub;
         if (!cadisdikId) {
             throw new common_1.BadRequestException('cadisdik_id is missing from token.');
         }
         if (!body.sekolah_id || !body.tanggal_mulai || !body.tanggal_selesai || !body.agenda) {
             throw new common_1.BadRequestException('sekolah_id, tanggal_mulai, tanggal_selesai, and agenda are required.');
         }
-        const data = await this.mandalaService.createJadwalMonitoring(cadisdikId, pegawaiId, body);
+        let targetPegawaiId = user.sub;
+        const isPengawas = user.role === 'Mandala Pegawai' || Number(user.jabatan) === 6;
+        if (!isPengawas) {
+            if (body.pegawai_id) {
+                targetPegawaiId = body.pegawai_id;
+            }
+        }
+        const data = await this.mandalaService.createJadwalMonitoring(cadisdikId, targetPegawaiId, body);
         return {
             status: 'success',
             message: 'Jadwal monitoring berhasil dibuat',
