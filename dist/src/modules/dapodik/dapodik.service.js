@@ -2776,7 +2776,7 @@ let DapodikService = class DapodikService {
                 anggota_rombel: {
                     where: {
                         rombongan_belajar: {
-                            jenis_rombel: 1,
+                            jenis_rombel: { in: [1, 51] },
                         }
                     },
                     select: {
@@ -2785,6 +2785,7 @@ let DapodikService = class DapodikService {
                                 nama: true,
                                 tingkat_pendidikan_id: true,
                                 semester_id: true,
+                                jenis_rombel: true,
                             }
                         }
                     }

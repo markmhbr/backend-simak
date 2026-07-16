@@ -1696,6 +1696,140 @@ let MandalaService = MandalaService_1 = class MandalaService {
         }
         return createdRoles;
     }
+    async getSekolahBinaan(pegawaiId, cadisdikId) {
+        return await this.prisma.sekolah.findMany({
+            where: {
+                cadisdik_id: cadisdikId,
+                mapping_pengawas: {
+                    some: {
+                        pegawai_id: pegawaiId,
+                    },
+                },
+            },
+            select: {
+                sekolah_id: true,
+                nama: true,
+                npsn: true,
+            },
+        });
+    }
+    async getJadwalMonitoring(cadisdikId, query) {
+        const where = {
+            cadisdik_id: cadisdikId,
+        };
+        if (query.pegawai_id) {
+            where.pegawai_id = query.pegawai_id;
+        }
+        if (query.sekolah_id) {
+            where.sekolah_id = query.sekolah_id;
+        }
+        if (query.start_date || query.end_date) {
+            if (query.start_date && query.end_date) {
+                where.AND = [
+                    { tanggal_mulai: { gte: new Date(query.start_date) } },
+                    { tanggal_selesai: { lte: new Date(query.end_date) } }
+                ];
+            }
+            else if (query.start_date) {
+                where.tanggal_mulai = { gte: new Date(query.start_date) };
+            }
+            else if (query.end_date) {
+                where.tanggal_selesai = { lte: new Date(query.end_date) };
+            }
+        }
+        const data = await this.prisma.jadwalMonitoring.findMany({
+            where,
+            include: {
+                sekolah: {
+                    select: {
+                        nama: true,
+                        npsn: true,
+                    },
+                },
+                pegawai: {
+                    select: {
+                        nama_lengkap: true,
+                        nip: true,
+                    },
+                },
+            },
+            orderBy: { tanggal_mulai: 'asc' },
+        });
+        return data.map(item => ({
+            ...item,
+            tanggal_mulai: item.tanggal_mulai.toISOString().split('T')[0],
+            tanggal_selesai: item.tanggal_selesai.toISOString().split('T')[0],
+        }));
+    }
+    async createJadwalMonitoring(cadisdikId, pegawaiId, body) {
+        const created = await this.prisma.jadwalMonitoring.create({
+            data: {
+                cadisdik_id: cadisdikId,
+                pegawai_id: pegawaiId,
+                sekolah_id: body.sekolah_id,
+                tanggal_mulai: new Date(body.tanggal_mulai),
+                tanggal_selesai: new Date(body.tanggal_selesai),
+                agenda: body.agenda,
+                keterangan: body.keterangan || null,
+                status: 'scheduled',
+            },
+        });
+        return {
+            ...created,
+            tanggal_mulai: created.tanggal_mulai.toISOString().split('T')[0],
+            tanggal_selesai: created.tanggal_selesai.toISOString().split('T')[0],
+        };
+    }
+    async updateJadwalMonitoring(id, cadisdikId, user, body) {
+        const existing = await this.prisma.jadwalMonitoring.findFirst({
+            where: {
+                jadwal_monitoring_id: id,
+                cadisdik_id: cadisdikId,
+            },
+        });
+        if (!existing) {
+            throw new common_1.NotFoundException('Jadwal monitoring tidak ditemukan.');
+        }
+        const isPengawas = user.role === 'Mandala Pegawai' || Number(user.jabatan) === 6;
+        if (isPengawas && existing.pegawai_id !== user.sub) {
+            throw new common_1.ForbiddenException('Anda tidak berhak mengubah jadwal ini.');
+        }
+        const updateData = {};
+        if (body.sekolah_id !== undefined)
+            updateData.sekolah_id = body.sekolah_id;
+        if (body.tanggal_mulai !== undefined)
+            updateData.tanggal_mulai = new Date(body.tanggal_mulai);
+        if (body.tanggal_selesai !== undefined)
+            updateData.tanggal_selesai = new Date(body.tanggal_selesai);
+        if (body.agenda !== undefined)
+            updateData.agenda = body.agenda;
+        if (body.keterangan !== undefined)
+            updateData.keterangan = body.keterangan;
+        if (body.status !== undefined)
+            updateData.status = body.status;
+        return await this.prisma.jadwalMonitoring.update({
+            where: { jadwal_monitoring_id: id },
+            data: updateData,
+        });
+    }
+    async deleteJadwalMonitoring(id, cadisdikId, user) {
+        const existing = await this.prisma.jadwalMonitoring.findFirst({
+            where: {
+                jadwal_monitoring_id: id,
+                cadisdik_id: cadisdikId,
+            },
+        });
+        if (!existing) {
+            throw new common_1.NotFoundException('Jadwal monitoring tidak ditemukan.');
+        }
+        const isPengawas = user.role === 'Mandala Pegawai' || Number(user.jabatan) === 6;
+        if (isPengawas && existing.pegawai_id !== user.sub) {
+            throw new common_1.ForbiddenException('Anda tidak berhak menghapus jadwal ini.');
+        }
+        return await this.prisma.jadwalMonitoring.delete({
+            where: { jadwal_monitoring_id: id },
+        });
+    }
 };
 exports.MandalaService = MandalaService;
 exports.MandalaService = MandalaService = MandalaService_1 = __decorate([

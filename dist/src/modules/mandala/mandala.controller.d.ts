@@ -818,4 +818,61 @@ export declare class MandalaController {
         message: string;
         data: any[];
     }>;
+    getSekolahBinaan(req: any): Promise<{
+        status: string;
+        data: {
+            sekolah_id: string;
+            nama: string;
+            npsn: string;
+        }[];
+    }>;
+    getJadwalMonitoring(req: any, startDate?: string, endDate?: string, sekolahId?: string, pegawaiId?: string): Promise<{
+        status: string;
+        data: {
+            tanggal_mulai: string;
+            tanggal_selesai: string;
+            sekolah: {
+                nama: string;
+                npsn: string;
+            };
+            pegawai: {
+                nama_lengkap: string;
+                nip: string;
+            };
+            sekolah_id: string;
+            created_at: Date;
+            updated_at: Date;
+            cadisdik_id: string;
+            pegawai_id: string;
+            status: string;
+            keterangan: string | null;
+            jadwal_monitoring_id: string;
+            agenda: string;
+        }[];
+    }>;
+    createJadwalMonitoring(req: any, body: any): Promise<{
+        status: string;
+        message: string;
+        data: {
+            tanggal_mulai: string;
+            tanggal_selesai: string;
+            sekolah_id: string;
+            created_at: Date;
+            updated_at: Date;
+            cadisdik_id: string;
+            pegawai_id: string;
+            status: string;
+            keterangan: string | null;
+            jadwal_monitoring_id: string;
+            agenda: string;
+        };
+    }>;
+    updateJadwalMonitoring(req: any, id: string, body: any): Promise<{
+        status: string;
+        message: string;
+    }>;
+    deleteJadwalMonitoring(req: any, id: string): Promise<{
+        status: string;
+        message: string;
+    }>;
 }

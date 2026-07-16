@@ -82,6 +82,7 @@ model Sekolah {
   pengaturan_umum        PengaturanUmum?
   anak                   Anak[]
   mutasi_pd              MutasiPd[]
+  jadwal_monitoring      JadwalMonitoring[]
 
   @@map("sekolah")
   @@schema("dapodik")
@@ -1112,6 +1113,7 @@ model Cadisdik {
   mandala_surat_masuk      MandalaSuratMasuk[]
   mandala_surat_keluar     MandalaSuratKeluar[]
   system_setting           SystemSetting?
+  jadwal_monitoring        JadwalMonitoring[]
 
   @@map("cadisdik")
   @@schema("mandala")
@@ -1246,12 +1248,37 @@ model Pegawai {
   cadisdik               Cadisdik               @relation(fields: [cadisdik_id], references: [cadisdik_id])
   permohonan_layanan_log PermohonanLayananLog[]
   mandala_surat_keluar   MandalaSuratKeluar[]
+  jadwal_monitoring      JadwalMonitoring[]
 
   @@index([cadisdik_id])
   @@index([nik])
   @@index([nip])
   @@index([email])
   @@map("pegawai")
+  @@schema("mandala")
+}
+
+model JadwalMonitoring {
+  jadwal_monitoring_id String   @id @default(uuid()) @db.Uuid
+  cadisdik_id          String   @db.Uuid
+  pegawai_id           String   @db.Uuid
+  sekolah_id           String   @db.Uuid
+  tanggal_mulai        DateTime @db.Timestamptz(6)
+  tanggal_selesai      DateTime @db.Timestamptz(6)
+  agenda               String   @db.Text
+  keterangan           String?  @db.Text
+  status               String   @default("scheduled") @db.VarChar(20)
+  created_at           DateTime @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  cadisdik             Cadisdik @relation(fields: [cadisdik_id], references: [cadisdik_id], onDelete: Cascade)
+  pegawai              Pegawai  @relation(fields: [pegawai_id], references: [pegawai_id], onDelete: Cascade)
+  sekolah              Sekolah  @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
+
+  @@index([cadisdik_id])
+  @@index([pegawai_id])
+  @@index([sekolah_id])
+  @@map("jadwal_monitoring")
   @@schema("mandala")
 }
 

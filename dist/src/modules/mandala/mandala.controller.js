@@ -434,6 +434,97 @@ let MandalaController = class MandalaController {
             data: result,
         };
     }
+    async getSekolahBinaan(req) {
+        const user = req['user'];
+        if (!user || !user.sub) {
+            throw new common_1.UnauthorizedException('Invalid user token.');
+        }
+        const pegawaiId = user.sub;
+        const cadisdikId = user.cadisdik_id;
+        if (!cadisdikId) {
+            throw new common_1.BadRequestException('cadisdik_id is missing from token.');
+        }
+        const data = await this.mandalaService.getSekolahBinaan(pegawaiId, cadisdikId);
+        return {
+            status: 'success',
+            data,
+        };
+    }
+    async getJadwalMonitoring(req, startDate, endDate, sekolahId, pegawaiId) {
+        const user = req['user'];
+        if (!user || !user.sub) {
+            throw new common_1.UnauthorizedException('Invalid user token.');
+        }
+        const cadisdikId = user.cadisdik_id;
+        if (!cadisdikId) {
+            throw new common_1.BadRequestException('cadisdik_id is missing from token.');
+        }
+        let targetPegawaiId = pegawaiId;
+        const isPengawas = user.role === 'Mandala Pegawai' || Number(user.jabatan) === 6;
+        if (isPengawas) {
+            targetPegawaiId = user.sub;
+        }
+        const data = await this.mandalaService.getJadwalMonitoring(cadisdikId, {
+            start_date: startDate,
+            end_date: endDate,
+            sekolah_id: sekolahId,
+            pegawai_id: targetPegawaiId,
+        });
+        return {
+            status: 'success',
+            data,
+        };
+    }
+    async createJadwalMonitoring(req, body) {
+        const user = req['user'];
+        if (!user || !user.sub) {
+            throw new common_1.UnauthorizedException('Invalid user token.');
+        }
+        const cadisdikId = user.cadisdik_id;
+        const pegawaiId = user.sub;
+        if (!cadisdikId) {
+            throw new common_1.BadRequestException('cadisdik_id is missing from token.');
+        }
+        if (!body.sekolah_id || !body.tanggal_mulai || !body.tanggal_selesai || !body.agenda) {
+            throw new common_1.BadRequestException('sekolah_id, tanggal_mulai, tanggal_selesai, and agenda are required.');
+        }
+        const data = await this.mandalaService.createJadwalMonitoring(cadisdikId, pegawaiId, body);
+        return {
+            status: 'success',
+            message: 'Jadwal monitoring berhasil dibuat',
+            data,
+        };
+    }
+    async updateJadwalMonitoring(req, id, body) {
+        const user = req['user'];
+        if (!user || !user.sub) {
+            throw new common_1.UnauthorizedException('Invalid user token.');
+        }
+        const cadisdikId = user.cadisdik_id;
+        if (!cadisdikId) {
+            throw new common_1.BadRequestException('cadisdik_id is missing from token.');
+        }
+        await this.mandalaService.updateJadwalMonitoring(id, cadisdikId, user, body);
+        return {
+            status: 'success',
+            message: 'Jadwal monitoring berhasil diperbarui',
+        };
+    }
+    async deleteJadwalMonitoring(req, id) {
+        const user = req['user'];
+        if (!user || !user.sub) {
+            throw new common_1.UnauthorizedException('Invalid user token.');
+        }
+        const cadisdikId = user.cadisdik_id;
+        if (!cadisdikId) {
+            throw new common_1.BadRequestException('cadisdik_id is missing from token.');
+        }
+        await this.mandalaService.deleteJadwalMonitoring(id, cadisdikId, user);
+        return {
+            status: 'success',
+            message: 'Jadwal monitoring berhasil dihapus',
+        };
+    }
 };
 exports.MandalaController = MandalaController;
 __decorate([
@@ -810,6 +901,54 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], MandalaController.prototype, "updateMenuRoles", null);
+__decorate([
+    (0, common_1.Get)('pengawas/sekolah-binaan'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "getSekolahBinaan", null);
+__decorate([
+    (0, common_1.Get)('monitoring/jadwal'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('start_date')),
+    __param(2, (0, common_1.Query)('end_date')),
+    __param(3, (0, common_1.Query)('sekolah_id')),
+    __param(4, (0, common_1.Query)('pegawai_id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String, String, String]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "getJadwalMonitoring", null);
+__decorate([
+    (0, common_1.Post)('monitoring/jadwal'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "createJadwalMonitoring", null);
+__decorate([
+    (0, common_1.Patch)('monitoring/jadwal/:id'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, Object]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "updateJadwalMonitoring", null);
+__decorate([
+    (0, common_1.Delete)('monitoring/jadwal/:id'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "deleteJadwalMonitoring", null);
 exports.MandalaController = MandalaController = __decorate([
     (0, common_1.Controller)('mandala'),
     __metadata("design:paramtypes", [mandala_service_1.MandalaService])

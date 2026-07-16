@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, UseGuards, HttpStatus, HttpCode, NotFoundException, Query, BadRequestException, Patch, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, HttpStatus, HttpCode, NotFoundException, Query, BadRequestException, Patch, Delete, Req, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { MandalaService } from './mandala.service';
 import { MandalaKeyGuard } from '../../core/mandala/mandala-key.guard';
 
@@ -598,4 +598,131 @@ export class MandalaController {
       data: result,
     };
   }
+
+  // --- MONITORING ENDPOINTS ---
+
+  @Get('pengawas/sekolah-binaan')
+  @UseGuards(MandalaKeyGuard)
+  async getSekolahBinaan(@Req() req: any) {
+    const user = req['user'];
+    if (!user || !user.sub) {
+      throw new UnauthorizedException('Invalid user token.');
+    }
+    const pegawaiId = user.sub;
+    const cadisdikId = user.cadisdik_id;
+    if (!cadisdikId) {
+      throw new BadRequestException('cadisdik_id is missing from token.');
+    }
+
+    const data = await this.mandalaService.getSekolahBinaan(pegawaiId, cadisdikId);
+    return {
+      status: 'success',
+      data,
+    };
+  }
+
+  @Get('monitoring/jadwal')
+  @UseGuards(MandalaKeyGuard)
+  async getJadwalMonitoring(
+    @Req() req: any,
+    @Query('start_date') startDate?: string,
+    @Query('end_date') endDate?: string,
+    @Query('sekolah_id') sekolahId?: string,
+    @Query('pegawai_id') pegawaiId?: string,
+  ) {
+    const user = req['user'];
+    if (!user || !user.sub) {
+      throw new UnauthorizedException('Invalid user token.');
+    }
+    const cadisdikId = user.cadisdik_id;
+    if (!cadisdikId) {
+      throw new BadRequestException('cadisdik_id is missing from token.');
+    }
+
+    let targetPegawaiId = pegawaiId;
+    const isPengawas = user.role === 'Mandala Pegawai' || Number(user.jabatan) === 6;
+    if (isPengawas) {
+      targetPegawaiId = user.sub;
+    }
+
+    const data = await this.mandalaService.getJadwalMonitoring(cadisdikId, {
+      start_date: startDate,
+      end_date: endDate,
+      sekolah_id: sekolahId,
+      pegawai_id: targetPegawaiId,
+    });
+
+    return {
+      status: 'success',
+      data,
+    };
+  }
+
+  @Post('monitoring/jadwal')
+  @UseGuards(MandalaKeyGuard)
+  async createJadwalMonitoring(@Req() req: any, @Body() body: any) {
+    const user = req['user'];
+    if (!user || !user.sub) {
+      throw new UnauthorizedException('Invalid user token.');
+    }
+    const cadisdikId = user.cadisdik_id;
+    const pegawaiId = user.sub;
+    if (!cadisdikId) {
+      throw new BadRequestException('cadisdik_id is missing from token.');
+    }
+
+    if (!body.sekolah_id || !body.tanggal_mulai || !body.tanggal_selesai || !body.agenda) {
+      throw new BadRequestException('sekolah_id, tanggal_mulai, tanggal_selesai, and agenda are required.');
+    }
+
+    const data = await this.mandalaService.createJadwalMonitoring(cadisdikId, pegawaiId, body);
+    return {
+      status: 'success',
+      message: 'Jadwal monitoring berhasil dibuat',
+      data,
+    };
+  }
+
+  @Patch('monitoring/jadwal/:id')
+  @UseGuards(MandalaKeyGuard)
+  async updateJadwalMonitoring(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() body: any,
+  ) {
+    const user = req['user'];
+    if (!user || !user.sub) {
+      throw new UnauthorizedException('Invalid user token.');
+    }
+    const cadisdikId = user.cadisdik_id;
+    if (!cadisdikId) {
+      throw new BadRequestException('cadisdik_id is missing from token.');
+    }
+
+    await this.mandalaService.updateJadwalMonitoring(id, cadisdikId, user, body);
+    return {
+      status: 'success',
+      message: 'Jadwal monitoring berhasil diperbarui',
+    };
+  }
+
+  @Delete('monitoring/jadwal/:id')
+  @UseGuards(MandalaKeyGuard)
+  async deleteJadwalMonitoring(@Req() req: any, @Param('id') id: string) {
+    const user = req['user'];
+    if (!user || !user.sub) {
+      throw new UnauthorizedException('Invalid user token.');
+    }
+    const cadisdikId = user.cadisdik_id;
+    if (!cadisdikId) {
+      throw new BadRequestException('cadisdik_id is missing from token.');
+    }
+
+    await this.mandalaService.deleteJadwalMonitoring(id, cadisdikId, user);
+    return {
+      status: 'success',
+      message: 'Jadwal monitoring berhasil dihapus',
+    };
+  }
 }
+

@@ -769,4 +769,80 @@ export declare class MandalaService implements OnModuleInit {
         jabatan_nama?: string;
         jenis_jabatan_id?: string;
     }>): Promise<any[]>;
+    getSekolahBinaan(pegawaiId: string, cadisdikId: string): Promise<{
+        sekolah_id: string;
+        nama: string;
+        npsn: string;
+    }[]>;
+    getJadwalMonitoring(cadisdikId: string, query: {
+        start_date?: string;
+        end_date?: string;
+        sekolah_id?: string;
+        pegawai_id?: string;
+    }): Promise<{
+        tanggal_mulai: string;
+        tanggal_selesai: string;
+        sekolah: {
+            nama: string;
+            npsn: string;
+        };
+        pegawai: {
+            nama_lengkap: string;
+            nip: string;
+        };
+        sekolah_id: string;
+        created_at: Date;
+        updated_at: Date;
+        cadisdik_id: string;
+        pegawai_id: string;
+        status: string;
+        keterangan: string | null;
+        jadwal_monitoring_id: string;
+        agenda: string;
+    }[]>;
+    createJadwalMonitoring(cadisdikId: string, pegawaiId: string, body: {
+        sekolah_id: string;
+        tanggal_mulai: string;
+        tanggal_selesai: string;
+        agenda: string;
+        keterangan?: string;
+    }): Promise<{
+        tanggal_mulai: string;
+        tanggal_selesai: string;
+        sekolah_id: string;
+        created_at: Date;
+        updated_at: Date;
+        cadisdik_id: string;
+        pegawai_id: string;
+        status: string;
+        keterangan: string | null;
+        jadwal_monitoring_id: string;
+        agenda: string;
+    }>;
+    updateJadwalMonitoring(id: string, cadisdikId: string, user: any, body: any): Promise<{
+        sekolah_id: string;
+        created_at: Date;
+        updated_at: Date;
+        cadisdik_id: string;
+        pegawai_id: string;
+        status: string;
+        keterangan: string | null;
+        tanggal_mulai: Date;
+        tanggal_selesai: Date;
+        jadwal_monitoring_id: string;
+        agenda: string;
+    }>;
+    deleteJadwalMonitoring(id: string, cadisdikId: string, user: any): Promise<{
+        sekolah_id: string;
+        created_at: Date;
+        updated_at: Date;
+        cadisdik_id: string;
+        pegawai_id: string;
+        status: string;
+        keterangan: string | null;
+        tanggal_mulai: Date;
+        tanggal_selesai: Date;
+        jadwal_monitoring_id: string;
+        agenda: string;
+    }>;
 }
