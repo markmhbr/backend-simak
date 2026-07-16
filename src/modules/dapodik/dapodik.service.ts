@@ -707,13 +707,30 @@ export class DapodikService {
     }
 
     const destDir = path.join(process.cwd(), 'storage', sekolahId, 'gtk', uuidGtk);
-    const fileName = 'tanda_tangan'; // sharp helper will append .jpg automatically
+    const fs = require('fs');
+    
+    // Hapus tanda tangan lama untuk menghemat penyimpanan
+    if (fs.existsSync(destDir)) {
+      try {
+        const files = fs.readdirSync(destDir);
+        for (const f of files) {
+          if (f.startsWith('tanda_tangan')) {
+            fs.unlinkSync(path.join(destDir, f));
+          }
+        }
+      } catch (err) {
+        console.error('Gagal membersihkan tanda tangan lama:', err);
+      }
+    }
+
+    const timestamp = Date.now();
+    const fileName = `tanda_tangan_${timestamp}`; // sharp helper will append .jpg automatically
 
     // Kompres & Simpan foto tanda tangan
     const savedPath = await compressAndSaveImage(file.buffer, destDir, fileName);
 
     // Path yang disimpan di DB (untuk diakses web client)
-    const relativePath = `/storage/${sekolahId}/gtk/${uuidGtk}/tanda_tangan.jpg`;
+    const relativePath = `/storage/${sekolahId}/gtk/${uuidGtk}/tanda_tangan_${timestamp}.jpg`;
 
     await this.prisma.gtk.update({
       where: { ptk_id: uuidGtk },
@@ -729,7 +746,7 @@ export class DapodikService {
   async uploadSiswaDokumen(sekolahId: string, uuidSiswa: string, file: Express.Multer.File, docName: string) {
     const fs = require('fs');
     const path = require('path');
-    const { compressAndSaveImage, saveDocument } = require('../../common/utils/upload.util');
+    const { saveDocument } = require('../../common/utils/upload.util');
 
     const siswa = await this.prisma.pesertaDidik.findFirst({
       where: { peserta_didik_id: uuidSiswa, sekolah_id: sekolahId }
@@ -783,7 +800,7 @@ export class DapodikService {
   async uploadGtkDokumen(sekolahId: string, uuidGtk: string, file: Express.Multer.File, docName: string) {
     const fs = require('fs');
     const path = require('path');
-    const { compressAndSaveImage, saveDocument } = require('../../common/utils/upload.util');
+    const { saveDocument } = require('../../common/utils/upload.util');
 
     const gtk = await this.prisma.gtk.findFirst({
       where: { ptk_id: uuidGtk, sekolah_id: sekolahId }

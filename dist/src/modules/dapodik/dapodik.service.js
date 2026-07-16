@@ -632,9 +632,24 @@ let DapodikService = class DapodikService {
             throw new Error('GTK tidak ditemukan atau tidak terdaftar di sekolah Anda.');
         }
         const destDir = path.join(process.cwd(), 'storage', sekolahId, 'gtk', uuidGtk);
-        const fileName = 'tanda_tangan';
+        const fs = require('fs');
+        if (fs.existsSync(destDir)) {
+            try {
+                const files = fs.readdirSync(destDir);
+                for (const f of files) {
+                    if (f.startsWith('tanda_tangan')) {
+                        fs.unlinkSync(path.join(destDir, f));
+                    }
+                }
+            }
+            catch (err) {
+                console.error('Gagal membersihkan tanda tangan lama:', err);
+            }
+        }
+        const timestamp = Date.now();
+        const fileName = `tanda_tangan_${timestamp}`;
         const savedPath = await compressAndSaveImage(file.buffer, destDir, fileName);
-        const relativePath = `/storage/${sekolahId}/gtk/${uuidGtk}/tanda_tangan.jpg`;
+        const relativePath = `/storage/${sekolahId}/gtk/${uuidGtk}/tanda_tangan_${timestamp}.jpg`;
         await this.prisma.gtk.update({
             where: { ptk_id: uuidGtk },
             data: { tanda_tangan: relativePath }
@@ -647,7 +662,7 @@ let DapodikService = class DapodikService {
     async uploadSiswaDokumen(sekolahId, uuidSiswa, file, docName) {
         const fs = require('fs');
         const path = require('path');
-        const { compressAndSaveImage, saveDocument } = require('../../common/utils/upload.util');
+        const { saveDocument } = require('../../common/utils/upload.util');
         const siswa = await this.prisma.pesertaDidik.findFirst({
             where: { peserta_didik_id: uuidSiswa, sekolah_id: sekolahId }
         });
@@ -689,7 +704,7 @@ let DapodikService = class DapodikService {
     async uploadGtkDokumen(sekolahId, uuidGtk, file, docName) {
         const fs = require('fs');
         const path = require('path');
-        const { compressAndSaveImage, saveDocument } = require('../../common/utils/upload.util');
+        const { saveDocument } = require('../../common/utils/upload.util');
         const gtk = await this.prisma.gtk.findFirst({
             where: { ptk_id: uuidGtk, sekolah_id: sekolahId }
         });
