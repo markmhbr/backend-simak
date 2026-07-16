@@ -815,9 +815,11 @@ export declare class DapodikController {
         status: string;
         data: {
             gtk: any;
+            jurusan_id: string;
             ptk_id: string;
             ptk_terdaftar_id: string;
             pembelajaran_id: string;
+            mata_pelajaran_id: number;
             jam_mengajar_per_minggu: import("@prisma/client-runtime-utils").Decimal;
             nama_mata_pelajaran: string;
         }[];

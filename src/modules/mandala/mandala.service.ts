@@ -1950,7 +1950,7 @@ export class MandalaService implements OnModuleInit {
       throw new NotFoundException('Jadwal monitoring tidak ditemukan.');
     }
 
-    const isPengawas = user.role === 'Mandala Pegawai' || Number(user.jabatan) === 6;
+    const isPengawas = Number(user.jabatan) === 6;
     if (isPengawas && existing.pegawai_id !== user.sub) {
       throw new ForbiddenException('Anda tidak berhak mengubah jadwal ini.');
     }
@@ -1981,7 +1981,7 @@ export class MandalaService implements OnModuleInit {
       throw new NotFoundException('Jadwal monitoring tidak ditemukan.');
     }
 
-    const isPengawas = user.role === 'Mandala Pegawai' || Number(user.jabatan) === 6;
+    const isPengawas = Number(user.jabatan) === 6;
     if (isPengawas && existing.pegawai_id !== user.sub) {
       throw new ForbiddenException('Anda tidak berhak menghapus jadwal ini.');
     }

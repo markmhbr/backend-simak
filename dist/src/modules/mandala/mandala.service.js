@@ -1790,7 +1790,7 @@ let MandalaService = MandalaService_1 = class MandalaService {
         if (!existing) {
             throw new common_1.NotFoundException('Jadwal monitoring tidak ditemukan.');
         }
-        const isPengawas = user.role === 'Mandala Pegawai' || Number(user.jabatan) === 6;
+        const isPengawas = Number(user.jabatan) === 6;
         if (isPengawas && existing.pegawai_id !== user.sub) {
             throw new common_1.ForbiddenException('Anda tidak berhak mengubah jadwal ini.');
         }
@@ -1822,7 +1822,7 @@ let MandalaService = MandalaService_1 = class MandalaService {
         if (!existing) {
             throw new common_1.NotFoundException('Jadwal monitoring tidak ditemukan.');
         }
-        const isPengawas = user.role === 'Mandala Pegawai' || Number(user.jabatan) === 6;
+        const isPengawas = Number(user.jabatan) === 6;
         if (isPengawas && existing.pegawai_id !== user.sub) {
             throw new common_1.ForbiddenException('Anda tidak berhak menghapus jadwal ini.');
         }

@@ -640,7 +640,7 @@ export class MandalaController {
     }
 
     let targetPegawaiId = pegawaiId;
-    const isPengawas = user.role === 'Mandala Pegawai' || Number(user.jabatan) === 6;
+    const isPengawas = Number(user.jabatan) === 6;
     if (isPengawas) {
       targetPegawaiId = user.sub;
     }
@@ -675,7 +675,7 @@ export class MandalaController {
     }
 
     let targetPegawaiId = user.sub;
-    const isPengawas = user.role === 'Mandala Pegawai' || Number(user.jabatan) === 6;
+    const isPengawas = Number(user.jabatan) === 6;
     if (!isPengawas) {
       if (body.pegawai_id) {
         targetPegawaiId = body.pegawai_id;

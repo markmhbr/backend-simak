@@ -2202,6 +2202,7 @@ export class DapodikService {
       where: { rombongan_belajar_id: { in: rombelIds } },
       select: {
         pembelajaran_id: true,
+        mata_pelajaran_id: true,
         nama_mata_pelajaran: true,
         jam_mengajar_per_minggu: true,
         ptk_id: true,
@@ -2220,6 +2221,24 @@ export class DapodikService {
       },
     });
 
+    // 5. Tarik info mata_pelajaran untuk menentukan jurusan_id secara in-memory
+    const matpelIds = pembelajarans
+      .map((p) => p.mata_pelajaran_id)
+      .filter((id): id is number => id !== null);
+
+    const matpels = await this.prisma.mata_pelajaran.findMany({
+      where: { mata_pelajaran_id: { in: matpelIds } },
+      select: {
+        mata_pelajaran_id: true,
+        jurusan_id: true,
+      },
+    });
+
+    const matpelMap = new Map<number, string | null>();
+    matpels.forEach((m) => {
+      matpelMap.set(m.mata_pelajaran_id, m.jurusan_id);
+    });
+
     const gtkMap = new Map<string, any>();
     gtks.forEach((g) => {
       if (g.ptk_terdaftar_id) {
@@ -2229,9 +2248,11 @@ export class DapodikService {
 
     return pembelajarans.map((p) => {
       const match = p.ptk_terdaftar_id ? gtkMap.get(p.ptk_terdaftar_id) : null;
+      const jurusanId = p.mata_pelajaran_id ? matpelMap.get(p.mata_pelajaran_id) : null;
       return {
         ...p,
         gtk: match || null,
+        jurusan_id: jurusanId || null,
       };
     });
   }

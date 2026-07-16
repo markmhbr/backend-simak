@@ -583,9 +583,11 @@ export declare class DapodikService {
     }[]>;
     getRombelPembelajaran(rombelId: string): Promise<{
         gtk: any;
+        jurusan_id: string;
         ptk_id: string;
         ptk_terdaftar_id: string;
         pembelajaran_id: string;
+        mata_pelajaran_id: number;
         jam_mengajar_per_minggu: Prisma.Decimal;
         nama_mata_pelajaran: string;
     }[]>;

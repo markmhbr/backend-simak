@@ -460,7 +460,7 @@ let MandalaController = class MandalaController {
             throw new common_1.BadRequestException('cadisdik_id is missing from token.');
         }
         let targetPegawaiId = pegawaiId;
-        const isPengawas = user.role === 'Mandala Pegawai' || Number(user.jabatan) === 6;
+        const isPengawas = Number(user.jabatan) === 6;
         if (isPengawas) {
             targetPegawaiId = user.sub;
         }
@@ -488,7 +488,7 @@ let MandalaController = class MandalaController {
             throw new common_1.BadRequestException('sekolah_id, tanggal_mulai, tanggal_selesai, and agenda are required.');
         }
         let targetPegawaiId = user.sub;
-        const isPengawas = user.role === 'Mandala Pegawai' || Number(user.jabatan) === 6;
+        const isPengawas = Number(user.jabatan) === 6;
         if (!isPengawas) {
             if (body.pegawai_id) {
                 targetPegawaiId = body.pegawai_id;
