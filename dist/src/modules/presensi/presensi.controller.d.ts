@@ -363,6 +363,7 @@ export declare class PresensiController {
             id_telegram: string | null;
             nama_kcp: string | null;
             mode_presensi: number;
+            tanda_tangan: string | null;
         };
     }>;
 }

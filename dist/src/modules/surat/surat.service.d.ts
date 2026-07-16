@@ -419,6 +419,7 @@ export declare class SuratService {
             id_telegram: string | null;
             nama_kcp: string | null;
             mode_presensi: number;
+            tanda_tangan: string | null;
         };
         template_surat: {
             sekolah_id: string;

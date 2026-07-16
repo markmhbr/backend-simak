@@ -149,6 +149,7 @@ export declare class PresensiService {
             id_telegram: string | null;
             nama_kcp: string | null;
             mode_presensi: number;
+            tanda_tangan: string | null;
         };
     }>;
     presensiGtk(sekolahId: string, data: {

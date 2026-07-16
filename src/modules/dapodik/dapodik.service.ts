@@ -522,13 +522,26 @@ export class DapodikService {
         sekolah_id: filter.sekolah_id,
         peran_nama: { contains: 'Kepala Sekolah', mode: 'insensitive' }
       },
-      select: { nama: true }
+      select: { nama: true, ptk_id: true }
     });
 
     let namaKepalaSekolah = kepalaSekolah?.nama || null;
+    let nipKepalaSekolah = null;
+    let tandaTanganKepalaSekolah = null;
+
+    if (kepalaSekolah && kepalaSekolah.ptk_id) {
+      const gtkKepsek = await this.prisma.gtk.findUnique({
+        where: { ptk_id: kepalaSekolah.ptk_id },
+        select: { nip: true, tanda_tangan: true }
+      });
+      if (gtkKepsek) {
+        nipKepalaSekolah = gtkKepsek.nip || null;
+        tandaTanganKepalaSekolah = gtkKepsek.tanda_tangan || null;
+      }
+    }
 
     // Fallback ke tabel GTK jika tidak ditemukan di pengguna
-    if (!namaKepalaSekolah) {
+    if (!namaKepalaSekolah || !nipKepalaSekolah || !tandaTanganKepalaSekolah) {
       const kepalaSekolahGtk = await this.prisma.gtk.findFirst({
         where: {
           AND: [
@@ -541,9 +554,13 @@ export class DapodikService {
             }
           ]
         },
-        select: { nama: true }
+        select: { nama: true, nip: true, tanda_tangan: true }
       });
-      namaKepalaSekolah = kepalaSekolahGtk?.nama || null;
+      if (kepalaSekolahGtk) {
+        if (!namaKepalaSekolah) namaKepalaSekolah = kepalaSekolahGtk.nama || null;
+        if (!nipKepalaSekolah) nipKepalaSekolah = kepalaSekolahGtk.nip || null;
+        if (!tandaTanganKepalaSekolah) tandaTanganKepalaSekolah = kepalaSekolahGtk.tanda_tangan || null;
+      }
     }
 
     // 2. Cari Operator Sekolah dari tabel pengguna
@@ -571,6 +588,8 @@ export class DapodikService {
       status_sekolah_str,
       logo: logoUrl,
       nama_kepala_sekolah: namaKepalaSekolah,
+      nip_kepala_sekolah: nipKepalaSekolah,
+      tanda_tangan_kepala_sekolah: tandaTanganKepalaSekolah,
       nama_operator: operatorSekolah?.nama || null
     };
   }
@@ -667,6 +686,38 @@ export class DapodikService {
     await this.prisma.gtk.update({
       where: { ptk_id: uuidGtk },
       data: { foto: relativePath }
+    });
+
+    return {
+      filePath: relativePath,
+      savedPath
+    };
+  }
+
+  async uploadGtkTandaTangan(sekolahId: string, uuidGtk: string, file: Express.Multer.File) {
+    const path = require('path');
+    const { compressAndSaveImage } = require('../../common/utils/upload.util');
+    
+    // Validasi GTK ada dan milik sekolah ini
+    const gtk = await this.prisma.gtk.findFirst({
+      where: { ptk_id: uuidGtk, sekolah_id: sekolahId }
+    });
+    if (!gtk) {
+      throw new Error('GTK tidak ditemukan atau tidak terdaftar di sekolah Anda.');
+    }
+
+    const destDir = path.join(process.cwd(), 'storage', sekolahId, 'gtk', uuidGtk);
+    const fileName = 'tanda_tangan'; // sharp helper will append .jpg automatically
+
+    // Kompres & Simpan foto tanda tangan
+    const savedPath = await compressAndSaveImage(file.buffer, destDir, fileName);
+
+    // Path yang disimpan di DB (untuk diakses web client)
+    const relativePath = `/storage/${sekolahId}/gtk/${uuidGtk}/tanda_tangan.jpg`;
+
+    await this.prisma.gtk.update({
+      where: { ptk_id: uuidGtk },
+      data: { tanda_tangan: relativePath }
     });
 
     return {
@@ -3124,6 +3175,7 @@ export class DapodikService {
             nama: true,
             tingkat_pendidikan_id: true,
             semester_id: true,
+            ptk_id: true,
           }
         },
         anggota_rombel: {
@@ -3140,6 +3192,7 @@ export class DapodikService {
                 tingkat_pendidikan_id: true,
                 semester_id: true,
                 jenis_rombel: true,
+                ptk_id: true,
               }
             }
           }

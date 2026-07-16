@@ -258,6 +258,8 @@ export declare class DapodikController {
             status_sekolah_str: any;
             logo: string;
             nama_kepala_sekolah: string;
+            nip_kepala_sekolah: any;
+            tanda_tangan_kepala_sekolah: any;
             nama_operator: string;
             sekolah_id: string;
             cadisdik_id: string | null;
@@ -425,6 +427,14 @@ export declare class DapodikController {
         };
     }>;
     uploadGtkFoto(req: Request, uuid: string, file: Express.Multer.File): Promise<{
+        status: string;
+        klien: any;
+        data: {
+            filePath: string;
+            savedPath: any;
+        };
+    }>;
+    uploadGtkTandaTangan(req: Request, uuid: string, file: Express.Multer.File): Promise<{
         status: string;
         klien: any;
         data: {
@@ -1034,6 +1044,7 @@ export declare class DapodikController {
             id_telegram: string | null;
             nama_kcp: string | null;
             mode_presensi: number;
+            tanda_tangan: string | null;
         };
     }>;
     createGtkAnak(req: Request, id: string, body: any): Promise<{

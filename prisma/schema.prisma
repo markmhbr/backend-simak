@@ -440,6 +440,7 @@ model Gtk {
   id_telegram   String?
   nama_kcp      String?
   mode_presensi Int     @default(0) @db.SmallInt
+  tanda_tangan  String?
 
   // --- Relations ---
   jenis_ptk                 jenis_ptk?                @relation(fields: [jenis_ptk_id], references: [jenis_ptk_id], onDelete: NoAction, onUpdate: NoAction)

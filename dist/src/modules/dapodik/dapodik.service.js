@@ -484,10 +484,22 @@ let DapodikService = class DapodikService {
                 sekolah_id: filter.sekolah_id,
                 peran_nama: { contains: 'Kepala Sekolah', mode: 'insensitive' }
             },
-            select: { nama: true }
+            select: { nama: true, ptk_id: true }
         });
         let namaKepalaSekolah = kepalaSekolah?.nama || null;
-        if (!namaKepalaSekolah) {
+        let nipKepalaSekolah = null;
+        let tandaTanganKepalaSekolah = null;
+        if (kepalaSekolah && kepalaSekolah.ptk_id) {
+            const gtkKepsek = await this.prisma.gtk.findUnique({
+                where: { ptk_id: kepalaSekolah.ptk_id },
+                select: { nip: true, tanda_tangan: true }
+            });
+            if (gtkKepsek) {
+                nipKepalaSekolah = gtkKepsek.nip || null;
+                tandaTanganKepalaSekolah = gtkKepsek.tanda_tangan || null;
+            }
+        }
+        if (!namaKepalaSekolah || !nipKepalaSekolah || !tandaTanganKepalaSekolah) {
             const kepalaSekolahGtk = await this.prisma.gtk.findFirst({
                 where: {
                     AND: [
@@ -500,9 +512,16 @@ let DapodikService = class DapodikService {
                         }
                     ]
                 },
-                select: { nama: true }
+                select: { nama: true, nip: true, tanda_tangan: true }
             });
-            namaKepalaSekolah = kepalaSekolahGtk?.nama || null;
+            if (kepalaSekolahGtk) {
+                if (!namaKepalaSekolah)
+                    namaKepalaSekolah = kepalaSekolahGtk.nama || null;
+                if (!nipKepalaSekolah)
+                    nipKepalaSekolah = kepalaSekolahGtk.nip || null;
+                if (!tandaTanganKepalaSekolah)
+                    tandaTanganKepalaSekolah = kepalaSekolahGtk.tanda_tangan || null;
+            }
         }
         const operatorSekolah = await this.prisma.pengguna.findFirst({
             where: {
@@ -526,6 +545,8 @@ let DapodikService = class DapodikService {
             status_sekolah_str,
             logo: logoUrl,
             nama_kepala_sekolah: namaKepalaSekolah,
+            nip_kepala_sekolah: nipKepalaSekolah,
+            tanda_tangan_kepala_sekolah: tandaTanganKepalaSekolah,
             nama_operator: operatorSekolah?.nama || null
         };
     }
@@ -595,6 +616,28 @@ let DapodikService = class DapodikService {
         await this.prisma.gtk.update({
             where: { ptk_id: uuidGtk },
             data: { foto: relativePath }
+        });
+        return {
+            filePath: relativePath,
+            savedPath
+        };
+    }
+    async uploadGtkTandaTangan(sekolahId, uuidGtk, file) {
+        const path = require('path');
+        const { compressAndSaveImage } = require('../../common/utils/upload.util');
+        const gtk = await this.prisma.gtk.findFirst({
+            where: { ptk_id: uuidGtk, sekolah_id: sekolahId }
+        });
+        if (!gtk) {
+            throw new Error('GTK tidak ditemukan atau tidak terdaftar di sekolah Anda.');
+        }
+        const destDir = path.join(process.cwd(), 'storage', sekolahId, 'gtk', uuidGtk);
+        const fileName = 'tanda_tangan';
+        const savedPath = await compressAndSaveImage(file.buffer, destDir, fileName);
+        const relativePath = `/storage/${sekolahId}/gtk/${uuidGtk}/tanda_tangan.jpg`;
+        await this.prisma.gtk.update({
+            where: { ptk_id: uuidGtk },
+            data: { tanda_tangan: relativePath }
         });
         return {
             filePath: relativePath,
@@ -2816,6 +2859,7 @@ let DapodikService = class DapodikService {
                         nama: true,
                         tingkat_pendidikan_id: true,
                         semester_id: true,
+                        ptk_id: true,
                     }
                 },
                 anggota_rombel: {
@@ -2832,6 +2876,7 @@ let DapodikService = class DapodikService {
                                 tingkat_pendidikan_id: true,
                                 semester_id: true,
                                 jenis_rombel: true,
+                                ptk_id: true,
                             }
                         }
                     }

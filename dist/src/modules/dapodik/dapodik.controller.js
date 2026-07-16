@@ -158,6 +158,23 @@ let DapodikController = class DapodikController {
             throw new common_1.BadRequestException(err.message);
         }
     }
+    async uploadGtkTandaTangan(req, uuid, file) {
+        if (!file) {
+            throw new common_1.BadRequestException('Berkas tanda tangan wajib disertakan.');
+        }
+        const { sekolahId, namaApp } = this.getSekolahInfo(req);
+        try {
+            const data = await this.dapodikService.uploadGtkTandaTangan(sekolahId, uuid, file);
+            return {
+                status: 'success',
+                klien: namaApp,
+                data,
+            };
+        }
+        catch (err) {
+            throw new common_1.BadRequestException(err.message);
+        }
+    }
     async uploadSiswaDokumen(req, uuid, namaDokumen, file) {
         if (!file) {
             throw new common_1.BadRequestException('Berkas dokumen wajib disertakan.');
@@ -671,6 +688,16 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Promise)
 ], DapodikController.prototype, "uploadGtkFoto", null);
+__decorate([
+    (0, common_1.Post)('gtk/:uuid/upload-tanda-tangan'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('uuid')),
+    __param(2, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, Object]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "uploadGtkTandaTangan", null);
 __decorate([
     (0, common_1.Post)('siswa/:uuid/upload-dokumen'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),

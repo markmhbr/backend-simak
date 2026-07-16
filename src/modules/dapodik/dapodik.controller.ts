@@ -181,6 +181,29 @@ export class DapodikController {
     }
   }
 
+  @Post('gtk/:uuid/upload-tanda-tangan')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadGtkTandaTangan(
+    @Req() req: Request, 
+    @Param('uuid') uuid: string, 
+    @UploadedFile() file: Express.Multer.File
+  ) {
+    if (!file) {
+      throw new BadRequestException('Berkas tanda tangan wajib disertakan.');
+    }
+    const { sekolahId, namaApp } = this.getSekolahInfo(req);
+    try {
+      const data = await this.dapodikService.uploadGtkTandaTangan(sekolahId, uuid, file);
+      return {
+        status: 'success',
+        klien: namaApp,
+        data,
+      };
+    } catch (err) {
+      throw new BadRequestException(err.message);
+    }
+  }
+
   @Post('siswa/:uuid/upload-dokumen')
   @UseInterceptors(FileInterceptor('file'))
   async uploadSiswaDokumen(

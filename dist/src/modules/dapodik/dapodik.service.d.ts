@@ -36,6 +36,8 @@ export declare class DapodikService {
         status_sekolah_str: any;
         logo: string;
         nama_kepala_sekolah: string;
+        nip_kepala_sekolah: any;
+        tanda_tangan_kepala_sekolah: any;
         nama_operator: string;
         sekolah_id: string;
         cadisdik_id: string | null;
@@ -190,6 +192,10 @@ export declare class DapodikService {
         savedPath: any;
     }>;
     uploadGtkFoto(sekolahId: string, uuidGtk: string, file: Express.Multer.File): Promise<{
+        filePath: string;
+        savedPath: any;
+    }>;
+    uploadGtkTandaTangan(sekolahId: string, uuidGtk: string, file: Express.Multer.File): Promise<{
         filePath: string;
         savedPath: any;
     }>;
@@ -826,6 +832,7 @@ export declare class DapodikService {
         id_telegram: string | null;
         nama_kcp: string | null;
         mode_presensi: number;
+        tanda_tangan: string | null;
     }>;
     getPesertaDidikById(sekolahId: string, id: string): Promise<any>;
     updatePesertaDidik(sekolahId: string, id: string, data: any): Promise<{
