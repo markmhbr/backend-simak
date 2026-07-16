@@ -1955,7 +1955,7 @@ let DapodikService = class DapodikService {
         }
         const rombel = await this.prisma.rombonganBelajar.findUnique({
             where: { rombongan_belajar_id: rombelId },
-            select: { nama: true, sekolah_id: true },
+            select: { nama: true, sekolah_id: true, kurikulum_id: true, tingkat_pendidikan_id: true },
         });
         if (!rombel)
             return [];
@@ -1998,6 +1998,24 @@ let DapodikService = class DapodikService {
                 jurusan_id: true,
             },
         });
+        let matpelKuris = [];
+        if (rombel.kurikulum_id) {
+            matpelKuris = await this.prisma.mata_pelajaran_kurikulum.findMany({
+                where: {
+                    kurikulum_id: rombel.kurikulum_id,
+                    mata_pelajaran_id: { in: matpelIds },
+                },
+                select: {
+                    mata_pelajaran_id: true,
+                    a_peminatan: true,
+                    area_kompetensi: true,
+                },
+            });
+        }
+        const matpelKuriMap = new Map();
+        matpelKuris.forEach((mk) => {
+            matpelKuriMap.set(mk.mata_pelajaran_id, mk);
+        });
         const matpelMap = new Map();
         matpels.forEach((m) => {
             matpelMap.set(m.mata_pelajaran_id, m.jurusan_id);
@@ -2010,7 +2028,16 @@ let DapodikService = class DapodikService {
         });
         return pembelajarans.map((p) => {
             const match = p.ptk_terdaftar_id ? gtkMap.get(p.ptk_terdaftar_id) : null;
-            const jurusanId = p.mata_pelajaran_id ? matpelMap.get(p.mata_pelajaran_id) : null;
+            let jurusanId = p.mata_pelajaran_id ? matpelMap.get(p.mata_pelajaran_id) : null;
+            if (!jurusanId && p.mata_pelajaran_id) {
+                const mkInfo = matpelKuriMap.get(p.mata_pelajaran_id);
+                if (mkInfo) {
+                    const aPeminatanNum = mkInfo.a_peminatan ? Number(mkInfo.a_peminatan) : 0;
+                    if (aPeminatanNum === 1 || mkInfo.area_kompetensi === 'P' || mkInfo.area_kompetensi === 'C') {
+                        jurusanId = 'KEJURUAN';
+                    }
+                }
+            }
             return {
                 ...p,
                 gtk: match || null,
@@ -2785,6 +2812,7 @@ let DapodikService = class DapodikService {
                 },
                 rombongan_belajar: {
                     select: {
+                        rombongan_belajar_id: true,
                         nama: true,
                         tingkat_pendidikan_id: true,
                         semester_id: true,
@@ -2799,6 +2827,7 @@ let DapodikService = class DapodikService {
                     select: {
                         rombongan_belajar: {
                             select: {
+                                rombongan_belajar_id: true,
                                 nama: true,
                                 tingkat_pendidikan_id: true,
                                 semester_id: true,

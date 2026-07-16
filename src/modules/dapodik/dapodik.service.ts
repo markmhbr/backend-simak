@@ -2180,7 +2180,7 @@ export class DapodikService {
     // 1. Cari dulu nama rombel ini
     const rombel = await this.prisma.rombonganBelajar.findUnique({
       where: { rombongan_belajar_id: rombelId },
-      select: { nama: true, sekolah_id: true },
+      select: { nama: true, sekolah_id: true, kurikulum_id: true, tingkat_pendidikan_id: true },
     });
 
     if (!rombel) return [];
@@ -2234,6 +2234,27 @@ export class DapodikService {
       },
     });
 
+    // Fetch mata_pelajaran_kurikulum mapping supporting classification
+    let matpelKuris: any[] = [];
+    if (rombel.kurikulum_id) {
+      matpelKuris = await this.prisma.mata_pelajaran_kurikulum.findMany({
+        where: {
+          kurikulum_id: rombel.kurikulum_id,
+          mata_pelajaran_id: { in: matpelIds },
+        },
+        select: {
+          mata_pelajaran_id: true,
+          a_peminatan: true,
+          area_kompetensi: true,
+        },
+      });
+    }
+
+    const matpelKuriMap = new Map<number, any>();
+    matpelKuris.forEach((mk) => {
+      matpelKuriMap.set(mk.mata_pelajaran_id, mk);
+    });
+
     const matpelMap = new Map<number, string | null>();
     matpels.forEach((m) => {
       matpelMap.set(m.mata_pelajaran_id, m.jurusan_id);
@@ -2248,7 +2269,19 @@ export class DapodikService {
 
     return pembelajarans.map((p) => {
       const match = p.ptk_terdaftar_id ? gtkMap.get(p.ptk_terdaftar_id) : null;
-      const jurusanId = p.mata_pelajaran_id ? matpelMap.get(p.mata_pelajaran_id) : null;
+      let jurusanId = p.mata_pelajaran_id ? matpelMap.get(p.mata_pelajaran_id) : null;
+
+      // Fallback: classify based on mata_pelajaran_kurikulum if database jurusan_id is null/empty
+      if (!jurusanId && p.mata_pelajaran_id) {
+        const mkInfo = matpelKuriMap.get(p.mata_pelajaran_id);
+        if (mkInfo) {
+          const aPeminatanNum = mkInfo.a_peminatan ? Number(mkInfo.a_peminatan) : 0;
+          if (aPeminatanNum === 1 || mkInfo.area_kompetensi === 'P' || mkInfo.area_kompetensi === 'C') {
+            jurusanId = 'KEJURUAN';
+          }
+        }
+      }
+
       return {
         ...p,
         gtk: match || null,
@@ -3087,6 +3120,7 @@ export class DapodikService {
         },
         rombongan_belajar: {
           select: {
+            rombongan_belajar_id: true,
             nama: true,
             tingkat_pendidikan_id: true,
             semester_id: true,
@@ -3101,6 +3135,7 @@ export class DapodikService {
           select: {
             rombongan_belajar: {
               select: {
+                rombongan_belajar_id: true,
                 nama: true,
                 tingkat_pendidikan_id: true,
                 semester_id: true,
