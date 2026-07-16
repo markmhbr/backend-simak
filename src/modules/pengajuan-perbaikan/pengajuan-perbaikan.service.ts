@@ -35,7 +35,6 @@ export class PengajuanPerbaikanService {
     const list = await this.prisma.pengajuanPerbaikan.findMany({
       where: {
         sekolah_id: sekolahId,
-        status: 'PENDING',
       },
       orderBy: {
         created_at: 'desc',
@@ -106,7 +105,7 @@ export class PengajuanPerbaikanService {
     return { status: 'success', message: 'Pengajuan disetujui, data diperbarui, dan status diubah menjadi APPROVED.' };
   }
 
-  async tolakPengajuan(sekolahId: string, id: string) {
+  async tolakPengajuan(sekolahId: string, id: string, alasanTolak?: string) {
     const pengajuan = await this.prisma.pengajuanPerbaikan.findFirst({
       where: { id, sekolah_id: sekolahId },
     });
@@ -117,7 +116,10 @@ export class PengajuanPerbaikanService {
 
     await this.prisma.pengajuanPerbaikan.update({
       where: { id },
-      data: { status: 'REJECTED' },
+      data: { 
+        status: 'REJECTED',
+        alasan_tolak: alasanTolak || null
+      },
     });
 
     return { status: 'success', message: 'Pengajuan ditolak dan status diubah menjadi REJECTED.' };

@@ -8,11 +8,11 @@ export declare class JadwalService {
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
+            tipe: number;
             urutan: number;
             jenis_jadwal_id: string;
             pengaturan_jadwal_id: string;
             hari: number;
-            tipe: number;
             durasi_menit: number;
         }[];
         pengaturan_hari: {
@@ -102,11 +102,11 @@ export declare class JadwalService {
         created_at: Date;
         updated_at: Date;
         aktif: boolean;
+        tipe: number;
         urutan: number;
         jenis_jadwal_id: string;
         pengaturan_jadwal_id: string;
         hari: number;
-        tipe: number;
         durasi_menit: number;
     }[]>;
     upsertPengaturanJadwal(sekolahId: string, data: {
@@ -121,11 +121,11 @@ export declare class JadwalService {
         created_at: Date;
         updated_at: Date;
         aktif: boolean;
+        tipe: number;
         urutan: number;
         jenis_jadwal_id: string;
         pengaturan_jadwal_id: string;
         hari: number;
-        tipe: number;
         durasi_menit: number;
     }>;
     deletePengaturanJadwal(sekolahId: string, pengaturanJadwalId: string): Promise<{
@@ -133,11 +133,11 @@ export declare class JadwalService {
         created_at: Date;
         updated_at: Date;
         aktif: boolean;
+        tipe: number;
         urutan: number;
         jenis_jadwal_id: string;
         pengaturan_jadwal_id: string;
         hari: number;
-        tipe: number;
         durasi_menit: number;
     }>;
     getJadwalPelajaran(sekolahId: string, jenisJadwalId: string, rombelId?: string): Promise<(({

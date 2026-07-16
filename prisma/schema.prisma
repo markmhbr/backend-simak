@@ -697,6 +697,7 @@ model PengajuanPerbaikan {
   tipe             String // "GTK" | "SISWA"
   perubahan        Json // Format: { [nama_field]: { sebelumnya: any, diajukan: any } }
   status           String   @default("PENDING") // "PENDING" | "APPROVED" | "REJECTED"
+  alasan_tolak     String?  @db.Text
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
 

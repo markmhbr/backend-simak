@@ -17,6 +17,7 @@ export declare class PengajuanPerbaikanService {
         status: string;
         tipe: string;
         perubahan: import("@prisma/client/runtime/client").JsonValue;
+        alasan_tolak: string | null;
     }>;
     dapatkanDaftar(sekolahId: string): Promise<{
         nama: string;
@@ -29,12 +30,13 @@ export declare class PengajuanPerbaikanService {
         status: string;
         tipe: string;
         perubahan: import("@prisma/client/runtime/client").JsonValue;
+        alasan_tolak: string | null;
     }[]>;
     setujuiPengajuan(sekolahId: string, id: string): Promise<{
         status: string;
         message: string;
     }>;
-    tolakPengajuan(sekolahId: string, id: string): Promise<{
+    tolakPengajuan(sekolahId: string, id: string, alasanTolak?: string): Promise<{
         status: string;
         message: string;
     }>;

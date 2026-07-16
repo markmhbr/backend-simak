@@ -29,10 +29,10 @@ export declare class MutasiPdService {
         peserta_didik_id: string;
         jenis_keluar_id: string;
         status: number;
+        alasan_tolak: string | null;
         mutasi_id: string;
         alasan: string | null;
         bukti: string | null;
-        alasan_tolak: string | null;
     })[]>;
     createMutasiPd(sekolahId: string, data: {
         peserta_didik_id: string;
@@ -46,10 +46,10 @@ export declare class MutasiPdService {
         peserta_didik_id: string;
         jenis_keluar_id: string;
         status: number;
+        alasan_tolak: string | null;
         mutasi_id: string;
         alasan: string | null;
         bukti: string | null;
-        alasan_tolak: string | null;
     }>;
     approveMutasiPd(sekolahId: string, mutasiId: string): Promise<{
         sekolah_id: string;
@@ -59,10 +59,10 @@ export declare class MutasiPdService {
         peserta_didik_id: string;
         jenis_keluar_id: string;
         status: number;
+        alasan_tolak: string | null;
         mutasi_id: string;
         alasan: string | null;
         bukti: string | null;
-        alasan_tolak: string | null;
     }>;
     rejectMutasiPd(sekolahId: string, mutasiId: string, alasanTolak: string): Promise<{
         sekolah_id: string;
@@ -72,9 +72,9 @@ export declare class MutasiPdService {
         peserta_didik_id: string;
         jenis_keluar_id: string;
         status: number;
+        alasan_tolak: string | null;
         mutasi_id: string;
         alasan: string | null;
         bukti: string | null;
-        alasan_tolak: string | null;
     }>;
 }

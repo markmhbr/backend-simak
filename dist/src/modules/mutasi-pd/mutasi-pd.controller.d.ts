@@ -33,10 +33,10 @@ export declare class MutasiPdController {
             peserta_didik_id: string;
             jenis_keluar_id: string;
             status: number;
+            alasan_tolak: string | null;
             mutasi_id: string;
             alasan: string | null;
             bukti: string | null;
-            alasan_tolak: string | null;
         })[];
     }>;
     create(req: Request, data: {
@@ -54,10 +54,10 @@ export declare class MutasiPdController {
             peserta_didik_id: string;
             jenis_keluar_id: string;
             status: number;
+            alasan_tolak: string | null;
             mutasi_id: string;
             alasan: string | null;
             bukti: string | null;
-            alasan_tolak: string | null;
         };
     }>;
     approve(req: Request, id: string): Promise<{
@@ -71,10 +71,10 @@ export declare class MutasiPdController {
             peserta_didik_id: string;
             jenis_keluar_id: string;
             status: number;
+            alasan_tolak: string | null;
             mutasi_id: string;
             alasan: string | null;
             bukti: string | null;
-            alasan_tolak: string | null;
         };
     }>;
     reject(req: Request, id: string, body: {
@@ -90,10 +90,10 @@ export declare class MutasiPdController {
             peserta_didik_id: string;
             jenis_keluar_id: string;
             status: number;
+            alasan_tolak: string | null;
             mutasi_id: string;
             alasan: string | null;
             bukti: string | null;
-            alasan_tolak: string | null;
         };
     }>;
 }

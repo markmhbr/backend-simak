@@ -55,9 +55,9 @@ let PengajuanPerbaikanController = class PengajuanPerbaikanController {
         const sekolahId = this.getSekolahId(req);
         return this.service.setujuiPengajuan(sekolahId, id);
     }
-    async tolakPengajuan(req, id) {
+    async tolakPengajuan(req, id, body) {
         const sekolahId = this.getSekolahId(req);
-        return this.service.tolakPengajuan(sekolahId, id);
+        return this.service.tolakPengajuan(sekolahId, id, body.alasan_tolak);
     }
 };
 exports.PengajuanPerbaikanController = PengajuanPerbaikanController;
@@ -103,8 +103,9 @@ __decorate([
     (0, common_1.Post)(':id/tolak'),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Promise)
 ], PengajuanPerbaikanController.prototype, "tolakPengajuan", null);
 exports.PengajuanPerbaikanController = PengajuanPerbaikanController = __decorate([

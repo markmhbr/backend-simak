@@ -54,8 +54,12 @@ export class PengajuanPerbaikanController {
   }
 
   @Post(':id/tolak')
-  async tolakPengajuan(@Req() req: Request, @Param('id') id: string) {
+  async tolakPengajuan(
+    @Req() req: Request, 
+    @Param('id') id: string,
+    @Body() body: { alasan_tolak?: string }
+  ) {
     const sekolahId = this.getSekolahId(req);
-    return this.service.tolakPengajuan(sekolahId, id);
+    return this.service.tolakPengajuan(sekolahId, id, body.alasan_tolak);
   }
 }

@@ -194,7 +194,7 @@ export class DapodikService {
         'nama_dusun', 'desa_kelurahan', 'provinsi', 'kabupaten_kota', 'kecamatan',
         'kode_pos', 'lintang', 'bujur', 'sumber_gaji', 'id_bank', 'rekening_bank',
         'rekening_atas_nama', 'nama_kcp', 'no_hp', 'no_whatsapp', 'id_telegram',
-        'email'
+        'email', 'tanda_tangan'
       ];
 
       const isFieldFilled = (key: string) => {
@@ -856,6 +856,190 @@ export class DapodikService {
     if (fs.existsSync(destFile)) {
       fs.unlinkSync(destFile);
     }
+  }
+
+  async getNotifications(sekolahId: string, user?: any) {
+    const filter = this.getSekolahFilter(sekolahId);
+    const appUrl = process.env.APP_URL || 'http://localhost:3000';
+
+    // Determinisasi apakah user adalah Operator/Admin
+    const isOperator = !user || 
+      user.role === 'Super Admin' || 
+      user.role === 'superadmin' || 
+      user.role === 'Operator Sekolah' || 
+      user.role === 'operator_sekolah' || 
+      user.role?.toLowerCase()?.includes('operator') ||
+      user.role?.toLowerCase()?.includes('admin');
+    
+    let ptkId = user?.ptkId || user?.ptk_id;
+    let pesertaDidikId = user?.pesertaDidikId || user?.peserta_didik_id;
+
+    // Jika pengguna login tetapi ptkId/pesertaDidikId tidak tersimpan dalam token JWT payload,
+    // maka kita selidiki langsung dari data pengguna di database menggunakan user.sub (pengguna_id).
+    if (user?.sub && (!ptkId && !pesertaDidikId)) {
+      try {
+        const dbUser = await this.prisma.pengguna.findUnique({
+          where: { pengguna_id: user.sub },
+          select: { ptk_id: true, peserta_didik_id: true }
+        });
+        if (dbUser) {
+          ptkId = dbUser.ptk_id;
+          pesertaDidikId = dbUser.peserta_didik_id;
+        }
+      } catch (err) {
+        console.error('Gagal memuat detail pengguna relasi:', err);
+      }
+    }
+
+    // 1. PENGATURAN FILTER PENGAJUAN DATA PERBAIKAN
+    const changesWhereClause: any = {
+      sekolah_id: filter.sekolah_id,
+    };
+
+    if (isOperator) {
+      // Operator hanya melihat yang PENDING
+      changesWhereClause.status = 'PENDING';
+    } else {
+      if (ptkId) {
+        changesWhereClause.ptk_id = ptkId;
+        changesWhereClause.status = { in: ['PENDING', 'APPROVED', 'REJECTED'] };
+      } else if (pesertaDidikId) {
+        changesWhereClause.peserta_didik_id = pesertaDidikId;
+        changesWhereClause.status = { in: ['PENDING', 'APPROVED', 'REJECTED'] };
+      } else {
+        // Jika bukan operator dan tidak punya ID yang valid, tidak tampilkan apapun
+        changesWhereClause.id = '00000000-0000-0000-0000-000000000000';
+      }
+    }
+
+    // Fetch pending/processed data changes
+    const pendingChanges = await this.prisma.pengajuanPerbaikan.findMany({
+      where: changesWhereClause,
+      orderBy: { created_at: 'desc' },
+      take: 10,
+    });
+
+    // Resolve names for pendingChanges
+    const changesWithNames = await Promise.all(
+      pendingChanges.map(async (item) => {
+        let name = 'Pengguna';
+        let foto = null;
+        if (item.tipe === 'GTK' && item.ptk_id) {
+          const gtk = await this.prisma.gtk.findUnique({
+            where: { ptk_id: item.ptk_id },
+            select: { nama: true, foto: true }
+          });
+          if (gtk) {
+            name = gtk.nama;
+            foto = gtk.foto ? (gtk.foto.startsWith('http') ? gtk.foto : `${appUrl}${gtk.foto}`) : null;
+          }
+        } else if (item.tipe === 'SISWA' && item.peserta_didik_id) {
+          const pd = await this.prisma.pesertaDidik.findUnique({
+            where: { peserta_didik_id: item.peserta_didik_id },
+            select: { nama: true, foto: true }
+          });
+          if (pd) {
+            name = pd.nama;
+            foto = pd.foto ? (pd.foto.startsWith('http') ? pd.foto : `${appUrl}${pd.foto}`) : null;
+          }
+        }
+
+        let title = 'Pengajuan Perbaikan Data';
+        let message = `${name} mengajukan perubahan data profil`;
+        
+        if (!isOperator) {
+          if (item.status === 'PENDING') {
+            title = 'Pengajuan Perbaikan Data';
+            message = `Pengajuan perbaikan data profil Anda sedang diproses (Menunggu Persetujuan).`;
+          }
+        }
+        
+        if (item.status === 'APPROVED') {
+          title = 'Perbaikan Data Disetujui';
+          message = `Pengajuan perbaikan data profil Anda telah DISETUJUI dan data telah diperbarui.`;
+        } else if (item.status === 'REJECTED') {
+          title = 'Perbaikan Data Ditolak';
+          message = `Pengajuan perbaikan data profil Anda telah DITOLAK. Alasan: ${item.alasan_tolak || '-'}`;
+        }
+
+        return {
+          id: item.id,
+          type: 'perbaikan',
+          title,
+          message,
+          time: item.updated_at || item.created_at,
+          foto,
+          tipe: item.tipe,
+        };
+      })
+    );
+
+    // 2. PENGATURAN FILTER PENGAJUAN MUTASI
+    const mutationsWhereClause: any = {
+      sekolah_id: filter.sekolah_id,
+    };
+
+    if (isOperator) {
+      // Operator hanya melihat yang PENDING (status 0)
+      mutationsWhereClause.status = 0;
+    } else {
+      if (ptkId) {
+        // PTK yang mengajukan mutasi ini bisa melihat status PENDING (0), APPROVED (1), dan REJECTED (2)
+        mutationsWhereClause.ptk_id = ptkId;
+        mutationsWhereClause.status = { in: [0, 1, 2] };
+      } else {
+        // Siswa tidak berhak melihat pengajuan mutasi
+        mutationsWhereClause.mutasi_id = '00000000-0000-0000-0000-000000000000';
+      }
+    }
+
+    // Fetch pending/processed mutations
+    const pendingMutations = await this.prisma.mutasiPd.findMany({
+      where: mutationsWhereClause,
+      include: {
+        peserta_didik: {
+          select: { nama: true }
+        },
+        ptk: {
+          select: { nama: true, foto: true }
+        }
+      },
+      orderBy: { created_at: 'desc' },
+      take: 10,
+    });
+
+    const mutationsFormatted = pendingMutations.map((item) => {
+      const ptkFoto = item.ptk?.foto;
+      const formattedFoto = ptkFoto ? (ptkFoto.startsWith('http') ? ptkFoto : `${appUrl}${ptkFoto}`) : null;
+      
+      let title = 'Pengajuan Mutasi Siswa';
+      let message = `Pengajuan mutasi keluar untuk siswa ${item.peserta_didik?.nama || 'Siswa'}`;
+      if (item.status === 1) {
+        title = 'Mutasi Siswa Disetujui';
+        message = `Pengajuan mutasi untuk siswa ${item.peserta_didik?.nama || 'Siswa'} telah DISETUJUI oleh Operator.`;
+      } else if (item.status === 2) {
+        title = 'Mutasi Siswa Ditolak';
+        message = `Pengajuan mutasi untuk siswa ${item.peserta_didik?.nama || 'Siswa'} telah DITOLAK. Alasan: ${item.alasan_tolak || '-'}`;
+      }
+
+      return {
+        id: item.mutasi_id,
+        type: 'mutasi',
+        title,
+        message,
+        time: item.updated_at || item.created_at,
+        foto: formattedFoto,
+        tipe: 'GTK',
+        alasan: item.alasan,
+      };
+    });
+
+    // Combine and sort by time
+    const allNotifications = [...changesWithNames, ...mutationsFormatted].sort(
+      (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
+    );
+
+    return allNotifications.slice(0, 15);
   }
 
   async deleteSiswaDokumen(sekolahId: string, uuidSiswa: string, fileName: string) {
@@ -2646,6 +2830,7 @@ export class DapodikService {
       no_kk: true,
       no_hp: true,
       email: true,
+      tanda_tangan: true,
       sk_pengangkatan: true,
       tmt_pengangkatan: true,
       last_update: true,
@@ -2682,7 +2867,7 @@ export class DapodikService {
         'nama_dusun', 'desa_kelurahan', 'provinsi', 'kabupaten_kota', 'kecamatan',
         'kode_pos', 'lintang', 'bujur', 'sumber_gaji', 'id_bank', 'rekening_bank',
         'rekening_atas_nama', 'nama_kcp', 'no_hp', 'no_whatsapp', 'id_telegram',
-        'email'
+        'email', 'tanda_tangan'
       ];
 
       const isFieldFilled = (key: string) => {

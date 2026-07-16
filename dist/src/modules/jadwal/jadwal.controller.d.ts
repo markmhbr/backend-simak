@@ -13,11 +13,11 @@ export declare class JadwalController {
                 created_at: Date;
                 updated_at: Date;
                 aktif: boolean;
+                tipe: number;
                 urutan: number;
                 jenis_jadwal_id: string;
                 pengaturan_jadwal_id: string;
                 hari: number;
-                tipe: number;
                 durasi_menit: number;
             }[];
             pengaturan_hari: {
@@ -135,11 +135,11 @@ export declare class JadwalController {
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
+            tipe: number;
             urutan: number;
             jenis_jadwal_id: string;
             pengaturan_jadwal_id: string;
             hari: number;
-            tipe: number;
             durasi_menit: number;
         }[];
     }>;
@@ -158,11 +158,11 @@ export declare class JadwalController {
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
+            tipe: number;
             urutan: number;
             jenis_jadwal_id: string;
             pengaturan_jadwal_id: string;
             hari: number;
-            tipe: number;
             durasi_menit: number;
         };
     }>;
@@ -174,11 +174,11 @@ export declare class JadwalController {
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
+            tipe: number;
             urutan: number;
             jenis_jadwal_id: string;
             pengaturan_jadwal_id: string;
             hari: number;
-            tipe: number;
             durasi_menit: number;
         };
     }>;

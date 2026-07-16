@@ -106,6 +106,16 @@ let DapodikController = class DapodikController {
             data,
         };
     }
+    async getNotifications(req) {
+        const { sekolahId, namaApp } = this.getSekolahInfo(req);
+        const user = req['user'];
+        const data = await this.dapodikService.getNotifications(sekolahId, user);
+        return {
+            status: 'success',
+            klien: namaApp,
+            data,
+        };
+    }
     async updateSekolahInfoDetail(req, body) {
         const { sekolahId, namaApp } = this.getSekolahInfo(req);
         const data = await this.dapodikService.updateSekolah(sekolahId, body);
@@ -651,6 +661,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], DapodikController.prototype, "getSekolahInfoDetail", null);
+__decorate([
+    (0, common_1.Get)('notifications'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], DapodikController.prototype, "getNotifications", null);
 __decorate([
     (0, common_1.Patch)('sekolah'),
     __param(0, (0, common_1.Req)()),

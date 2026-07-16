@@ -212,6 +212,15 @@ export declare class DapodikService {
         sizeBytes: number;
     }>;
     deleteGtkDokumen(sekolahId: string, uuidGtk: string, fileName: string): Promise<void>;
+    getNotifications(sekolahId: string, user?: any): Promise<{
+        id: string;
+        type: string;
+        title: string;
+        message: string;
+        time: Date;
+        foto: any;
+        tipe: string;
+    }[]>;
     deleteSiswaDokumen(sekolahId: string, uuidSiswa: string, fileName: string): Promise<void>;
     getTanah(sekolahId: string | null, limit?: number, search?: string, page?: number): Promise<{
         total: number;

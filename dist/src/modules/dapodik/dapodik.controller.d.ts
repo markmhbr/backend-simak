@@ -310,6 +310,19 @@ export declare class DapodikController {
             radius: number | null;
         };
     }>;
+    getNotifications(req: Request): Promise<{
+        status: string;
+        klien: any;
+        data: {
+            id: string;
+            type: string;
+            title: string;
+            message: string;
+            time: Date;
+            foto: any;
+            tipe: string;
+        }[];
+    }>;
     updateSekolahInfoDetail(req: Request, body: any): Promise<{
         status: string;
         klien: any;

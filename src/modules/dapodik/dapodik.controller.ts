@@ -112,6 +112,18 @@ export class DapodikController {
     };
   }
 
+  @Get('notifications')
+  async getNotifications(@Req() req: Request) {
+    const { sekolahId, namaApp } = this.getSekolahInfo(req);
+    const user = req['user'];
+    const data = await this.dapodikService.getNotifications(sekolahId, user);
+    return {
+      status: 'success',
+      klien: namaApp,
+      data,
+    };
+  }
+
   @Patch('sekolah')
   async updateSekolahInfoDetail(@Req() req: Request, @Body() body: any) {
     const { sekolahId, namaApp } = this.getSekolahInfo(req);

@@ -14,6 +14,7 @@ export declare class PengajuanPerbaikanController {
         status: string;
         tipe: string;
         perubahan: import("@prisma/client/runtime/client").JsonValue;
+        alasan_tolak: string | null;
     }>;
     dapatkanPerbaikanDisetujui(req: Request): Promise<({
         id: string;
@@ -49,12 +50,15 @@ export declare class PengajuanPerbaikanController {
         status: string;
         tipe: string;
         perubahan: import("@prisma/client/runtime/client").JsonValue;
+        alasan_tolak: string | null;
     }[]>;
     setujuiPengajuan(req: Request, id: string): Promise<{
         status: string;
         message: string;
     }>;
-    tolakPengajuan(req: Request, id: string): Promise<{
+    tolakPengajuan(req: Request, id: string, body: {
+        alasan_tolak?: string;
+    }): Promise<{
         status: string;
         message: string;
     }>;
