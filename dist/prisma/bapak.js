@@ -12,7 +12,7 @@ if (!dbUrl) {
 }
 const pool = new pg_1.Pool({
     connectionString: dbUrl,
-    ssl: dbUrl.includes('sslmode=disable') ? false : { rejectUnauthorized: false }
+    ssl: false
 });
 async function main() {
     const targetEmail = 'infoutep81@gmail.com';

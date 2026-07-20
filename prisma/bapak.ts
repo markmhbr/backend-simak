@@ -11,10 +11,10 @@ if (!dbUrl) {
   process.exit(1);
 }
 
-// Gunakan SSL jika tidak didisable
+// Matikan SSL secara total
 const pool = new Pool({ 
   connectionString: dbUrl,
-  ssl: dbUrl.includes('sslmode=disable') ? false : { rejectUnauthorized: false }
+  ssl: false
 });
 
 async function main() {
