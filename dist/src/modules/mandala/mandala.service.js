@@ -1728,6 +1728,17 @@ let MandalaService = MandalaService_1 = class MandalaService {
             if (sem) {
                 semesters.push(sem);
             }
+            else {
+                const year = parseInt(latestSemesterId.substring(0, 4), 10);
+                const termCode = latestSemesterId.charAt(4);
+                const termName = termCode === '1' ? 'Ganjil' : 'Genap';
+                semesters.push({
+                    semester_id: latestSemesterId,
+                    nama: `${year}/${year + 1} ${termName}`,
+                    periode_aktif: 1,
+                    semester: termCode,
+                });
+            }
         }
         if (semesters.length === 0) {
             semesters = await this.prisma.semester.findMany({

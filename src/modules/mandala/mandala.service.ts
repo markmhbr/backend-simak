@@ -1876,13 +1876,23 @@ export class MandalaService implements OnModuleInit {
     });
     const latestSemesterId = latestRombel?.semester_id;
 
-    let semesters = [];
+    let semesters: any[] = [];
     if (latestSemesterId) {
       const sem = await this.prisma.semester.findFirst({
         where: { semester_id: latestSemesterId },
       });
       if (sem) {
         semesters.push(sem);
+      } else {
+        const year = parseInt(latestSemesterId.substring(0, 4), 10);
+        const termCode = latestSemesterId.charAt(4);
+        const termName = termCode === '1' ? 'Ganjil' : 'Genap';
+        semesters.push({
+          semester_id: latestSemesterId,
+          nama: `${year}/${year + 1} ${termName}`,
+          periode_aktif: 1,
+          semester: termCode,
+        });
       }
     }
 
