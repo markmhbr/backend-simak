@@ -12,26 +12,21 @@ if (!dbUrl) {
     console.error('DATABASE_URL tidak ditemukan di .env');
     process.exit(1);
 }
-const pool = new pg_1.Pool({ connectionString: dbUrl });
+const pool = new pg_1.Pool({
+    connectionString: dbUrl,
+    ssl: dbUrl.includes('sslmode=disable') ? false : { rejectUnauthorized: false }
+});
 const adapter = new adapter_pg_1.PrismaPg(pool);
 const prisma = new client_1.PrismaClient({ adapter });
 async function main() {
     const targetEmail = 'infoutep81@gmail.com';
     console.log(`--- Memulai reset authenticator_secret untuk email: ${targetEmail} ---`);
-    const result = await prisma.pegawai.updateMany({
-        where: {
-            email: targetEmail,
-        },
-        data: {
-            authenticator_secret: null,
-        },
-    });
-    if (result.count > 0) {
-        console.log(`Berhasil menghapus authenticator_secret untuk ${result.count} data pegawai.`);
-    }
-    else {
-        console.log(`Tidak ditemukan pegawai dengan email: ${targetEmail}`);
-    }
+    const updatedCount = await prisma.$executeRaw `
+    UPDATE mandala.pegawai 
+    SET authenticator_secret = NULL 
+    WHERE email = ${targetEmail}
+  `;
+    console.log(`Berhasil menghapus authenticator_secret pada ${updatedCount} data pegawai.`);
     console.log('--- Selesai ---');
 }
 main()

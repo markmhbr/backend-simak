@@ -2,7 +2,6 @@ import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
 
-// Ambil DB URL dari file .env secara manual
 const fs = require('fs');
 const path = require('path');
 const envPath = path.join(__dirname, '../.env');
@@ -14,7 +13,12 @@ if (!dbUrl) {
   process.exit(1);
 }
 
-const pool = new Pool({ connectionString: dbUrl });
+// Tambahkan ssl rejectUnauthorized: false jika server memintanya
+const pool = new Pool({ 
+  connectionString: dbUrl,
+  ssl: dbUrl.includes('sslmode=disable') ? false : { rejectUnauthorized: false }
+});
+
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
@@ -23,22 +27,14 @@ async function main() {
 
   console.log(`--- Memulai reset authenticator_secret untuk email: ${targetEmail} ---`);
 
-  // Menghapus/mengosongkan authenticator_secret (mengubah nilainya menjadi null)
-  const result = await prisma.pegawai.updateMany({
-    where: {
-      email: targetEmail,
-    },
-    data: {
-      authenticator_secret: null,
-    },
-  });
+  // Menggunakan ExecuteRaw ke schema mandala secara eksplisit
+  const updatedCount = await prisma.$executeRaw`
+    UPDATE mandala.pegawai 
+    SET authenticator_secret = NULL 
+    WHERE email = ${targetEmail}
+  `;
 
-  if (result.count > 0) {
-    console.log(`Berhasil menghapus authenticator_secret untuk ${result.count} data pegawai.`);
-  } else {
-    console.log(`Tidak ditemukan pegawai dengan email: ${targetEmail}`);
-  }
-
+  console.log(`Berhasil menghapus authenticator_secret pada ${updatedCount} data pegawai.`);
   console.log('--- Selesai ---');
 }
 
