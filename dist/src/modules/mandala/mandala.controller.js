@@ -235,6 +235,18 @@ let MandalaController = class MandalaController {
         }
         return await this.mandalaService.verify2FAPegawai(body.tempToken, body.code, body.secretToSave);
     }
+    async requestReset2FA(body) {
+        if (!body.username || !body.password) {
+            throw new common_1.BadRequestException('username and password are required.');
+        }
+        return await this.mandalaService.requestReset2FAPegawai(body.username, body.password);
+    }
+    async verifyReset2FA(body) {
+        if (!body.resetToken || !body.code) {
+            throw new common_1.BadRequestException('resetToken and code are required.');
+        }
+        return await this.mandalaService.verifyReset2FAPegawai(body.resetToken, body.code);
+    }
     async refresh(refreshToken) {
         if (!refreshToken) {
             throw new common_1.BadRequestException('refreshToken is required.');
@@ -741,6 +753,22 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], MandalaController.prototype, "verify2FA", null);
+__decorate([
+    (0, common_1.Post)('auth/reset-2fa/request'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "requestReset2FA", null);
+__decorate([
+    (0, common_1.Post)('auth/reset-2fa/verify'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "verifyReset2FA", null);
 __decorate([
     (0, common_1.Post)('auth/refresh'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),

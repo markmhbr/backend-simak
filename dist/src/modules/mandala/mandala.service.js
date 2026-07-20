@@ -49,6 +49,7 @@ const prisma_service_1 = require("../../core/prisma/prisma.service");
 const jwt_1 = require("@nestjs/jwt");
 const config_1 = require("@nestjs/config");
 const crypto_service_1 = require("../../core/crypto/crypto.service");
+const mail_service_1 = require("../../core/mail/mail.service");
 const bcrypt = __importStar(require("bcryptjs"));
 const { generateSecret, generateURI, verify } = require('otplib');
 let MandalaService = MandalaService_1 = class MandalaService {
@@ -56,12 +57,14 @@ let MandalaService = MandalaService_1 = class MandalaService {
     jwtService;
     configService;
     cryptoService;
+    mailService;
     logger = new common_1.Logger(MandalaService_1.name);
-    constructor(prisma, jwtService, configService, cryptoService) {
+    constructor(prisma, jwtService, configService, cryptoService, mailService) {
         this.prisma = prisma;
         this.jwtService = jwtService;
         this.configService = configService;
         this.cryptoService = cryptoService;
+        this.mailService = mailService;
     }
     async onModuleInit() {
         const urlMandala = process.env.URL_MANDALA;
@@ -969,6 +972,83 @@ let MandalaService = MandalaService_1 = class MandalaService {
         }
         catch (e) {
             throw new common_1.UnauthorizedException('Sesi telah berakhir, silakan login kembali');
+        }
+    }
+    async requestReset2FAPegawai(identifier, pass) {
+        const pegawai = await this.prisma.pegawai.findFirst({
+            where: {
+                OR: [
+                    { nip: identifier },
+                    { email: identifier },
+                ],
+            },
+        });
+        if (!pegawai) {
+            throw new common_1.UnauthorizedException('Kredensial tidak valid');
+        }
+        if (!pegawai.aktif) {
+            throw new common_1.ForbiddenException('Akun Anda telah dinonaktifkan.');
+        }
+        const isMatch = await bcrypt.compare(pass, pegawai.password);
+        if (!isMatch) {
+            throw new common_1.UnauthorizedException('Kredensial tidak valid');
+        }
+        const email = pegawai.email;
+        if (!email || email.trim() === '') {
+            throw new common_1.BadRequestException('Email tidak terdaftar pada akun Anda. Silakan hubungi admin Anda.');
+        }
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const salt = await bcrypt.genSalt(10);
+        const otpHash = await bcrypt.hash(otp, salt);
+        const name = pegawai.nama_lengkap;
+        const emailSent = await this.mailService.sendOTP(email, otp, name);
+        if (!emailSent) {
+            throw new common_1.BadRequestException('Gagal mengirimkan kode OTP ke email Anda. Silakan coba beberapa saat lagi.');
+        }
+        const resetToken = this.jwtService.sign({
+            sub: pegawai.pegawai_id,
+            otpHash,
+            type: 'reset_2fa_mandala'
+        }, { secret: this.configService.get('JWT_SECRET'), expiresIn: '10m' });
+        const emailParts = email.split('@');
+        const maskedLocal = emailParts[0].length > 2
+            ? emailParts[0].substring(0, 2) + '***'
+            : emailParts[0] + '***';
+        const maskedEmail = `${maskedLocal}@${emailParts[1]}`;
+        return {
+            status: 'success',
+            message: `Kode OTP verifikasi telah dikirim ke email: ${maskedEmail}`,
+            resetToken,
+        };
+    }
+    async verifyReset2FAPegawai(resetToken, code) {
+        try {
+            const payload = this.jwtService.verify(resetToken, {
+                secret: this.configService.get('JWT_SECRET'),
+            });
+            if (payload.type !== 'reset_2fa_mandala') {
+                throw new common_1.UnauthorizedException('Token reset tidak valid');
+            }
+            const isMatch = await bcrypt.compare(code, payload.otpHash);
+            if (!isMatch) {
+                throw new common_1.UnauthorizedException('Kode OTP yang Anda masukkan salah');
+            }
+            await this.prisma.pegawai.update({
+                where: { pegawai_id: payload.sub },
+                data: { authenticator_secret: null },
+            });
+            return {
+                status: 'success',
+                message: 'Autentikasi Dua Faktor (2FA) berhasil diset ulang. Silakan masuk kembali.',
+            };
+        }
+        catch (e) {
+            if (e instanceof common_1.UnauthorizedException)
+                throw e;
+            if (e.name === 'TokenExpiredError') {
+                throw new common_1.UnauthorizedException('Sesi reset 2FA telah berakhir (Expired). Silakan ajukan ulang.');
+            }
+            throw new common_1.UnauthorizedException('Verifikasi reset 2FA gagal');
         }
     }
     async getSchoolDetail(sekolahId) {
@@ -1924,6 +2004,7 @@ exports.MandalaService = MandalaService = MandalaService_1 = __decorate([
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         jwt_1.JwtService,
         config_1.ConfigService,
-        crypto_service_1.CryptoService])
+        crypto_service_1.CryptoService,
+        mail_service_1.MailService])
 ], MandalaService);
 //# sourceMappingURL=mandala.service.js.map

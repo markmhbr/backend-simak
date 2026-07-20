@@ -350,6 +350,21 @@ export declare class MandalaController {
             };
         };
     }>;
+    requestReset2FA(body: {
+        username: string;
+        password: any;
+    }): Promise<{
+        status: string;
+        message: string;
+        resetToken: string;
+    }>;
+    verifyReset2FA(body: {
+        resetToken: string;
+        code: string;
+    }): Promise<{
+        status: string;
+        message: string;
+    }>;
     refresh(refreshToken: string): Promise<{
         accessToken: string;
         refreshToken: string;

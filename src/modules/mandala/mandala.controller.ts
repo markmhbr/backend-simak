@@ -309,6 +309,24 @@ export class MandalaController {
     return await this.mandalaService.verify2FAPegawai(body.tempToken, body.code, body.secretToSave);
   }
 
+  @Post('auth/reset-2fa/request')
+  @HttpCode(HttpStatus.OK)
+  async requestReset2FA(@Body() body: { username: string; password: any }) {
+    if (!body.username || !body.password) {
+      throw new BadRequestException('username and password are required.');
+    }
+    return await this.mandalaService.requestReset2FAPegawai(body.username, body.password);
+  }
+
+  @Post('auth/reset-2fa/verify')
+  @HttpCode(HttpStatus.OK)
+  async verifyReset2FA(@Body() body: { resetToken: string; code: string }) {
+    if (!body.resetToken || !body.code) {
+      throw new BadRequestException('resetToken and code are required.');
+    }
+    return await this.mandalaService.verifyReset2FAPegawai(body.resetToken, body.code);
+  }
+
   @Post('auth/refresh')
   @HttpCode(HttpStatus.OK)
   async refresh(@Body('refreshToken') refreshToken: string) {

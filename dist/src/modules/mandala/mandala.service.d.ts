@@ -3,13 +3,15 @@ import { PrismaService } from '../../core/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { CryptoService } from '../../core/crypto/crypto.service';
+import { MailService } from '../../core/mail/mail.service';
 export declare class MandalaService implements OnModuleInit {
     private readonly prisma;
     private readonly jwtService;
     private readonly configService;
     private readonly cryptoService;
+    private readonly mailService;
     private readonly logger;
-    constructor(prisma: PrismaService, jwtService: JwtService, configService: ConfigService, cryptoService: CryptoService);
+    constructor(prisma: PrismaService, jwtService: JwtService, configService: ConfigService, cryptoService: CryptoService, mailService: MailService);
     onModuleInit(): Promise<void>;
     getConnection(): Promise<{
         id: string;
@@ -511,6 +513,15 @@ export declare class MandalaService implements OnModuleInit {
         accessToken: string;
         refreshToken: string;
         pegawai: any;
+    }>;
+    requestReset2FAPegawai(identifier: string, pass: string): Promise<{
+        status: string;
+        message: string;
+        resetToken: string;
+    }>;
+    verifyReset2FAPegawai(resetToken: string, code: string): Promise<{
+        status: string;
+        message: string;
     }>;
     getSchoolDetail(sekolahId: string): Promise<{
         nama_kepala_sekolah: string;
