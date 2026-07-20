@@ -44,6 +44,37 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
+  // Intercept and verify JWT token for all /storage requests
+  app.use('/storage', (req, res, next) => {
+    let token = req.query.token as string;
+    
+    if (!token && req.headers.authorization) {
+      const parts = req.headers.authorization.split(' ');
+      if (parts.length === 2 && parts[0] === 'Bearer') {
+        token = parts[1];
+      }
+    }
+
+    if (!token) {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Access Denied: No authentication token provided.'
+      });
+    }
+
+    try {
+      const jwt = require('jsonwebtoken');
+      const secret = process.env.JWT_SECRET || 'fallback-secret-key';
+      jwt.verify(token, secret);
+      next();
+    } catch (err) {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Access Denied: Invalid or expired authentication token.'
+      });
+    }
+  });
+
   // Serve static files from storage directory with disabled caching
   app.use('/storage', express.static(path.join(process.cwd(), 'storage'), {
     setHeaders: (res) => {

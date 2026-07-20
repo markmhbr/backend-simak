@@ -72,6 +72,33 @@ async function bootstrap() {
         credentials: true,
     });
     app.use((0, cookie_parser_1.default)());
+    app.use('/storage', (req, res, next) => {
+        let token = req.query.token;
+        if (!token && req.headers.authorization) {
+            const parts = req.headers.authorization.split(' ');
+            if (parts.length === 2 && parts[0] === 'Bearer') {
+                token = parts[1];
+            }
+        }
+        if (!token) {
+            return res.status(403).json({
+                status: 'error',
+                message: 'Access Denied: No authentication token provided.'
+            });
+        }
+        try {
+            const jwt = require('jsonwebtoken');
+            const secret = process.env.JWT_SECRET || 'fallback-secret-key';
+            jwt.verify(token, secret);
+            next();
+        }
+        catch (err) {
+            return res.status(403).json({
+                status: 'error',
+                message: 'Access Denied: Invalid or expired authentication token.'
+            });
+        }
+    });
     app.use('/storage', express.static(path.join(process.cwd(), 'storage'), {
         setHeaders: (res) => {
             res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
