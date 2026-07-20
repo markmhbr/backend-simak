@@ -33,6 +33,7 @@ const reference_module_1 = require("./modules/reference/reference.module");
 const pengajuan_perbaikan_module_1 = require("./modules/pengajuan-perbaikan/pengajuan-perbaikan.module");
 const pengaturan_umum_module_1 = require("./modules/pengaturan-umum/pengaturan-umum.module");
 const mutasi_pd_module_1 = require("./modules/mutasi-pd/mutasi-pd.module");
+const mail_module_1 = require("./core/mail/mail.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -46,6 +47,7 @@ exports.AppModule = AppModule = __decorate([
             prisma_module_1.PrismaModule,
             app_key_module_1.AppKeyModule,
             crypto_module_1.CryptoModule,
+            mail_module_1.MailModule,
             auth_module_1.AuthModule,
             dapodik_module_1.DapodikModule,
             sync_module_1.SyncModule,

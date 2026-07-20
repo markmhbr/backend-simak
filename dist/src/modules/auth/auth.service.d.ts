@@ -3,13 +3,15 @@ import { PrismaService } from '../../core/prisma/prisma.service';
 import { CryptoService } from '../../core/crypto/crypto.service';
 import { AppKeyService } from '../../core/app-key/app-key.service';
 import { ConfigService } from '@nestjs/config';
+import { MailService } from '../../core/mail/mail.service';
 export declare class AuthService {
     private prisma;
     private jwtService;
     private cryptoService;
     private configService;
     private appKeyService;
-    constructor(prisma: PrismaService, jwtService: JwtService, cryptoService: CryptoService, configService: ConfigService, appKeyService: AppKeyService);
+    private mailService;
+    constructor(prisma: PrismaService, jwtService: JwtService, cryptoService: CryptoService, configService: ConfigService, appKeyService: AppKeyService, mailService: MailService);
     validateUser(username: string, pass: string, sekolahId?: string): Promise<{
         accessToken: string;
         refreshToken: string;
@@ -106,5 +108,14 @@ export declare class AuthService {
         no_hp: string;
         ptk_id: string;
         peserta_didik_id: string;
+    }>;
+    requestReset2FA(username: string, pass: string, sekolahId?: string): Promise<{
+        status: string;
+        message: string;
+        resetToken: string;
+    }>;
+    verifyReset2FA(resetToken: string, code: string): Promise<{
+        status: string;
+        message: string;
     }>;
 }

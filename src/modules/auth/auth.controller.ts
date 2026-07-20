@@ -69,6 +69,25 @@ export class AuthController {
     return this.authService.reset2FA(body);
   }
 
+  @UseGuards(ThrottlerGuard, ApiKeyGuard)
+  @Post('reset-2fa/request')
+  async requestReset2fa(
+    @Body() body: LoginDto,
+    @Req() request: Request,
+  ) {
+    const appKey = request['appKey'];
+    const sekolahId = appKey ? appKey.sekolah_id : undefined;
+    return this.authService.requestReset2FA(body.username, body.password, sekolahId);
+  }
+
+  @UseGuards(ThrottlerGuard)
+  @Post('reset-2fa/verify')
+  async verifyReset2fa(
+    @Body() body: { resetToken: string; code: string },
+  ) {
+    return this.authService.verifyReset2FA(body.resetToken, body.code);
+  }
+
   @UseGuards(ApiKeyGuard)
   @Get('me')
   async getMe(@Req() request: Request) {

@@ -1022,6 +1022,12 @@ let MandalaService = MandalaService_1 = class MandalaService {
         else if (status === 'non-aktif') {
             whereClause.status = { not: 'Aktif' };
         }
+        const latestRombel = await this.prisma.rombonganBelajar.findFirst({
+            where: sekolahId ? { sekolah_id: sekolahId } : {},
+            select: { semester_id: true },
+            orderBy: { semester_id: 'desc' },
+        });
+        const latestSemesterId = latestRombel?.semester_id || null;
         const skip = (page - 1) * limit;
         const [total, students] = await Promise.all([
             this.prisma.pesertaDidik.count({ where: whereClause }),
@@ -1039,6 +1045,7 @@ let MandalaService = MandalaService_1 = class MandalaService {
                         where: {
                             rombongan_belajar: {
                                 jenis_rombel: 1,
+                                ...(latestSemesterId ? { semester_id: latestSemesterId } : {}),
                             },
                         },
                         include: {

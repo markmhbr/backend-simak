@@ -59,14 +59,29 @@ export class IndisiplinerService {
   // =====================
 
   async getPelanggaran(sekolahId: string, filter?: { peserta_didik_id?: string; ptk_id?: string; status?: number }) {
-    const whereClause: any = { sekolah_id: sekolahId };
+    const whereClause: any = { 
+      sekolah_id: sekolahId,
+      OR: [
+        {
+          peserta_didik_id: { not: null },
+          peserta_didik: { status: 'Aktif' }
+        },
+        {
+          ptk_id: { not: null },
+          gtk: { status: 'Aktif' }
+        }
+      ]
+    };
 
     if (filter) {
       if (filter.peserta_didik_id) {
         whereClause.peserta_didik_id = filter.peserta_didik_id;
-      }
-      if (filter.ptk_id) {
+        delete whereClause.OR;
+        whereClause.peserta_didik = { status: 'Aktif' };
+      } else if (filter.ptk_id) {
         whereClause.ptk_id = filter.ptk_id;
+        delete whereClause.OR;
+        whereClause.gtk = { status: 'Aktif' };
       }
       if (filter.status) {
         whereClause.status = Number(filter.status);
@@ -257,9 +272,29 @@ export class IndisiplinerService {
 
   async getSchoolSummary(sekolahId: string) {
     const [totalPelanggaran, totalPelanggaranGtk, totalPelanggaranSiswa, jpList, jtlList] = await Promise.all([
-      this.prisma.pelanggaran.count({ where: { sekolah_id: sekolahId } }),
-      this.prisma.pelanggaran.count({ where: { sekolah_id: sekolahId, ptk_id: { not: null } } }),
-      this.prisma.pelanggaran.count({ where: { sekolah_id: sekolahId, peserta_didik_id: { not: null } } }),
+      this.prisma.pelanggaran.count({
+        where: {
+          sekolah_id: sekolahId,
+          OR: [
+            { peserta_didik_id: { not: null }, peserta_didik: { status: 'Aktif' } },
+            { ptk_id: { not: null }, gtk: { status: 'Aktif' } }
+          ]
+        }
+      }),
+      this.prisma.pelanggaran.count({
+        where: {
+          sekolah_id: sekolahId,
+          ptk_id: { not: null },
+          gtk: { status: 'Aktif' }
+        }
+      }),
+      this.prisma.pelanggaran.count({
+        where: {
+          sekolah_id: sekolahId,
+          peserta_didik_id: { not: null },
+          peserta_didik: { status: 'Aktif' }
+        }
+      }),
       this.prisma.jenisPelanggaran.count({ where: { sekolah_id: sekolahId } }),
       this.prisma.jenisTindakLanjut.count({ where: { sekolah_id: sekolahId } }),
     ]);
@@ -270,6 +305,7 @@ export class IndisiplinerService {
       where: {
         sekolah_id: sekolahId,
         peserta_didik_id: { not: null },
+        peserta_didik: { status: 'Aktif' },
         status: { in: [1, 2, 3] }, // Draft, Diproses, Selesai
       },
       _sum: { poin: true },
@@ -303,6 +339,7 @@ export class IndisiplinerService {
       where: {
         sekolah_id: sekolahId,
         ptk_id: { not: null },
+        gtk: { status: 'Aktif' },
         status: { in: [1, 2, 3] }, // Draft, Diproses, Selesai
       },
       _sum: { poin: true },

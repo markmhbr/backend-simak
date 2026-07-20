@@ -24,6 +24,7 @@ import { ReferenceModule } from './modules/reference/reference.module';
 import { PengajuanPerbaikanModule } from './modules/pengajuan-perbaikan/pengajuan-perbaikan.module';
 import { PengaturanUmumModule } from './modules/pengaturan-umum/pengaturan-umum.module';
 import { MutasiPdModule } from './modules/mutasi-pd/mutasi-pd.module';
+import { MailModule } from './core/mail/mail.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { MutasiPdModule } from './modules/mutasi-pd/mutasi-pd.module';
     PrismaModule,
     AppKeyModule,
     CryptoModule,
+    MailModule,
     AuthModule,
     DapodikModule,
     SyncModule,

@@ -1,16 +1,51 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DapodikService = void 0;
 const common_1 = require("@nestjs/common");
+const fs = __importStar(require("fs"));
+const path = __importStar(require("path"));
 const prisma_service_1 = require("../../core/prisma/prisma.service");
 const reference_service_1 = require("../reference/reference.service");
 const client_1 = require("@prisma/client");
@@ -156,6 +191,7 @@ let DapodikService = class DapodikService {
                 no_kk: true,
                 no_hp: true,
                 email: true,
+                tanda_tangan: true,
                 sumber_gaji: {
                     select: { nama: true }
                 },
@@ -168,6 +204,24 @@ let DapodikService = class DapodikService {
             }
         });
         const mappedGtk = allGtk.map((item) => {
+            const destDir = path.join(process.cwd(), 'storage', sekolahId, 'gtk', item.ptk_id, 'dokumen');
+            const mandatoryList = ["KK", "KTP", "Akte Kelahiran", "Ijazah SD", "Ijazah SMP", "Ijazah SMA", "Ijazah S1"];
+            let uploadedMandatory = [];
+            if (fs.existsSync(destDir)) {
+                try {
+                    const files = fs.readdirSync(destDir);
+                    uploadedMandatory = mandatoryList.filter(name => {
+                        const normalizedName = name.replace(/\s+/g, '').toUpperCase();
+                        return files.some((file) => {
+                            const baseName = file.substring(0, file.lastIndexOf('.'));
+                            const nameWords = baseName.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                            const normalizedExisting = nameWords.replace(/\s+/g, '').toUpperCase();
+                            return normalizedExisting.startsWith(normalizedName);
+                        });
+                    });
+                }
+                catch (e) { }
+            }
             return {
                 ...item,
                 rt: item.rt !== null && item.rt !== undefined ? String(item.rt) : null,
@@ -177,6 +231,14 @@ let DapodikService = class DapodikService {
                 agama_id_str: item.agama?.nama || null,
                 sumber_gaji: item.sumber_gaji?.nama || null,
                 memilikiSertifikasi: item.rwy_sertifikasi && item.rwy_sertifikasi.length > 0 ? "Ya" : "Tidak",
+                tanda_tangan: item.tanda_tangan || null,
+                doc_kk: uploadedMandatory.includes("KK") ? "Ada" : null,
+                doc_ktp: uploadedMandatory.includes("KTP") ? "Ada" : null,
+                doc_akte: uploadedMandatory.includes("Akte Kelahiran") ? "Ada" : null,
+                doc_ijazah_sd: uploadedMandatory.includes("Ijazah SD") ? "Ada" : null,
+                doc_ijazah_smp: uploadedMandatory.includes("Ijazah SMP") ? "Ada" : null,
+                doc_ijazah_sma: uploadedMandatory.includes("Ijazah SMA") ? "Ada" : null,
+                doc_ijazah_s1: uploadedMandatory.includes("Ijazah S1") ? "Ada" : null,
             };
         });
         const checkGtkCompleteness = (item) => {
@@ -184,10 +246,11 @@ let DapodikService = class DapodikService {
                 'nama', 'nik', 'no_kk', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir',
                 'nama_ibu_kandung', 'agama_id_str', 'status_perkawinan', 'nama_suami_istri',
                 'pekerjaan_suami_istri', 'nm_wp', 'npwp', 'alamat_jalan', 'rt', 'rw',
-                'nama_dusun', 'desa_kelurahan', 'provinsi', 'kabupaten_kota', 'kecamatan',
+                'desa_kelurahan', 'provinsi', 'kabupaten_kota', 'kecamatan',
                 'kode_pos', 'lintang', 'bujur', 'sumber_gaji', 'id_bank', 'rekening_bank',
                 'rekening_atas_nama', 'nama_kcp', 'no_hp', 'no_whatsapp', 'id_telegram',
-                'email', 'tanda_tangan'
+                'email', 'tanda_tangan',
+                'doc_kk', 'doc_ktp', 'doc_akte', 'doc_ijazah_sd', 'doc_ijazah_smp', 'doc_ijazah_sma', 'doc_ijazah_s1'
             ];
             const isFieldFilled = (key) => {
                 if (key === 'provinsi' || key === 'kabupaten_kota' || key === 'kecamatan') {
@@ -1017,6 +1080,7 @@ let DapodikService = class DapodikService {
     }
     async getPesertaDidik(sekolahId, limit = 10, search, page = 1, rombelName, status, tingkat, completeness) {
         const filter = this.getSekolahFilter(sekolahId);
+        const semesterId = await this.getLatestSemesterId(filter.sekolah_id);
         let whereClause = {
             AND: [
                 { sekolah_id: filter.sekolah_id },
@@ -1031,10 +1095,14 @@ let DapodikService = class DapodikService {
             });
         }
         if (rombelName) {
+            const rombelFilterClause = { nama: rombelName };
+            if (semesterId) {
+                rombelFilterClause.semester_id = semesterId;
+            }
             whereClause.AND.push({
                 OR: [
-                    { rombongan_belajar: { nama: rombelName } },
-                    { anggota_rombel: { some: { rombongan_belajar: { nama: rombelName } } } }
+                    { rombongan_belajar: rombelFilterClause },
+                    { anggota_rombel: { some: { rombongan_belajar: rombelFilterClause } } }
                 ]
             });
         }
@@ -2032,13 +2100,20 @@ let DapodikService = class DapodikService {
             total: counts.t10 + counts.t11 + counts.t12
         }));
     }
-    async getRombonganBelajar(sekolahId, type, limit = 10, page = 1, search, tingkat) {
+    async getRombonganBelajar(sekolahId, type, limit = 10, page = 1, search, tingkat, semesterId) {
         const filter = this.getSekolahFilter(sekolahId);
+        let semId = semesterId;
+        if (!semId || semId === 'latest') {
+            semId = await this.getLatestSemesterId(filter.sekolah_id) || undefined;
+        }
         let whereClause = {
             AND: [
                 { sekolah_id: filter.sekolah_id },
             ],
         };
+        if (semId) {
+            whereClause.AND.push({ semester_id: semId });
+        }
         if (type === 'reguler') {
             whereClause.AND.push({ jenis_rombel: 1 });
         }
@@ -2548,10 +2623,11 @@ let DapodikService = class DapodikService {
                 'nama', 'nik', 'no_kk', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir',
                 'nama_ibu_kandung', 'agama_id_str', 'status_perkawinan', 'nama_suami_istri',
                 'pekerjaan_suami_istri', 'nm_wp', 'npwp', 'alamat_jalan', 'rt', 'rw',
-                'nama_dusun', 'desa_kelurahan', 'provinsi', 'kabupaten_kota', 'kecamatan',
+                'desa_kelurahan', 'provinsi', 'kabupaten_kota', 'kecamatan',
                 'kode_pos', 'lintang', 'bujur', 'sumber_gaji', 'id_bank', 'rekening_bank',
                 'rekening_atas_nama', 'nama_kcp', 'no_hp', 'no_whatsapp', 'id_telegram',
-                'email', 'tanda_tangan'
+                'email', 'tanda_tangan',
+                'doc_kk', 'doc_ktp', 'doc_akte', 'doc_ijazah_sd', 'doc_ijazah_smp', 'doc_ijazah_sma', 'doc_ijazah_s1'
             ];
             const isFieldFilled = (key) => {
                 if (key === 'provinsi' || key === 'kabupaten_kota' || key === 'kecamatan') {
@@ -2594,6 +2670,24 @@ let DapodikService = class DapodikService {
             const wilayahCache = new Map();
             const mappedAll = await Promise.all(rawData.map(async (item) => {
                 const wilayahHierarchy = await this.resolveWilayahHierarchy(item.kode_wilayah, wilayahCache);
+                const destDir = path.join(process.cwd(), 'storage', sekolahId, 'gtk', item.ptk_id, 'dokumen');
+                const mandatoryList = ["KK", "KTP", "Akte Kelahiran", "Ijazah SD", "Ijazah SMP", "Ijazah SMA", "Ijazah S1"];
+                let uploadedMandatory = [];
+                if (fs.existsSync(destDir)) {
+                    try {
+                        const files = fs.readdirSync(destDir);
+                        uploadedMandatory = mandatoryList.filter(name => {
+                            const normalizedName = name.replace(/\s+/g, '').toUpperCase();
+                            return files.some((file) => {
+                                const baseName = file.substring(0, file.lastIndexOf('.'));
+                                const nameWords = baseName.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                                const normalizedExisting = nameWords.replace(/\s+/g, '').toUpperCase();
+                                return normalizedExisting.startsWith(normalizedName);
+                            });
+                        });
+                    }
+                    catch (e) { }
+                }
                 return {
                     ptk_id: item.ptk_id,
                     nama: item.nama,
@@ -2645,6 +2739,14 @@ let DapodikService = class DapodikService {
                     memilikiSertifikasi: item.rwy_sertifikasi && item.rwy_sertifikasi.length > 0 ? "Ya" : "Tidak",
                     pendidikan_terakhir: getPendidikanTerakhir(item.riwayat_pendidikan_formal),
                     updated_at: item.last_update,
+                    tanda_tangan: item.tanda_tangan || null,
+                    doc_kk: uploadedMandatory.includes("KK") ? "Ada" : null,
+                    doc_ktp: uploadedMandatory.includes("KTP") ? "Ada" : null,
+                    doc_akte: uploadedMandatory.includes("Akte Kelahiran") ? "Ada" : null,
+                    doc_ijazah_sd: uploadedMandatory.includes("Ijazah SD") ? "Ada" : null,
+                    doc_ijazah_smp: uploadedMandatory.includes("Ijazah SMP") ? "Ada" : null,
+                    doc_ijazah_sma: uploadedMandatory.includes("Ijazah SMA") ? "Ada" : null,
+                    doc_ijazah_s1: uploadedMandatory.includes("Ijazah S1") ? "Ada" : null,
                 };
             }));
             let filteredData = mappedAll;
@@ -2677,6 +2779,24 @@ let DapodikService = class DapodikService {
             const wilayahCache = new Map();
             const mappedData = await Promise.all(rawData.map(async (item) => {
                 const wilayahHierarchy = await this.resolveWilayahHierarchy(item.kode_wilayah, wilayahCache);
+                const destDir = path.join(process.cwd(), 'storage', sekolahId, 'gtk', item.ptk_id, 'dokumen');
+                const mandatoryList = ["KK", "KTP", "Akte Kelahiran", "Ijazah SD", "Ijazah SMP", "Ijazah SMA", "Ijazah S1"];
+                let uploadedMandatory = [];
+                if (fs.existsSync(destDir)) {
+                    try {
+                        const files = fs.readdirSync(destDir);
+                        uploadedMandatory = mandatoryList.filter(name => {
+                            const normalizedName = name.replace(/\s+/g, '').toUpperCase();
+                            return files.some((file) => {
+                                const baseName = file.substring(0, file.lastIndexOf('.'));
+                                const nameWords = baseName.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                                const normalizedExisting = nameWords.replace(/\s+/g, '').toUpperCase();
+                                return normalizedExisting.startsWith(normalizedName);
+                            });
+                        });
+                    }
+                    catch (e) { }
+                }
                 return {
                     ptk_id: item.ptk_id,
                     nama: item.nama,
@@ -2728,6 +2848,14 @@ let DapodikService = class DapodikService {
                     memilikiSertifikasi: item.rwy_sertifikasi && item.rwy_sertifikasi.length > 0 ? "Ya" : "Tidak",
                     pendidikan_terakhir: getPendidikanTerakhir(item.riwayat_pendidikan_formal),
                     updated_at: item.last_update,
+                    tanda_tangan: item.tanda_tangan || null,
+                    doc_kk: uploadedMandatory.includes("KK") ? "Ada" : null,
+                    doc_ktp: uploadedMandatory.includes("KTP") ? "Ada" : null,
+                    doc_akte: uploadedMandatory.includes("Akte Kelahiran") ? "Ada" : null,
+                    doc_ijazah_sd: uploadedMandatory.includes("Ijazah SD") ? "Ada" : null,
+                    doc_ijazah_smp: uploadedMandatory.includes("Ijazah SMP") ? "Ada" : null,
+                    doc_ijazah_sma: uploadedMandatory.includes("Ijazah SMA") ? "Ada" : null,
+                    doc_ijazah_s1: uploadedMandatory.includes("Ijazah S1") ? "Ada" : null,
                 };
             }));
             return { total: totalCount, data: mappedData };
@@ -2771,8 +2899,6 @@ let DapodikService = class DapodikService {
             },
         });
         if (gtk) {
-            const fs = require('fs');
-            const path = require('path');
             const destDir = path.join(process.cwd(), 'storage', sekolahId, 'gtk', id, 'dokumen');
             let fotoDokumen = [];
             if (fs.existsSync(destDir)) {

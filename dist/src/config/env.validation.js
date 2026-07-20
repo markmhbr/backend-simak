@@ -32,6 +32,11 @@ class EnvironmentVariables {
     REDIS_PORT;
     URL_MANDALA;
     KEY_MANDALA;
+    SMTP_HOST;
+    SMTP_PORT;
+    SMTP_USER;
+    SMTP_PASS;
+    SMTP_FROM;
 }
 __decorate([
     (0, class_validator_1.IsEnum)(Environment),
@@ -89,6 +94,31 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], EnvironmentVariables.prototype, "KEY_MANDALA", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], EnvironmentVariables.prototype, "SMTP_HOST", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], EnvironmentVariables.prototype, "SMTP_PORT", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], EnvironmentVariables.prototype, "SMTP_USER", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], EnvironmentVariables.prototype, "SMTP_PASS", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], EnvironmentVariables.prototype, "SMTP_FROM", void 0);
 function validate(config) {
     const validatedConfig = (0, class_transformer_1.plainToInstance)(EnvironmentVariables, config, { enableImplicitConversion: true });
     const errors = (0, class_validator_1.validateSync)(validatedConfig, { skipMissingProperties: false });

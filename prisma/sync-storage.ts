@@ -37,6 +37,9 @@ async function syncStorageToDatabase() {
 
     console.log(`\n🏫 Memproses sekolah: ${sekolahId}`);
 
+    // Sync Logo Sekolah
+    await syncSchoolLogo(sekolahId, sekolahPath);
+
     // Baca subfolder (Level 2: gtk, peserta_didik, dll.)
     const categoryDirs = fs.readdirSync(sekolahPath);
 
@@ -52,7 +55,101 @@ async function syncStorageToDatabase() {
     }
   }
 
+  // 2. Baca folder settings (Level 1)
+  const settingsRoot = path.join(STORAGE_ROOT, 'settings');
+  if (fs.existsSync(settingsRoot)) {
+    const cadisdikDirs = fs.readdirSync(settingsRoot);
+    for (const cadisdikId of cadisdikDirs) {
+      if (!uuidRegex.test(cadisdikId)) continue;
+
+      const cadisdikPath = path.join(settingsRoot, cadisdikId);
+      if (!fs.statSync(cadisdikPath).isDirectory()) continue;
+
+      console.log(`\n⚙️ Memproses settings cadisdik: ${cadisdikId}`);
+      await syncSystemSettings(cadisdikId, cadisdikPath);
+    }
+  }
+
   console.log('\n✅ Sinkronisasi selesai!');
+}
+
+async function syncSchoolLogo(sekolahId: string, sekolahFolderPath: string) {
+  const files = fs.readdirSync(sekolahFolderPath);
+  const logoFile = files.find(f => /^logo\.(jpg|jpeg|png|webp)$/i.test(f));
+
+  if (logoFile) {
+    const relativePath = `/storage/${sekolahId}/${logoFile}`;
+
+    try {
+      // Cek dulu apakah data Sekolah ada di DB
+      const exist = await prisma.sekolah.findUnique({
+        where: { sekolah_id: sekolahId }
+      });
+
+      if (exist) {
+        await prisma.sekolah.update({
+          where: { sekolah_id: sekolahId },
+          data: { logo: relativePath }
+        });
+        console.log(`  🟢 Sekolah [${sekolahId}]: Berhasil update logo ke -> ${relativePath}`);
+      } else {
+        console.log(`  🟡 Sekolah [${sekolahId}]: Tidak ditemukan di database (skip)`);
+      }
+    } catch (err: any) {
+      console.error(`  🔴 Sekolah [${sekolahId}]: Gagal update database:`, err.message);
+    }
+  }
+}
+
+async function syncSystemSettings(cadisdikId: string, settingsPath: string) {
+  const files = fs.readdirSync(settingsPath);
+  
+  const updateData: any = {};
+  
+  const logoFile = files.find(f => /^logo\.(jpg|jpeg|png|webp)$/i.test(f));
+  if (logoFile) {
+    updateData.appLogo = `/storage/settings/${cadisdikId}/${logoFile}`;
+  }
+
+  const logoDarkFile = files.find(f => /^logo_dark\.(jpg|jpeg|png|webp)$/i.test(f));
+  if (logoDarkFile) {
+    updateData.appLogoDark = `/storage/settings/${cadisdikId}/${logoDarkFile}`;
+  }
+
+  const faviconFile = files.find(f => /^favicon\.(jpg|jpeg|png|webp)$/i.test(f));
+  if (faviconFile) {
+    updateData.appFavicon = `/storage/settings/${cadisdikId}/${faviconFile}`;
+  }
+
+  if (Object.keys(updateData).length > 0) {
+    try {
+      const exist = await prisma.systemSetting.findUnique({
+        where: { cadisdik_id: cadisdikId }
+      });
+
+      if (exist) {
+        await prisma.systemSetting.update({
+          where: { cadisdik_id: cadisdikId },
+          data: updateData
+        });
+        console.log(`  🟢 SystemSetting [${cadisdikId}]: Berhasil update settings ->`, updateData);
+      } else {
+        await prisma.systemSetting.create({
+          data: {
+            cadisdik_id: cadisdikId,
+            appName: 'SIMAK',
+            appShortName: 'Mandala',
+            copyrightText: '© 2026 SIMAK. All Rights Reserved.',
+            maintenanceMode: false,
+            ...updateData
+          }
+        });
+        console.log(`  🟢 SystemSetting [${cadisdikId}]: Berhasil membuat settings baru ->`, updateData);
+      }
+    } catch (err: any) {
+      console.error(`  🔴 SystemSetting [${cadisdikId}]: Gagal update/create database:`, err.message);
+    }
+  }
 }
 
 async function syncGtk(sekolahId: string, gtkFolderPath: string) {

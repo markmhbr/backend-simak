@@ -405,11 +405,11 @@ let DapodikController = class DapodikController {
         const data = await this.dapodikService.getRombelRekapKompetensi(sekolahId);
         return { status: 'success', data };
     }
-    async getRombonganBelajarList(req, type, limit, page, search, tingkat) {
+    async getRombonganBelajarList(req, type, limit, page, search, tingkat, semesterId) {
         const { sekolahId, namaApp } = this.getSekolahInfo(req);
         const take = limit ? parseInt(limit, 10) : 10;
         const skipPage = page ? parseInt(page, 10) : 1;
-        const { total, data } = await this.dapodikService.getRombonganBelajar(sekolahId, type, take, skipPage, search, tingkat);
+        const { total, data } = await this.dapodikService.getRombonganBelajar(sekolahId, type, take, skipPage, search, tingkat, semesterId);
         return {
             status: 'success',
             klien: namaApp,
@@ -885,8 +885,9 @@ __decorate([
     __param(3, (0, common_1.Query)('page')),
     __param(4, (0, common_1.Query)('search')),
     __param(5, (0, common_1.Query)('tingkat')),
+    __param(6, (0, common_1.Query)('semester_id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, String, String, String, String]),
+    __metadata("design:paramtypes", [Object, String, String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], DapodikController.prototype, "getRombonganBelajarList", null);
 __decorate([

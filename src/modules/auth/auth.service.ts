@@ -6,6 +6,7 @@ import { AppKeyService } from '../../core/app-key/app-key.service';
 import * as bcrypt from 'bcryptjs';
 const { generateSecret, generateURI, verify } = require('otplib');
 import { ConfigService } from '@nestjs/config';
+import { MailService } from '../../core/mail/mail.service';
 
 @Injectable()
 export class AuthService {
@@ -15,6 +16,7 @@ export class AuthService {
     private cryptoService: CryptoService,
     private configService: ConfigService,
     private appKeyService: AppKeyService,
+    private mailService: MailService,
   ) {}
 
   /**
@@ -406,5 +408,137 @@ export class AuthService {
       ...user,
       foto,
     };
+  }
+
+  async requestReset2FA(username: string, pass: string, sekolahId?: string) {
+    // 1. Cari user berdasarkan username/email
+    const user = await this.prisma.pengguna.findFirst({
+      where: {
+        OR: [
+          { username: username },
+          { email: username },
+        ],
+      },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Kredensial tidak valid');
+    }
+
+    // Multi-tenant check jika sekolahId ada
+    if (sekolahId && user.sekolah_id && user.sekolah_id !== sekolahId) {
+      throw new UnauthorizedException('Akun Anda tidak terdaftar di sekolah ini');
+    }
+
+    // 2. Cek password
+    const isMatch = await bcrypt.compare(pass, user.password);
+    if (!isMatch) {
+      throw new UnauthorizedException('Kredensial tidak valid');
+    }
+
+    // 3. Tentukan email berdasarkan ptk/peserta didik
+    let email: string | null = null;
+    let name = user.nama || user.username;
+
+    if (user.ptk_id) {
+      const gtk = await this.prisma.gtk.findUnique({
+        where: { ptk_id: user.ptk_id },
+        select: { email: true, nama: true }
+      });
+      if (gtk?.email) {
+        email = gtk.email;
+      }
+      if (gtk?.nama) {
+        name = gtk.nama;
+      }
+    } else if (user.peserta_didik_id) {
+      const pd = await this.prisma.pesertaDidik.findUnique({
+        where: { peserta_didik_id: user.peserta_didik_id },
+        select: { email_aktif: true, nama: true }
+      });
+      if (pd?.email_aktif) {
+        email = pd.email_aktif;
+      }
+      if (pd?.nama) {
+        name = pd.nama;
+      }
+    }
+
+    // Fallback ke email dari pengguna
+    if (!email) {
+      email = user.email;
+    }
+
+    if (!email || email.trim() === '') {
+      throw new BadRequestException('Email tidak terdaftar pada akun Anda. Silakan hubungi admin sekolah Anda.');
+    }
+
+    // 4. Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // 5. Hash OTP
+    const salt = await bcrypt.genSalt(10);
+    const otpHash = await bcrypt.hash(otp, salt);
+
+    // 6. Kirim email OTP
+    const emailSent = await this.mailService.sendOTP(email, otp, name);
+    if (!emailSent) {
+      throw new BadRequestException('Gagal mengirimkan kode OTP ke email Anda. Silakan coba beberapa saat lagi.');
+    }
+
+    // 7. Sign JWT berisi reset token (berlaku 10 menit)
+    const resetToken = this.jwtService.sign(
+      { sub: user.pengguna_id, otpHash, type: 'reset_2fa' },
+      { secret: this.configService.get('JWT_SECRET'), expiresIn: '10m' }
+    );
+
+    // Mask email for security (e.g. ad***@domain.com)
+    const emailParts = email.split('@');
+    const maskedLocal = emailParts[0].length > 2 
+      ? emailParts[0].substring(0, 2) + '***'
+      : emailParts[0] + '***';
+    const maskedEmail = `${maskedLocal}@${emailParts[1]}`;
+
+    return {
+      status: 'success',
+      message: `Kode OTP verifikasi telah dikirim ke email: ${maskedEmail}`,
+      resetToken,
+    };
+  }
+
+  async verifyReset2FA(resetToken: string, code: string) {
+    try {
+      // 1. Verifikasi JWT
+      const payload = this.jwtService.verify(resetToken, {
+        secret: this.configService.get('JWT_SECRET'),
+      });
+
+      if (payload.type !== 'reset_2fa') {
+        throw new UnauthorizedException('Token reset tidak valid');
+      }
+
+      // 2. Bandingkan OTP
+      const isMatch = await bcrypt.compare(code, payload.otpHash);
+      if (!isMatch) {
+        throw new UnauthorizedException('Kode OTP yang Anda masukkan salah');
+      }
+
+      // 3. Reset google2fa_secret di DB
+      await this.prisma.pengguna.update({
+        where: { pengguna_id: payload.sub },
+        data: { google2fa_secret: null },
+      });
+
+      return {
+        status: 'success',
+        message: 'Autentikasi Dua Faktor (2FA) berhasil diset ulang. Silakan masuk kembali.',
+      };
+    } catch (e: any) {
+      if (e instanceof UnauthorizedException) throw e;
+      if (e.name === 'TokenExpiredError') {
+        throw new UnauthorizedException('Sesi reset 2FA telah berakhir (Expired). Silakan ajukan ulang.');
+      }
+      throw new UnauthorizedException('Verifikasi reset 2FA gagal');
+    }
   }
 }

@@ -17,6 +17,11 @@ declare class EnvironmentVariables {
     REDIS_PORT?: number;
     URL_MANDALA?: string;
     KEY_MANDALA?: string;
+    SMTP_HOST?: string;
+    SMTP_PORT?: number;
+    SMTP_USER?: string;
+    SMTP_PASS?: string;
+    SMTP_FROM?: string;
 }
 export declare function validate(config: Record<string, unknown>): EnvironmentVariables;
 export {};

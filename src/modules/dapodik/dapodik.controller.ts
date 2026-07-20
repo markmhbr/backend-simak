@@ -527,13 +527,14 @@ export class DapodikController {
     @Query('limit') limit?: string,
     @Query('page') page?: string,
     @Query('search') search?: string,
-    @Query('tingkat') tingkat?: string
+    @Query('tingkat') tingkat?: string,
+    @Query('semester_id') semesterId?: string
   ) {
     const { sekolahId, namaApp } = this.getSekolahInfo(req);
     const take = limit ? parseInt(limit, 10) : 10;
     const skipPage = page ? parseInt(page, 10) : 1;
 
-    const { total, data } = await this.dapodikService.getRombonganBelajar(sekolahId, type, take, skipPage, search, tingkat);
+    const { total, data } = await this.dapodikService.getRombonganBelajar(sekolahId, type, take, skipPage, search, tingkat, semesterId);
     
     return {
       status: 'success',

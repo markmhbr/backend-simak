@@ -57,6 +57,14 @@ let AuthController = class AuthController {
     async reset2fa(body) {
         return this.authService.reset2FA(body);
     }
+    async requestReset2fa(body, request) {
+        const appKey = request['appKey'];
+        const sekolahId = appKey ? appKey.sekolah_id : undefined;
+        return this.authService.requestReset2FA(body.username, body.password, sekolahId);
+    }
+    async verifyReset2fa(body) {
+        return this.authService.verifyReset2FA(body.resetToken, body.code);
+    }
     async getMe(request) {
         const user = request['user'];
         if (!user)
@@ -144,6 +152,23 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "reset2fa", null);
+__decorate([
+    (0, common_1.UseGuards)(throttler_1.ThrottlerGuard, api_key_guard_1.ApiKeyGuard),
+    (0, common_1.Post)('reset-2fa/request'),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [auth_dto_1.LoginDto, Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "requestReset2fa", null);
+__decorate([
+    (0, common_1.UseGuards)(throttler_1.ThrottlerGuard),
+    (0, common_1.Post)('reset-2fa/verify'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "verifyReset2fa", null);
 __decorate([
     (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
     (0, common_1.Get)('me'),

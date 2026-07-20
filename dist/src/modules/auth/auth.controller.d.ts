@@ -72,6 +72,18 @@ export declare class AuthController {
         status: string;
         message: string;
     }>;
+    requestReset2fa(body: LoginDto, request: Request): Promise<{
+        status: string;
+        message: string;
+        resetToken: string;
+    }>;
+    verifyReset2fa(body: {
+        resetToken: string;
+        code: string;
+    }): Promise<{
+        status: string;
+        message: string;
+    }>;
     getMe(request: Request): Promise<{
         foto: string;
         sekolah_id: string;
