@@ -8,10 +8,10 @@ export declare class PengajuanPerbaikanService {
         tipe: 'GTK' | 'SISWA';
         perubahan: any;
     }): Promise<{
-        created_at: Date;
-        updated_at: Date;
         id: string;
         sekolah_id: string;
+        created_at: Date;
+        updated_at: Date;
         ptk_id: string | null;
         peserta_didik_id: string | null;
         status: string;
@@ -21,10 +21,10 @@ export declare class PengajuanPerbaikanService {
     }>;
     dapatkanDaftar(sekolahId: string): Promise<{
         nama: string;
-        created_at: Date;
-        updated_at: Date;
         id: string;
         sekolah_id: string;
+        created_at: Date;
+        updated_at: Date;
         ptk_id: string | null;
         peserta_didik_id: string | null;
         status: string;

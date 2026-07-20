@@ -7,39 +7,39 @@ export declare class IndisiplinerService {
     private readonly prisma;
     constructor(prisma: PrismaService);
     getJenisPelanggaran(sekolahId: string): Promise<{
-        aktif: boolean;
+        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        sekolah_id: string;
+        aktif: boolean;
         nama: string;
         target: number;
         poin: number;
         jenis_pelanggaran_id: string;
     }[]>;
     createJenisPelanggaran(dto: CreateJenisPelanggaranDto): Promise<{
-        aktif: boolean;
+        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        sekolah_id: string;
+        aktif: boolean;
         nama: string;
         target: number;
         poin: number;
         jenis_pelanggaran_id: string;
     }>;
     getJenisTindakLanjut(sekolahId: string): Promise<{
-        aktif: boolean;
+        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        sekolah_id: string;
+        aktif: boolean;
         nama: string;
         target: number;
         jenis_tindak_lanjut_id: string;
     }[]>;
     createJenisTindakLanjut(dto: CreateJenisTindakLanjutDto): Promise<{
-        aktif: boolean;
+        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        sekolah_id: string;
+        aktif: boolean;
         nama: string;
         target: number;
         jenis_tindak_lanjut_id: string;
@@ -50,9 +50,9 @@ export declare class IndisiplinerService {
         status?: number;
     }): Promise<any[]>;
     createPelanggaran(dto: CreatePelanggaranDto): Promise<{
+        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        sekolah_id: string;
         ptk_id: string | null;
         peserta_didik_id: string | null;
         status: number;
@@ -65,9 +65,9 @@ export declare class IndisiplinerService {
         pelanggaran_id: string;
     }>;
     updatePelanggaranStatus(id: string, status: number): Promise<{
+        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        sekolah_id: string;
         ptk_id: string | null;
         peserta_didik_id: string | null;
         status: number;

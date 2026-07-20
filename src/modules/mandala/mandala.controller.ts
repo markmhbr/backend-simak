@@ -386,6 +386,17 @@ export class MandalaController {
     };
   }
 
+  @Post('pegawai/:id/reset-2fa')
+  @UseGuards(MandalaKeyGuard)
+  @HttpCode(HttpStatus.OK)
+  async reset2FAPegawai(@Param('id') id: string) {
+    await this.mandalaService.reset2FAPegawai(id);
+    return {
+      status: 'success',
+      message: 'Pegawai 2FA successfully reset.',
+    };
+  }
+
   // --- MAPPING PENGAWAS ENDPOINTS ---
 
   @Get('mapping-pengawas')

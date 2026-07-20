@@ -290,6 +290,13 @@ let MandalaController = class MandalaController {
             message: 'Pegawai successfully deleted.',
         };
     }
+    async reset2FAPegawai(id) {
+        await this.mandalaService.reset2FAPegawai(id);
+        return {
+            status: 'success',
+            message: 'Pegawai 2FA successfully reset.',
+        };
+    }
     async getMappingPengawas(pegawaiId, sekolahId) {
         const data = await this.mandalaService.getMappingPengawas(pegawaiId, sekolahId);
         return {
@@ -783,6 +790,15 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], MandalaController.prototype, "deletePegawai", null);
+__decorate([
+    (0, common_1.Post)('pegawai/:id/reset-2fa'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "reset2FAPegawai", null);
 __decorate([
     (0, common_1.Get)('mapping-pengawas'),
     (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),

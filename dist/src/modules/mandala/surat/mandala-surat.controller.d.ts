@@ -8,10 +8,10 @@ export declare class MandalaSuratController {
         status: string;
         message: string;
         data: {
-            aktif: boolean;
             created_at: Date;
             updated_at: Date;
             cadisdik_id: string;
+            aktif: boolean;
             kategori: number;
             pengaturan_nomor_surat_id: string;
             nama_label: string;
@@ -22,10 +22,10 @@ export declare class MandalaSuratController {
     getPengaturanNomorList(req: Request): Promise<{
         status: string;
         data: {
-            aktif: boolean;
             created_at: Date;
             updated_at: Date;
             cadisdik_id: string;
+            aktif: boolean;
             kategori: number;
             pengaturan_nomor_surat_id: string;
             nama_label: string;
@@ -37,10 +37,10 @@ export declare class MandalaSuratController {
         status: string;
         message: string;
         data: {
-            aktif: boolean;
             created_at: Date;
             updated_at: Date;
             cadisdik_id: string;
+            aktif: boolean;
             kategori: number;
             pengaturan_nomor_surat_id: string;
             nama_label: string;
@@ -56,10 +56,10 @@ export declare class MandalaSuratController {
         status: string;
         message: string;
         data: {
-            aktif: boolean;
             created_at: Date;
             updated_at: Date;
             cadisdik_id: string;
+            aktif: boolean;
             kategori: number;
             template_surat_id: string;
             nama_template: string;
@@ -74,10 +74,10 @@ export declare class MandalaSuratController {
     getTemplateList(req: Request): Promise<{
         status: string;
         data: {
-            aktif: boolean;
             created_at: Date;
             updated_at: Date;
             cadisdik_id: string;
+            aktif: boolean;
             kategori: number;
             template_surat_id: string;
             nama_template: string;
@@ -92,10 +92,10 @@ export declare class MandalaSuratController {
     getTemplateDetail(id: string): Promise<{
         status: string;
         data: {
-            aktif: boolean;
             created_at: Date;
             updated_at: Date;
             cadisdik_id: string;
+            aktif: boolean;
             kategori: number;
             template_surat_id: string;
             nama_template: string;
@@ -111,10 +111,10 @@ export declare class MandalaSuratController {
         status: string;
         message: string;
         data: {
-            aktif: boolean;
             created_at: Date;
             updated_at: Date;
             cadisdik_id: string;
+            aktif: boolean;
             kategori: number;
             template_surat_id: string;
             nama_template: string;
@@ -199,11 +199,11 @@ export declare class MandalaSuratController {
         status: string;
         message: string;
         data: {
-            pegawai_id: string | null;
+            sekolah_id: string | null;
             created_at: Date;
             updated_at: Date;
             cadisdik_id: string;
-            sekolah_id: string | null;
+            pegawai_id: string | null;
             status: number;
             kategori: number;
             pengaturan_nomor_surat_id: string;
@@ -229,11 +229,11 @@ export declare class MandalaSuratController {
                 nama_template: string;
             };
         } & {
-            pegawai_id: string | null;
+            sekolah_id: string | null;
             created_at: Date;
             updated_at: Date;
             cadisdik_id: string;
-            sekolah_id: string | null;
+            pegawai_id: string | null;
             status: number;
             kategori: number;
             pengaturan_nomor_surat_id: string;
@@ -255,10 +255,10 @@ export declare class MandalaSuratController {
         status: string;
         data: {
             sekolah: {
+                sekolah_id: string;
+                cadisdik_id: string | null;
                 email: string | null;
                 nomor_telepon: string | null;
-                cadisdik_id: string | null;
-                sekolah_id: string;
                 website: string | null;
                 nama: string;
                 nama_nomenklatur: string | null;
@@ -305,32 +305,32 @@ export declare class MandalaSuratController {
                 radius: number | null;
             };
             pegawai: {
+                created_at: Date;
+                updated_at: Date;
+                cadisdik_id: string;
+                email: string;
+                nomor_telepon: string | null;
+                aktif: boolean;
                 pegawai_id: string;
                 nama_lengkap: string;
                 nip: string | null;
-                email: string;
                 password: string;
                 authenticator_secret: string | null;
                 jabatan: number | null;
                 jenis_kelamin: number;
-                nomor_telepon: string | null;
                 foto: string | null;
-                aktif: boolean;
-                created_at: Date;
-                updated_at: Date;
                 alamat_lengkap: string | null;
                 nik: string | null;
                 tanggal_lahir: Date | null;
                 tempat_lahir: string | null;
                 golongan: number | null;
-                cadisdik_id: string;
                 jenis_jabatan_id: string | null;
             };
             template_surat: {
-                aktif: boolean;
                 created_at: Date;
                 updated_at: Date;
                 cadisdik_id: string;
+                aktif: boolean;
                 kategori: number;
                 template_surat_id: string;
                 nama_template: string;
@@ -342,11 +342,11 @@ export declare class MandalaSuratController {
                 konten_html: string;
             };
         } & {
-            pegawai_id: string | null;
+            sekolah_id: string | null;
             created_at: Date;
             updated_at: Date;
             cadisdik_id: string;
-            sekolah_id: string | null;
+            pegawai_id: string | null;
             status: number;
             kategori: number;
             pengaturan_nomor_surat_id: string;
@@ -363,11 +363,11 @@ export declare class MandalaSuratController {
         status: string;
         message: string;
         data: {
-            pegawai_id: string | null;
+            sekolah_id: string | null;
             created_at: Date;
             updated_at: Date;
             cadisdik_id: string;
-            sekolah_id: string | null;
+            pegawai_id: string | null;
             status: number;
             kategori: number;
             pengaturan_nomor_surat_id: string;
@@ -384,11 +384,11 @@ export declare class MandalaSuratController {
         status: string;
         message: string;
         data: {
-            pegawai_id: string | null;
+            sekolah_id: string | null;
             created_at: Date;
             updated_at: Date;
             cadisdik_id: string;
-            sekolah_id: string | null;
+            pegawai_id: string | null;
             status: number;
             kategori: number;
             pengaturan_nomor_surat_id: string;

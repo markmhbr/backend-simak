@@ -633,6 +633,16 @@ let MandalaService = MandalaService_1 = class MandalaService {
             where: { pegawai_id: id },
         });
     }
+    async reset2FAPegawai(id) {
+        await this.getPegawaiById(id);
+        return await this.prisma.pegawai.update({
+            where: { pegawai_id: id },
+            data: {
+                authenticator_secret: null,
+                updated_at: new Date(),
+            },
+        });
+    }
     async getMappingPengawas(pegawaiId, sekolahId) {
         const where = {};
         if (pegawaiId)

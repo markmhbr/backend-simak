@@ -9,10 +9,10 @@ export declare class IndisiplinerController {
     getJenisPelanggaran(sekolahId: string): Promise<{
         status: string;
         data: {
-            aktif: boolean;
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
-            sekolah_id: string;
+            aktif: boolean;
             nama: string;
             target: number;
             poin: number;
@@ -23,10 +23,10 @@ export declare class IndisiplinerController {
         status: string;
         message: string;
         data: {
-            aktif: boolean;
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
-            sekolah_id: string;
+            aktif: boolean;
             nama: string;
             target: number;
             poin: number;
@@ -36,10 +36,10 @@ export declare class IndisiplinerController {
     getJenisTindakLanjut(sekolahId: string): Promise<{
         status: string;
         data: {
-            aktif: boolean;
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
-            sekolah_id: string;
+            aktif: boolean;
             nama: string;
             target: number;
             jenis_tindak_lanjut_id: string;
@@ -49,10 +49,10 @@ export declare class IndisiplinerController {
         status: string;
         message: string;
         data: {
-            aktif: boolean;
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
-            sekolah_id: string;
+            aktif: boolean;
             nama: string;
             target: number;
             jenis_tindak_lanjut_id: string;
@@ -66,9 +66,9 @@ export declare class IndisiplinerController {
         status: string;
         message: string;
         data: {
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
-            sekolah_id: string;
             ptk_id: string | null;
             peserta_didik_id: string | null;
             status: number;
@@ -85,9 +85,9 @@ export declare class IndisiplinerController {
         status: string;
         message: string;
         data: {
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
-            sekolah_id: string;
             ptk_id: string | null;
             peserta_didik_id: string | null;
             status: number;

@@ -22,9 +22,9 @@ export declare class MutasiPdService {
             nama: string;
         };
     } & {
+        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        sekolah_id: string;
         ptk_id: string | null;
         peserta_didik_id: string;
         jenis_keluar_id: string;
@@ -39,9 +39,9 @@ export declare class MutasiPdService {
         jenis_keluar_id: string;
         alasan?: string;
     }, ptkId: string | null, file?: Express.Multer.File): Promise<{
+        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        sekolah_id: string;
         ptk_id: string | null;
         peserta_didik_id: string;
         jenis_keluar_id: string;
@@ -52,9 +52,9 @@ export declare class MutasiPdService {
         bukti: string | null;
     }>;
     approveMutasiPd(sekolahId: string, mutasiId: string): Promise<{
+        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        sekolah_id: string;
         ptk_id: string | null;
         peserta_didik_id: string;
         jenis_keluar_id: string;
@@ -65,9 +65,9 @@ export declare class MutasiPdService {
         bukti: string | null;
     }>;
     rejectMutasiPd(sekolahId: string, mutasiId: string, alasanTolak: string): Promise<{
+        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        sekolah_id: string;
         ptk_id: string | null;
         peserta_didik_id: string;
         jenis_keluar_id: string;

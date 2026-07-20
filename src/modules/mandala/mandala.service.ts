@@ -668,6 +668,17 @@ export class MandalaService implements OnModuleInit {
     });
   }
 
+  async reset2FAPegawai(id: string) {
+    await this.getPegawaiById(id);
+    return await this.prisma.pegawai.update({
+      where: { pegawai_id: id },
+      data: {
+        authenticator_secret: null,
+        updated_at: new Date(),
+      },
+    });
+  }
+
   // --- MAPPING PENGAWAS CRUD ---
 
   async getMappingPengawas(pegawaiId?: string, sekolahId?: string) {
