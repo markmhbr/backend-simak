@@ -86,9 +86,9 @@ export declare class AuthController {
     }>;
     getMe(request: Request): Promise<{
         foto: string;
+        email: string;
         sekolah_id: string;
         alamat: string;
-        email: string;
         pengguna_id: string;
         username: string;
         nama: string;
@@ -104,6 +104,8 @@ export declare class AuthController {
         registeredDomain: string;
     }>;
     systemSetup(apiKey: string, request: Request): Promise<{
+        created_at: Date;
+        updated_at: Date;
         id: string;
         sekolah_id: string;
         nama_app: string;
@@ -111,8 +113,6 @@ export declare class AuthController {
         key_webService: string | null;
         key_adminPanel: string | null;
         is_active: boolean;
-        created_at: Date;
-        updated_at: Date;
         domain: string | null;
     }>;
     private getRequestDomain;

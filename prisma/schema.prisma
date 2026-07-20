@@ -285,6 +285,8 @@ model PesertaDidik {
   penghasilan_id_wali      Int?
   kewarganegaraan          String?
   pekerjaan_id             Int?
+  status_hidup_ayah        Int?
+  status_hidup_ibu         Int?
   soft_delete              Decimal?  @db.Decimal
 
   // --- Kolom dari tabel registrasi_peserta_didik ---

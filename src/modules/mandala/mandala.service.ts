@@ -1179,6 +1179,18 @@ export class MandalaService implements OnModuleInit {
       const activeAnggota = pd.anggota_rombel?.[0];
       const activeRombel = activeAnggota?.rombongan_belajar || pd.rombongan_belajar;
 
+      // Parse tahun ajaran and semester from semester_id (e.g. "20251" -> "2025/2026" & "Ganjil")
+      let tahunAjaran = '';
+      let semesterNama = '';
+      if (activeRombel?.semester_id && activeRombel.semester_id.length >= 5) {
+        const startYear = parseInt(activeRombel.semester_id.substring(0, 4), 10);
+        if (!isNaN(startYear)) {
+          tahunAjaran = `${startYear}/${startYear + 1}`;
+        }
+        const term = activeRombel.semester_id.charAt(4);
+        semesterNama = term === '1' ? 'Ganjil' : term === '2' ? 'Genap' : '';
+      }
+
       return {
         identitas: {
           id: pd.peserta_didik_id,
@@ -1203,6 +1215,9 @@ export class MandalaService implements OnModuleInit {
           nama_rombel: activeRombel?.nama || '',
           tingkat: activeRombel?.tingkat_pendidikan_id?.toString() || '',
           jurusan: activeRombel?.jurusan_sp?.nama_jurusan_sp || activeRombel?.jurusan_sp_id || '',
+          tahun_ajaran: tahunAjaran,
+          tahun_pelajaran: tahunAjaran, // Dukung alias tahun_pelajaran
+          semester: semesterNama,
         },
         data_pendukung: {
           alamat_lengkap: alamatLengkap,

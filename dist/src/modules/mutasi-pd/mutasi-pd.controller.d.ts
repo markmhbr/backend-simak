@@ -26,9 +26,9 @@ export declare class MutasiPdController {
                 nama: string;
             };
         } & {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             ptk_id: string | null;
             peserta_didik_id: string;
             jenis_keluar_id: string;
@@ -47,9 +47,9 @@ export declare class MutasiPdController {
         status: string;
         message: string;
         data: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             ptk_id: string | null;
             peserta_didik_id: string;
             jenis_keluar_id: string;
@@ -64,9 +64,9 @@ export declare class MutasiPdController {
         status: string;
         message: string;
         data: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             ptk_id: string | null;
             peserta_didik_id: string;
             jenis_keluar_id: string;
@@ -83,9 +83,9 @@ export declare class MutasiPdController {
         status: string;
         message: string;
         data: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             ptk_id: string | null;
             peserta_didik_id: string;
             jenis_keluar_id: string;

@@ -9,10 +9,10 @@ export declare class PelaporanController {
         status: string;
         message: string;
         data: {
+            aktif: boolean;
             created_at: Date;
             updated_at: Date;
             cadisdik_id: string;
-            aktif: boolean;
             tanggal_mulai: Date | null;
             tanggal_selesai: Date | null;
             judul: string;
@@ -76,10 +76,10 @@ export declare class PelaporanController {
         status: string;
         message: string;
         data: {
+            aktif: boolean;
             created_at: Date;
             updated_at: Date;
             cadisdik_id: string;
-            aktif: boolean;
             tanggal_mulai: Date | null;
             tanggal_selesai: Date | null;
             judul: string;

@@ -4,10 +4,10 @@ export declare class PelaporanService {
     private prisma;
     constructor(prisma: PrismaService);
     createPelaporan(cadisdikId: string, dto: CreatePelaporanDto): Promise<{
+        aktif: boolean;
         created_at: Date;
         updated_at: Date;
         cadisdik_id: string;
-        aktif: boolean;
         tanggal_mulai: Date | null;
         tanggal_selesai: Date | null;
         judul: string;
@@ -93,10 +93,10 @@ export declare class PelaporanService {
     renderAllSekolahPelaporanHtml(cadisdikId: string, pelaporanId: string): Promise<string>;
     exportAllSekolahExcel(cadisdikId: string, pelaporanId: string): Promise<Buffer>;
     updatePelaporan(cadisdikId: string, pelaporanId: string, dto: CreatePelaporanDto): Promise<{
+        aktif: boolean;
         created_at: Date;
         updated_at: Date;
         cadisdik_id: string;
-        aktif: boolean;
         tanggal_mulai: Date | null;
         tanggal_selesai: Date | null;
         judul: string;

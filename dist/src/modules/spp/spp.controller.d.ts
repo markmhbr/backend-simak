@@ -14,10 +14,10 @@ export declare class SppController {
         status: string;
         message: string;
         data: {
-            sekolah_id: string;
+            aktif: boolean;
             created_at: Date;
             updated_at: Date;
-            aktif: boolean;
+            sekolah_id: string;
             tipe: number;
             nama_tagihan: string;
             nominal: bigint;
@@ -41,10 +41,10 @@ export declare class SppController {
                 pengaturan_tagihan_rombel_id: string;
             })[];
         } & {
-            sekolah_id: string;
+            aktif: boolean;
             created_at: Date;
             updated_at: Date;
-            aktif: boolean;
+            sekolah_id: string;
             tipe: number;
             nama_tagihan: string;
             nominal: bigint;
@@ -55,10 +55,10 @@ export declare class SppController {
         status: string;
         message: string;
         data: {
-            sekolah_id: string;
+            aktif: boolean;
             created_at: Date;
             updated_at: Date;
-            aktif: boolean;
+            sekolah_id: string;
             tipe: number;
             nama_tagihan: string;
             nominal: bigint;
@@ -110,8 +110,8 @@ export declare class SppController {
                 nama_tagihan: string;
             };
             riwayat_transaksi: {
-                sekolah_id: string;
                 created_at: Date;
+                sekolah_id: string;
                 peserta_didik_id: string;
                 keterangan: string | null;
                 nominal: bigint;
@@ -122,9 +122,9 @@ export declare class SppController {
                 riwayat_transaksi_spp_id: string;
             }[];
         } & {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             peserta_didik_id: string;
             status: number;
             pengaturan_tagihan_id: string;
@@ -138,8 +138,8 @@ export declare class SppController {
         status: string;
         message: string;
         data: {
-            sekolah_id: string;
             created_at: Date;
+            sekolah_id: string;
             peserta_didik_id: string;
             keterangan: string | null;
             nominal: bigint;

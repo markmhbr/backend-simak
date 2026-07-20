@@ -7,10 +7,10 @@ export declare class LayananMandalaController {
     createLayanan(req: Request, dto: CreateLayananDto): Promise<{
         status: string;
         data: {
+            aktif: boolean;
             created_at: Date;
             updated_at: Date;
             cadisdik_id: string | null;
-            aktif: boolean;
             layanan_id: string;
             nama_layanan: string;
             kategori: number;
@@ -20,9 +20,9 @@ export declare class LayananMandalaController {
         status: string;
         data: ({
             syarat: {
+                aktif: boolean;
                 created_at: Date;
                 updated_at: Date;
-                aktif: boolean;
                 layanan_id: string;
                 urutan: number;
                 layanan_syarat_id: string;
@@ -30,10 +30,10 @@ export declare class LayananMandalaController {
                 wajib: boolean;
             }[];
         } & {
+            aktif: boolean;
             created_at: Date;
             updated_at: Date;
             cadisdik_id: string | null;
-            aktif: boolean;
             layanan_id: string;
             nama_layanan: string;
             kategori: number;
@@ -42,10 +42,10 @@ export declare class LayananMandalaController {
     updateLayanan(id: string, dto: Partial<CreateLayananDto>): Promise<{
         status: string;
         data: {
+            aktif: boolean;
             created_at: Date;
             updated_at: Date;
             cadisdik_id: string | null;
-            aktif: boolean;
             layanan_id: string;
             nama_layanan: string;
             kategori: number;
@@ -58,9 +58,9 @@ export declare class LayananMandalaController {
     createSyarat(layananId: string, dto: CreateLayananSyaratDto): Promise<{
         status: string;
         data: {
+            aktif: boolean;
             created_at: Date;
             updated_at: Date;
-            aktif: boolean;
             layanan_id: string;
             urutan: number;
             layanan_syarat_id: string;
@@ -71,9 +71,9 @@ export declare class LayananMandalaController {
     updateSyarat(syaratId: string, dto: Partial<CreateLayananSyaratDto>): Promise<{
         status: string;
         data: {
+            aktif: boolean;
             created_at: Date;
             updated_at: Date;
-            aktif: boolean;
             layanan_id: string;
             urutan: number;
             layanan_syarat_id: string;
@@ -88,9 +88,9 @@ export declare class LayananMandalaController {
     getSyarat(layananId: string): Promise<{
         status: string;
         data: {
+            aktif: boolean;
             created_at: Date;
             updated_at: Date;
-            aktif: boolean;
             layanan_id: string;
             urutan: number;
             layanan_syarat_id: string;
@@ -102,10 +102,10 @@ export declare class LayananMandalaController {
         status: string;
         message: string;
         data: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
             cadisdik_id: string | null;
+            sekolah_id: string;
             ptk_id: string | null;
             peserta_didik_id: string | null;
             status: number;
@@ -124,10 +124,10 @@ export declare class LayananMandalaController {
             ptk: any;
             peserta_didik: any;
             layanan: {
+                aktif: boolean;
                 created_at: Date;
                 updated_at: Date;
                 cadisdik_id: string | null;
-                aktif: boolean;
                 layanan_id: string;
                 nama_layanan: string;
                 kategori: number;
@@ -137,8 +137,8 @@ export declare class LayananMandalaController {
                     nama_lengkap: string;
                 };
             } & {
-                created_at: Date;
                 pegawai_id: string;
+                created_at: Date;
                 status: number;
                 permohonan_layanan_id: string;
                 permohonan_layanan_log_id: string;
@@ -146,9 +146,9 @@ export declare class LayananMandalaController {
             })[];
             permohonan_layanan_file: ({
                 layanan_syarat: {
+                    aktif: boolean;
                     created_at: Date;
                     updated_at: Date;
-                    aktif: boolean;
                     layanan_id: string;
                     urutan: number;
                     layanan_syarat_id: string;
@@ -167,10 +167,10 @@ export declare class LayananMandalaController {
                 nama_file: string | null;
                 file_url: string | null;
             })[];
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
             cadisdik_id: string | null;
+            sekolah_id: string;
             ptk_id: string | null;
             peserta_didik_id: string | null;
             status: number;
@@ -190,9 +190,9 @@ export declare class LayananMandalaController {
             peserta_didik: any;
             layanan: {
                 syarat: {
+                    aktif: boolean;
                     created_at: Date;
                     updated_at: Date;
-                    aktif: boolean;
                     layanan_id: string;
                     urutan: number;
                     layanan_syarat_id: string;
@@ -200,10 +200,10 @@ export declare class LayananMandalaController {
                     wajib: boolean;
                 }[];
             } & {
+                aktif: boolean;
                 created_at: Date;
                 updated_at: Date;
                 cadisdik_id: string | null;
-                aktif: boolean;
                 layanan_id: string;
                 nama_layanan: string;
                 kategori: number;
@@ -213,8 +213,8 @@ export declare class LayananMandalaController {
                     nama_lengkap: string;
                 };
             } & {
-                created_at: Date;
                 pegawai_id: string;
+                created_at: Date;
                 status: number;
                 permohonan_layanan_id: string;
                 permohonan_layanan_log_id: string;
@@ -222,9 +222,9 @@ export declare class LayananMandalaController {
             })[];
             permohonan_layanan_file: ({
                 layanan_syarat: {
+                    aktif: boolean;
                     created_at: Date;
                     updated_at: Date;
-                    aktif: boolean;
                     layanan_id: string;
                     urutan: number;
                     layanan_syarat_id: string;
@@ -243,10 +243,10 @@ export declare class LayananMandalaController {
                 nama_file: string | null;
                 file_url: string | null;
             })[];
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
             cadisdik_id: string | null;
+            sekolah_id: string;
             ptk_id: string | null;
             peserta_didik_id: string | null;
             status: number;
@@ -262,10 +262,10 @@ export declare class LayananMandalaController {
         status: string;
         message: string;
         data: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
             cadisdik_id: string | null;
+            sekolah_id: string;
             ptk_id: string | null;
             peserta_didik_id: string | null;
             status: number;

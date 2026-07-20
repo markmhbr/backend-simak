@@ -443,6 +443,8 @@ let SyncService = SyncService_1 = class SyncService {
                 penghasilan_id_wali: p.penghasilan_id_wali ? Number(p.penghasilan_id_wali) : null,
                 kewarganegaraan: p.kewarganegaraan || 'Indonesia',
                 pekerjaan_id: p.pekerjaan_id ? Number(p.pekerjaan_id) : null,
+                status_hidup_ayah: p.status_hidup_ayah !== undefined ? this.parseNumber(p.status_hidup_ayah) : null,
+                status_hidup_ibu: p.status_hidup_ibu !== undefined ? this.parseNumber(p.status_hidup_ibu) : null,
                 soft_delete: this.parseNumber(p.soft_delete),
                 registrasi_id: rpd.registrasi_id || null,
                 jurusan_sp_id: rpd.jurusan_sp_id || null,

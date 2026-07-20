@@ -20,9 +20,9 @@ export declare class PresensiController {
             rombongan_belajar_id: string;
             nama_rombel: string;
         };
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         peserta_didik_id: string;
         jam_masuk: Date | null;
         jam_pulang: Date | null;
@@ -36,9 +36,9 @@ export declare class PresensiController {
             nuptk: string;
             jenis_ptk_id_str: string;
         };
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         ptk_id: string;
         jam_masuk: Date | null;
         jam_pulang: Date | null;
@@ -62,9 +62,9 @@ export declare class PresensiController {
             };
         };
         activeIzinKeluar: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             ptk_id: string | null;
             peserta_didik_id: string | null;
             keterangan: string;
@@ -86,9 +86,9 @@ export declare class PresensiController {
             nuptk: string;
         };
         activeIzinKeluar: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             ptk_id: string | null;
             peserta_didik_id: string | null;
             keterangan: string;
@@ -102,10 +102,10 @@ export declare class PresensiController {
         };
     }>;
     getHariLibur(sekolahId: string): Promise<{
-        sekolah_id: string;
+        aktif: boolean;
         created_at: Date;
         updated_at: Date;
-        aktif: boolean;
+        sekolah_id: string;
         nama: string;
         keterangan: string | null;
         tanggal_mulai: Date;
@@ -118,10 +118,10 @@ export declare class PresensiController {
         tanggal_selesai: string;
         keterangan?: string;
     }): Promise<{
-        sekolah_id: string;
+        aktif: boolean;
         created_at: Date;
         updated_at: Date;
-        aktif: boolean;
+        sekolah_id: string;
         nama: string;
         keterangan: string | null;
         tanggal_mulai: Date;
@@ -134,10 +134,10 @@ export declare class PresensiController {
         tanggal_selesai?: string;
         keterangan?: string;
     }): Promise<{
-        sekolah_id: string;
+        aktif: boolean;
         created_at: Date;
         updated_at: Date;
-        aktif: boolean;
+        sekolah_id: string;
         nama: string;
         keterangan: string | null;
         tanggal_mulai: Date;
@@ -150,9 +150,9 @@ export declare class PresensiController {
         waktu: string;
         tipe: 'masuk' | 'pulang';
     }): Promise<{
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         peserta_didik_id: string;
         jam_masuk: Date | null;
         jam_pulang: Date | null;
@@ -165,9 +165,9 @@ export declare class PresensiController {
         waktu: string;
         tipe: 'masuk' | 'pulang';
     }): Promise<{
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         ptk_id: string;
         jam_masuk: Date | null;
         jam_pulang: Date | null;
@@ -181,8 +181,8 @@ export declare class PresensiController {
         tanggal: string;
         status: number;
     }): Promise<{
-        sekolah_id: string;
         created_at: Date;
+        sekolah_id: string;
         peserta_didik_id: string;
         status: number;
         jadwal_pelajaran_id: string;
@@ -200,9 +200,9 @@ export declare class PresensiController {
     }): Promise<any>;
     getIzinKeluar(sekolahId: string, tanggal?: string): Promise<any[]>;
     catatKembali(sekolahId: string, izinId: string): Promise<{
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         ptk_id: string | null;
         peserta_didik_id: string | null;
         keterangan: string;
@@ -215,9 +215,9 @@ export declare class PresensiController {
         jam_kembali_estimasi: Date | null;
     }>;
     setujuiIzin(sekolahId: string, izinId: string): Promise<{
-        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
+        sekolah_id: string;
         ptk_id: string | null;
         peserta_didik_id: string | null;
         keterangan: string;
@@ -236,9 +236,9 @@ export declare class PresensiController {
     getRekapGtk(sekolahId: string, tanggal?: string): Promise<{
         jenis_ptk_id_str: string;
         presensi: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             ptk_id: string;
             jam_masuk: Date | null;
             jam_pulang: Date | null;
@@ -247,9 +247,9 @@ export declare class PresensiController {
             status_pulang: number | null;
         };
         izin: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            sekolah_id: string;
             ptk_id: string | null;
             peserta_didik_id: string | null;
             keterangan: string;
@@ -281,14 +281,14 @@ export declare class PresensiController {
         status: string;
         message: string;
         data: {
-            sekolah_id: string | null;
-            email: string | null;
             nip: string | null;
+            email: string | null;
             jenis_kelamin: string | null;
             foto: string | null;
             nik: string | null;
             tanggal_lahir: Date | null;
             tempat_lahir: string | null;
+            sekolah_id: string | null;
             nama: string;
             no_hp: string | null;
             ptk_id: string;

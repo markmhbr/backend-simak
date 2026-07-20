@@ -3544,7 +3544,8 @@ export class DapodikService {
       'tahun_lahir_ayah', 'tahun_lahir_ibu', 'nama_wali', 'tahun_lahir_wali',
       'berat_badan', 'tinggi_badan', 'lingkar_kepala', 'jarak_rumah_ke_sekolah',
       'jarak_rumah_ke_sekolah_km', 'waktu_tempuh_ke_sekolah', 'menit_tempuh_ke_sekolah',
-      'jumlah_saudara_kandung', 'anak_keberapa', 'email', 'email_aktif', 'no_whatsapp'
+      'jumlah_saudara_kandung', 'anak_keberapa', 'email', 'email_aktif', 'no_whatsapp',
+      'status_hidup_ayah', 'status_hidup_ibu'
     ];
 
     for (const field of safePdFields) {
@@ -3595,6 +3596,9 @@ export class DapodikService {
     if (updateData.kebutuhan_khusus_id_ibu !== undefined) {
       cleanData.kebutuhan_khusus_id_ibu = (updateData.kebutuhan_khusus_id_ibu === null || updateData.kebutuhan_khusus_id_ibu === '') ? 0 : Number(updateData.kebutuhan_khusus_id_ibu);
     }
+
+    if (updateData.status_hidup_ayah !== undefined) cleanData.status_hidup_ayah = mapNumeric(updateData.status_hidup_ayah);
+    if (updateData.status_hidup_ibu !== undefined) cleanData.status_hidup_ibu = mapNumeric(updateData.status_hidup_ibu);
 
     // Pekerjaan
     if (updateData.pekerjaan_id_ayah !== undefined) cleanData.pekerjaan_id_ayah = mapNumeric(updateData.pekerjaan_id_ayah);
@@ -4202,6 +4206,8 @@ export class DapodikService {
         kebutuhan_khusus_id: true,
         kebutuhan_khusus_id_ayah: true,
         kebutuhan_khusus_id_ibu: true,
+        status_hidup_ayah: true,
+        status_hidup_ibu: true,
       },
     });
   }
