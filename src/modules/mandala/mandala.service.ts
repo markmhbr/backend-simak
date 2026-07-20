@@ -1624,6 +1624,14 @@ export class MandalaService implements OnModuleInit {
     const wibDate = new Date(date.getTime() + 7 * 60 * 60 * 1000);
     const dateOnly = new Date(wibDate.toISOString().split('T')[0]);
 
+    // Cari semester_id terbaru dari rombongan belajar sekolah terkait
+    const latestRombel = await this.prisma.rombonganBelajar.findFirst({
+      where: sekolahId ? { sekolah_id: sekolahId } : {},
+      select: { semester_id: true },
+      orderBy: { semester_id: 'desc' },
+    });
+    const latestSemesterId = latestRombel?.semester_id || null;
+
     const data = await this.prisma.presensiPesertaDidik.findMany({
       where: {
         sekolah_id: sekolahId,
@@ -1641,6 +1649,22 @@ export class MandalaService implements OnModuleInit {
                 nama: true,
                 tingkat_pendidikan_id: true,
               }
+            },
+            anggota_rombel: {
+              where: {
+                rombongan_belajar: {
+                  jenis_rombel: 1,
+                  ...(latestSemesterId ? { semester_id: latestSemesterId } : {}),
+                }
+              },
+              select: {
+                rombongan_belajar: {
+                  select: {
+                    nama: true,
+                    tingkat_pendidikan_id: true,
+                  }
+                }
+              }
             }
           }
         }
@@ -1648,11 +1672,20 @@ export class MandalaService implements OnModuleInit {
       orderBy: { jam_masuk: 'desc' },
     });
 
-    return data.map(item => ({
-      ...item,
-      status_masuk_str: this.mapStatusMasuk(item.status_masuk),
-      status_pulang_str: this.mapStatusPulang(item.status_pulang),
-    }));
+    return data.map(item => {
+      const activeAnggota = item.peserta_didik?.anggota_rombel?.[0];
+      const activeRombel = activeAnggota?.rombongan_belajar || item.peserta_didik?.rombongan_belajar;
+
+      return {
+        ...item,
+        status_masuk_str: this.mapStatusMasuk(item.status_masuk),
+        status_pulang_str: this.mapStatusPulang(item.status_pulang),
+        peserta_didik: item.peserta_didik ? {
+          ...item.peserta_didik,
+          rombongan_belajar: activeRombel,
+        } : null,
+      };
+    });
   }
 
   async getGtkPresenceForMandala(sekolahId: string, date: Date) {
@@ -1836,10 +1869,30 @@ export class MandalaService implements OnModuleInit {
   }
 
   async getSemestersForMandala() {
-    const semesters = await this.prisma.semester.findMany({
-      where: { periode_aktif: 1 },
+    // Cari semester_id terbaru dari rombongan_belajar
+    const latestRombel = await this.prisma.rombonganBelajar.findFirst({
+      select: { semester_id: true },
       orderBy: { semester_id: 'desc' },
     });
+    const latestSemesterId = latestRombel?.semester_id;
+
+    let semesters = [];
+    if (latestSemesterId) {
+      const sem = await this.prisma.semester.findFirst({
+        where: { semester_id: latestSemesterId },
+      });
+      if (sem) {
+        semesters.push(sem);
+      }
+    }
+
+    // Fallback jika tidak ada data di rombongan_belajar
+    if (semesters.length === 0) {
+      semesters = await this.prisma.semester.findMany({
+        where: { periode_aktif: 1 },
+        orderBy: { semester_id: 'desc' },
+      });
+    }
 
     return semesters.map((s) => {
       const nama = s.nama ? s.nama.trim() : '';

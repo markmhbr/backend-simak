@@ -727,14 +727,20 @@ export declare class MandalaController {
             status_masuk_str: string;
             status_pulang_str: string;
             peserta_didik: {
-                foto: string;
-                nama: string;
-                nisn: string;
-                nipd: string;
                 rombongan_belajar: {
                     nama: string;
                     tingkat_pendidikan_id: import("@prisma/client-runtime-utils").Decimal;
                 };
+                foto: string;
+                nama: string;
+                nisn: string;
+                nipd: string;
+                anggota_rombel: {
+                    rombongan_belajar: {
+                        nama: string;
+                        tingkat_pendidikan_id: import("@prisma/client-runtime-utils").Decimal;
+                    };
+                }[];
             };
             sekolah_id: string;
             created_at: Date;
@@ -789,10 +795,10 @@ export declare class MandalaController {
     getSemesterIds(): Promise<{
         status: string;
         data: {
-            semester_id: string;
-            nama: string;
-            tahun_ajaran: string;
-            semester: string;
+            semester_id: any;
+            nama: any;
+            tahun_ajaran: any;
+            semester: any;
             periode_aktif: boolean;
         }[];
     }>;
