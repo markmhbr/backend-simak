@@ -1,6 +1,4 @@
 import { Pool } from 'pg';
-import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient } from '@prisma/client';
 
 const fs = require('fs');
 const path = require('path');
@@ -13,28 +11,26 @@ if (!dbUrl) {
   process.exit(1);
 }
 
-// Tambahkan ssl rejectUnauthorized: false jika server memintanya
+// Gunakan SSL jika tidak didisable
 const pool = new Pool({ 
   connectionString: dbUrl,
   ssl: dbUrl.includes('sslmode=disable') ? false : { rejectUnauthorized: false }
 });
-
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
 
 async function main() {
   const targetEmail = 'infoutep81@gmail.com';
 
   console.log(`--- Memulai reset authenticator_secret untuk email: ${targetEmail} ---`);
 
-  // Menggunakan ExecuteRaw ke schema mandala secara eksplisit
-  const updatedCount = await prisma.$executeRaw`
-    UPDATE mandala.pegawai 
-    SET authenticator_secret = NULL 
-    WHERE email = ${targetEmail}
-  `;
+  // Kirim raw query langsung melalui pg Pool
+  const res = await pool.query(
+    `UPDATE mandala.pegawai 
+     SET authenticator_secret = NULL 
+     WHERE email = $1`,
+    [targetEmail]
+  );
 
-  console.log(`Berhasil menghapus authenticator_secret pada ${updatedCount} data pegawai.`);
+  console.log(`Berhasil menghapus authenticator_secret pada ${res.rowCount} data pegawai.`);
   console.log('--- Selesai ---');
 }
 
@@ -44,6 +40,5 @@ main()
     process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect();
     await pool.end();
   });
