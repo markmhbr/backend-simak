@@ -45,7 +45,7 @@ export class DapodikService {
     }
 
     try {
-      let currentKode: string | null = trimmed;
+      let currentKode: string | null = trimmed.padEnd(8, ' ');
       let maxDepth = 6; // Safety limit agar tidak infinite loop
 
       while (currentKode && maxDepth > 0) {
@@ -64,7 +64,7 @@ export class DapodikService {
           case 0: result.negara = wil.nama; break;
         }
 
-        currentKode = wil.mst_kode_wilayah?.trim() || null;
+        currentKode = wil.mst_kode_wilayah ? wil.mst_kode_wilayah.trim().padEnd(8, ' ') : null;
         maxDepth--;
       }
     } catch (e) {
