@@ -68,8 +68,9 @@ export class MandalaService implements OnModuleInit {
     }
   }
 
-  async getSchools() {
+  async getSchools(sekolahId?: string) {
     const schools = await this.prisma.sekolah.findMany({
+      where: sekolahId ? { sekolah_id: sekolahId } : undefined,
       include: {
         cadisdik: true,
       },
@@ -910,6 +911,7 @@ export class MandalaService implements OnModuleInit {
         cadisdik_id: cadisdikId,
         cadisdik_nama: cadisdikNama,
         sekolahId: userEntity.sekolah_id,
+        sekolah_id: userEntity.sekolah_id,
       } : {
         sub: userEntity.pegawai_id,
         email: userEntity.email,
@@ -940,6 +942,8 @@ export class MandalaService implements OnModuleInit {
             email: userEntity.email,
             role: 'Operator Sekolah',
             cadisdik: cadisdikNama || '',
+            sekolahId: userEntity.sekolah_id,
+            sekolah_id: userEntity.sekolah_id,
           } : {
             id: userEntity.pegawai_id,
             nama: userEntity.nama_lengkap,
@@ -996,6 +1000,8 @@ export class MandalaService implements OnModuleInit {
           role: 'Operator Sekolah',
           cadisdik_id: cadisdikId,
           cadisdik_nama: cadisdikNama,
+          sekolahId: operator.sekolah_id,
+          sekolah_id: operator.sekolah_id,
         };
 
         userResponse = {
@@ -1006,6 +1012,8 @@ export class MandalaService implements OnModuleInit {
           email: operator.email,
           role: 'Operator Sekolah',
           cadisdik: cadisdikNama || '',
+          sekolahId: operator.sekolah_id,
+          sekolah_id: operator.sekolah_id,
         };
       } else {
         const pegawai = await this.prisma.pegawai.findUnique({

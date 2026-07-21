@@ -37,8 +37,11 @@ export class MandalaController {
 
   @Get('sekolah')
   @UseGuards(MandalaKeyGuard)
-  async getSchools() {
-    const data = await this.mandalaService.getSchools();
+  async getSchools(@Req() req: any) {
+    const user = req['user'];
+    const isOperator = user?.role === 'Operator Sekolah';
+    const sekolahId = isOperator ? (user?.sekolahId || user?.sekolah_id) : undefined;
+    const data = await this.mandalaService.getSchools(sekolahId);
     return {
       status: 'success',
       data,
@@ -453,7 +456,13 @@ export class MandalaController {
 
   @Get('sekolah/:id')
   @UseGuards(MandalaKeyGuard)
-  async getSchoolDetail(@Param('id') id: string) {
+  async getSchoolDetail(@Param('id') id: string, @Req() req: any) {
+    const user = req['user'];
+    const isOperator = user?.role === 'Operator Sekolah';
+    const operatorSekolahId = user?.sekolahId || user?.sekolah_id;
+    if (isOperator && operatorSekolahId && operatorSekolahId !== id) {
+      throw new ForbiddenException('You do not have permission to access other school details.');
+    }
     const data = await this.mandalaService.getSchoolDetail(id);
     if (!data) {
       throw new NotFoundException(`School with ID ${id} not found.`);
@@ -466,7 +475,13 @@ export class MandalaController {
 
   @Get('sekolah/:id/summary')
   @UseGuards(MandalaKeyGuard)
-  async getSchoolSummary(@Param('id') id: string) {
+  async getSchoolSummary(@Param('id') id: string, @Req() req: any) {
+    const user = req['user'];
+    const isOperator = user?.role === 'Operator Sekolah';
+    const operatorSekolahId = user?.sekolahId || user?.sekolah_id;
+    if (isOperator && operatorSekolahId && operatorSekolahId !== id) {
+      throw new ForbiddenException('You do not have permission to access other school summaries.');
+    }
     const data = await this.mandalaService.getSchoolSummary(id);
     if (!data) {
       throw new NotFoundException(`School with ID ${id} not found.`);
@@ -480,18 +495,25 @@ export class MandalaController {
   @Get('dapodik/peserta-didik')
   @UseGuards(MandalaKeyGuard)
   async getPesertaDidik(
+    @Req() req: any,
     @Query('sekolah_id') sekolahId?: string,
     @Query('limit') limit?: string,
     @Query('page') page?: string,
     @Query('search') search?: string,
     @Query('status') status?: 'aktif' | 'non-aktif'
   ) {
+    const user = req['user'];
+    const isOperator = user?.role === 'Operator Sekolah';
+    let targetSekolahId = sekolahId;
+    if (isOperator) {
+      targetSekolahId = user?.sekolahId || user?.sekolah_id;
+    }
     let take = limit ? parseInt(limit, 10) : 10;
     if (take > 100) {
       take = 100; // Cap at 100 to optimize performance
     }
     const skipPage = page ? parseInt(page, 10) : 1;
-    return await this.mandalaService.getPesertaDidikForMandala(sekolahId, {
+    return await this.mandalaService.getPesertaDidikForMandala(targetSekolahId, {
       limit: take,
       page: skipPage,
       search,
@@ -502,6 +524,7 @@ export class MandalaController {
   @Get('dapodik/gtk')
   @UseGuards(MandalaKeyGuard)
   async getGtk(
+    @Req() req: any,
     @Query('sekolah_id') sekolahId?: string,
     @Query('limit') limit?: string,
     @Query('page') page?: string,
@@ -510,15 +533,21 @@ export class MandalaController {
     @Query('type') type?: 'guru' | 'tendik',
     @Query('tab') tab?: string
   ) {
+    const user = req['user'];
+    const isOperator = user?.role === 'Operator Sekolah';
+    let targetSekolahId = sekolahId;
+    if (isOperator) {
+      targetSekolahId = user?.sekolahId || user?.sekolah_id;
+    }
     if (tab === 'rekap') {
-      return await this.mandalaService.getGtkRekapForMandala(sekolahId);
+      return await this.mandalaService.getGtkRekapForMandala(targetSekolahId);
     }
     let take = limit ? parseInt(limit, 10) : 10;
     if (take > 100) {
       take = 100; // Cap at 100 to optimize performance
     }
     const skipPage = page ? parseInt(page, 10) : 1;
-    return await this.mandalaService.getGtkForMandala(sekolahId, {
+    return await this.mandalaService.getGtkForMandala(targetSekolahId, {
       limit: take,
       page: skipPage,
       search,
@@ -530,14 +559,21 @@ export class MandalaController {
   @Get('presensi/peserta-didik')
   @UseGuards(MandalaKeyGuard)
   async getPesertaDidikPresence(
+    @Req() req: any,
     @Query('sekolah_id') sekolahId: string,
     @Query('tanggal') tanggal?: string,
   ) {
-    if (!sekolahId) {
+    const user = req['user'];
+    const isOperator = user?.role === 'Operator Sekolah';
+    let targetSekolahId = sekolahId;
+    if (isOperator) {
+      targetSekolahId = user?.sekolahId || user?.sekolah_id;
+    }
+    if (!targetSekolahId) {
       throw new BadRequestException('sekolah_id is required.');
     }
     const date = tanggal ? new Date(tanggal) : new Date();
-    const data = await this.mandalaService.getPesertaDidikPresenceForMandala(sekolahId, date);
+    const data = await this.mandalaService.getPesertaDidikPresenceForMandala(targetSekolahId, date);
     return {
       status: 'success',
       data,
@@ -547,14 +583,21 @@ export class MandalaController {
   @Get('presensi/gtk')
   @UseGuards(MandalaKeyGuard)
   async getGtkPresence(
+    @Req() req: any,
     @Query('sekolah_id') sekolahId: string,
     @Query('tanggal') tanggal?: string,
   ) {
-    if (!sekolahId) {
+    const user = req['user'];
+    const isOperator = user?.role === 'Operator Sekolah';
+    let targetSekolahId = sekolahId;
+    if (isOperator) {
+      targetSekolahId = user?.sekolahId || user?.sekolah_id;
+    }
+    if (!targetSekolahId) {
       throw new BadRequestException('sekolah_id is required.');
     }
     const date = tanggal ? new Date(tanggal) : new Date();
-    const data = await this.mandalaService.getGtkPresenceForMandala(sekolahId, date);
+    const data = await this.mandalaService.getGtkPresenceForMandala(targetSekolahId, date);
     return {
       status: 'success',
       data,
@@ -564,14 +607,21 @@ export class MandalaController {
   @Get('presensi/peserta-didik/summary')
   @UseGuards(MandalaKeyGuard)
   async getPesertaDidikPresenceSummary(
+    @Req() req: any,
     @Query('sekolah_id') sekolahId: string,
     @Query('tahun') tahun?: string,
   ) {
-    if (!sekolahId) {
+    const user = req['user'];
+    const isOperator = user?.role === 'Operator Sekolah';
+    let targetSekolahId = sekolahId;
+    if (isOperator) {
+      targetSekolahId = user?.sekolahId || user?.sekolah_id;
+    }
+    if (!targetSekolahId) {
       throw new BadRequestException('sekolah_id is required.');
     }
     const year = tahun ? parseInt(tahun, 10) : new Date().getFullYear();
-    const data = await this.mandalaService.getPesertaDidikAnnualSummaryForMandala(sekolahId, year);
+    const data = await this.mandalaService.getPesertaDidikAnnualSummaryForMandala(targetSekolahId, year);
     return {
       status: 'success',
       data,
@@ -581,14 +631,21 @@ export class MandalaController {
   @Get('presensi/gtk/summary')
   @UseGuards(MandalaKeyGuard)
   async getGtkPresenceSummary(
+    @Req() req: any,
     @Query('sekolah_id') sekolahId: string,
     @Query('tahun') tahun?: string,
   ) {
-    if (!sekolahId) {
+    const user = req['user'];
+    const isOperator = user?.role === 'Operator Sekolah';
+    let targetSekolahId = sekolahId;
+    if (isOperator) {
+      targetSekolahId = user?.sekolahId || user?.sekolah_id;
+    }
+    if (!targetSekolahId) {
       throw new BadRequestException('sekolah_id is required.');
     }
     const year = tahun ? parseInt(tahun, 10) : new Date().getFullYear();
-    const data = await this.mandalaService.getGtkAnnualSummaryForMandala(sekolahId, year);
+    const data = await this.mandalaService.getGtkAnnualSummaryForMandala(targetSekolahId, year);
     return {
       status: 'success',
       data,

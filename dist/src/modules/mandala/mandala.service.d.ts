@@ -27,7 +27,7 @@ export declare class MandalaService implements OnModuleInit {
         key: string;
         url_mandala: string;
     }>;
-    getSchools(): Promise<{
+    getSchools(sekolahId?: string): Promise<{
         sekolah_id: string;
         nama: string;
         npsn: string;
@@ -496,6 +496,8 @@ export declare class MandalaService implements OnModuleInit {
                 email: any;
                 role: string;
                 cadisdik: string;
+                sekolahId: any;
+                sekolah_id: any;
                 jabatan?: undefined;
             } | {
                 id: any;
@@ -506,6 +508,8 @@ export declare class MandalaService implements OnModuleInit {
                 role: string;
                 jabatan: any;
                 cadisdik: any;
+                sekolahId?: undefined;
+                sekolah_id?: undefined;
             };
         };
     }>;

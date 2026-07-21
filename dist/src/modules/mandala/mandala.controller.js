@@ -45,8 +45,11 @@ let MandalaController = class MandalaController {
             data: result,
         };
     }
-    async getSchools() {
-        const data = await this.mandalaService.getSchools();
+    async getSchools(req) {
+        const user = req['user'];
+        const isOperator = user?.role === 'Operator Sekolah';
+        const sekolahId = isOperator ? (user?.sekolahId || user?.sekolah_id) : undefined;
+        const data = await this.mandalaService.getSchools(sekolahId);
         return {
             status: 'success',
             data,
@@ -334,7 +337,13 @@ let MandalaController = class MandalaController {
             message: 'Mapping Pengawas successfully deleted.',
         };
     }
-    async getSchoolDetail(id) {
+    async getSchoolDetail(id, req) {
+        const user = req['user'];
+        const isOperator = user?.role === 'Operator Sekolah';
+        const operatorSekolahId = user?.sekolahId || user?.sekolah_id;
+        if (isOperator && operatorSekolahId && operatorSekolahId !== id) {
+            throw new common_1.ForbiddenException('You do not have permission to access other school details.');
+        }
         const data = await this.mandalaService.getSchoolDetail(id);
         if (!data) {
             throw new common_1.NotFoundException(`School with ID ${id} not found.`);
@@ -344,7 +353,13 @@ let MandalaController = class MandalaController {
             data,
         };
     }
-    async getSchoolSummary(id) {
+    async getSchoolSummary(id, req) {
+        const user = req['user'];
+        const isOperator = user?.role === 'Operator Sekolah';
+        const operatorSekolahId = user?.sekolahId || user?.sekolah_id;
+        if (isOperator && operatorSekolahId && operatorSekolahId !== id) {
+            throw new common_1.ForbiddenException('You do not have permission to access other school summaries.');
+        }
         const data = await this.mandalaService.getSchoolSummary(id);
         if (!data) {
             throw new common_1.NotFoundException(`School with ID ${id} not found.`);
@@ -354,29 +369,41 @@ let MandalaController = class MandalaController {
             data,
         };
     }
-    async getPesertaDidik(sekolahId, limit, page, search, status) {
+    async getPesertaDidik(req, sekolahId, limit, page, search, status) {
+        const user = req['user'];
+        const isOperator = user?.role === 'Operator Sekolah';
+        let targetSekolahId = sekolahId;
+        if (isOperator) {
+            targetSekolahId = user?.sekolahId || user?.sekolah_id;
+        }
         let take = limit ? parseInt(limit, 10) : 10;
         if (take > 100) {
             take = 100;
         }
         const skipPage = page ? parseInt(page, 10) : 1;
-        return await this.mandalaService.getPesertaDidikForMandala(sekolahId, {
+        return await this.mandalaService.getPesertaDidikForMandala(targetSekolahId, {
             limit: take,
             page: skipPage,
             search,
             status
         });
     }
-    async getGtk(sekolahId, limit, page, search, status, type, tab) {
+    async getGtk(req, sekolahId, limit, page, search, status, type, tab) {
+        const user = req['user'];
+        const isOperator = user?.role === 'Operator Sekolah';
+        let targetSekolahId = sekolahId;
+        if (isOperator) {
+            targetSekolahId = user?.sekolahId || user?.sekolah_id;
+        }
         if (tab === 'rekap') {
-            return await this.mandalaService.getGtkRekapForMandala(sekolahId);
+            return await this.mandalaService.getGtkRekapForMandala(targetSekolahId);
         }
         let take = limit ? parseInt(limit, 10) : 10;
         if (take > 100) {
             take = 100;
         }
         const skipPage = page ? parseInt(page, 10) : 1;
-        return await this.mandalaService.getGtkForMandala(sekolahId, {
+        return await this.mandalaService.getGtkForMandala(targetSekolahId, {
             limit: take,
             page: skipPage,
             search,
@@ -384,45 +411,69 @@ let MandalaController = class MandalaController {
             type
         });
     }
-    async getPesertaDidikPresence(sekolahId, tanggal) {
-        if (!sekolahId) {
+    async getPesertaDidikPresence(req, sekolahId, tanggal) {
+        const user = req['user'];
+        const isOperator = user?.role === 'Operator Sekolah';
+        let targetSekolahId = sekolahId;
+        if (isOperator) {
+            targetSekolahId = user?.sekolahId || user?.sekolah_id;
+        }
+        if (!targetSekolahId) {
             throw new common_1.BadRequestException('sekolah_id is required.');
         }
         const date = tanggal ? new Date(tanggal) : new Date();
-        const data = await this.mandalaService.getPesertaDidikPresenceForMandala(sekolahId, date);
+        const data = await this.mandalaService.getPesertaDidikPresenceForMandala(targetSekolahId, date);
         return {
             status: 'success',
             data,
         };
     }
-    async getGtkPresence(sekolahId, tanggal) {
-        if (!sekolahId) {
+    async getGtkPresence(req, sekolahId, tanggal) {
+        const user = req['user'];
+        const isOperator = user?.role === 'Operator Sekolah';
+        let targetSekolahId = sekolahId;
+        if (isOperator) {
+            targetSekolahId = user?.sekolahId || user?.sekolah_id;
+        }
+        if (!targetSekolahId) {
             throw new common_1.BadRequestException('sekolah_id is required.');
         }
         const date = tanggal ? new Date(tanggal) : new Date();
-        const data = await this.mandalaService.getGtkPresenceForMandala(sekolahId, date);
+        const data = await this.mandalaService.getGtkPresenceForMandala(targetSekolahId, date);
         return {
             status: 'success',
             data,
         };
     }
-    async getPesertaDidikPresenceSummary(sekolahId, tahun) {
-        if (!sekolahId) {
+    async getPesertaDidikPresenceSummary(req, sekolahId, tahun) {
+        const user = req['user'];
+        const isOperator = user?.role === 'Operator Sekolah';
+        let targetSekolahId = sekolahId;
+        if (isOperator) {
+            targetSekolahId = user?.sekolahId || user?.sekolah_id;
+        }
+        if (!targetSekolahId) {
             throw new common_1.BadRequestException('sekolah_id is required.');
         }
         const year = tahun ? parseInt(tahun, 10) : new Date().getFullYear();
-        const data = await this.mandalaService.getPesertaDidikAnnualSummaryForMandala(sekolahId, year);
+        const data = await this.mandalaService.getPesertaDidikAnnualSummaryForMandala(targetSekolahId, year);
         return {
             status: 'success',
             data,
         };
     }
-    async getGtkPresenceSummary(sekolahId, tahun) {
-        if (!sekolahId) {
+    async getGtkPresenceSummary(req, sekolahId, tahun) {
+        const user = req['user'];
+        const isOperator = user?.role === 'Operator Sekolah';
+        let targetSekolahId = sekolahId;
+        if (isOperator) {
+            targetSekolahId = user?.sekolahId || user?.sekolah_id;
+        }
+        if (!targetSekolahId) {
             throw new common_1.BadRequestException('sekolah_id is required.');
         }
         const year = tahun ? parseInt(tahun, 10) : new Date().getFullYear();
-        const data = await this.mandalaService.getGtkAnnualSummaryForMandala(sekolahId, year);
+        const data = await this.mandalaService.getGtkAnnualSummaryForMandala(targetSekolahId, year);
         return {
             status: 'success',
             data,
@@ -569,8 +620,9 @@ __decorate([
 __decorate([
     (0, common_1.Get)('sekolah'),
     (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], MandalaController.prototype, "getSchools", null);
 __decorate([
@@ -856,78 +908,86 @@ __decorate([
     (0, common_1.Get)('sekolah/:id'),
     (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], MandalaController.prototype, "getSchoolDetail", null);
 __decorate([
     (0, common_1.Get)('sekolah/:id/summary'),
     (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], MandalaController.prototype, "getSchoolSummary", null);
 __decorate([
     (0, common_1.Get)('dapodik/peserta-didik'),
     (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
-    __param(0, (0, common_1.Query)('sekolah_id')),
-    __param(1, (0, common_1.Query)('limit')),
-    __param(2, (0, common_1.Query)('page')),
-    __param(3, (0, common_1.Query)('search')),
-    __param(4, (0, common_1.Query)('status')),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('sekolah_id')),
+    __param(2, (0, common_1.Query)('limit')),
+    __param(3, (0, common_1.Query)('page')),
+    __param(4, (0, common_1.Query)('search')),
+    __param(5, (0, common_1.Query)('status')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String, String]),
+    __metadata("design:paramtypes", [Object, String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], MandalaController.prototype, "getPesertaDidik", null);
 __decorate([
     (0, common_1.Get)('dapodik/gtk'),
     (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
-    __param(0, (0, common_1.Query)('sekolah_id')),
-    __param(1, (0, common_1.Query)('limit')),
-    __param(2, (0, common_1.Query)('page')),
-    __param(3, (0, common_1.Query)('search')),
-    __param(4, (0, common_1.Query)('status')),
-    __param(5, (0, common_1.Query)('type')),
-    __param(6, (0, common_1.Query)('tab')),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('sekolah_id')),
+    __param(2, (0, common_1.Query)('limit')),
+    __param(3, (0, common_1.Query)('page')),
+    __param(4, (0, common_1.Query)('search')),
+    __param(5, (0, common_1.Query)('status')),
+    __param(6, (0, common_1.Query)('type')),
+    __param(7, (0, common_1.Query)('tab')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [Object, String, String, String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], MandalaController.prototype, "getGtk", null);
 __decorate([
     (0, common_1.Get)('presensi/peserta-didik'),
     (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
-    __param(0, (0, common_1.Query)('sekolah_id')),
-    __param(1, (0, common_1.Query)('tanggal')),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('sekolah_id')),
+    __param(2, (0, common_1.Query)('tanggal')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], MandalaController.prototype, "getPesertaDidikPresence", null);
 __decorate([
     (0, common_1.Get)('presensi/gtk'),
     (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
-    __param(0, (0, common_1.Query)('sekolah_id')),
-    __param(1, (0, common_1.Query)('tanggal')),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('sekolah_id')),
+    __param(2, (0, common_1.Query)('tanggal')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], MandalaController.prototype, "getGtkPresence", null);
 __decorate([
     (0, common_1.Get)('presensi/peserta-didik/summary'),
     (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
-    __param(0, (0, common_1.Query)('sekolah_id')),
-    __param(1, (0, common_1.Query)('tahun')),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('sekolah_id')),
+    __param(2, (0, common_1.Query)('tahun')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], MandalaController.prototype, "getPesertaDidikPresenceSummary", null);
 __decorate([
     (0, common_1.Get)('presensi/gtk/summary'),
     (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
-    __param(0, (0, common_1.Query)('sekolah_id')),
-    __param(1, (0, common_1.Query)('tahun')),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('sekolah_id')),
+    __param(2, (0, common_1.Query)('tahun')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], MandalaController.prototype, "getGtkPresenceSummary", null);
 __decorate([

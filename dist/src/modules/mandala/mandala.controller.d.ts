@@ -30,7 +30,7 @@ export declare class MandalaController {
             url_mandala: string;
         };
     }>;
-    getSchools(): Promise<{
+    getSchools(req: any): Promise<{
         status: string;
         data: {
             sekolah_id: string;
@@ -337,6 +337,8 @@ export declare class MandalaController {
                 email: any;
                 role: string;
                 cadisdik: string;
+                sekolahId: any;
+                sekolah_id: any;
                 jabatan?: undefined;
             } | {
                 id: any;
@@ -347,6 +349,8 @@ export declare class MandalaController {
                 role: string;
                 jabatan: any;
                 cadisdik: any;
+                sekolahId?: undefined;
+                sekolah_id?: undefined;
             };
         };
     }>;
@@ -544,7 +548,7 @@ export declare class MandalaController {
         status: string;
         message: string;
     }>;
-    getSchoolDetail(id: string): Promise<{
+    getSchoolDetail(id: string, req: any): Promise<{
         status: string;
         data: {
             nama_kepala_sekolah: string;
@@ -598,7 +602,7 @@ export declare class MandalaController {
             radius: number | null;
         };
     }>;
-    getSchoolSummary(id: string): Promise<{
+    getSchoolSummary(id: string, req: any): Promise<{
         status: string;
         data: {
             sekolah_id: string;
@@ -609,7 +613,7 @@ export declare class MandalaController {
             total_gtk: number;
         };
     }>;
-    getPesertaDidik(sekolahId?: string, limit?: string, page?: string, search?: string, status?: 'aktif' | 'non-aktif'): Promise<{
+    getPesertaDidik(req: any, sekolahId?: string, limit?: string, page?: string, search?: string, status?: 'aktif' | 'non-aktif'): Promise<{
         status: string;
         data: {
             identitas: {
@@ -656,7 +660,7 @@ export declare class MandalaController {
             current_page: number;
         };
     }>;
-    getGtk(sekolahId?: string, limit?: string, page?: string, search?: string, status?: 'aktif' | 'non-aktif', type?: 'guru' | 'tendik', tab?: string): Promise<{
+    getGtk(req: any, sekolahId?: string, limit?: string, page?: string, search?: string, status?: 'aktif' | 'non-aktif', type?: 'guru' | 'tendik', tab?: string): Promise<{
         status: string;
         data: {
             rekap_kategori: {
@@ -736,7 +740,7 @@ export declare class MandalaController {
             current_page: number;
         };
     }>;
-    getPesertaDidikPresence(sekolahId: string, tanggal?: string): Promise<{
+    getPesertaDidikPresence(req: any, sekolahId: string, tanggal?: string): Promise<{
         status: string;
         data: {
             status_masuk_str: string;
@@ -768,7 +772,7 @@ export declare class MandalaController {
             status_pulang: number | null;
         }[];
     }>;
-    getGtkPresence(sekolahId: string, tanggal?: string): Promise<{
+    getGtkPresence(req: any, sekolahId: string, tanggal?: string): Promise<{
         status: string;
         data: {
             gtk: any;
@@ -785,7 +789,7 @@ export declare class MandalaController {
             status_pulang: number | null;
         }[];
     }>;
-    getPesertaDidikPresenceSummary(sekolahId: string, tahun?: string): Promise<{
+    getPesertaDidikPresenceSummary(req: any, sekolahId: string, tahun?: string): Promise<{
         status: string;
         data: {
             bulan: string;
@@ -796,7 +800,7 @@ export declare class MandalaController {
             alpha: number;
         }[];
     }>;
-    getGtkPresenceSummary(sekolahId: string, tahun?: string): Promise<{
+    getGtkPresenceSummary(req: any, sekolahId: string, tahun?: string): Promise<{
         status: string;
         data: {
             bulan: string;

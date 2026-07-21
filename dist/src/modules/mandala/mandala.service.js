@@ -112,8 +112,9 @@ let MandalaService = MandalaService_1 = class MandalaService {
             });
         }
     }
-    async getSchools() {
+    async getSchools(sekolahId) {
         const schools = await this.prisma.sekolah.findMany({
+            where: sekolahId ? { sekolah_id: sekolahId } : undefined,
             include: {
                 cadisdik: true,
             },
@@ -838,6 +839,7 @@ let MandalaService = MandalaService_1 = class MandalaService {
                 cadisdik_id: cadisdikId,
                 cadisdik_nama: cadisdikNama,
                 sekolahId: userEntity.sekolah_id,
+                sekolah_id: userEntity.sekolah_id,
             } : {
                 sub: userEntity.pegawai_id,
                 email: userEntity.email,
@@ -866,6 +868,8 @@ let MandalaService = MandalaService_1 = class MandalaService {
                         email: userEntity.email,
                         role: 'Operator Sekolah',
                         cadisdik: cadisdikNama || '',
+                        sekolahId: userEntity.sekolah_id,
+                        sekolah_id: userEntity.sekolah_id,
                     } : {
                         id: userEntity.pegawai_id,
                         nama: userEntity.nama_lengkap,
@@ -918,6 +922,8 @@ let MandalaService = MandalaService_1 = class MandalaService {
                     role: 'Operator Sekolah',
                     cadisdik_id: cadisdikId,
                     cadisdik_nama: cadisdikNama,
+                    sekolahId: operator.sekolah_id,
+                    sekolah_id: operator.sekolah_id,
                 };
                 userResponse = {
                     id: operator.pengguna_id,
@@ -927,6 +933,8 @@ let MandalaService = MandalaService_1 = class MandalaService {
                     email: operator.email,
                     role: 'Operator Sekolah',
                     cadisdik: cadisdikNama || '',
+                    sekolahId: operator.sekolah_id,
+                    sekolah_id: operator.sekolah_id,
                 };
             }
             else {
