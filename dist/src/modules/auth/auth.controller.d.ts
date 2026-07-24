@@ -103,6 +103,15 @@ export declare class AuthController {
         isConfigured: boolean;
         registeredDomain: string;
     }>;
+    getPublicProfile(id: string): Promise<{
+        id: string;
+        nama: string;
+        tipe: string;
+        rombel: string;
+        sekolah: string;
+        hasFoto: boolean;
+    }>;
+    getPublicProfilePhoto(id: string, res: Response): Promise<void>;
     systemSetup(apiKey: string, request: Request): Promise<{
         id: string;
         sekolah_id: string;

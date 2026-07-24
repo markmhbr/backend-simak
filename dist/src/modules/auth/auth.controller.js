@@ -75,6 +75,12 @@ let AuthController = class AuthController {
         const domain = this.getRequestDomain(request);
         return this.authService.getSystemInfo(domain);
     }
+    async getPublicProfile(id) {
+        return this.authService.getPublicProfile(id);
+    }
+    async getPublicProfilePhoto(id, res) {
+        return this.authService.getPublicProfilePhoto(id, res);
+    }
     async systemSetup(apiKey, request) {
         const domain = this.getRequestDomain(request);
         return this.authService.setupSystem(apiKey, domain);
@@ -184,6 +190,21 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "getSystemInfo", null);
+__decorate([
+    (0, common_1.Get)('public-profile/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "getPublicProfile", null);
+__decorate([
+    (0, common_1.Get)('public-profile/photo/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "getPublicProfilePhoto", null);
 __decorate([
     (0, common_1.Post)('system-setup'),
     __param(0, (0, common_1.Body)('apiKey')),

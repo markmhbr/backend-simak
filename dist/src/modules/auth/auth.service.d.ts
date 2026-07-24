@@ -4,6 +4,7 @@ import { CryptoService } from '../../core/crypto/crypto.service';
 import { AppKeyService } from '../../core/app-key/app-key.service';
 import { ConfigService } from '@nestjs/config';
 import { MailService } from '../../core/mail/mail.service';
+import { Response } from 'express';
 export declare class AuthService {
     private prisma;
     private jwtService;
@@ -118,4 +119,13 @@ export declare class AuthService {
         status: string;
         message: string;
     }>;
+    getPublicProfile(id: string): Promise<{
+        id: string;
+        nama: string;
+        tipe: string;
+        rombel: string;
+        sekolah: string;
+        hasFoto: boolean;
+    }>;
+    getPublicProfilePhoto(id: string, res: Response): Promise<void>;
 }

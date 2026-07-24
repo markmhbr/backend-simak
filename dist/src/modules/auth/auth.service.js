@@ -52,6 +52,8 @@ const bcrypt = __importStar(require("bcryptjs"));
 const { generateSecret, generateURI, verify } = require('otplib');
 const config_1 = require("@nestjs/config");
 const mail_service_1 = require("../../core/mail/mail.service");
+const fs = __importStar(require("fs"));
+const path = __importStar(require("path"));
 let AuthService = class AuthService {
     prisma;
     jwtService;
@@ -475,6 +477,101 @@ let AuthService = class AuthService {
             }
             throw new common_1.UnauthorizedException('Verifikasi reset 2FA gagal');
         }
+    }
+    async getPublicProfile(id) {
+        const pd = await this.prisma.pesertaDidik.findFirst({
+            where: {
+                OR: [
+                    { peserta_didik_id: id },
+                    { qr_token: { endsWith: id } }
+                ]
+            },
+            include: {
+                rombongan_belajar: true,
+            },
+        });
+        if (pd) {
+            const sekolah = await this.prisma.sekolah.findUnique({
+                where: { sekolah_id: pd.sekolah_id },
+                select: { nama: true },
+            });
+            return {
+                id: pd.peserta_didik_id,
+                nama: pd.nama,
+                tipe: 'siswa',
+                rombel: pd.rombongan_belajar?.nama || '-',
+                sekolah: sekolah?.nama || '-',
+                hasFoto: !!pd.foto,
+            };
+        }
+        const gtk = await this.prisma.gtk.findFirst({
+            where: {
+                OR: [
+                    { ptk_id: id },
+                    { qr_token: { endsWith: id } }
+                ]
+            },
+            include: {
+                jenis_ptk: true,
+            },
+        });
+        if (gtk) {
+            const sekolah = await this.prisma.sekolah.findUnique({
+                where: { sekolah_id: gtk.sekolah_id },
+                select: { nama: true },
+            });
+            return {
+                id: gtk.ptk_id,
+                nama: gtk.nama,
+                tipe: 'gtk',
+                rombel: gtk.jenis_ptk?.jenis_ptk || 'Guru/Staf',
+                sekolah: sekolah?.nama || '-',
+                hasFoto: !!gtk.foto,
+            };
+        }
+        throw new common_1.NotFoundException('Data tidak ditemukan');
+    }
+    async getPublicProfilePhoto(id, res) {
+        let fotoPath = null;
+        const pd = await this.prisma.pesertaDidik.findFirst({
+            where: {
+                OR: [
+                    { peserta_didik_id: id },
+                    { qr_token: { endsWith: id } }
+                ]
+            },
+            select: { foto: true }
+        });
+        if (pd) {
+            fotoPath = pd.foto;
+        }
+        else {
+            const gtk = await this.prisma.gtk.findFirst({
+                where: {
+                    OR: [
+                        { ptk_id: id },
+                        { qr_token: { endsWith: id } }
+                    ]
+                },
+                select: { foto: true }
+            });
+            if (gtk) {
+                fotoPath = gtk.foto;
+            }
+        }
+        if (fotoPath) {
+            const sanitizedPath = path.normalize(fotoPath).replace(/^(\.\.(\/|\\))+/, '');
+            const fullPath = path.join(process.cwd(), 'storage', sanitizedPath);
+            if (fs.existsSync(fullPath)) {
+                res.setHeader('Cache-Control', 'public, max-age=86400');
+                return res.sendFile(fullPath);
+            }
+        }
+        const placeholderPath = path.join(process.cwd(), 'storage', 'default-avatar.png');
+        if (fs.existsSync(placeholderPath)) {
+            return res.sendFile(placeholderPath);
+        }
+        throw new common_1.NotFoundException('Foto tidak ditemukan');
     }
 };
 exports.AuthService = AuthService;

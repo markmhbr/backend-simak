@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Res, Req, UnauthorizedException, UseGuards, Get } from '@nestjs/common';
+import { Controller, Post, Body, Res, Req, UnauthorizedException, UseGuards, Get, Param } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto, Verify2faDto } from './dto/auth.dto';
 import type { Response, Request } from 'express';
@@ -101,6 +101,18 @@ export class AuthController {
   async getSystemInfo(@Req() request: Request) {
     const domain = this.getRequestDomain(request);
     return this.authService.getSystemInfo(domain);
+  }
+
+  // Endpoint public profile untuk QR code scan (Public)
+  @Get('public-profile/:id')
+  async getPublicProfile(@Param('id') id: string) {
+    return this.authService.getPublicProfile(id);
+  }
+
+  // Endpoint public profile photo (Public)
+  @Get('public-profile/photo/:id')
+  async getPublicProfilePhoto(@Param('id') id: string, @Res() res: Response) {
+    return this.authService.getPublicProfilePhoto(id, res);
   }
 
   // Endpoint untuk setup awal oleh Operator
