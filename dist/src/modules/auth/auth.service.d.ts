@@ -119,6 +119,7 @@ export declare class AuthService {
         status: string;
         message: string;
     }>;
+    private buildAlamat;
     getPublicProfile(id: string): Promise<{
         id: string;
         nama: string;
@@ -126,6 +127,7 @@ export declare class AuthService {
         rombel: string;
         sekolah: string;
         hasFoto: boolean;
+        alamat: string;
     }>;
     getPublicProfilePhoto(id: string, res: Response): Promise<void>;
 }

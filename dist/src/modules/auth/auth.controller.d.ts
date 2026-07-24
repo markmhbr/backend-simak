@@ -110,6 +110,7 @@ export declare class AuthController {
         rombel: string;
         sekolah: string;
         hasFoto: boolean;
+        alamat: string;
     }>;
     getPublicProfilePhoto(id: string, res: Response): Promise<void>;
     systemSetup(apiKey: string, request: Request): Promise<{

@@ -478,6 +478,23 @@ let AuthService = class AuthService {
             throw new common_1.UnauthorizedException('Verifikasi reset 2FA gagal');
         }
     }
+    buildAlamat(data) {
+        const parts = [];
+        if (data.alamat_jalan)
+            parts.push(data.alamat_jalan.trim());
+        const rtVal = data.rt ? String(data.rt).trim() : '';
+        const rwVal = data.rw ? String(data.rw).trim() : '';
+        if (rtVal || rwVal) {
+            parts.push(`RT ${rtVal || '-'}/RW ${rwVal || '-'}`);
+        }
+        if (data.nama_dusun)
+            parts.push(`Dusun ${data.nama_dusun.trim()}`);
+        if (data.desa_kelurahan)
+            parts.push(`Desa/Kel. ${data.desa_kelurahan.trim()}`);
+        if (data.kode_pos)
+            parts.push(`Kode Pos ${data.kode_pos.trim()}`);
+        return parts.length > 0 ? parts.join(', ') : '-';
+    }
     async getPublicProfile(id) {
         const pd = await this.prisma.pesertaDidik.findFirst({
             where: {
@@ -502,6 +519,7 @@ let AuthService = class AuthService {
                 rombel: pd.rombongan_belajar?.nama || '-',
                 sekolah: sekolah?.nama || '-',
                 hasFoto: !!pd.foto,
+                alamat: this.buildAlamat(pd),
             };
         }
         const gtk = await this.prisma.gtk.findFirst({
@@ -527,6 +545,7 @@ let AuthService = class AuthService {
                 rombel: gtk.jenis_ptk?.jenis_ptk || 'Guru/Staf',
                 sekolah: sekolah?.nama || '-',
                 hasFoto: !!gtk.foto,
+                alamat: this.buildAlamat(gtk),
             };
         }
         throw new common_1.NotFoundException('Data tidak ditemukan');
@@ -560,7 +579,14 @@ let AuthService = class AuthService {
             }
         }
         if (fotoPath) {
-            const sanitizedPath = path.normalize(fotoPath).replace(/^(\.\.(\/|\\))+/, '');
+            let cleanPath = fotoPath;
+            if (cleanPath.startsWith('/storage/')) {
+                cleanPath = cleanPath.substring(9);
+            }
+            else if (cleanPath.startsWith('storage/')) {
+                cleanPath = cleanPath.substring(8);
+            }
+            const sanitizedPath = path.normalize(cleanPath).replace(/^(\.\.(\/|\\))+/, '');
             const fullPath = path.join(process.cwd(), 'storage', sanitizedPath);
             if (fs.existsSync(fullPath)) {
                 res.setHeader('Cache-Control', 'public, max-age=86400');

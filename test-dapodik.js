@@ -9,7 +9,7 @@ const prisma = new PrismaClient({ adapter });
 
 async function main() {
   const ids = [100011070, 200010300, 300110000, 300210000, 300311900, 401000000, 600070200, 800000213];
-  
+
   // Find rombel info to get kurikulum_id
   const rombel = await prisma.rombonganBelajar.findUnique({
     where: { rombongan_belajar_id: 'f0b4da74-5edf-4b1b-bdf0-84bafc989b63' }
