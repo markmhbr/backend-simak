@@ -2478,16 +2478,17 @@ export class DapodikService {
     // 1. Cari dulu nama rombel ini
     const rombel = await this.prisma.rombonganBelajar.findUnique({
       where: { rombongan_belajar_id: rombelId },
-      select: { nama: true, sekolah_id: true, kurikulum_id: true, tingkat_pendidikan_id: true },
+      select: { nama: true, sekolah_id: true, kurikulum_id: true, tingkat_pendidikan_id: true, semester_id: true },
     });
 
     if (!rombel) return [];
 
-    // 2. Cari semua rombel yang namanya sama (untuk menarik Matapelajaran Pilihan yang namanya sama dengan Kelas)
+    // 2. Cari semua rombel yang namanya sama di semester yang sama (untuk menarik Matapelajaran Pilihan yang namanya sama dengan Kelas)
     const relatedRombels = await this.prisma.rombonganBelajar.findMany({
       where: {
         nama: rombel.nama,
         sekolah_id: rombel.sekolah_id,
+        semester_id: rombel.semester_id,
         jenis_rombel: { in: [1, 14] }, // Kelas (1) and Matapelajaran Pilihan (14)
       },
       select: { rombongan_belajar_id: true },
@@ -2509,7 +2510,7 @@ export class DapodikService {
       orderBy: { nama_mata_pelajaran: 'asc' },
     });
 
-    // 4. Tarik semua GTK di sekolah untuk pemetaan in-memory ptk_terdaftar_id
+    // 4. Tarik semua GTK di sekolah untuk pemetaan in-memory ptk_terdaftar_id / ptk_id
     const gtks = await this.prisma.gtk.findMany({
       where: { sekolah_id: rombel.sekolah_id },
       select: {
@@ -2559,14 +2560,18 @@ export class DapodikService {
     });
 
     const gtkMap = new Map<string, any>();
+    const gtkByPtkIdMap = new Map<string, any>();
     gtks.forEach((g) => {
       if (g.ptk_terdaftar_id) {
         gtkMap.set(g.ptk_terdaftar_id, g);
       }
+      if (g.ptk_id) {
+        gtkByPtkIdMap.set(g.ptk_id, g);
+      }
     });
 
     return pembelajarans.map((p) => {
-      const match = p.ptk_terdaftar_id ? gtkMap.get(p.ptk_terdaftar_id) : null;
+      const match = (p.ptk_terdaftar_id ? gtkMap.get(p.ptk_terdaftar_id) : null) || (p.ptk_id ? gtkByPtkIdMap.get(p.ptk_id) : null);
       let jurusanId = p.mata_pelajaran_id ? matpelMap.get(p.mata_pelajaran_id) : null;
 
       // Fallback: classify based on mata_pelajaran_kurikulum if database jurusan_id is null/empty
@@ -2724,8 +2729,15 @@ export class DapodikService {
 
   async getAllPembelajaran(sekolahId: string | null) {
     const filter = this.getSekolahFilter(sekolahId);
+    const latestSemesterId = await this.getLatestSemesterId(filter.sekolah_id);
+
+    let whereClause: any = { sekolah_id: filter.sekolah_id };
+    if (latestSemesterId) {
+      whereClause.semester_id = latestSemesterId;
+    }
+
     const pembelajarans = await this.prisma.pembelajaran.findMany({
-      where: { sekolah_id: filter.sekolah_id },
+      where: whereClause,
       select: {
         pembelajaran_id: true,
         rombongan_belajar_id: true,
@@ -2758,14 +2770,18 @@ export class DapodikService {
     });
 
     const gtkMap = new Map<string, any>();
+    const gtkByPtkIdMap = new Map<string, any>();
     gtks.forEach((g) => {
       if (g.ptk_terdaftar_id) {
         gtkMap.set(g.ptk_terdaftar_id, g);
       }
+      if (g.ptk_id) {
+        gtkByPtkIdMap.set(g.ptk_id, g);
+      }
     });
 
     return pembelajarans.map((p) => {
-      const match = p.ptk_terdaftar_id ? gtkMap.get(p.ptk_terdaftar_id) : null;
+      const match = (p.ptk_terdaftar_id ? gtkMap.get(p.ptk_terdaftar_id) : null) || (p.ptk_id ? gtkByPtkIdMap.get(p.ptk_id) : null);
       return {
         ...p,
         gtk: match || null,

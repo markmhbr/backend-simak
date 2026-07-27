@@ -2243,7 +2243,7 @@ let DapodikService = class DapodikService {
         }
         const rombel = await this.prisma.rombonganBelajar.findUnique({
             where: { rombongan_belajar_id: rombelId },
-            select: { nama: true, sekolah_id: true, kurikulum_id: true, tingkat_pendidikan_id: true },
+            select: { nama: true, sekolah_id: true, kurikulum_id: true, tingkat_pendidikan_id: true, semester_id: true },
         });
         if (!rombel)
             return [];
@@ -2251,6 +2251,7 @@ let DapodikService = class DapodikService {
             where: {
                 nama: rombel.nama,
                 sekolah_id: rombel.sekolah_id,
+                semester_id: rombel.semester_id,
                 jenis_rombel: { in: [1, 14] },
             },
             select: { rombongan_belajar_id: true },
@@ -2309,13 +2310,17 @@ let DapodikService = class DapodikService {
             matpelMap.set(m.mata_pelajaran_id, m.jurusan_id);
         });
         const gtkMap = new Map();
+        const gtkByPtkIdMap = new Map();
         gtks.forEach((g) => {
             if (g.ptk_terdaftar_id) {
                 gtkMap.set(g.ptk_terdaftar_id, g);
             }
+            if (g.ptk_id) {
+                gtkByPtkIdMap.set(g.ptk_id, g);
+            }
         });
         return pembelajarans.map((p) => {
-            const match = p.ptk_terdaftar_id ? gtkMap.get(p.ptk_terdaftar_id) : null;
+            const match = (p.ptk_terdaftar_id ? gtkMap.get(p.ptk_terdaftar_id) : null) || (p.ptk_id ? gtkByPtkIdMap.get(p.ptk_id) : null);
             let jurusanId = p.mata_pelajaran_id ? matpelMap.get(p.mata_pelajaran_id) : null;
             if (!jurusanId && p.mata_pelajaran_id) {
                 const mkInfo = matpelKuriMap.get(p.mata_pelajaran_id);
@@ -2448,8 +2453,13 @@ let DapodikService = class DapodikService {
     }
     async getAllPembelajaran(sekolahId) {
         const filter = this.getSekolahFilter(sekolahId);
+        const latestSemesterId = await this.getLatestSemesterId(filter.sekolah_id);
+        let whereClause = { sekolah_id: filter.sekolah_id };
+        if (latestSemesterId) {
+            whereClause.semester_id = latestSemesterId;
+        }
         const pembelajarans = await this.prisma.pembelajaran.findMany({
-            where: { sekolah_id: filter.sekolah_id },
+            where: whereClause,
             select: {
                 pembelajaran_id: true,
                 rombongan_belajar_id: true,
@@ -2479,13 +2489,17 @@ let DapodikService = class DapodikService {
             },
         });
         const gtkMap = new Map();
+        const gtkByPtkIdMap = new Map();
         gtks.forEach((g) => {
             if (g.ptk_terdaftar_id) {
                 gtkMap.set(g.ptk_terdaftar_id, g);
             }
+            if (g.ptk_id) {
+                gtkByPtkIdMap.set(g.ptk_id, g);
+            }
         });
         return pembelajarans.map((p) => {
-            const match = p.ptk_terdaftar_id ? gtkMap.get(p.ptk_terdaftar_id) : null;
+            const match = (p.ptk_terdaftar_id ? gtkMap.get(p.ptk_terdaftar_id) : null) || (p.ptk_id ? gtkByPtkIdMap.get(p.ptk_id) : null);
             return {
                 ...p,
                 gtk: match || null,

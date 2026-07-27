@@ -60,6 +60,11 @@ export declare class PresensiController {
             rombongan_belajar: {
                 nama: string;
             };
+            anggota_rombel: {
+                rombongan_belajar: {
+                    nama: string;
+                };
+            }[];
         };
         activeIzinKeluar: {
             sekolah_id: string;
@@ -261,10 +266,12 @@ export declare class PresensiController {
             jam_kembali: Date | null;
             jam_kembali_estimasi: Date | null;
         };
+        hasJadwalToday: boolean;
         foto: string;
         nama: string;
         ptk_id: string;
         nuptk: string;
+        mode_presensi: number;
     }[]>;
     getRekapPeriodik(sekolahId: string, rombel: string, tanggalMulai: string, tanggalSelesai: string, tipe?: 'pd' | 'gtk'): Promise<{
         data: any[];
