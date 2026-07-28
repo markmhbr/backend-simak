@@ -513,6 +513,7 @@ model Pengguna {
   email            String?       @unique
   peran_nama       String?
   peran_id         Int?
+  face_embedding   String?
   alamat           String?
   no_telepon       String?
   no_hp            String?

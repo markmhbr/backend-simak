@@ -703,6 +703,43 @@ export class DapodikController {
     return { status: 'success', data };
   }
 
+  @Post('gtk/:id/face-id')
+  async registerGtkFace(@Req() req: Request, @Param('id') id: string, @Body() body: { embedding: number[] }) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.registerGtkFace(sekolahId, id, body.embedding);
+    return { status: 'success', data };
+  }
+
+  @Get('gtk/:id/face-id')
+  async getGtkFace(@Req() req: Request, @Param('id') id: string) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.getGtkFace(sekolahId, id);
+    return { status: 'success', data };
+  }
+
+  @Post('peserta-didik/:id/face-id')
+  async registerStudentFace(@Req() req: Request, @Param('id') id: string, @Body() body: { embedding: number[] }) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.registerStudentFace(sekolahId, id, body.embedding);
+    return { status: 'success', data };
+  }
+
+  @Get('peserta-didik/:id/face-id')
+  async getStudentFace(@Req() req: Request, @Param('id') id: string) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.getStudentFace(sekolahId, id);
+    return { status: 'success', data };
+  }
+
+  @Post('face-id/identify')
+  async identifyFace(@Req() req: Request, @Body() body: { embedding: number[] }) {
+    const { sekolahId } = this.getSekolahInfo(req);
+    const data = await this.dapodikService.identifyFace(sekolahId, body.embedding);
+    return { status: 'success', data };
+  }
+
+
+
   // ========================
   // DUDI (Dunia Usaha & Industri)
   // ========================

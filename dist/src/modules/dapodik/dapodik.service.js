@@ -4134,6 +4134,156 @@ let DapodikService = class DapodikService {
         });
         return result.map(r => Number(r.jumlah_jam));
     }
+    async registerGtkFace(sekolahId, id, embedding) {
+        const pengguna = await this.prisma.pengguna.findFirst({
+            where: { ptk_id: id },
+        });
+        if (!pengguna) {
+            const gtk = await this.prisma.gtk.findUnique({
+                where: { ptk_id: id },
+            });
+            if (!gtk) {
+                throw new Error('GTK tidak ditemukan.');
+            }
+            return this.prisma.pengguna.create({
+                data: {
+                    username: gtk.nik || `gtk_${gtk.ptk_id.substring(0, 8)}`,
+                    password: 'password_default_face_id',
+                    nama: gtk.nama,
+                    ptk_id: id,
+                    sekolah_id: sekolahId,
+                    face_embedding: JSON.stringify(embedding),
+                },
+            });
+        }
+        return this.prisma.pengguna.update({
+            where: { pengguna_id: pengguna.pengguna_id },
+            data: {
+                face_embedding: JSON.stringify(embedding),
+            },
+        });
+    }
+    async registerStudentFace(sekolahId, id, embedding) {
+        const pengguna = await this.prisma.pengguna.findFirst({
+            where: { peserta_didik_id: id },
+        });
+        if (!pengguna) {
+            const student = await this.prisma.pesertaDidik.findUnique({
+                where: { peserta_didik_id: id },
+            });
+            if (!student) {
+                throw new Error('Peserta didik tidak ditemukan.');
+            }
+            return this.prisma.pengguna.create({
+                data: {
+                    username: student.nisn || student.nik || `siswa_${student.peserta_didik_id.substring(0, 8)}`,
+                    password: 'password_default_face_id',
+                    nama: student.nama,
+                    peserta_didik_id: id,
+                    sekolah_id: sekolahId,
+                    face_embedding: JSON.stringify(embedding),
+                },
+            });
+        }
+        return this.prisma.pengguna.update({
+            where: { pengguna_id: pengguna.pengguna_id },
+            data: {
+                face_embedding: JSON.stringify(embedding),
+            },
+        });
+    }
+    async getGtkFace(sekolahId, id) {
+        const pengguna = await this.prisma.pengguna.findFirst({
+            where: { ptk_id: id },
+            select: { face_embedding: true },
+        });
+        return {
+            registered: !!pengguna?.face_embedding,
+            embedding: pengguna?.face_embedding ? JSON.parse(pengguna.face_embedding) : null,
+        };
+    }
+    async getStudentFace(sekolahId, id) {
+        const pengguna = await this.prisma.pengguna.findFirst({
+            where: { peserta_didik_id: id },
+            select: { face_embedding: true },
+        });
+        return {
+            registered: !!pengguna?.face_embedding,
+            embedding: pengguna?.face_embedding ? JSON.parse(pengguna.face_embedding) : null,
+        };
+    }
+    async identifyFace(sekolahId, embedding) {
+        const users = await this.prisma.pengguna.findMany({
+            where: {
+                sekolah_id: sekolahId,
+                face_embedding: { not: null },
+            },
+            select: {
+                pengguna_id: true,
+                ptk_id: true,
+                peserta_didik_id: true,
+                face_embedding: true,
+            },
+        });
+        let bestMatch = null;
+        let highestSimilarity = 0;
+        for (const user of users) {
+            if (!user.face_embedding)
+                continue;
+            try {
+                const registeredEmbedding = JSON.parse(user.face_embedding);
+                const similarity = this.calculateCosineSimilarity(embedding, registeredEmbedding);
+                if (similarity > highestSimilarity) {
+                    highestSimilarity = similarity;
+                    bestMatch = user;
+                }
+            }
+            catch (e) {
+                console.error('Failed to parse embedding for user:', user.pengguna_id, e);
+            }
+        }
+        const threshold = 0.80;
+        if (bestMatch && highestSimilarity >= threshold) {
+            if (bestMatch.ptk_id) {
+                const gtk = await this.prisma.gtk.findUnique({
+                    where: { ptk_id: bestMatch.ptk_id },
+                });
+                return {
+                    type: 'gtk',
+                    data: gtk,
+                    similarity: highestSimilarity,
+                };
+            }
+            else if (bestMatch.peserta_didik_id) {
+                const student = await this.prisma.pesertaDidik.findUnique({
+                    where: { peserta_didik_id: bestMatch.peserta_didik_id },
+                });
+                return {
+                    type: 'pd',
+                    data: student,
+                    similarity: highestSimilarity,
+                };
+            }
+        }
+        return {
+            type: null,
+            data: null,
+            similarity: highestSimilarity,
+        };
+    }
+    calculateCosineSimilarity(v1, v2) {
+        let dotProduct = 0;
+        let normV1 = 0;
+        let normV2 = 0;
+        for (let i = 0; i < v1.length; i++) {
+            dotProduct += v1[i] * v2[i];
+            normV1 += v1[i] * v1[i];
+            normV2 += v2[i] * v2[i];
+        }
+        if (normV1 === 0 || normV2 === 0)
+            return 0;
+        return dotProduct / (Math.sqrt(normV1) * Math.sqrt(normV2));
+    }
 };
 exports.DapodikService = DapodikService;
 exports.DapodikService = DapodikService = __decorate([
