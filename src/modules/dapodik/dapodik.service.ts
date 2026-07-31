@@ -645,16 +645,32 @@ export class DapodikService {
 
   async uploadLogo(sekolahId: string, file: Express.Multer.File) {
     const path = require('path');
+    const fs = require('fs');
     const { compressAndSaveImage } = require('../../common/utils/upload.util');
-    
+
+    const timestamp = new Date().toISOString().replace(/[-:T.]/g, '').substring(0, 14); // YYYYMMDDHHmmss
     const destDir = path.join(process.cwd(), 'storage', sekolahId);
-    const fileName = 'logo'; // sharp helper will append .jpg automatically
+    const fileName = `logo_${timestamp}`;
+
+    // Hapus logo lama untuk menghemat penyimpanan
+    if (fs.existsSync(destDir)) {
+      try {
+        const files = fs.readdirSync(destDir);
+        for (const f of files) {
+          if (f.startsWith('logo_') || f === 'logo.jpg') {
+            fs.unlinkSync(path.join(destDir, f));
+          }
+        }
+      } catch (e) {
+        console.error('Gagal menghapus logo lama:', e);
+      }
+    }
 
     // Kompres & Simpan logo
     await compressAndSaveImage(file.buffer, destDir, fileName);
 
     // Path relatif untuk diakses klien
-    const relativePath = `/storage/${sekolahId}/logo.jpg`;
+    const relativePath = `/storage/${sekolahId}/${fileName}.jpg`;
 
     return await this.prisma.sekolah.update({
       where: { sekolah_id: sekolahId },
@@ -664,6 +680,7 @@ export class DapodikService {
 
   async uploadSiswaFoto(sekolahId: string, uuidSiswa: string, file: Express.Multer.File) {
     const path = require('path');
+    const fs = require('fs');
     const { compressAndSaveImage } = require('../../common/utils/upload.util');
     
     // Validasi siswa ada dan milik sekolah ini
@@ -674,14 +691,29 @@ export class DapodikService {
       throw new Error('Siswa tidak ditemukan atau tidak terdaftar di sekolah Anda.');
     }
 
+    const timestamp = new Date().toISOString().replace(/[-:T.]/g, '').substring(0, 14); // YYYYMMDDHHmmss
     const destDir = path.join(process.cwd(), 'storage', sekolahId, 'siswa', uuidSiswa);
-    const fileName = 'foto_profil'; // sharp helper will append .jpg automatically
+    const fileName = `foto_profil_${timestamp}`;
+
+    // Hapus foto lama
+    if (fs.existsSync(destDir)) {
+      try {
+        const files = fs.readdirSync(destDir);
+        for (const f of files) {
+          if (f.startsWith('foto_profil')) {
+            fs.unlinkSync(path.join(destDir, f));
+          }
+        }
+      } catch (e) {
+        console.error('Gagal menghapus foto lama:', e);
+      }
+    }
 
     // Kompres & Simpan foto
     const savedPath = await compressAndSaveImage(file.buffer, destDir, fileName);
 
     // Path yang disimpan di DB (untuk diakses web client)
-    const relativePath = `/storage/${sekolahId}/siswa/${uuidSiswa}/foto_profil.jpg`;
+    const relativePath = `/storage/${sekolahId}/siswa/${uuidSiswa}/${fileName}.jpg`;
 
     await this.prisma.pesertaDidik.update({
       where: { peserta_didik_id: uuidSiswa },
@@ -696,6 +728,7 @@ export class DapodikService {
 
   async uploadGtkFoto(sekolahId: string, uuidGtk: string, file: Express.Multer.File) {
     const path = require('path');
+    const fs = require('fs');
     const { compressAndSaveImage } = require('../../common/utils/upload.util');
     
     // Validasi GTK ada dan milik sekolah ini
@@ -706,14 +739,29 @@ export class DapodikService {
       throw new Error('GTK tidak ditemukan atau tidak terdaftar di sekolah Anda.');
     }
 
+    const timestamp = new Date().toISOString().replace(/[-:T.]/g, '').substring(0, 14); // YYYYMMDDHHmmss
     const destDir = path.join(process.cwd(), 'storage', sekolahId, 'gtk', uuidGtk);
-    const fileName = 'foto_profil'; // sharp helper will append .jpg automatically
+    const fileName = `foto_profil_${timestamp}`;
+
+    // Hapus foto lama
+    if (fs.existsSync(destDir)) {
+      try {
+        const files = fs.readdirSync(destDir);
+        for (const f of files) {
+          if (f.startsWith('foto_profil')) {
+            fs.unlinkSync(path.join(destDir, f));
+          }
+        }
+      } catch (e) {
+        console.error('Gagal menghapus foto lama:', e);
+      }
+    }
 
     // Kompres & Simpan foto
     const savedPath = await compressAndSaveImage(file.buffer, destDir, fileName);
 
     // Path yang disimpan di DB (untuk diakses web client)
-    const relativePath = `/storage/${sekolahId}/gtk/${uuidGtk}/foto_profil.jpg`;
+    const relativePath = `/storage/${sekolahId}/gtk/${uuidGtk}/${fileName}.jpg`;
 
     await this.prisma.gtk.update({
       where: { ptk_id: uuidGtk },
