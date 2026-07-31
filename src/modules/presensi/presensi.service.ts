@@ -1290,7 +1290,7 @@ export class PresensiService {
       const iz = izinMap.get(g.ptk_id);
       const { jenis_ptk, ...gtkRest } = g;
       const isGuru = (jenis_ptk?.jenis_ptk || "").toLowerCase().includes("guru");
-      const hasJadwalToday = g.mode_presensi === 0 || !isGuru || ptkIdsWithJadwal.has(g.ptk_id);
+      const hasJadwalToday = !isGuru || ptkIdsWithJadwal.has(g.ptk_id);
 
       return {
         ...gtkRest,

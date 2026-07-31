@@ -136,11 +136,27 @@ export declare class AuthService {
     getPublicProfile(id: string): Promise<{
         id: string;
         nama: string;
+        nisn: string;
+        jenis_kelamin: string;
         tipe: string;
         rombel: string;
         sekolah: string;
         hasFoto: boolean;
         alamat: string;
+        nuptk?: undefined;
+        unit_kerja?: undefined;
+    } | {
+        id: string;
+        nama: string;
+        nuptk: string;
+        jenis_kelamin: string;
+        tipe: string;
+        unit_kerja: string;
+        rombel: string;
+        sekolah: string;
+        hasFoto: boolean;
+        alamat: string;
+        nisn?: undefined;
     }>;
     getPublicProfilePhoto(id: string, res: Response): Promise<void>;
 }

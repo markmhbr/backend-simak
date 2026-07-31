@@ -649,6 +649,8 @@ export class AuthService {
       return {
         id: pd.peserta_didik_id,
         nama: pd.nama,
+        nisn: pd.nisn || '-',
+        jenis_kelamin: pd.jenis_kelamin === 'L' ? 'Laki-laki' : pd.jenis_kelamin === 'P' ? 'Perempuan' : (pd.jenis_kelamin || '-'),
         tipe: 'siswa',
         rombel: pd.rombongan_belajar?.nama || '-',
         sekolah: sekolah?.nama || '-',
@@ -679,7 +681,10 @@ export class AuthService {
       return {
         id: gtk.ptk_id,
         nama: gtk.nama,
+        nuptk: gtk.nuptk || '-',
+        jenis_kelamin: gtk.jenis_kelamin === 'L' ? 'Laki-laki' : gtk.jenis_kelamin === 'P' ? 'Perempuan' : (gtk.jenis_kelamin || '-'),
         tipe: 'gtk',
+        unit_kerja: gtk.jenis_ptk?.jenis_ptk || 'Guru/Staf',
         rombel: gtk.jenis_ptk?.jenis_ptk || 'Guru/Staf',
         sekolah: sekolah?.nama || '-',
         hasFoto: !!gtk.foto,
