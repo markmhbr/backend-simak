@@ -1,4 +1,5 @@
 import { IndisiplinerService } from './indisipliner.service';
+import { CreateKategoriPelanggaranDto } from './dto/create-kategori-pelanggaran.dto';
 import { CreateJenisPelanggaranDto } from './dto/create-jenis-pelanggaran.dto';
 import { CreateJenisTindakLanjutDto } from './dto/create-jenis-tindak-lanjut.dto';
 import { CreatePelanggaranDto } from './dto/create-pelanggaran.dto';
@@ -6,20 +7,32 @@ import { CreateTindakLanjutDto } from './dto/create-tindak-lanjut.dto';
 export declare class IndisiplinerController {
     private readonly indisiplinerService;
     constructor(indisiplinerService: IndisiplinerService);
-    getJenisPelanggaran(sekolahId: string): Promise<{
+    getKategoriPelanggaran(sekolahId: string, target?: number): Promise<{
         status: string;
-        data: {
+        data: ({
+            jenis_pelanggaran: {
+                sekolah_id: string;
+                created_at: Date;
+                updated_at: Date;
+                aktif: boolean;
+                nama: string;
+                target: number;
+                poin: number;
+                kategori_pelanggaran_id: string | null;
+                jenis_pelanggaran_id: string;
+            }[];
+        } & {
             sekolah_id: string;
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
             nama: string;
+            keterangan: string | null;
             target: number;
-            poin: number;
-            jenis_pelanggaran_id: string;
-        }[];
+            kategori_pelanggaran_id: string;
+        })[];
     }>;
-    createJenisPelanggaran(dto: CreateJenisPelanggaranDto): Promise<{
+    createKategoriPelanggaran(dto: CreateKategoriPelanggaranDto): Promise<{
         status: string;
         message: string;
         data: {
@@ -28,8 +41,59 @@ export declare class IndisiplinerController {
             updated_at: Date;
             aktif: boolean;
             nama: string;
+            keterangan: string | null;
+            target: number;
+            kategori_pelanggaran_id: string;
+        };
+    }>;
+    getJenisPelanggaran(sekolahId: string): Promise<{
+        status: string;
+        data: ({
+            kategori_pelanggaran: {
+                sekolah_id: string;
+                created_at: Date;
+                updated_at: Date;
+                aktif: boolean;
+                nama: string;
+                keterangan: string | null;
+                target: number;
+                kategori_pelanggaran_id: string;
+            };
+        } & {
+            sekolah_id: string;
+            created_at: Date;
+            updated_at: Date;
+            aktif: boolean;
+            nama: string;
             target: number;
             poin: number;
+            kategori_pelanggaran_id: string | null;
+            jenis_pelanggaran_id: string;
+        })[];
+    }>;
+    createJenisPelanggaran(dto: CreateJenisPelanggaranDto): Promise<{
+        status: string;
+        message: string;
+        data: {
+            kategori_pelanggaran: {
+                sekolah_id: string;
+                created_at: Date;
+                updated_at: Date;
+                aktif: boolean;
+                nama: string;
+                keterangan: string | null;
+                target: number;
+                kategori_pelanggaran_id: string;
+            };
+        } & {
+            sekolah_id: string;
+            created_at: Date;
+            updated_at: Date;
+            aktif: boolean;
+            nama: string;
+            target: number;
+            poin: number;
+            kategori_pelanggaran_id: string | null;
             jenis_pelanggaran_id: string;
         };
     }>;

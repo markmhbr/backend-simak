@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../core/prisma/prisma.service';
+import { CreateKategoriPelanggaranDto } from './dto/create-kategori-pelanggaran.dto';
 import { CreateJenisPelanggaranDto } from './dto/create-jenis-pelanggaran.dto';
 import { CreateJenisTindakLanjutDto } from './dto/create-jenis-tindak-lanjut.dto';
 import { CreatePelanggaranDto } from './dto/create-pelanggaran.dto';
@@ -10,12 +11,48 @@ export class IndisiplinerService {
   constructor(private readonly prisma: PrismaService) {}
 
   // =====================
+  // MASTER KATEGORI PELANGGARAN
+  // =====================
+
+  async getKategoriPelanggaran(sekolahId: string, target?: number) {
+    const where: any = { sekolah_id: sekolahId };
+    if (target !== undefined && target !== null && !isNaN(target)) {
+      where.OR = [
+        { target: Number(target) },
+        { target: 3 }
+      ];
+    }
+    return this.prisma.kategoriPelanggaran.findMany({
+      where,
+      include: {
+        jenis_pelanggaran: true,
+      },
+      orderBy: { nama: 'asc' },
+    });
+  }
+
+  async createKategoriPelanggaran(dto: CreateKategoriPelanggaranDto) {
+    return this.prisma.kategoriPelanggaran.create({
+      data: {
+        sekolah_id: dto.sekolah_id,
+        nama: dto.nama,
+        target: dto.target ?? 1,
+        keterangan: dto.keterangan,
+        aktif: dto.aktif ?? true,
+      },
+    });
+  }
+
+  // =====================
   // MASTER JENIS PELANGGARAN
   // =====================
 
   async getJenisPelanggaran(sekolahId: string) {
     return this.prisma.jenisPelanggaran.findMany({
       where: { sekolah_id: sekolahId },
+      include: {
+        kategori_pelanggaran: true,
+      },
       orderBy: { nama: 'asc' },
     });
   }
@@ -24,10 +61,14 @@ export class IndisiplinerService {
     return this.prisma.jenisPelanggaran.create({
       data: {
         sekolah_id: dto.sekolah_id,
+        kategori_pelanggaran_id: dto.kategori_pelanggaran_id || null,
         nama: dto.nama,
         target: dto.target,
         poin: dto.poin,
         aktif: dto.aktif ?? true,
+      },
+      include: {
+        kategori_pelanggaran: true,
       },
     });
   }
@@ -91,7 +132,11 @@ export class IndisiplinerService {
     const data = await this.prisma.pelanggaran.findMany({
       where: whereClause,
       include: {
-        jenis_pelanggaran: true,
+        jenis_pelanggaran: {
+          include: {
+            kategori_pelanggaran: true,
+          },
+        },
         peserta_didik: {
           select: {
             peserta_didik_id: true,

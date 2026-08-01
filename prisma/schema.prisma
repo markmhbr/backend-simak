@@ -1433,19 +1433,39 @@ model MandalaSuratKeluar {
   @@schema("mandala")
 }
 
-model JenisPelanggaran {
-  jenis_pelanggaran_id String        @id @default(uuid()) @db.Uuid
-  sekolah_id           String        @db.Uuid
-  nama                 String        @db.VarChar(150)
-  target               Int           @db.SmallInt
-  poin                 Int           @db.SmallInt
-  aktif                Boolean       @default(true)
-  created_at           DateTime      @default(now()) @db.Timestamptz(6)
-  updated_at           DateTime      @updatedAt @db.Timestamptz(6)
-  pelanggaran          Pelanggaran[]
+model KategoriPelanggaran {
+  kategori_pelanggaran_id String             @id @default(uuid()) @db.Uuid
+  sekolah_id              String             @db.Uuid
+  nama                    String             @db.VarChar(150)
+  target                  Int                @default(1) @db.SmallInt
+  keterangan              String?            @db.Text
+  aktif                   Boolean            @default(true)
+  created_at              DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime           @updatedAt @db.Timestamptz(6)
+  jenis_pelanggaran       JenisPelanggaran[]
 
   @@index([sekolah_id])
   @@index([target])
+  @@map("kategori_pelanggaran")
+  @@schema("simak")
+}
+
+model JenisPelanggaran {
+  jenis_pelanggaran_id    String               @id @default(uuid()) @db.Uuid
+  sekolah_id              String               @db.Uuid
+  kategori_pelanggaran_id String?              @db.Uuid
+  nama                    String               @db.VarChar(150)
+  target                  Int                  @db.SmallInt
+  poin                    Int                  @db.SmallInt
+  aktif                   Boolean              @default(true)
+  created_at              DateTime             @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime             @updatedAt @db.Timestamptz(6)
+  kategori_pelanggaran    KategoriPelanggaran? @relation(fields: [kategori_pelanggaran_id], references: [kategori_pelanggaran_id], onDelete: SetNull)
+  pelanggaran             Pelanggaran[]
+
+  @@index([sekolah_id])
+  @@index([target])
+  @@index([kategori_pelanggaran_id])
   @@map("jenis_pelanggaran")
   @@schema("simak")
 }

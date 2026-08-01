@@ -9,43 +9,39 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateJenisPelanggaranDto = void 0;
+exports.CreateKategoriPelanggaranDto = void 0;
 const class_validator_1 = require("class-validator");
-class CreateJenisPelanggaranDto {
+class CreateKategoriPelanggaranDto {
     sekolah_id;
     nama;
     target;
-    poin;
-    kategori_pelanggaran_id;
+    keterangan;
     aktif;
 }
-exports.CreateJenisPelanggaranDto = CreateJenisPelanggaranDto;
+exports.CreateKategoriPelanggaranDto = CreateKategoriPelanggaranDto;
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
-], CreateJenisPelanggaranDto.prototype, "sekolah_id", void 0);
+], CreateKategoriPelanggaranDto.prototype, "sekolah_id", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
-], CreateJenisPelanggaranDto.prototype, "nama", void 0);
+], CreateKategoriPelanggaranDto.prototype, "nama", void 0);
 __decorate([
     (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
-], CreateJenisPelanggaranDto.prototype, "target", void 0);
-__decorate([
-    (0, class_validator_1.IsInt)(),
-    __metadata("design:type", Number)
-], CreateJenisPelanggaranDto.prototype, "poin", void 0);
+], CreateKategoriPelanggaranDto.prototype, "target", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
-], CreateJenisPelanggaranDto.prototype, "kategori_pelanggaran_id", void 0);
+], CreateKategoriPelanggaranDto.prototype, "keterangan", void 0);
 __decorate([
     (0, class_validator_1.IsBoolean)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Boolean)
-], CreateJenisPelanggaranDto.prototype, "aktif", void 0);
-//# sourceMappingURL=create-jenis-pelanggaran.dto.js.map
+], CreateKategoriPelanggaranDto.prototype, "aktif", void 0);
+//# sourceMappingURL=create-kategori-pelanggaran.dto.js.map

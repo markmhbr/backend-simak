@@ -3,5 +3,6 @@ export declare class CreateJenisPelanggaranDto {
     nama: string;
     target: number;
     poin: number;
+    kategori_pelanggaran_id?: string;
     aktif?: boolean;
 }

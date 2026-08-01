@@ -1,4 +1,5 @@
 import { PrismaService } from '../../core/prisma/prisma.service';
+import { CreateKategoriPelanggaranDto } from './dto/create-kategori-pelanggaran.dto';
 import { CreateJenisPelanggaranDto } from './dto/create-jenis-pelanggaran.dto';
 import { CreateJenisTindakLanjutDto } from './dto/create-jenis-tindak-lanjut.dto';
 import { CreatePelanggaranDto } from './dto/create-pelanggaran.dto';
@@ -6,7 +7,50 @@ import { CreateTindakLanjutDto } from './dto/create-tindak-lanjut.dto';
 export declare class IndisiplinerService {
     private readonly prisma;
     constructor(prisma: PrismaService);
-    getJenisPelanggaran(sekolahId: string): Promise<{
+    getKategoriPelanggaran(sekolahId: string, target?: number): Promise<({
+        jenis_pelanggaran: {
+            sekolah_id: string;
+            created_at: Date;
+            updated_at: Date;
+            aktif: boolean;
+            nama: string;
+            target: number;
+            poin: number;
+            kategori_pelanggaran_id: string | null;
+            jenis_pelanggaran_id: string;
+        }[];
+    } & {
+        sekolah_id: string;
+        created_at: Date;
+        updated_at: Date;
+        aktif: boolean;
+        nama: string;
+        keterangan: string | null;
+        target: number;
+        kategori_pelanggaran_id: string;
+    })[]>;
+    createKategoriPelanggaran(dto: CreateKategoriPelanggaranDto): Promise<{
+        sekolah_id: string;
+        created_at: Date;
+        updated_at: Date;
+        aktif: boolean;
+        nama: string;
+        keterangan: string | null;
+        target: number;
+        kategori_pelanggaran_id: string;
+    }>;
+    getJenisPelanggaran(sekolahId: string): Promise<({
+        kategori_pelanggaran: {
+            sekolah_id: string;
+            created_at: Date;
+            updated_at: Date;
+            aktif: boolean;
+            nama: string;
+            keterangan: string | null;
+            target: number;
+            kategori_pelanggaran_id: string;
+        };
+    } & {
         sekolah_id: string;
         created_at: Date;
         updated_at: Date;
@@ -14,9 +58,21 @@ export declare class IndisiplinerService {
         nama: string;
         target: number;
         poin: number;
+        kategori_pelanggaran_id: string | null;
         jenis_pelanggaran_id: string;
-    }[]>;
+    })[]>;
     createJenisPelanggaran(dto: CreateJenisPelanggaranDto): Promise<{
+        kategori_pelanggaran: {
+            sekolah_id: string;
+            created_at: Date;
+            updated_at: Date;
+            aktif: boolean;
+            nama: string;
+            keterangan: string | null;
+            target: number;
+            kategori_pelanggaran_id: string;
+        };
+    } & {
         sekolah_id: string;
         created_at: Date;
         updated_at: Date;
@@ -24,6 +80,7 @@ export declare class IndisiplinerService {
         nama: string;
         target: number;
         poin: number;
+        kategori_pelanggaran_id: string | null;
         jenis_pelanggaran_id: string;
     }>;
     getJenisTindakLanjut(sekolahId: string): Promise<{

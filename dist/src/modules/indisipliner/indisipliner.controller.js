@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.IndisiplinerController = void 0;
 const common_1 = require("@nestjs/common");
 const indisipliner_service_1 = require("./indisipliner.service");
+const create_kategori_pelanggaran_dto_1 = require("./dto/create-kategori-pelanggaran.dto");
 const create_jenis_pelanggaran_dto_1 = require("./dto/create-jenis-pelanggaran.dto");
 const create_jenis_tindak_lanjut_dto_1 = require("./dto/create-jenis-tindak-lanjut.dto");
 const create_pelanggaran_dto_1 = require("./dto/create-pelanggaran.dto");
@@ -23,6 +24,24 @@ let IndisiplinerController = class IndisiplinerController {
     indisiplinerService;
     constructor(indisiplinerService) {
         this.indisiplinerService = indisiplinerService;
+    }
+    async getKategoriPelanggaran(sekolahId, target) {
+        if (!sekolahId) {
+            throw new common_1.BadRequestException('sekolah_id query parameter is required.');
+        }
+        const data = await this.indisiplinerService.getKategoriPelanggaran(sekolahId, target ? Number(target) : undefined);
+        return {
+            status: 'success',
+            data,
+        };
+    }
+    async createKategoriPelanggaran(dto) {
+        const data = await this.indisiplinerService.createKategoriPelanggaran(dto);
+        return {
+            status: 'success',
+            message: 'Kategori pelanggaran berhasil dibuat.',
+            data,
+        };
     }
     async getJenisPelanggaran(sekolahId) {
         if (!sekolahId) {
@@ -110,6 +129,21 @@ let IndisiplinerController = class IndisiplinerController {
     }
 };
 exports.IndisiplinerController = IndisiplinerController;
+__decorate([
+    (0, common_1.Get)('kategori-pelanggaran'),
+    __param(0, (0, common_1.Query)('sekolah_id')),
+    __param(1, (0, common_1.Query)('target')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Number]),
+    __metadata("design:returntype", Promise)
+], IndisiplinerController.prototype, "getKategoriPelanggaran", null);
+__decorate([
+    (0, common_1.Post)('kategori-pelanggaran'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [create_kategori_pelanggaran_dto_1.CreateKategoriPelanggaranDto]),
+    __metadata("design:returntype", Promise)
+], IndisiplinerController.prototype, "createKategoriPelanggaran", null);
 __decorate([
     (0, common_1.Get)('jenis-pelanggaran'),
     __param(0, (0, common_1.Query)('sekolah_id')),

@@ -1,6 +1,6 @@
 import { IsString, IsNotEmpty, IsInt, IsOptional, IsBoolean } from 'class-validator';
 
-export class CreateJenisPelanggaranDto {
+export class CreateKategoriPelanggaranDto {
   @IsString()
   @IsNotEmpty()
   sekolah_id: string;
@@ -10,14 +10,12 @@ export class CreateJenisPelanggaranDto {
   nama: string;
 
   @IsInt()
-  target: number; // 0 = GTK, 1 = Peserta Didik, 2 = Keduanya
-
-  @IsInt()
-  poin: number;
+  @IsOptional()
+  target?: number; // 1 = Peserta Didik, 2 = GTK, 3 = Semua
 
   @IsString()
   @IsOptional()
-  kategori_pelanggaran_id?: string;
+  keterangan?: string;
 
   @IsBoolean()
   @IsOptional()

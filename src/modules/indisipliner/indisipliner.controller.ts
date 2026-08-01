@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Patch, Body, Query, Param, HttpCode, HttpStatus, NotFoundException, BadRequestException } from '@nestjs/common';
 import { IndisiplinerService } from './indisipliner.service';
+import { CreateKategoriPelanggaranDto } from './dto/create-kategori-pelanggaran.dto';
 import { CreateJenisPelanggaranDto } from './dto/create-jenis-pelanggaran.dto';
 import { CreateJenisTindakLanjutDto } from './dto/create-jenis-tindak-lanjut.dto';
 import { CreatePelanggaranDto } from './dto/create-pelanggaran.dto';
@@ -8,6 +9,35 @@ import { CreateTindakLanjutDto } from './dto/create-tindak-lanjut.dto';
 @Controller('indisipliner')
 export class IndisiplinerController {
   constructor(private readonly indisiplinerService: IndisiplinerService) {}
+
+  // =====================
+  // MASTER KATEGORI PELANGGARAN
+  // =====================
+
+  @Get('kategori-pelanggaran')
+  async getKategoriPelanggaran(
+    @Query('sekolah_id') sekolahId: string,
+    @Query('target') target?: number,
+  ) {
+    if (!sekolahId) {
+      throw new BadRequestException('sekolah_id query parameter is required.');
+    }
+    const data = await this.indisiplinerService.getKategoriPelanggaran(sekolahId, target ? Number(target) : undefined);
+    return {
+      status: 'success',
+      data,
+    };
+  }
+
+  @Post('kategori-pelanggaran')
+  async createKategoriPelanggaran(@Body() dto: CreateKategoriPelanggaranDto) {
+    const data = await this.indisiplinerService.createKategoriPelanggaran(dto);
+    return {
+      status: 'success',
+      message: 'Kategori pelanggaran berhasil dibuat.',
+      data,
+    };
+  }
 
   // =====================
   // MASTER JENIS PELANGGARAN

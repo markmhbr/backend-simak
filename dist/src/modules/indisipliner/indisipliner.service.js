@@ -17,9 +17,39 @@ let IndisiplinerService = class IndisiplinerService {
     constructor(prisma) {
         this.prisma = prisma;
     }
+    async getKategoriPelanggaran(sekolahId, target) {
+        const where = { sekolah_id: sekolahId };
+        if (target !== undefined && target !== null && !isNaN(target)) {
+            where.OR = [
+                { target: Number(target) },
+                { target: 3 }
+            ];
+        }
+        return this.prisma.kategoriPelanggaran.findMany({
+            where,
+            include: {
+                jenis_pelanggaran: true,
+            },
+            orderBy: { nama: 'asc' },
+        });
+    }
+    async createKategoriPelanggaran(dto) {
+        return this.prisma.kategoriPelanggaran.create({
+            data: {
+                sekolah_id: dto.sekolah_id,
+                nama: dto.nama,
+                target: dto.target ?? 1,
+                keterangan: dto.keterangan,
+                aktif: dto.aktif ?? true,
+            },
+        });
+    }
     async getJenisPelanggaran(sekolahId) {
         return this.prisma.jenisPelanggaran.findMany({
             where: { sekolah_id: sekolahId },
+            include: {
+                kategori_pelanggaran: true,
+            },
             orderBy: { nama: 'asc' },
         });
     }
@@ -27,10 +57,14 @@ let IndisiplinerService = class IndisiplinerService {
         return this.prisma.jenisPelanggaran.create({
             data: {
                 sekolah_id: dto.sekolah_id,
+                kategori_pelanggaran_id: dto.kategori_pelanggaran_id || null,
                 nama: dto.nama,
                 target: dto.target,
                 poin: dto.poin,
                 aktif: dto.aktif ?? true,
+            },
+            include: {
+                kategori_pelanggaran: true,
             },
         });
     }
@@ -82,7 +116,11 @@ let IndisiplinerService = class IndisiplinerService {
         const data = await this.prisma.pelanggaran.findMany({
             where: whereClause,
             include: {
-                jenis_pelanggaran: true,
+                jenis_pelanggaran: {
+                    include: {
+                        kategori_pelanggaran: true,
+                    },
+                },
                 peserta_didik: {
                     select: {
                         peserta_didik_id: true,
