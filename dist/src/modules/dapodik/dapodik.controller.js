@@ -564,17 +564,22 @@ let DapodikController = class DapodikController {
         const data = await this.dapodikService.getDudiById(sekolahId, id);
         return { status: 'success', data };
     }
-    async getRoles(req) {
-        const { sekolahId } = this.getSekolahInfo(req);
-        const data = await this.dapodikService.getDistinctRoles(sekolahId);
+    async getRoles(req, querySekolahId) {
+        const { sekolahId: reqSekolahId } = this.getSekolahInfo(req);
+        const sekolahId = querySekolahId || reqSekolahId;
+        const data = await this.dapodikService.getDistinctRoles(sekolahId || undefined);
         return { status: 'success', data };
     }
-    async getMenuRoles() {
-        const data = await this.dapodikService.getMenuRoles();
+    async getMenuRoles(req, querySekolahId) {
+        const { sekolahId: reqSekolahId } = this.getSekolahInfo(req);
+        const sekolahId = querySekolahId || reqSekolahId;
+        const data = await this.dapodikService.getMenuRoles(sekolahId);
         return { status: 'success', data };
     }
-    async saveMenuRoles(body) {
-        const data = await this.dapodikService.saveMenuRoles(body.peranId, body.peranNama, body.menuIds);
+    async saveMenuRoles(req, body) {
+        const { sekolahId: reqSekolahId } = this.getSekolahInfo(req);
+        const sekolahId = body.sekolahId || reqSekolahId;
+        const data = await this.dapodikService.saveMenuRoles(sekolahId, body.peranId, body.peranNama, body.menuIds);
         return { status: 'success', data };
     }
     async getMyMenus(req) {
@@ -1096,21 +1101,25 @@ __decorate([
 __decorate([
     (0, common_1.Get)('roles'),
     __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('sekolah_id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], DapodikController.prototype, "getRoles", null);
 __decorate([
     (0, common_1.Get)('menu-roles'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('sekolah_id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], DapodikController.prototype, "getMenuRoles", null);
 __decorate([
     (0, common_1.Post)('menu-roles'),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], DapodikController.prototype, "saveMenuRoles", null);
 __decorate([

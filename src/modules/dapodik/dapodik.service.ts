@@ -4103,14 +4103,28 @@ export class DapodikService {
     return Array.from(uniqueMap.values());
   }
 
-  async getMenuRoles() {
+  async getMenuRoles(sekolahId?: string | null) {
+    if (sekolahId) {
+      const schoolRoles = await this.prisma.menuRole.findMany({
+        where: { sekolah_id: sekolahId },
+      });
+      if (schoolRoles.length > 0) {
+        return schoolRoles;
+      }
+      return this.prisma.menuRole.findMany({
+        where: { sekolah_id: null },
+      });
+    }
     return this.prisma.menuRole.findMany();
   }
 
-  async saveMenuRoles(peranId: number, peranNama: string, menuIds: string[]) {
+  async saveMenuRoles(sekolahId: string | null | undefined, peranId: number, peranNama: string, menuIds: string[]) {
+    const targetSekolahId = sekolahId || null;
+
     await this.prisma.$transaction([
       this.prisma.menuRole.deleteMany({
         where: {
+          sekolah_id: targetSekolahId,
           OR: [
             { peran_id: peranId },
             { peran_nama: peranNama }
@@ -4122,6 +4136,7 @@ export class DapodikService {
           menu_id: menuId,
           peran_id: peranId,
           peran_nama: peranNama,
+          sekolah_id: targetSekolahId,
         }))
       })
     ]);
@@ -4314,15 +4329,32 @@ export class DapodikService {
       return [];
     }
 
-    const mappings = await this.prisma.menuRole.findMany({
-      where: {
-        OR: [
-          ...(distinctNames.length > 0 ? [{ peran_nama: { in: distinctNames, mode: 'insensitive' as any } }] : []),
-          ...(distinctIds.length > 0 ? [{ peran_id: { in: distinctIds } }] : []),
-        ]
-      },
-      select: { menu_id: true }
-    });
+    let mappings = [];
+    if (pengguna.sekolah_id) {
+      mappings = await this.prisma.menuRole.findMany({
+        where: {
+          sekolah_id: pengguna.sekolah_id,
+          OR: [
+            ...(distinctNames.length > 0 ? [{ peran_nama: { in: distinctNames, mode: 'insensitive' as any } }] : []),
+            ...(distinctIds.length > 0 ? [{ peran_id: { in: distinctIds } }] : []),
+          ]
+        },
+        select: { menu_id: true }
+      });
+    }
+
+    if (mappings.length === 0) {
+      mappings = await this.prisma.menuRole.findMany({
+        where: {
+          sekolah_id: null,
+          OR: [
+            ...(distinctNames.length > 0 ? [{ peran_nama: { in: distinctNames, mode: 'insensitive' as any } }] : []),
+            ...(distinctIds.length > 0 ? [{ peran_id: { in: distinctIds } }] : []),
+          ]
+        },
+        select: { menu_id: true }
+      });
+    }
 
     return Array.from(new Set(mappings.map(m => m.menu_id)));
   }

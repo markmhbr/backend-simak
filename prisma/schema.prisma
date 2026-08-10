@@ -3485,9 +3485,11 @@ model MenuRole {
   menu_id      String  @db.VarChar(100)
   peran_id     Int
   peran_nama   String? @db.VarChar(100)
+  sekolah_id   String? @db.Uuid
 
   @@index([menu_id])
   @@index([peran_id])
+  @@index([sekolah_id])
   @@map("menu_roles")
   @@schema("simak")
 }

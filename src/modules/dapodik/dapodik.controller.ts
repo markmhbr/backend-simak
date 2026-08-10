@@ -759,21 +759,29 @@ export class DapodikController {
   }
 
   @Get('roles')
-  async getRoles(@Req() req: Request) {
-    const { sekolahId } = this.getSekolahInfo(req);
-    const data = await this.dapodikService.getDistinctRoles(sekolahId);
+  async getRoles(@Req() req: Request, @Query('sekolah_id') querySekolahId?: string) {
+    const { sekolahId: reqSekolahId } = this.getSekolahInfo(req);
+    const sekolahId = querySekolahId || reqSekolahId;
+    const data = await this.dapodikService.getDistinctRoles(sekolahId || undefined);
     return { status: 'success', data };
   }
 
   @Get('menu-roles')
-  async getMenuRoles() {
-    const data = await this.dapodikService.getMenuRoles();
+  async getMenuRoles(@Req() req: Request, @Query('sekolah_id') querySekolahId?: string) {
+    const { sekolahId: reqSekolahId } = this.getSekolahInfo(req);
+    const sekolahId = querySekolahId || reqSekolahId;
+    const data = await this.dapodikService.getMenuRoles(sekolahId);
     return { status: 'success', data };
   }
 
   @Post('menu-roles')
-  async saveMenuRoles(@Body() body: { peranId: number; peranNama: string; menuIds: string[] }) {
-    const data = await this.dapodikService.saveMenuRoles(body.peranId, body.peranNama, body.menuIds);
+  async saveMenuRoles(
+    @Req() req: Request,
+    @Body() body: { peranId: number; peranNama: string; menuIds: string[]; sekolahId?: string }
+  ) {
+    const { sekolahId: reqSekolahId } = this.getSekolahInfo(req);
+    const sekolahId = body.sekolahId || reqSekolahId;
+    const data = await this.dapodikService.saveMenuRoles(sekolahId, body.peranId, body.peranNama, body.menuIds);
     return { status: 'success', data };
   }
 

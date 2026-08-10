@@ -1037,17 +1037,18 @@ export declare class DapodikService {
         peran_id: number;
         peran_nama: string;
     }[]>;
-    getMenuRoles(): Promise<{
+    getMenuRoles(sekolahId?: string | null): Promise<{
+        sekolah_id: string | null;
         peran_nama: string | null;
         peran_id: number;
         menu_role_id: string;
         menu_id: string;
     }[]>;
-    saveMenuRoles(peranId: number, peranNama: string, menuIds: string[]): Promise<{
+    saveMenuRoles(sekolahId: string | null | undefined, peranId: number, peranNama: string, menuIds: string[]): Promise<{
         success: boolean;
     }>;
     getMyMenus(peranId: number): Promise<string[]>;
-    getMyMenusByUserId(penggunaId: string): Promise<string[]>;
+    getMyMenusByUserId(penggunaId: string): Promise<any[]>;
     getUpdateGtk(sekolahId: string): Promise<{
         no_hp: string;
         ptk_id: string;

@@ -1563,26 +1563,28 @@ export declare class DapodikController {
         status: string;
         data: any;
     }>;
-    getRoles(req: Request): Promise<{
+    getRoles(req: Request, querySekolahId?: string): Promise<{
         status: string;
         data: {
             peran_id: number;
             peran_nama: string;
         }[];
     }>;
-    getMenuRoles(): Promise<{
+    getMenuRoles(req: Request, querySekolahId?: string): Promise<{
         status: string;
         data: {
+            sekolah_id: string | null;
             peran_nama: string | null;
             peran_id: number;
             menu_role_id: string;
             menu_id: string;
         }[];
     }>;
-    saveMenuRoles(body: {
+    saveMenuRoles(req: Request, body: {
         peranId: number;
         peranNama: string;
         menuIds: string[];
+        sekolahId?: string;
     }): Promise<{
         status: string;
         data: {
@@ -1591,7 +1593,7 @@ export declare class DapodikController {
     }>;
     getMyMenus(req: Request): Promise<{
         status: string;
-        data: string[];
+        data: any[];
     }>;
     generateBackup(req: Request, res: Response): Promise<Response<any, Record<string, any>>>;
     getTugasTambahan(req: Request, index?: string, search?: string, limit?: string, page?: string): Promise<{
