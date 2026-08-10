@@ -112,6 +112,13 @@ export declare class AuthController {
         no_telepon: string;
         no_hp: string;
     }>;
+    linkGtk(request: Request, body: {
+        ptk_id: string;
+    }): Promise<{
+        status: string;
+        message: string;
+        ptk_id: string;
+    }>;
     getSystemInfo(request: Request): Promise<{
         isConfigured: boolean;
         registeredDomain: string;

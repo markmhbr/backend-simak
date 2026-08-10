@@ -123,6 +123,11 @@ export declare class AuthService {
         no_telepon: string;
         no_hp: string;
     }>;
+    linkUserToGtk(userId: string, ptkId: string): Promise<{
+        status: string;
+        message: string;
+        ptk_id: string;
+    }>;
     requestReset2FA(username: string, pass: string, sekolahId?: string): Promise<{
         status: string;
         message: string;

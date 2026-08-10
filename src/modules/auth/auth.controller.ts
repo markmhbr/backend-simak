@@ -120,6 +120,14 @@ export class AuthController {
     return this.authService.getMe(user.sub);
   }
 
+  @UseGuards(ApiKeyGuard)
+  @Post('link-gtk')
+  async linkGtk(@Req() request: Request, @Body() body: { ptk_id: string }) {
+    const user = request['user'] as any;
+    if (!user || !user.sub) throw new UnauthorizedException('Sesi berakhir');
+    return this.authService.linkUserToGtk(user.sub, body.ptk_id);
+  }
+
   // Endpoint untuk mendapatkan identitas sekolah (Public)
   @Get('system-info')
   async getSystemInfo(@Req() request: Request) {

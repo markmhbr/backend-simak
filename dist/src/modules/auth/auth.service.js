@@ -479,6 +479,26 @@ let AuthService = class AuthService {
             foto,
         };
     }
+    async linkUserToGtk(userId, ptkId) {
+        const user = await this.prisma.pengguna.findUnique({
+            where: { pengguna_id: userId },
+        });
+        if (!user)
+            throw new common_1.BadRequestException('Pengguna tidak ditemukan');
+        const gtk = await this.prisma.gtk.findFirst({
+            where: {
+                ptk_id: ptkId,
+                sekolah_id: user.sekolah_id || undefined,
+            },
+        });
+        if (!gtk)
+            throw new common_1.BadRequestException('Data GTK tidak ditemukan di sekolah ini');
+        await this.prisma.pengguna.update({
+            where: { pengguna_id: userId },
+            data: { ptk_id: ptkId },
+        });
+        return { status: 'success', message: 'Akun berhasil dihubungkan ke profil GTK', ptk_id: ptkId };
+    }
     async requestReset2FA(username, pass, sekolahId) {
         const user = await this.prisma.pengguna.findFirst({
             where: {

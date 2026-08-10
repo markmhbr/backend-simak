@@ -85,6 +85,12 @@ let AuthController = class AuthController {
             throw new common_1.UnauthorizedException('Sesi berakhir');
         return this.authService.getMe(user.sub);
     }
+    async linkGtk(request, body) {
+        const user = request['user'];
+        if (!user || !user.sub)
+            throw new common_1.UnauthorizedException('Sesi berakhir');
+        return this.authService.linkUserToGtk(user.sub, body.ptk_id);
+    }
     async getSystemInfo(request) {
         const domain = this.getRequestDomain(request);
         return this.authService.getSystemInfo(domain);
@@ -207,6 +213,15 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "getMe", null);
+__decorate([
+    (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
+    (0, common_1.Post)('link-gtk'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "linkGtk", null);
 __decorate([
     (0, common_1.Get)('system-info'),
     __param(0, (0, common_1.Req)()),
