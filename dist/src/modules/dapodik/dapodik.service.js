@@ -3633,7 +3633,7 @@ let DapodikService = class DapodikService {
             }
         });
         const distinct = Array.from(new Map(users.map(u => [`${u.peran_id}-${u.peran_nama}`, u])).values());
-        const baseRoles = distinct.filter(r => r.peran_id !== 53);
+        const baseRoles = distinct.filter(r => r.peran_id !== 53 && r.peran_nama);
         const distinctGtks = await this.prisma.gtk.findMany({
             select: {
                 jenis_ptk_id: true,
@@ -3644,7 +3644,7 @@ let DapodikService = class DapodikService {
             },
             distinct: ['jenis_ptk_id'],
         });
-        const activeJenisPtkIds = distinctGtks.map(g => Number(g.jenis_ptk_id));
+        const activeJenisPtkIds = distinctGtks.map(g => Number(g.jenis_ptk_id)).filter(id => !isNaN(id) && id > 0);
         const jenisPtks = await this.prisma.jenis_ptk.findMany({
             where: {
                 jenis_ptk_id: { in: activeJenisPtkIds }
@@ -3667,11 +3667,15 @@ let DapodikService = class DapodikService {
             },
             where: {
                 sekolah_id: sekolahId ? sekolahId : undefined,
-                jabatan_ptk_id: { not: null }
+                jabatan_ptk_id: { not: null },
+                OR: [
+                    { soft_delete: null },
+                    { soft_delete: { equals: 0 } },
+                ]
             },
             distinct: ['jabatan_ptk_id']
         });
-        const activeJabatanIds = distinctTugas.map(t => Number(t.jabatan_ptk_id));
+        const activeJabatanIds = distinctTugas.map(t => Number(t.jabatan_ptk_id)).filter(id => !isNaN(id) && id > 0);
         const jabatans = await this.prisma.jabatan_tugas_ptk.findMany({
             where: {
                 jabatan_ptk_id: { in: activeJabatanIds }
@@ -3696,11 +3700,15 @@ let DapodikService = class DapodikService {
                 sekolah_id: sekolahId ? sekolahId : undefined,
                 jabatan: { not: null, notIn: [''] },
                 jabatan_ptk_id: null,
+                OR: [
+                    { soft_delete: null },
+                    { soft_delete: { equals: 0 } },
+                ]
             },
             distinct: ['jabatan'],
         });
         const customRoles = distinctCustomTugas.map((t) => {
-            const name = t.jabatan;
+            const name = t.jabatan.trim();
             let hash = 0;
             for (let i = 0; i < name.length; i++) {
                 hash = name.charCodeAt(i) + ((hash << 5) - hash);
@@ -3711,7 +3719,20 @@ let DapodikService = class DapodikService {
                 peran_nama: name,
             };
         });
-        return [...tugasRoles, ...customRoles];
+        const allRoles = [...baseRoles, ...ptkRoles, ...tugasRoles, ...customRoles];
+        const uniqueMap = new Map();
+        for (const r of allRoles) {
+            if (r.peran_nama && r.peran_nama.trim()) {
+                const key = r.peran_nama.trim().toLowerCase();
+                if (!uniqueMap.has(key)) {
+                    uniqueMap.set(key, {
+                        peran_id: r.peran_id,
+                        peran_nama: r.peran_nama.trim(),
+                    });
+                }
+            }
+        }
+        return Array.from(uniqueMap.values());
     }
     async getMenuRoles() {
         return this.prisma.menuRole.findMany();
@@ -3719,7 +3740,12 @@ let DapodikService = class DapodikService {
     async saveMenuRoles(peranId, peranNama, menuIds) {
         await this.prisma.$transaction([
             this.prisma.menuRole.deleteMany({
-                where: { peran_id: peranId }
+                where: {
+                    OR: [
+                        { peran_id: peranId },
+                        { peran_nama: peranNama }
+                    ]
+                }
             }),
             this.prisma.menuRole.createMany({
                 data: menuIds.map(menuId => ({
@@ -3741,53 +3767,173 @@ let DapodikService = class DapodikService {
     async getMyMenusByUserId(penggunaId) {
         const pengguna = await this.prisma.pengguna.findUnique({
             where: { pengguna_id: penggunaId },
-            select: { peran_id: true, ptk_id: true, sekolah_id: true }
+            select: {
+                pengguna_id: true,
+                peran_id: true,
+                peran_nama: true,
+                ptk_id: true,
+                peserta_didik_id: true,
+                sekolah_id: true,
+                username: true,
+                email: true,
+            }
         });
         if (!pengguna)
             return [];
-        let allowedMenuIds = [];
-        if (pengguna.ptk_id) {
+        let ptkId = pengguna.ptk_id;
+        let pdId = pengguna.peserta_didik_id;
+        if (!ptkId && !pdId) {
+            if (pengguna.email || pengguna.username) {
+                const foundGtk = await this.prisma.gtk.findFirst({
+                    where: {
+                        sekolah_id: pengguna.sekolah_id || undefined,
+                        OR: [
+                            ...(pengguna.email ? [{ email: pengguna.email }] : []),
+                            ...(pengguna.username ? [{ nik: pengguna.username }, { nuptk: pengguna.username }] : []),
+                        ],
+                    },
+                    select: { ptk_id: true },
+                });
+                if (foundGtk)
+                    ptkId = foundGtk.ptk_id;
+                if (!ptkId) {
+                    const foundPd = await this.prisma.pesertaDidik.findFirst({
+                        where: {
+                            sekolah_id: pengguna.sekolah_id || undefined,
+                            OR: [
+                                ...(pengguna.email ? [{ email: pengguna.email }] : []),
+                                ...(pengguna.username ? [{ nisn: pengguna.username }, { nik: pengguna.username }] : []),
+                            ],
+                        },
+                        select: { peserta_didik_id: true },
+                    });
+                    if (foundPd)
+                        pdId = foundPd.peserta_didik_id;
+                }
+            }
+        }
+        const roleNames = [];
+        const roleIds = [];
+        if (pengguna.peran_nama)
+            roleNames.push(pengguna.peran_nama.trim());
+        if (pengguna.peran_id)
+            roleIds.push(Number(pengguna.peran_id));
+        if (ptkId) {
             const gtk = await this.prisma.gtk.findUnique({
-                where: { ptk_id: pengguna.ptk_id },
+                where: { ptk_id: ptkId },
                 select: { jenis_ptk_id: true }
             });
             if (gtk && gtk.jenis_ptk_id) {
+                const jPtkId = Number(gtk.jenis_ptk_id);
+                roleIds.push(1000 + jPtkId);
                 const jPtk = await this.prisma.jenis_ptk.findUnique({
                     where: { jenis_ptk_id: gtk.jenis_ptk_id },
                     select: { jenis_ptk: true }
                 });
-                if (jPtk) {
-                    const mappings = await this.prisma.menuRole.findMany({
-                        where: { peran_nama: jPtk.jenis_ptk },
-                        select: { menu_id: true }
-                    });
-                    allowedMenuIds.push(...mappings.map(m => m.menu_id));
+                if (jPtk?.jenis_ptk) {
+                    roleNames.push(jPtk.jenis_ptk.trim());
                 }
             }
             const additionalTasks = await this.prisma.tugasTambahan.findMany({
-                where: { ptk_id: pengguna.ptk_id, sekolah_id: pengguna.sekolah_id || undefined },
-                select: { jabatan_ptk_id: true }
+                where: {
+                    ptk_id: ptkId,
+                    sekolah_id: pengguna.sekolah_id || undefined,
+                    OR: [
+                        { soft_delete: null },
+                        { soft_delete: { equals: 0 } },
+                    ],
+                },
+                select: {
+                    jabatan_ptk_id: true,
+                    jabatan: true,
+                },
             });
-            const taskJabatanIds = additionalTasks.map(t => Number(t.jabatan_ptk_id));
+            const taskJabatanIds = additionalTasks
+                .filter(t => t.jabatan_ptk_id !== null && t.jabatan_ptk_id !== undefined)
+                .map(t => Number(t.jabatan_ptk_id))
+                .filter(id => !isNaN(id) && id > 0);
             if (taskJabatanIds.length > 0) {
+                taskJabatanIds.forEach(id => roleIds.push(2000 + id));
                 const jabatans = await this.prisma.jabatan_tugas_ptk.findMany({
                     where: { jabatan_ptk_id: { in: taskJabatanIds } },
                     select: { nama: true }
                 });
-                const taskNames = jabatans.map(j => j.nama);
-                if (taskNames.length > 0) {
-                    const taskMappings = await this.prisma.menuRole.findMany({
-                        where: { peran_nama: { in: taskNames } },
-                        select: { menu_id: true }
-                    });
-                    allowedMenuIds.push(...taskMappings.map(m => m.menu_id));
+                jabatans.forEach(j => {
+                    if (j.nama)
+                        roleNames.push(j.nama.trim());
+                });
+            }
+            additionalTasks.forEach(t => {
+                if (t.jabatan && t.jabatan.trim()) {
+                    const name = t.jabatan.trim();
+                    roleNames.push(name);
+                    let hash = 0;
+                    for (let i = 0; i < name.length; i++) {
+                        hash = name.charCodeAt(i) + ((hash << 5) - hash);
+                    }
+                    const hashId = 30000 + (Math.abs(hash) % 10000);
+                    roleIds.push(hashId);
                 }
-            }
-            if (allowedMenuIds.length > 0) {
-                return Array.from(new Set(allowedMenuIds));
-            }
+            });
         }
-        return this.getMyMenus(pengguna.peran_id);
+        if (pdId) {
+            const pdTasks = await this.prisma.tugasTambahan.findMany({
+                where: {
+                    peserta_didik_id: pdId,
+                    sekolah_id: pengguna.sekolah_id || undefined,
+                    OR: [
+                        { soft_delete: null },
+                        { soft_delete: { equals: 0 } },
+                    ],
+                },
+                select: {
+                    jabatan_ptk_id: true,
+                    jabatan: true,
+                },
+            });
+            const pdJabatanIds = pdTasks
+                .filter(t => t.jabatan_ptk_id !== null && t.jabatan_ptk_id !== undefined)
+                .map(t => Number(t.jabatan_ptk_id))
+                .filter(id => !isNaN(id) && id > 0);
+            if (pdJabatanIds.length > 0) {
+                pdJabatanIds.forEach(id => roleIds.push(2000 + id));
+                const jabatans = await this.prisma.jabatan_tugas_ptk.findMany({
+                    where: { jabatan_ptk_id: { in: pdJabatanIds } },
+                    select: { nama: true }
+                });
+                jabatans.forEach(j => {
+                    if (j.nama)
+                        roleNames.push(j.nama.trim());
+                });
+            }
+            pdTasks.forEach(t => {
+                if (t.jabatan && t.jabatan.trim()) {
+                    const name = t.jabatan.trim();
+                    roleNames.push(name);
+                    let hash = 0;
+                    for (let i = 0; i < name.length; i++) {
+                        hash = name.charCodeAt(i) + ((hash << 5) - hash);
+                    }
+                    const hashId = 30000 + (Math.abs(hash) % 10000);
+                    roleIds.push(hashId);
+                }
+            });
+        }
+        const distinctNames = Array.from(new Set(roleNames.filter(Boolean)));
+        const distinctIds = Array.from(new Set(roleIds.filter(id => !isNaN(id))));
+        if (distinctNames.length === 0 && distinctIds.length === 0) {
+            return [];
+        }
+        const mappings = await this.prisma.menuRole.findMany({
+            where: {
+                OR: [
+                    ...(distinctNames.length > 0 ? [{ peran_nama: { in: distinctNames, mode: 'insensitive' } }] : []),
+                    ...(distinctIds.length > 0 ? [{ peran_id: { in: distinctIds } }] : []),
+                ]
+            },
+            select: { menu_id: true }
+        });
+        return Array.from(new Set(mappings.map(m => m.menu_id)));
     }
     async getUpdateGtk(sekolahId) {
         return this.prisma.gtk.findMany({
