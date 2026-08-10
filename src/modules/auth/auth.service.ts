@@ -449,16 +449,73 @@ export class AuthService {
     });
     if (!user) throw new BadRequestException('Pengguna tidak ditemukan');
 
+    let ptkId = user.ptk_id;
+    let pdId = user.peserta_didik_id;
+
+    // Jika pengguna belum terhubung dengan ptk_id / peserta_didik_id,
+    // lakukan auto-linking cerdas ke GTK / Peserta Didik di sekolah yang sama
+    if (!ptkId && !pdId) {
+      if (user.email || user.username || user.nama) {
+        const foundGtk = await this.prisma.gtk.findFirst({
+          where: {
+            sekolah_id: user.sekolah_id || undefined,
+            OR: [
+              ...(user.email ? [{ email: { equals: user.email, mode: 'insensitive' as any } }] : []),
+              ...(user.username ? [
+                { nik: user.username },
+                { nuptk: user.username },
+                { email: { equals: user.username, mode: 'insensitive' as any } }
+              ] : []),
+              ...(user.nama ? [{ nama: { equals: user.nama, mode: 'insensitive' as any } }] : []),
+            ],
+          },
+          select: { ptk_id: true },
+        });
+
+        if (foundGtk) {
+          ptkId = foundGtk.ptk_id;
+          await this.prisma.pengguna.update({
+            where: { pengguna_id: user.pengguna_id },
+            data: { ptk_id: ptkId },
+          }).catch(() => {});
+        } else {
+          const foundPd = await this.prisma.pesertaDidik.findFirst({
+            where: {
+              sekolah_id: user.sekolah_id || undefined,
+              OR: [
+                ...(user.email ? [{ email: { equals: user.email, mode: 'insensitive' as any } }] : []),
+                ...(user.username ? [
+                  { nisn: user.username },
+                  { nik: user.username },
+                  { email: { equals: user.username, mode: 'insensitive' as any } }
+                ] : []),
+                ...(user.nama ? [{ nama: { equals: user.nama, mode: 'insensitive' as any } }] : []),
+              ],
+            },
+            select: { peserta_didik_id: true },
+          });
+
+          if (foundPd) {
+            pdId = foundPd.peserta_didik_id;
+            await this.prisma.pengguna.update({
+              where: { pengguna_id: user.pengguna_id },
+              data: { peserta_didik_id: pdId },
+            }).catch(() => {});
+          }
+        }
+      }
+    }
+
     let foto: string | null = null;
-    if (user.ptk_id) {
+    if (ptkId) {
       const gtk = await this.prisma.gtk.findUnique({
-        where: { ptk_id: user.ptk_id },
+        where: { ptk_id: ptkId },
         select: { foto: true }
       });
       foto = gtk?.foto || null;
-    } else if (user.peserta_didik_id) {
+    } else if (pdId) {
       const pd = await this.prisma.pesertaDidik.findUnique({
-        where: { peserta_didik_id: user.peserta_didik_id },
+        where: { peserta_didik_id: pdId },
         select: { foto: true }
       });
       foto = pd?.foto || null;
@@ -466,6 +523,8 @@ export class AuthService {
 
     return {
       ...user,
+      ptk_id: ptkId,
+      peserta_didik_id: pdId,
       foto,
     };
   }

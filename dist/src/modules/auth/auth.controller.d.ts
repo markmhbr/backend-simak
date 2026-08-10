@@ -98,12 +98,12 @@ export declare class AuthController {
         message: string;
     }>;
     getMe(request: Request): Promise<{
+        ptk_id: string;
+        peserta_didik_id: string;
         foto: string;
         sekolah_id: string;
         nama: string;
         email: string;
-        peserta_didik_id: string;
-        ptk_id: string;
         alamat: string;
         pengguna_id: string;
         username: string;
