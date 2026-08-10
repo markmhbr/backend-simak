@@ -5,16 +5,16 @@ export declare class PengaturanVaService {
     constructor(prisma: PrismaService);
     getSettings(sekolahId: string): Promise<{
         sekolah_id: string;
-        is_active: boolean;
         created_at: Date;
         updated_at: Date;
-        mode: string;
+        pengaturan_va_id: string;
+        is_active: boolean;
         client_id: string | null;
         secret_key: string | null;
         private_key: string | null;
         bjb_public_key: string | null;
         api_url: string | null;
-        pengaturan_va_id: string;
+        mode: string;
     } | {
         sekolah_id: string;
         is_active: boolean;
@@ -27,15 +27,15 @@ export declare class PengaturanVaService {
     }>;
     updateSettings(sekolahId: string, data: UpdatePengaturanVaDto): Promise<{
         sekolah_id: string;
-        is_active: boolean;
         created_at: Date;
         updated_at: Date;
-        mode: string;
+        pengaturan_va_id: string;
+        is_active: boolean;
         client_id: string | null;
         secret_key: string | null;
         private_key: string | null;
         bjb_public_key: string | null;
         api_url: string | null;
-        pengaturan_va_id: string;
+        mode: string;
     }>;
 }

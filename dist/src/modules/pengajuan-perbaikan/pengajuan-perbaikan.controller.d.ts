@@ -6,15 +6,15 @@ export declare class PengajuanPerbaikanController {
     private getSekolahId;
     buatPengajuan(req: Request, body: any): Promise<{
         sekolah_id: string;
-        id: string;
         created_at: Date;
         updated_at: Date;
-        ptk_id: string | null;
         peserta_didik_id: string | null;
-        status: string;
+        ptk_id: string | null;
         tipe: string;
-        perubahan: import("@prisma/client/runtime/client").JsonValue;
+        status: string;
         alasan_tolak: string | null;
+        id: string;
+        perubahan: import("@prisma/client/runtime/client").JsonValue;
     }>;
     dapatkanPerbaikanDisetujui(req: Request): Promise<({
         id: string;
@@ -42,15 +42,15 @@ export declare class PengajuanPerbaikanController {
     dapatkanDaftar(req: Request): Promise<{
         nama: string;
         sekolah_id: string;
-        id: string;
         created_at: Date;
         updated_at: Date;
-        ptk_id: string | null;
         peserta_didik_id: string | null;
-        status: string;
+        ptk_id: string | null;
         tipe: string;
-        perubahan: import("@prisma/client/runtime/client").JsonValue;
+        status: string;
         alasan_tolak: string | null;
+        id: string;
+        perubahan: import("@prisma/client/runtime/client").JsonValue;
     }[]>;
     setujuiPengajuan(req: Request, id: string): Promise<{
         status: string;

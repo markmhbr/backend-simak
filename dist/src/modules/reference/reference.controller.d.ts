@@ -14,12 +14,12 @@ export declare class ReferenceController {
                 nm_bank: string;
             }[];
             jabatan_ptk: {
-                jabatan_ptk_id: import("@prisma/client-runtime-utils").Decimal;
                 jabatan_ptk: string;
+                jabatan_ptk_id: import("@prisma/client-runtime-utils").Decimal;
             }[];
             jenis_ptk: {
-                jenis_ptk_id: import("@prisma/client-runtime-utils").Decimal;
                 jenis_ptk: string;
+                jenis_ptk_id: import("@prisma/client-runtime-utils").Decimal;
             }[];
             keahlian_laboratorium: {
                 nama: string;
@@ -54,8 +54,8 @@ export declare class ReferenceController {
                 nm_hobby: string;
             }[];
             alasan_layak_pip: {
-                id_layak_pip: import("@prisma/client-runtime-utils").Decimal;
                 alasan_layak_pip: string;
+                id_layak_pip: import("@prisma/client-runtime-utils").Decimal;
             }[];
             jenis_pendaftaran: {
                 nama: string;
@@ -104,15 +104,15 @@ export declare class ReferenceController {
     getJabatanPtk(): Promise<{
         status: string;
         data: {
-            jabatan_ptk_id: import("@prisma/client-runtime-utils").Decimal;
             jabatan_ptk: string;
+            jabatan_ptk_id: import("@prisma/client-runtime-utils").Decimal;
         }[];
     }>;
     getJenisPtk(): Promise<{
         status: string;
         data: {
-            jenis_ptk_id: import("@prisma/client-runtime-utils").Decimal;
             jenis_ptk: string;
+            jenis_ptk_id: import("@prisma/client-runtime-utils").Decimal;
         }[];
     }>;
     getKeahlianLaboratorium(): Promise<{
@@ -189,8 +189,8 @@ export declare class ReferenceController {
     getAlasanLayakPip(): Promise<{
         status: string;
         data: {
-            id_layak_pip: import("@prisma/client-runtime-utils").Decimal;
             alasan_layak_pip: string;
+            id_layak_pip: import("@prisma/client-runtime-utils").Decimal;
         }[];
     }>;
     getJenisPendaftaran(): Promise<{

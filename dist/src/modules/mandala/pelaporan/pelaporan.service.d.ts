@@ -4,16 +4,16 @@ export declare class PelaporanService {
     private prisma;
     constructor(prisma: PrismaService);
     createPelaporan(cadisdikId: string, dto: CreatePelaporanDto): Promise<{
+        cadisdik_id: string;
         created_at: Date;
         updated_at: Date;
-        cadisdik_id: string;
-        aktif: boolean;
         tanggal_mulai: Date | null;
         tanggal_selesai: Date | null;
+        aktif: boolean;
+        pelaporan_id: string;
         judul: string;
         deskripsi: string | null;
         template_konten: string | null;
-        pelaporan_id: string;
     }>;
     getListPelaporan(cadisdikId: string, page?: number, limit?: number): Promise<{
         total: number;
@@ -49,10 +49,10 @@ export declare class PelaporanService {
         nama_sekolah: string;
         dokumen: {
             created_at: Date;
-            nama_file: string;
             file_url: string;
             pelaporan_sekolah_id: string;
             pelaporan_dokumen_id: string;
+            nama_file: string;
             ukuran_file: bigint | null;
         }[];
     }>;
@@ -78,10 +78,10 @@ export declare class PelaporanService {
         tanggal_selesai: Date;
         dokumen: {
             created_at: Date;
-            nama_file: string;
             file_url: string;
             pelaporan_sekolah_id: string;
             pelaporan_dokumen_id: string;
+            nama_file: string;
             ukuran_file: bigint | null;
         }[];
     }>;
@@ -93,15 +93,15 @@ export declare class PelaporanService {
     renderAllSekolahPelaporanHtml(cadisdikId: string, pelaporanId: string): Promise<string>;
     exportAllSekolahExcel(cadisdikId: string, pelaporanId: string): Promise<Buffer>;
     updatePelaporan(cadisdikId: string, pelaporanId: string, dto: CreatePelaporanDto): Promise<{
+        cadisdik_id: string;
         created_at: Date;
         updated_at: Date;
-        cadisdik_id: string;
-        aktif: boolean;
         tanggal_mulai: Date | null;
         tanggal_selesai: Date | null;
+        aktif: boolean;
+        pelaporan_id: string;
         judul: string;
         deskripsi: string | null;
         template_konten: string | null;
-        pelaporan_id: string;
     }>;
 }

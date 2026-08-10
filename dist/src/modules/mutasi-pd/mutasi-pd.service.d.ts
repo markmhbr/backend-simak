@@ -7,16 +7,16 @@ export declare class MutasiPdService {
         ket_keluar: string;
     }[]>;
     getMutasiPdList(sekolahId: string): Promise<({
+        jenis_keluar: {
+            ket_keluar: string;
+        };
         peserta_didik: {
-            foto: string;
             nama: string;
             nisn: string;
+            foto: string;
             rombongan_belajar: {
                 nama: string;
             };
-        };
-        jenis_keluar: {
-            ket_keluar: string;
         };
         ptk: {
             nama: string;
@@ -25,14 +25,14 @@ export declare class MutasiPdService {
         sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        ptk_id: string | null;
         peserta_didik_id: string;
-        jenis_keluar_id: string;
+        ptk_id: string | null;
         status: number;
-        alasan_tolak: string | null;
         mutasi_id: string;
+        jenis_keluar_id: string;
         alasan: string | null;
         bukti: string | null;
+        alasan_tolak: string | null;
     })[]>;
     createMutasiPd(sekolahId: string, data: {
         peserta_didik_id: string;
@@ -42,39 +42,39 @@ export declare class MutasiPdService {
         sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        ptk_id: string | null;
         peserta_didik_id: string;
-        jenis_keluar_id: string;
+        ptk_id: string | null;
         status: number;
-        alasan_tolak: string | null;
         mutasi_id: string;
+        jenis_keluar_id: string;
         alasan: string | null;
         bukti: string | null;
+        alasan_tolak: string | null;
     }>;
     approveMutasiPd(sekolahId: string, mutasiId: string): Promise<{
         sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        ptk_id: string | null;
         peserta_didik_id: string;
-        jenis_keluar_id: string;
+        ptk_id: string | null;
         status: number;
-        alasan_tolak: string | null;
         mutasi_id: string;
+        jenis_keluar_id: string;
         alasan: string | null;
         bukti: string | null;
+        alasan_tolak: string | null;
     }>;
     rejectMutasiPd(sekolahId: string, mutasiId: string, alasanTolak: string): Promise<{
         sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        ptk_id: string | null;
         peserta_didik_id: string;
-        jenis_keluar_id: string;
+        ptk_id: string | null;
         status: number;
-        alasan_tolak: string | null;
         mutasi_id: string;
+        jenis_keluar_id: string;
         alasan: string | null;
         bukti: string | null;
+        alasan_tolak: string | null;
     }>;
 }

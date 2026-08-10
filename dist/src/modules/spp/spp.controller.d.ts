@@ -18,10 +18,10 @@ export declare class SppController {
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
-            tipe: number;
+            pengaturan_tagihan_id: string;
             nama_tagihan: string;
             nominal: bigint;
-            pengaturan_tagihan_id: string;
+            tipe: number;
         };
     }>;
     getPengaturanTagihan(sekolahId: string): Promise<{
@@ -45,10 +45,10 @@ export declare class SppController {
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
-            tipe: number;
+            pengaturan_tagihan_id: string;
             nama_tagihan: string;
             nominal: bigint;
-            pengaturan_tagihan_id: string;
+            tipe: number;
         })[];
     }>;
     updatePengaturanTagihan(id: string, dto: UpdatePengaturanTagihanDto): Promise<{
@@ -59,10 +59,10 @@ export declare class SppController {
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
-            tipe: number;
+            pengaturan_tagihan_id: string;
             nama_tagihan: string;
             nominal: bigint;
-            pengaturan_tagihan_id: string;
+            tipe: number;
         };
     }>;
     deletePengaturanTagihan(id: string): Promise<{
@@ -98,6 +98,10 @@ export declare class SppController {
     getTagihanSpp(sekolahId: string, pesertaDidikId?: string, status?: number): Promise<{
         status: string;
         data: ({
+            pengaturan_tagihan: {
+                nama_tagihan: string;
+                tipe: number;
+            };
             peserta_didik: {
                 nama: string;
                 nisn: string;
@@ -105,29 +109,25 @@ export declare class SppController {
                     nama: string;
                 };
             };
-            pengaturan_tagihan: {
-                tipe: number;
-                nama_tagihan: string;
-            };
             riwayat_transaksi: {
                 sekolah_id: string;
                 created_at: Date;
-                peserta_didik_id: string;
                 keterangan: string | null;
+                peserta_didik_id: string;
                 nominal: bigint;
+                riwayat_transaksi_spp_id: string;
                 spp_id: string;
                 jenis_transaksi: number;
                 tanggal_transaksi: Date;
                 metode_pembayaran: number | null;
-                riwayat_transaksi_spp_id: string;
             }[];
         } & {
             sekolah_id: string;
             created_at: Date;
             updated_at: Date;
             peserta_didik_id: string;
-            status: number;
             pengaturan_tagihan_id: string;
+            status: number;
             spp_id: string;
             nominal_tagihan: bigint;
             nominal_terbayar: bigint;
@@ -140,14 +140,14 @@ export declare class SppController {
         data: {
             sekolah_id: string;
             created_at: Date;
-            peserta_didik_id: string;
             keterangan: string | null;
+            peserta_didik_id: string;
             nominal: bigint;
+            riwayat_transaksi_spp_id: string;
             spp_id: string;
             jenis_transaksi: number;
             tanggal_transaksi: Date;
             metode_pembayaran: number | null;
-            riwayat_transaksi_spp_id: string;
         };
     }>;
     getTunggakanPerSiswa(sekolahId: string): Promise<{

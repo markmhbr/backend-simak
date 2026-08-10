@@ -11,10 +11,10 @@ export declare class SppService {
         created_at: Date;
         updated_at: Date;
         aktif: boolean;
-        tipe: number;
+        pengaturan_tagihan_id: string;
         nama_tagihan: string;
         nominal: bigint;
-        pengaturan_tagihan_id: string;
+        tipe: number;
     }>;
     getPengaturanTagihan(sekolahId: string): Promise<({
         pengaturan_rombel: ({
@@ -35,30 +35,30 @@ export declare class SppService {
         created_at: Date;
         updated_at: Date;
         aktif: boolean;
-        tipe: number;
+        pengaturan_tagihan_id: string;
         nama_tagihan: string;
         nominal: bigint;
-        pengaturan_tagihan_id: string;
+        tipe: number;
     })[]>;
     updatePengaturanTagihan(id: string, dto: UpdatePengaturanTagihanDto): Promise<{
         sekolah_id: string;
         created_at: Date;
         updated_at: Date;
         aktif: boolean;
-        tipe: number;
+        pengaturan_tagihan_id: string;
         nama_tagihan: string;
         nominal: bigint;
-        pengaturan_tagihan_id: string;
+        tipe: number;
     }>;
     deletePengaturanTagihan(id: string): Promise<{
         sekolah_id: string;
         created_at: Date;
         updated_at: Date;
         aktif: boolean;
-        tipe: number;
+        pengaturan_tagihan_id: string;
         nama_tagihan: string;
         nominal: bigint;
-        pengaturan_tagihan_id: string;
+        tipe: number;
     }>;
     createPengaturanTagihanRombel(dto: CreatePengaturanTagihanRombelDto): Promise<{
         rombongan_belajar: {
@@ -84,6 +84,10 @@ export declare class SppService {
         peserta_didik_id?: string;
         status?: number;
     }): Promise<({
+        pengaturan_tagihan: {
+            nama_tagihan: string;
+            tipe: number;
+        };
         peserta_didik: {
             nama: string;
             nisn: string;
@@ -91,29 +95,25 @@ export declare class SppService {
                 nama: string;
             };
         };
-        pengaturan_tagihan: {
-            tipe: number;
-            nama_tagihan: string;
-        };
         riwayat_transaksi: {
             sekolah_id: string;
             created_at: Date;
-            peserta_didik_id: string;
             keterangan: string | null;
+            peserta_didik_id: string;
             nominal: bigint;
+            riwayat_transaksi_spp_id: string;
             spp_id: string;
             jenis_transaksi: number;
             tanggal_transaksi: Date;
             metode_pembayaran: number | null;
-            riwayat_transaksi_spp_id: string;
         }[];
     } & {
         sekolah_id: string;
         created_at: Date;
         updated_at: Date;
         peserta_didik_id: string;
-        status: number;
         pengaturan_tagihan_id: string;
+        status: number;
         spp_id: string;
         nominal_tagihan: bigint;
         nominal_terbayar: bigint;
@@ -122,14 +122,14 @@ export declare class SppService {
     createTransaksiSpp(dto: CreateTransaksiSppDto): Promise<{
         sekolah_id: string;
         created_at: Date;
-        peserta_didik_id: string;
         keterangan: string | null;
+        peserta_didik_id: string;
         nominal: bigint;
+        riwayat_transaksi_spp_id: string;
         spp_id: string;
         jenis_transaksi: number;
         tanggal_transaksi: Date;
         metode_pembayaran: number | null;
-        riwayat_transaksi_spp_id: string;
     }>;
     private getStudentRombelMap;
     getTunggakanPerSiswa(sekolahId: string): Promise<{

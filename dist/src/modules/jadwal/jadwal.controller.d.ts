@@ -13,11 +13,11 @@ export declare class JadwalController {
                 created_at: Date;
                 updated_at: Date;
                 aktif: boolean;
-                tipe: number;
+                hari: number;
                 urutan: number;
                 jenis_jadwal_id: string;
+                tipe: number;
                 pengaturan_jadwal_id: string;
-                hari: number;
                 durasi_menit: number;
             }[];
             pengaturan_hari: {
@@ -25,18 +25,18 @@ export declare class JadwalController {
                 created_at: Date;
                 updated_at: Date;
                 aktif: boolean;
-                jenis_jadwal_id: string;
                 hari: number;
-                pengaturan_hari_id: string;
+                jenis_jadwal_id: string;
                 jam_masuk: Date;
                 jam_pulang: Date;
+                pengaturan_hari_id: string;
             }[];
         } & {
             sekolah_id: string;
+            nama: string;
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
-            nama: string;
             jenis_jadwal_id: string;
             custom_mapel: boolean;
         })[];
@@ -51,10 +51,10 @@ export declare class JadwalController {
         klien: any;
         data: {
             sekolah_id: string;
+            nama: string;
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
-            nama: string;
             jenis_jadwal_id: string;
             custom_mapel: boolean;
         };
@@ -70,10 +70,10 @@ export declare class JadwalController {
         klien: any;
         data: {
             sekolah_id: string;
+            nama: string;
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
-            nama: string;
             jenis_jadwal_id: string;
             custom_mapel: boolean;
         };
@@ -83,10 +83,10 @@ export declare class JadwalController {
         klien: any;
         data: {
             sekolah_id: string;
+            nama: string;
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
-            nama: string;
             jenis_jadwal_id: string;
             custom_mapel: boolean;
         };
@@ -98,10 +98,10 @@ export declare class JadwalController {
         klien: any;
         data: {
             sekolah_id: string;
+            nama: string;
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
-            nama: string;
             jenis_jadwal_id: string;
             custom_mapel: boolean;
         };
@@ -120,11 +120,11 @@ export declare class JadwalController {
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
-            jenis_jadwal_id: string;
             hari: number;
-            pengaturan_hari_id: string;
+            jenis_jadwal_id: string;
             jam_masuk: Date;
             jam_pulang: Date;
+            pengaturan_hari_id: string;
         };
     }>;
     getPengaturanJadwal(req: Request, jenisJadwalId: string, hari?: string): Promise<{
@@ -135,11 +135,11 @@ export declare class JadwalController {
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
-            tipe: number;
+            hari: number;
             urutan: number;
             jenis_jadwal_id: string;
+            tipe: number;
             pengaturan_jadwal_id: string;
-            hari: number;
             durasi_menit: number;
         }[];
     }>;
@@ -158,11 +158,11 @@ export declare class JadwalController {
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
-            tipe: number;
+            hari: number;
             urutan: number;
             jenis_jadwal_id: string;
+            tipe: number;
             pengaturan_jadwal_id: string;
-            hari: number;
             durasi_menit: number;
         };
     }>;
@@ -174,11 +174,11 @@ export declare class JadwalController {
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
-            tipe: number;
+            hari: number;
             urutan: number;
             jenis_jadwal_id: string;
+            tipe: number;
             pengaturan_jadwal_id: string;
-            hari: number;
             durasi_menit: number;
         };
     }>;
@@ -188,18 +188,18 @@ export declare class JadwalController {
         data: (({
             pembelajaran: {
                 sekolah_id: string | null;
-                ptk_id: string | null;
                 create_date: Date;
                 last_update: Date;
                 soft_delete: import("@prisma/client-runtime-utils").Decimal | null;
                 last_sync: Date | null;
                 updater_id: string | null;
-                ptk_terdaftar_id: string | null;
+                ptk_id: string | null;
                 rombongan_belajar_id: string;
+                pembelajaran_id: string;
                 status_di_kurikulum: import("@prisma/client-runtime-utils").Decimal | null;
                 semester_id: string | null;
-                pembelajaran_id: string;
                 mata_pelajaran_id: number | null;
+                ptk_terdaftar_id: string | null;
                 sk_mengajar: string | null;
                 tanggal_sk_mengajar: Date | null;
                 jam_mengajar_per_minggu: import("@prisma/client-runtime-utils").Decimal | null;
@@ -216,28 +216,28 @@ export declare class JadwalController {
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
-            rombongan_belajar_id: string;
-            urutan: number;
-            pembelajaran_id: string;
-            jenis_jadwal_id: string;
-            hari: number;
             jadwal_pelajaran_id: string;
+            rombongan_belajar_id: string;
+            pembelajaran_id: string;
+            hari: number;
+            urutan: number;
+            jenis_jadwal_id: string;
         }) | {
             pembelajaran: {
                 gtk: any;
                 sekolah_id: string | null;
-                ptk_id: string | null;
                 create_date: Date;
                 last_update: Date;
                 soft_delete: import("@prisma/client-runtime-utils").Decimal | null;
                 last_sync: Date | null;
                 updater_id: string | null;
-                ptk_terdaftar_id: string | null;
+                ptk_id: string | null;
                 rombongan_belajar_id: string;
+                pembelajaran_id: string;
                 status_di_kurikulum: import("@prisma/client-runtime-utils").Decimal | null;
                 semester_id: string | null;
-                pembelajaran_id: string;
                 mata_pelajaran_id: number | null;
+                ptk_terdaftar_id: string | null;
                 sk_mengajar: string | null;
                 tanggal_sk_mengajar: Date | null;
                 jam_mengajar_per_minggu: import("@prisma/client-runtime-utils").Decimal | null;
@@ -253,12 +253,12 @@ export declare class JadwalController {
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
-            rombongan_belajar_id: string;
-            urutan: number;
-            pembelajaran_id: string;
-            jenis_jadwal_id: string;
-            hari: number;
             jadwal_pelajaran_id: string;
+            rombongan_belajar_id: string;
+            pembelajaran_id: string;
+            hari: number;
+            urutan: number;
+            jenis_jadwal_id: string;
         })[];
     }>;
     upsertJadwalPelajaran(req: Request, body: {
@@ -275,12 +275,12 @@ export declare class JadwalController {
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
-            rombongan_belajar_id: string;
-            urutan: number;
-            pembelajaran_id: string;
-            jenis_jadwal_id: string;
-            hari: number;
             jadwal_pelajaran_id: string;
+            rombongan_belajar_id: string;
+            pembelajaran_id: string;
+            hari: number;
+            urutan: number;
+            jenis_jadwal_id: string;
         };
     }>;
     deleteJadwalPelajaran(req: Request, id: string): Promise<{
@@ -291,12 +291,12 @@ export declare class JadwalController {
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
-            rombongan_belajar_id: string;
-            urutan: number;
-            pembelajaran_id: string;
-            jenis_jadwal_id: string;
-            hari: number;
             jadwal_pelajaran_id: string;
+            rombongan_belajar_id: string;
+            pembelajaran_id: string;
+            hari: number;
+            urutan: number;
+            jenis_jadwal_id: string;
         };
     }>;
 }

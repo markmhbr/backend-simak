@@ -11,12 +11,12 @@ export declare class ReferenceService {
         nm_bank: string;
     }[]>;
     getJabatanPtk(): Promise<{
-        jabatan_ptk_id: import("@prisma/client-runtime-utils").Decimal;
         jabatan_ptk: string;
+        jabatan_ptk_id: import("@prisma/client-runtime-utils").Decimal;
     }[]>;
     getJenisPtk(): Promise<{
-        jenis_ptk_id: import("@prisma/client-runtime-utils").Decimal;
         jenis_ptk: string;
+        jenis_ptk_id: import("@prisma/client-runtime-utils").Decimal;
     }[]>;
     getKeahlianLaboratorium(): Promise<{
         nama: string;
@@ -60,8 +60,8 @@ export declare class ReferenceService {
         nm_hobby: string;
     }[]>;
     getAlasanLayakPip(): Promise<{
-        id_layak_pip: import("@prisma/client-runtime-utils").Decimal;
         alasan_layak_pip: string;
+        id_layak_pip: import("@prisma/client-runtime-utils").Decimal;
     }[]>;
     getJenisPendaftaran(): Promise<{
         nama: string;
@@ -101,12 +101,12 @@ export declare class ReferenceService {
             nm_bank: string;
         }[];
         jabatan_ptk: {
-            jabatan_ptk_id: import("@prisma/client-runtime-utils").Decimal;
             jabatan_ptk: string;
+            jabatan_ptk_id: import("@prisma/client-runtime-utils").Decimal;
         }[];
         jenis_ptk: {
-            jenis_ptk_id: import("@prisma/client-runtime-utils").Decimal;
             jenis_ptk: string;
+            jenis_ptk_id: import("@prisma/client-runtime-utils").Decimal;
         }[];
         keahlian_laboratorium: {
             nama: string;
@@ -141,8 +141,8 @@ export declare class ReferenceService {
             nm_hobby: string;
         }[];
         alasan_layak_pip: {
-            id_layak_pip: import("@prisma/client-runtime-utils").Decimal;
             alasan_layak_pip: string;
+            id_layak_pip: import("@prisma/client-runtime-utils").Decimal;
         }[];
         jenis_pendaftaran: {
             nama: string;

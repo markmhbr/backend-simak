@@ -9,16 +9,16 @@ export declare class PelaporanController {
         status: string;
         message: string;
         data: {
+            cadisdik_id: string;
             created_at: Date;
             updated_at: Date;
-            cadisdik_id: string;
-            aktif: boolean;
             tanggal_mulai: Date | null;
             tanggal_selesai: Date | null;
+            aktif: boolean;
+            pelaporan_id: string;
             judul: string;
             deskripsi: string | null;
             template_konten: string | null;
-            pelaporan_id: string;
         };
     }>;
     getListPelaporan(req: Request, page?: string, limit?: string): Promise<{
@@ -61,10 +61,10 @@ export declare class PelaporanController {
             nama_sekolah: string;
             dokumen: {
                 created_at: Date;
-                nama_file: string;
                 file_url: string;
                 pelaporan_sekolah_id: string;
                 pelaporan_dokumen_id: string;
+                nama_file: string;
                 ukuran_file: bigint | null;
             }[];
         };
@@ -76,16 +76,16 @@ export declare class PelaporanController {
         status: string;
         message: string;
         data: {
+            cadisdik_id: string;
             created_at: Date;
             updated_at: Date;
-            cadisdik_id: string;
-            aktif: boolean;
             tanggal_mulai: Date | null;
             tanggal_selesai: Date | null;
+            aktif: boolean;
+            pelaporan_id: string;
             judul: string;
             deskripsi: string | null;
             template_konten: string | null;
-            pelaporan_id: string;
         };
     }>;
     deletePelaporan(req: Request, id: string): Promise<{

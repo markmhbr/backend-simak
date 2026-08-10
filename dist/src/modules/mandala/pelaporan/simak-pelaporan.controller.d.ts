@@ -29,10 +29,10 @@ export declare class SimakPelaporanController {
             tanggal_selesai: Date;
             dokumen: {
                 created_at: Date;
-                nama_file: string;
                 file_url: string;
                 pelaporan_sekolah_id: string;
                 pelaporan_dokumen_id: string;
+                nama_file: string;
                 ukuran_file: bigint | null;
             }[];
         };

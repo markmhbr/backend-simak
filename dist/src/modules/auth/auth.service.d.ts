@@ -77,14 +77,14 @@ export declare class AuthService {
     }>;
     setupSystem(apiKey: string, domain: string): Promise<{
         sekolah_id: string;
+        created_at: Date;
+        updated_at: Date;
+        is_active: boolean;
         id: string;
         nama_app: string;
         key_api: string;
         key_webService: string | null;
         key_adminPanel: string | null;
-        is_active: boolean;
-        created_at: Date;
-        updated_at: Date;
         domain: string | null;
     }>;
     refreshTokens(refreshToken: string): Promise<{
@@ -110,18 +110,18 @@ export declare class AuthService {
     }>;
     getMe(penggunaId: string): Promise<{
         foto: string;
-        peran_id: number;
-        peran_nama: string;
         sekolah_id: string;
-        alamat: string;
+        nama: string;
         email: string;
+        peserta_didik_id: string;
+        ptk_id: string;
+        alamat: string;
         pengguna_id: string;
         username: string;
-        nama: string;
+        peran_nama: string;
+        peran_id: number;
         no_telepon: string;
         no_hp: string;
-        ptk_id: string;
-        peserta_didik_id: string;
     }>;
     requestReset2FA(username: string, pass: string, sekolahId?: string): Promise<{
         status: string;

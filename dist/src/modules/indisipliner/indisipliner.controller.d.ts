@@ -12,24 +12,24 @@ export declare class IndisiplinerController {
         data: ({
             jenis_pelanggaran: {
                 sekolah_id: string;
+                nama: string;
                 created_at: Date;
                 updated_at: Date;
                 aktif: boolean;
-                nama: string;
-                target: number;
+                jenis_pelanggaran_id: string;
                 poin: number;
                 kategori_pelanggaran_id: string | null;
-                jenis_pelanggaran_id: string;
+                target: number;
             }[];
         } & {
             sekolah_id: string;
+            nama: string;
             created_at: Date;
             updated_at: Date;
-            aktif: boolean;
-            nama: string;
             keterangan: string | null;
-            target: number;
+            aktif: boolean;
             kategori_pelanggaran_id: string;
+            target: number;
         })[];
     }>;
     createKategoriPelanggaran(dto: CreateKategoriPelanggaranDto): Promise<{
@@ -37,13 +37,13 @@ export declare class IndisiplinerController {
         message: string;
         data: {
             sekolah_id: string;
+            nama: string;
             created_at: Date;
             updated_at: Date;
-            aktif: boolean;
-            nama: string;
             keterangan: string | null;
-            target: number;
+            aktif: boolean;
             kategori_pelanggaran_id: string;
+            target: number;
         };
     }>;
     getJenisPelanggaran(sekolahId: string): Promise<{
@@ -51,24 +51,24 @@ export declare class IndisiplinerController {
         data: ({
             kategori_pelanggaran: {
                 sekolah_id: string;
+                nama: string;
                 created_at: Date;
                 updated_at: Date;
-                aktif: boolean;
-                nama: string;
                 keterangan: string | null;
-                target: number;
+                aktif: boolean;
                 kategori_pelanggaran_id: string;
+                target: number;
             };
         } & {
             sekolah_id: string;
+            nama: string;
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
-            nama: string;
-            target: number;
+            jenis_pelanggaran_id: string;
             poin: number;
             kategori_pelanggaran_id: string | null;
-            jenis_pelanggaran_id: string;
+            target: number;
         })[];
     }>;
     createJenisPelanggaran(dto: CreateJenisPelanggaranDto): Promise<{
@@ -77,36 +77,36 @@ export declare class IndisiplinerController {
         data: {
             kategori_pelanggaran: {
                 sekolah_id: string;
+                nama: string;
                 created_at: Date;
                 updated_at: Date;
-                aktif: boolean;
-                nama: string;
                 keterangan: string | null;
-                target: number;
+                aktif: boolean;
                 kategori_pelanggaran_id: string;
+                target: number;
             };
         } & {
             sekolah_id: string;
+            nama: string;
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
-            nama: string;
-            target: number;
+            jenis_pelanggaran_id: string;
             poin: number;
             kategori_pelanggaran_id: string | null;
-            jenis_pelanggaran_id: string;
+            target: number;
         };
     }>;
     getJenisTindakLanjut(sekolahId: string): Promise<{
         status: string;
         data: {
             sekolah_id: string;
+            nama: string;
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
-            nama: string;
-            target: number;
             jenis_tindak_lanjut_id: string;
+            target: number;
         }[];
     }>;
     createJenisTindakLanjut(dto: CreateJenisTindakLanjutDto): Promise<{
@@ -114,12 +114,12 @@ export declare class IndisiplinerController {
         message: string;
         data: {
             sekolah_id: string;
+            nama: string;
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
-            nama: string;
-            target: number;
             jenis_tindak_lanjut_id: string;
+            target: number;
         };
     }>;
     getPelanggaran(sekolahId: string, pesertaDidikId?: string, ptkId?: string, status?: number): Promise<{
@@ -133,16 +133,16 @@ export declare class IndisiplinerController {
             sekolah_id: string;
             created_at: Date;
             updated_at: Date;
-            ptk_id: string | null;
-            peserta_didik_id: string | null;
-            status: number;
             keterangan: string | null;
+            peserta_didik_id: string | null;
+            ptk_id: string | null;
             tanggal: Date;
-            poin: number;
+            status: number;
+            pelanggaran_id: string;
             jenis_pelanggaran_id: string;
             waktu: Date;
+            poin: number;
             pelapor_ptk_id: string | null;
-            pelanggaran_id: string;
         };
     }>;
     updatePelanggaranStatus(id: string, status: number): Promise<{
@@ -152,16 +152,16 @@ export declare class IndisiplinerController {
             sekolah_id: string;
             created_at: Date;
             updated_at: Date;
-            ptk_id: string | null;
-            peserta_didik_id: string | null;
-            status: number;
             keterangan: string | null;
+            peserta_didik_id: string | null;
+            ptk_id: string | null;
             tanggal: Date;
-            poin: number;
+            status: number;
+            pelanggaran_id: string;
             jenis_pelanggaran_id: string;
             waktu: Date;
+            poin: number;
             pelapor_ptk_id: string | null;
-            pelanggaran_id: string;
         };
     }>;
     createTindakLanjut(dto: CreateTindakLanjutDto): Promise<{
@@ -173,9 +173,9 @@ export declare class IndisiplinerController {
             keterangan: string | null;
             tanggal: Date;
             pelanggaran_id: string;
+            tindak_lanjut_id: string;
             jenis_tindak_lanjut_id: string;
             petugas_ptk_id: string | null;
-            tindak_lanjut_id: string;
         };
     }>;
     getSchoolSummary(sekolahId: string): Promise<{

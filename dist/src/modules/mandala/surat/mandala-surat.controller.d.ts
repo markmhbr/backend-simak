@@ -8,12 +8,12 @@ export declare class MandalaSuratController {
         status: string;
         message: string;
         data: {
+            cadisdik_id: string;
             created_at: Date;
             updated_at: Date;
-            cadisdik_id: string;
             aktif: boolean;
-            kategori: number;
             pengaturan_nomor_surat_id: string;
+            kategori: number;
             nama_label: string;
             format_nomor: string;
             counter: number;
@@ -22,12 +22,12 @@ export declare class MandalaSuratController {
     getPengaturanNomorList(req: Request): Promise<{
         status: string;
         data: {
+            cadisdik_id: string;
             created_at: Date;
             updated_at: Date;
-            cadisdik_id: string;
             aktif: boolean;
-            kategori: number;
             pengaturan_nomor_surat_id: string;
+            kategori: number;
             nama_label: string;
             format_nomor: string;
             counter: number;
@@ -37,12 +37,12 @@ export declare class MandalaSuratController {
         status: string;
         message: string;
         data: {
+            cadisdik_id: string;
             created_at: Date;
             updated_at: Date;
-            cadisdik_id: string;
             aktif: boolean;
-            kategori: number;
             pengaturan_nomor_surat_id: string;
+            kategori: number;
             nama_label: string;
             format_nomor: string;
             counter: number;
@@ -56,9 +56,9 @@ export declare class MandalaSuratController {
         status: string;
         message: string;
         data: {
+            cadisdik_id: string;
             created_at: Date;
             updated_at: Date;
-            cadisdik_id: string;
             aktif: boolean;
             kategori: number;
             template_surat_id: string;
@@ -74,9 +74,9 @@ export declare class MandalaSuratController {
     getTemplateList(req: Request): Promise<{
         status: string;
         data: {
+            cadisdik_id: string;
             created_at: Date;
             updated_at: Date;
-            cadisdik_id: string;
             aktif: boolean;
             kategori: number;
             template_surat_id: string;
@@ -92,9 +92,9 @@ export declare class MandalaSuratController {
     getTemplateDetail(id: string): Promise<{
         status: string;
         data: {
+            cadisdik_id: string;
             created_at: Date;
             updated_at: Date;
-            cadisdik_id: string;
             aktif: boolean;
             kategori: number;
             template_surat_id: string;
@@ -111,9 +111,9 @@ export declare class MandalaSuratController {
         status: string;
         message: string;
         data: {
+            cadisdik_id: string;
             created_at: Date;
             updated_at: Date;
-            cadisdik_id: string;
             aktif: boolean;
             kategori: number;
             template_surat_id: string;
@@ -134,37 +134,37 @@ export declare class MandalaSuratController {
         status: string;
         message: string;
         data: {
+            cadisdik_id: string;
             created_at: Date;
             updated_at: Date;
-            cadisdik_id: string;
             keterangan: string | null;
-            file_url: string;
-            surat_masuk_id: string;
+            nomor_surat: string;
             tanggal_surat: Date;
+            perihal: string;
+            surat_masuk_id: string;
             tanggal_diterima: Date;
             nomor_agenda: string;
-            nomor_surat: string;
             asal_surat: string;
             tujuan_disposisi: string;
-            perihal: string;
+            file_url: string;
         };
     }>;
     getSuratMasukList(req: Request, search?: string, limit?: string, page?: string): Promise<{
         status: string;
         data: {
+            cadisdik_id: string;
             created_at: Date;
             updated_at: Date;
-            cadisdik_id: string;
             keterangan: string | null;
-            file_url: string;
-            surat_masuk_id: string;
+            nomor_surat: string;
             tanggal_surat: Date;
+            perihal: string;
+            surat_masuk_id: string;
             tanggal_diterima: Date;
             nomor_agenda: string;
-            nomor_surat: string;
             asal_surat: string;
             tujuan_disposisi: string;
-            perihal: string;
+            file_url: string;
         }[];
         meta: {
             total_data: number;
@@ -176,19 +176,19 @@ export declare class MandalaSuratController {
         status: string;
         message: string;
         data: {
+            cadisdik_id: string;
             created_at: Date;
             updated_at: Date;
-            cadisdik_id: string;
             keterangan: string | null;
-            file_url: string;
-            surat_masuk_id: string;
+            nomor_surat: string;
             tanggal_surat: Date;
+            perihal: string;
+            surat_masuk_id: string;
             tanggal_diterima: Date;
             nomor_agenda: string;
-            nomor_surat: string;
             asal_surat: string;
             tujuan_disposisi: string;
-            perihal: string;
+            file_url: string;
         };
     }>;
     deleteSuratMasuk(id: string): Promise<{
@@ -200,18 +200,18 @@ export declare class MandalaSuratController {
         message: string;
         data: {
             sekolah_id: string | null;
-            created_at: Date;
-            updated_at: Date;
             cadisdik_id: string;
             pegawai_id: string | null;
-            status: number;
-            kategori: number;
+            created_at: Date;
+            updated_at: Date;
             pengaturan_nomor_surat_id: string;
-            template_surat_id: string;
-            tanggal_surat: Date;
-            nomor_surat: string | null;
-            perihal: string;
+            kategori: number;
+            status: number;
             surat_keluar_id: string;
+            template_surat_id: string;
+            nomor_surat: string | null;
+            tanggal_surat: Date;
+            perihal: string;
             isi_final_html: string;
             file_pdf: string | null;
         };
@@ -230,18 +230,18 @@ export declare class MandalaSuratController {
             };
         } & {
             sekolah_id: string | null;
-            created_at: Date;
-            updated_at: Date;
             cadisdik_id: string;
             pegawai_id: string | null;
-            status: number;
-            kategori: number;
+            created_at: Date;
+            updated_at: Date;
             pengaturan_nomor_surat_id: string;
-            template_surat_id: string;
-            tanggal_surat: Date;
-            nomor_surat: string | null;
-            perihal: string;
+            kategori: number;
+            status: number;
             surat_keluar_id: string;
+            template_surat_id: string;
+            nomor_surat: string | null;
+            tanggal_surat: Date;
+            perihal: string;
             isi_final_html: string;
             file_pdf: string | null;
         })[];
@@ -256,10 +256,6 @@ export declare class MandalaSuratController {
         data: {
             sekolah: {
                 sekolah_id: string;
-                cadisdik_id: string | null;
-                email: string | null;
-                nomor_telepon: string | null;
-                website: string | null;
                 nama: string;
                 nama_nomenklatur: string | null;
                 nss: string | null;
@@ -274,7 +270,10 @@ export declare class MandalaSuratController {
                 kode_pos: string | null;
                 lintang: import("@prisma/client-runtime-utils").Decimal | null;
                 bujur: import("@prisma/client-runtime-utils").Decimal | null;
+                nomor_telepon: string | null;
                 nomor_fax: string | null;
+                email: string | null;
+                website: string | null;
                 kebutuhan_khusus_id: number | null;
                 status_sekolah: string | null;
                 sk_pendirian_sekolah: string | null;
@@ -301,35 +300,36 @@ export declare class MandalaSuratController {
                 last_sync: Date | null;
                 updater_id: string | null;
                 logo: string | null;
+                cadisdik_id: string | null;
                 social_media: import("@prisma/client/runtime/client").JsonValue | null;
                 radius: number | null;
             };
             pegawai: {
+                nomor_telepon: string | null;
+                email: string;
+                cadisdik_id: string;
+                pegawai_id: string;
                 created_at: Date;
                 updated_at: Date;
-                cadisdik_id: string;
-                email: string;
-                nomor_telepon: string | null;
                 aktif: boolean;
-                pegawai_id: string;
+                nik: string | null;
+                jenis_kelamin: number;
+                tempat_lahir: string | null;
+                tanggal_lahir: Date | null;
                 nama_lengkap: string;
+                jabatan: number | null;
                 nip: string | null;
                 password: string;
                 authenticator_secret: string | null;
-                jabatan: number | null;
-                jenis_kelamin: number;
                 foto: string | null;
                 alamat_lengkap: string | null;
-                nik: string | null;
-                tanggal_lahir: Date | null;
-                tempat_lahir: string | null;
                 golongan: number | null;
                 jenis_jabatan_id: string | null;
             };
             template_surat: {
+                cadisdik_id: string;
                 created_at: Date;
                 updated_at: Date;
-                cadisdik_id: string;
                 aktif: boolean;
                 kategori: number;
                 template_surat_id: string;
@@ -343,18 +343,18 @@ export declare class MandalaSuratController {
             };
         } & {
             sekolah_id: string | null;
-            created_at: Date;
-            updated_at: Date;
             cadisdik_id: string;
             pegawai_id: string | null;
-            status: number;
-            kategori: number;
+            created_at: Date;
+            updated_at: Date;
             pengaturan_nomor_surat_id: string;
-            template_surat_id: string;
-            tanggal_surat: Date;
-            nomor_surat: string | null;
-            perihal: string;
+            kategori: number;
+            status: number;
             surat_keluar_id: string;
+            template_surat_id: string;
+            nomor_surat: string | null;
+            tanggal_surat: Date;
+            perihal: string;
             isi_final_html: string;
             file_pdf: string | null;
         };
@@ -364,18 +364,18 @@ export declare class MandalaSuratController {
         message: string;
         data: {
             sekolah_id: string | null;
-            created_at: Date;
-            updated_at: Date;
             cadisdik_id: string;
             pegawai_id: string | null;
-            status: number;
-            kategori: number;
+            created_at: Date;
+            updated_at: Date;
             pengaturan_nomor_surat_id: string;
-            template_surat_id: string;
-            tanggal_surat: Date;
-            nomor_surat: string | null;
-            perihal: string;
+            kategori: number;
+            status: number;
             surat_keluar_id: string;
+            template_surat_id: string;
+            nomor_surat: string | null;
+            tanggal_surat: Date;
+            perihal: string;
             isi_final_html: string;
             file_pdf: string | null;
         };
@@ -385,18 +385,18 @@ export declare class MandalaSuratController {
         message: string;
         data: {
             sekolah_id: string | null;
-            created_at: Date;
-            updated_at: Date;
             cadisdik_id: string;
             pegawai_id: string | null;
-            status: number;
-            kategori: number;
+            created_at: Date;
+            updated_at: Date;
             pengaturan_nomor_surat_id: string;
-            template_surat_id: string;
-            tanggal_surat: Date;
-            nomor_surat: string | null;
-            perihal: string;
+            kategori: number;
+            status: number;
             surat_keluar_id: string;
+            template_surat_id: string;
+            nomor_surat: string | null;
+            tanggal_surat: Date;
+            perihal: string;
             isi_final_html: string;
             file_pdf: string | null;
         };

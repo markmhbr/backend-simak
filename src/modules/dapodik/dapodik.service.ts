@@ -4755,6 +4755,10 @@ export class DapodikService {
       sekolah_id: filter.sekolah_id,
       jabatan: { not: null, notIn: [''] },
       jabatan_ptk_id: null,
+      OR: [
+        { soft_delete: null },
+        { soft_delete: { equals: 0 } },
+      ],
     };
     if (index !== undefined && !isNaN(index)) {
       whereClause.index = index;
@@ -4776,6 +4780,10 @@ export class DapodikService {
       sekolah_id: filter.sekolah_id,
       jumlah_jam: { not: null },
       jabatan_ptk_id: null,
+      OR: [
+        { soft_delete: null },
+        { soft_delete: { equals: 0 } },
+      ],
     };
     if (index !== undefined && !isNaN(index)) {
       whereClause.index = index;

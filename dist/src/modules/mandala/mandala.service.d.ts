@@ -14,16 +14,16 @@ export declare class MandalaService implements OnModuleInit {
     constructor(prisma: PrismaService, jwtService: JwtService, configService: ConfigService, cryptoService: CryptoService, mailService: MailService);
     onModuleInit(): Promise<void>;
     getConnection(): Promise<{
-        id: string;
         created_at: Date;
         updated_at: Date;
+        id: string;
         key: string;
         url_mandala: string;
     }>;
     saveOrUpdateConnection(key: string, urlMandala: string): Promise<{
-        id: string;
         created_at: Date;
         updated_at: Date;
+        id: string;
         key: string;
         url_mandala: string;
     }>;
@@ -54,17 +54,17 @@ export declare class MandalaService implements OnModuleInit {
         };
     }[]>;
     getCadisdiks(): Promise<{
+        nomor_telepon: string | null;
+        email: string | null;
+        website: string | null;
+        cadisdik_id: string;
         created_at: Date;
         updated_at: Date;
-        cadisdik_id: string;
+        aktif: boolean;
         nama_instansi: string;
         alamat: string | null;
-        email: string | null;
-        nomor_telepon: string | null;
-        website: string | null;
         provinsi: string | null;
         kabupaten: string[];
-        aktif: boolean;
     }[]>;
     getCadisdikById(id: string): Promise<{
         sekolah: {
@@ -73,66 +73,66 @@ export declare class MandalaService implements OnModuleInit {
             npsn: string;
         }[];
     } & {
+        nomor_telepon: string | null;
+        email: string | null;
+        website: string | null;
+        cadisdik_id: string;
         created_at: Date;
         updated_at: Date;
-        cadisdik_id: string;
+        aktif: boolean;
         nama_instansi: string;
         alamat: string | null;
-        email: string | null;
-        nomor_telepon: string | null;
-        website: string | null;
         provinsi: string | null;
         kabupaten: string[];
-        aktif: boolean;
     }>;
     validateKabupatenDuplication(kabupatenList: string[], excludeId?: string): Promise<void>;
     getAllProvinsi(): Promise<string[]>;
     getKabupatenByProvinsi(provinsiNama: string): Promise<string[]>;
     createCadisdik(data: any): Promise<{
+        nomor_telepon: string | null;
+        email: string | null;
+        website: string | null;
+        cadisdik_id: string;
         created_at: Date;
         updated_at: Date;
-        cadisdik_id: string;
+        aktif: boolean;
         nama_instansi: string;
         alamat: string | null;
-        email: string | null;
-        nomor_telepon: string | null;
-        website: string | null;
         provinsi: string | null;
         kabupaten: string[];
-        aktif: boolean;
     }>;
     updateCadisdik(id: string, data: any): Promise<{
+        nomor_telepon: string | null;
+        email: string | null;
+        website: string | null;
+        cadisdik_id: string;
         created_at: Date;
         updated_at: Date;
-        cadisdik_id: string;
+        aktif: boolean;
         nama_instansi: string;
         alamat: string | null;
-        email: string | null;
-        nomor_telepon: string | null;
-        website: string | null;
         provinsi: string | null;
         kabupaten: string[];
-        aktif: boolean;
     }>;
     deleteCadisdik(id: string): Promise<{
+        nomor_telepon: string | null;
+        email: string | null;
+        website: string | null;
+        cadisdik_id: string;
         created_at: Date;
         updated_at: Date;
-        cadisdik_id: string;
+        aktif: boolean;
         nama_instansi: string;
         alamat: string | null;
-        email: string | null;
-        nomor_telepon: string | null;
-        website: string | null;
         provinsi: string | null;
         kabupaten: string[];
-        aktif: boolean;
     }>;
     getKategoriKeperluan(cadisdikId?: string): Promise<{
+        nama: string;
+        cadisdik_id: string;
         created_at: Date;
         updated_at: Date;
-        cadisdik_id: string;
         aktif: boolean;
-        nama: string;
         kategori_keperluan_id: string;
     }[]>;
     createKategoriKeperluan(data: {
@@ -140,27 +140,27 @@ export declare class MandalaService implements OnModuleInit {
         nama: string;
         aktif?: boolean;
     }): Promise<{
+        nama: string;
+        cadisdik_id: string;
         created_at: Date;
         updated_at: Date;
-        cadisdik_id: string;
         aktif: boolean;
-        nama: string;
         kategori_keperluan_id: string;
     }>;
     updateKategoriKeperluan(id: string, data: any): Promise<{
+        nama: string;
+        cadisdik_id: string;
         created_at: Date;
         updated_at: Date;
-        cadisdik_id: string;
         aktif: boolean;
-        nama: string;
         kategori_keperluan_id: string;
     }>;
     deleteKategoriKeperluan(id: string): Promise<{
+        nama: string;
+        cadisdik_id: string;
         created_at: Date;
         updated_at: Date;
-        cadisdik_id: string;
         aktif: boolean;
-        nama: string;
         kategori_keperluan_id: string;
     }>;
     getAntrian(filters: {
@@ -170,24 +170,24 @@ export declare class MandalaService implements OnModuleInit {
         end_date?: string;
     }): Promise<({
         kategori_keperluan: {
+            nama: string;
+            cadisdik_id: string;
             created_at: Date;
             updated_at: Date;
-            cadisdik_id: string;
             aktif: boolean;
-            nama: string;
             kategori_keperluan_id: string;
         };
     } & {
+        cadisdik_id: string;
         created_at: Date;
         updated_at: Date;
-        cadisdik_id: string;
+        tanggal: Date;
+        status: number;
+        antrian_id: string;
+        kategori_keperluan_id: string;
+        nomor_antrian: number;
         nama_lengkap: string;
         jabatan: string | null;
-        status: number;
-        tanggal: Date;
-        kategori_keperluan_id: string;
-        antrian_id: string;
-        nomor_antrian: number;
         unit_instansi: string | null;
         nomor_hp: string | null;
         keperluan: string | null;
@@ -201,31 +201,31 @@ export declare class MandalaService implements OnModuleInit {
         nomor_hp?: string;
         keperluan?: string;
     }): Promise<{
+        cadisdik_id: string;
         created_at: Date;
         updated_at: Date;
-        cadisdik_id: string;
+        tanggal: Date;
+        status: number;
+        antrian_id: string;
+        kategori_keperluan_id: string;
+        nomor_antrian: number;
         nama_lengkap: string;
         jabatan: string | null;
-        status: number;
-        tanggal: Date;
-        kategori_keperluan_id: string;
-        antrian_id: string;
-        nomor_antrian: number;
         unit_instansi: string | null;
         nomor_hp: string | null;
         keperluan: string | null;
     }>;
     updateAntrianStatus(id: string, status: number): Promise<{
+        cadisdik_id: string;
         created_at: Date;
         updated_at: Date;
-        cadisdik_id: string;
+        tanggal: Date;
+        status: number;
+        antrian_id: string;
+        kategori_keperluan_id: string;
+        nomor_antrian: number;
         nama_lengkap: string;
         jabatan: string | null;
-        status: number;
-        tanggal: Date;
-        kategori_keperluan_id: string;
-        antrian_id: string;
-        nomor_antrian: number;
         unit_instansi: string | null;
         nomor_hp: string | null;
         keperluan: string | null;
@@ -240,198 +240,198 @@ export declare class MandalaService implements OnModuleInit {
         batal: number;
     }>;
     getJenisJabatans(): Promise<{
+        nama: string;
         created_at: Date;
         updated_at: Date;
         jenis_jabatan_id: string;
-        nama: string;
     }[]>;
     getJenisJabatanById(id: string): Promise<{
+        nama: string;
         created_at: Date;
         updated_at: Date;
         jenis_jabatan_id: string;
-        nama: string;
     }>;
     createJenisJabatan(data: {
         nama: string;
     }): Promise<{
+        nama: string;
         created_at: Date;
         updated_at: Date;
         jenis_jabatan_id: string;
-        nama: string;
     }>;
     updateJenisJabatan(id: string, data: {
         nama: string;
     }): Promise<{
+        nama: string;
         created_at: Date;
         updated_at: Date;
         jenis_jabatan_id: string;
-        nama: string;
     }>;
     deleteJenisJabatan(id: string): Promise<{
+        nama: string;
         created_at: Date;
         updated_at: Date;
         jenis_jabatan_id: string;
-        nama: string;
     }>;
     getPegawais(cadisdikId?: string): Promise<({
         cadisdik: {
             nama_instansi: string;
         };
         jenis_jabatan: {
+            nama: string;
             created_at: Date;
             updated_at: Date;
             jenis_jabatan_id: string;
-            nama: string;
         };
     } & {
+        nomor_telepon: string | null;
+        email: string;
+        cadisdik_id: string;
+        pegawai_id: string;
         created_at: Date;
         updated_at: Date;
-        cadisdik_id: string;
-        email: string;
-        nomor_telepon: string | null;
         aktif: boolean;
-        pegawai_id: string;
+        nik: string | null;
+        jenis_kelamin: number;
+        tempat_lahir: string | null;
+        tanggal_lahir: Date | null;
         nama_lengkap: string;
+        jabatan: number | null;
         nip: string | null;
         password: string;
         authenticator_secret: string | null;
-        jabatan: number | null;
-        jenis_kelamin: number;
         foto: string | null;
         alamat_lengkap: string | null;
-        nik: string | null;
-        tanggal_lahir: Date | null;
-        tempat_lahir: string | null;
         golongan: number | null;
         jenis_jabatan_id: string | null;
     })[]>;
     getPegawaiById(id: string): Promise<{
         cadisdik: {
+            nomor_telepon: string | null;
+            email: string | null;
+            website: string | null;
+            cadisdik_id: string;
             created_at: Date;
             updated_at: Date;
-            cadisdik_id: string;
+            aktif: boolean;
             nama_instansi: string;
             alamat: string | null;
-            email: string | null;
-            nomor_telepon: string | null;
-            website: string | null;
             provinsi: string | null;
             kabupaten: string[];
-            aktif: boolean;
         };
         jenis_jabatan: {
+            nama: string;
             created_at: Date;
             updated_at: Date;
             jenis_jabatan_id: string;
-            nama: string;
         };
     } & {
+        nomor_telepon: string | null;
+        email: string;
+        cadisdik_id: string;
+        pegawai_id: string;
         created_at: Date;
         updated_at: Date;
-        cadisdik_id: string;
-        email: string;
-        nomor_telepon: string | null;
         aktif: boolean;
-        pegawai_id: string;
+        nik: string | null;
+        jenis_kelamin: number;
+        tempat_lahir: string | null;
+        tanggal_lahir: Date | null;
         nama_lengkap: string;
+        jabatan: number | null;
         nip: string | null;
         password: string;
         authenticator_secret: string | null;
-        jabatan: number | null;
-        jenis_kelamin: number;
         foto: string | null;
         alamat_lengkap: string | null;
-        nik: string | null;
-        tanggal_lahir: Date | null;
-        tempat_lahir: string | null;
         golongan: number | null;
         jenis_jabatan_id: string | null;
     }>;
     createPegawai(data: any): Promise<{
+        nomor_telepon: string | null;
+        email: string;
+        cadisdik_id: string;
+        pegawai_id: string;
         created_at: Date;
         updated_at: Date;
-        cadisdik_id: string;
-        email: string;
-        nomor_telepon: string | null;
         aktif: boolean;
-        pegawai_id: string;
+        nik: string | null;
+        jenis_kelamin: number;
+        tempat_lahir: string | null;
+        tanggal_lahir: Date | null;
         nama_lengkap: string;
+        jabatan: number | null;
         nip: string | null;
         password: string;
         authenticator_secret: string | null;
-        jabatan: number | null;
-        jenis_kelamin: number;
         foto: string | null;
         alamat_lengkap: string | null;
-        nik: string | null;
-        tanggal_lahir: Date | null;
-        tempat_lahir: string | null;
         golongan: number | null;
         jenis_jabatan_id: string | null;
     }>;
     updatePegawai(id: string, data: any): Promise<{
+        nomor_telepon: string | null;
+        email: string;
+        cadisdik_id: string;
+        pegawai_id: string;
         created_at: Date;
         updated_at: Date;
-        cadisdik_id: string;
-        email: string;
-        nomor_telepon: string | null;
         aktif: boolean;
-        pegawai_id: string;
+        nik: string | null;
+        jenis_kelamin: number;
+        tempat_lahir: string | null;
+        tanggal_lahir: Date | null;
         nama_lengkap: string;
+        jabatan: number | null;
         nip: string | null;
         password: string;
         authenticator_secret: string | null;
-        jabatan: number | null;
-        jenis_kelamin: number;
         foto: string | null;
         alamat_lengkap: string | null;
-        nik: string | null;
-        tanggal_lahir: Date | null;
-        tempat_lahir: string | null;
         golongan: number | null;
         jenis_jabatan_id: string | null;
     }>;
     deletePegawai(id: string): Promise<{
+        nomor_telepon: string | null;
+        email: string;
+        cadisdik_id: string;
+        pegawai_id: string;
         created_at: Date;
         updated_at: Date;
-        cadisdik_id: string;
-        email: string;
-        nomor_telepon: string | null;
         aktif: boolean;
-        pegawai_id: string;
+        nik: string | null;
+        jenis_kelamin: number;
+        tempat_lahir: string | null;
+        tanggal_lahir: Date | null;
         nama_lengkap: string;
+        jabatan: number | null;
         nip: string | null;
         password: string;
         authenticator_secret: string | null;
-        jabatan: number | null;
-        jenis_kelamin: number;
         foto: string | null;
         alamat_lengkap: string | null;
-        nik: string | null;
-        tanggal_lahir: Date | null;
-        tempat_lahir: string | null;
         golongan: number | null;
         jenis_jabatan_id: string | null;
     }>;
     reset2FAPegawai(id: string): Promise<{
+        nomor_telepon: string | null;
+        email: string;
+        cadisdik_id: string;
+        pegawai_id: string;
         created_at: Date;
         updated_at: Date;
-        cadisdik_id: string;
-        email: string;
-        nomor_telepon: string | null;
         aktif: boolean;
-        pegawai_id: string;
+        nik: string | null;
+        jenis_kelamin: number;
+        tempat_lahir: string | null;
+        tanggal_lahir: Date | null;
         nama_lengkap: string;
+        jabatan: number | null;
         nip: string | null;
         password: string;
         authenticator_secret: string | null;
-        jabatan: number | null;
-        jenis_kelamin: number;
         foto: string | null;
         alamat_lengkap: string | null;
-        nik: string | null;
-        tanggal_lahir: Date | null;
-        tempat_lahir: string | null;
         golongan: number | null;
         jenis_jabatan_id: string | null;
     }>;
@@ -446,24 +446,24 @@ export declare class MandalaService implements OnModuleInit {
         };
     } & {
         sekolah_id: string;
+        mapping_pengawas_id: string;
+        pegawai_id: string;
         created_at: Date;
         updated_at: Date;
-        pegawai_id: string;
-        mapping_pengawas_id: string;
     })[]>;
     createMappingPengawas(data: any): Promise<{
         sekolah_id: string;
+        mapping_pengawas_id: string;
+        pegawai_id: string;
         created_at: Date;
         updated_at: Date;
-        pegawai_id: string;
-        mapping_pengawas_id: string;
     }>;
     deleteMappingPengawas(id: string): Promise<{
         sekolah_id: string;
+        mapping_pengawas_id: string;
+        pegawai_id: string;
         created_at: Date;
         updated_at: Date;
-        pegawai_id: string;
-        mapping_pengawas_id: string;
     }>;
     loginPegawai(credentials: {
         identifier: string;
@@ -530,10 +530,6 @@ export declare class MandalaService implements OnModuleInit {
     getSchoolDetail(sekolahId: string): Promise<{
         nama_kepala_sekolah: string;
         sekolah_id: string;
-        cadisdik_id: string | null;
-        email: string | null;
-        nomor_telepon: string | null;
-        website: string | null;
         nama: string;
         nama_nomenklatur: string | null;
         nss: string | null;
@@ -548,7 +544,10 @@ export declare class MandalaService implements OnModuleInit {
         kode_pos: string | null;
         lintang: import("@prisma/client-runtime-utils").Decimal | null;
         bujur: import("@prisma/client-runtime-utils").Decimal | null;
+        nomor_telepon: string | null;
         nomor_fax: string | null;
+        email: string | null;
+        website: string | null;
         kebutuhan_khusus_id: number | null;
         status_sekolah: string | null;
         sk_pendirian_sekolah: string | null;
@@ -575,6 +574,7 @@ export declare class MandalaService implements OnModuleInit {
         last_sync: Date | null;
         updater_id: string | null;
         logo: string | null;
+        cadisdik_id: string | null;
         social_media: import("@prisma/client/runtime/client").JsonValue | null;
         radius: number | null;
     }>;
@@ -733,9 +733,9 @@ export declare class MandalaService implements OnModuleInit {
                 nama: string;
                 tingkat_pendidikan_id: import("@prisma/client-runtime-utils").Decimal;
             };
-            foto: string;
             nama: string;
             nisn: string;
+            foto: string;
             nipd: string;
             anggota_rombel: {
                 rombongan_belajar: {
@@ -748,9 +748,9 @@ export declare class MandalaService implements OnModuleInit {
         created_at: Date;
         updated_at: Date;
         peserta_didik_id: string;
+        tanggal: Date;
         jam_masuk: Date | null;
         jam_pulang: Date | null;
-        tanggal: Date;
         status_masuk: number | null;
         status_pulang: number | null;
     }[]>;
@@ -762,9 +762,9 @@ export declare class MandalaService implements OnModuleInit {
         created_at: Date;
         updated_at: Date;
         ptk_id: string;
+        tanggal: Date;
         jam_masuk: Date | null;
         jam_pulang: Date | null;
-        tanggal: Date;
         status_masuk: number | null;
         status_pulang: number | null;
     }[]>;
@@ -797,14 +797,14 @@ export declare class MandalaService implements OnModuleInit {
     }[]>;
     getMenuRoles(): Promise<({
         jenis_jabatan: {
+            nama: string;
             created_at: Date;
             updated_at: Date;
             jenis_jabatan_id: string;
-            nama: string;
         };
     } & {
-        menu_role_id: string;
         jenis_jabatan_id: string | null;
+        menu_role_id: string;
         menu_key: string;
         jabatan_id: number | null;
         jabatan_nama: string | null;
@@ -837,12 +837,12 @@ export declare class MandalaService implements OnModuleInit {
             nip: string;
         };
         sekolah_id: string;
-        created_at: Date;
-        updated_at: Date;
         cadisdik_id: string;
         pegawai_id: string;
-        status: string;
+        created_at: Date;
+        updated_at: Date;
         keterangan: string | null;
+        status: string;
         jadwal_monitoring_id: string;
         agenda: string;
     }[]>;
@@ -856,38 +856,38 @@ export declare class MandalaService implements OnModuleInit {
         tanggal_mulai: string;
         tanggal_selesai: string;
         sekolah_id: string;
-        created_at: Date;
-        updated_at: Date;
         cadisdik_id: string;
         pegawai_id: string;
-        status: string;
+        created_at: Date;
+        updated_at: Date;
         keterangan: string | null;
+        status: string;
         jadwal_monitoring_id: string;
         agenda: string;
     }>;
     updateJadwalMonitoring(id: string, cadisdikId: string, user: any, body: any): Promise<{
         sekolah_id: string;
-        created_at: Date;
-        updated_at: Date;
         cadisdik_id: string;
         pegawai_id: string;
-        status: string;
-        keterangan: string | null;
+        created_at: Date;
+        updated_at: Date;
         tanggal_mulai: Date;
         tanggal_selesai: Date;
+        keterangan: string | null;
+        status: string;
         jadwal_monitoring_id: string;
         agenda: string;
     }>;
     deleteJadwalMonitoring(id: string, cadisdikId: string, user: any): Promise<{
         sekolah_id: string;
-        created_at: Date;
-        updated_at: Date;
         cadisdik_id: string;
         pegawai_id: string;
-        status: string;
-        keterangan: string | null;
+        created_at: Date;
+        updated_at: Date;
         tanggal_mulai: Date;
         tanggal_selesai: Date;
+        keterangan: string | null;
+        status: string;
         jadwal_monitoring_id: string;
         agenda: string;
     }>;
