@@ -4,8 +4,8 @@ export declare class AppKeyService {
     constructor(prisma: PrismaService);
     private generateSecureToken;
     validateApiKey(keyApi: string): Promise<{
-        id: string;
         sekolah_id: string;
+        id: string;
         nama_app: string;
         key_api: string;
         key_webService: string | null;
@@ -16,8 +16,8 @@ export declare class AppKeyService {
         domain: string | null;
     }>;
     findByDomain(domain: string): Promise<{
-        id: string;
         sekolah_id: string;
+        id: string;
         nama_app: string;
         key_api: string;
         key_webService: string | null;
@@ -28,8 +28,8 @@ export declare class AppKeyService {
         domain: string | null;
     }>;
     createKey(namaApp: string, sekolahId: string): Promise<{
-        id: string;
         sekolah_id: string;
+        id: string;
         nama_app: string;
         key_api: string;
         key_webService: string | null;
@@ -40,8 +40,8 @@ export declare class AppKeyService {
         domain: string | null;
     }>;
     updateWebServiceKey(sekolahId: string, keyWs: string): Promise<{
-        id: string;
         sekolah_id: string;
+        id: string;
         nama_app: string;
         key_api: string;
         key_webService: string | null;
@@ -52,8 +52,8 @@ export declare class AppKeyService {
         domain: string | null;
     }>;
     updateAdminPanelKey(sekolahId: string, keyAdm: string): Promise<{
-        id: string;
         sekolah_id: string;
+        id: string;
         nama_app: string;
         key_api: string;
         key_webService: string | null;
@@ -66,8 +66,8 @@ export declare class AppKeyService {
     getAllKeys(search?: string): Promise<{
         nama_sekolah: string;
         npsn: string;
-        id: string;
         sekolah_id: string;
+        id: string;
         nama_app: string;
         key_api: string;
         key_webService: string | null;
@@ -78,8 +78,8 @@ export declare class AppKeyService {
         domain: string | null;
     }[]>;
     regenerateKeys(id: string): Promise<{
-        id: string;
         sekolah_id: string;
+        id: string;
         nama_app: string;
         key_api: string;
         key_webService: string | null;
@@ -90,8 +90,8 @@ export declare class AppKeyService {
         domain: string | null;
     }>;
     updateSchoolDomain(sekolahId: string, domain: string): Promise<{
-        id: string;
         sekolah_id: string;
+        id: string;
         nama_app: string;
         key_api: string;
         key_webService: string | null;
@@ -102,8 +102,8 @@ export declare class AppKeyService {
         domain: string | null;
     }>;
     toggleActive(id: string): Promise<{
-        id: string;
         sekolah_id: string;
+        id: string;
         nama_app: string;
         key_api: string;
         key_webService: string | null;

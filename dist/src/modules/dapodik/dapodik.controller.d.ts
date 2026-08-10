@@ -1250,6 +1250,8 @@ export declare class DapodikController {
     }): Promise<{
         status: string;
         data: {
+            peran_id: number | null;
+            peran_nama: string | null;
             sekolah_id: string | null;
             created_at: Date;
             updated_at: Date;
@@ -1259,8 +1261,6 @@ export declare class DapodikController {
             pengguna_id: string;
             username: string;
             nama: string;
-            peran_nama: string | null;
-            peran_id: number | null;
             face_embedding: string | null;
             no_telepon: string | null;
             no_hp: string | null;
@@ -1282,6 +1282,8 @@ export declare class DapodikController {
     }): Promise<{
         status: string;
         data: {
+            peran_id: number | null;
+            peran_nama: string | null;
             sekolah_id: string | null;
             created_at: Date;
             updated_at: Date;
@@ -1291,8 +1293,6 @@ export declare class DapodikController {
             pengguna_id: string;
             username: string;
             nama: string;
-            peran_nama: string | null;
-            peran_id: number | null;
             face_embedding: string | null;
             no_telepon: string | null;
             no_hp: string | null;
@@ -1573,11 +1573,11 @@ export declare class DapodikController {
     getMenuRoles(req: Request, querySekolahId?: string): Promise<{
         status: string;
         data: {
-            sekolah_id: string | null;
-            peran_nama: string | null;
-            peran_id: number;
             menu_role_id: string;
             menu_id: string;
+            peran_id: number;
+            peran_nama: string | null;
+            sekolah_id: string | null;
         }[];
     }>;
     saveMenuRoles(req: Request, body: {

@@ -99,14 +99,14 @@ export declare class AuthController {
     }>;
     getMe(request: Request): Promise<{
         foto: string;
+        peran_id: number;
+        peran_nama: string;
         sekolah_id: string;
         alamat: string;
         email: string;
         pengguna_id: string;
         username: string;
         nama: string;
-        peran_nama: string;
-        peran_id: number;
         no_telepon: string;
         no_hp: string;
         ptk_id: string;
@@ -143,8 +143,8 @@ export declare class AuthController {
     }>;
     getPublicProfilePhoto(id: string, res: Response): Promise<void>;
     systemSetup(apiKey: string, request: Request): Promise<{
-        id: string;
         sekolah_id: string;
+        id: string;
         nama_app: string;
         key_api: string;
         key_webService: string | null;

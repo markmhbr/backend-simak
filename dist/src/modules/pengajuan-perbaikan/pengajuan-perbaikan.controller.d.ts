@@ -5,8 +5,8 @@ export declare class PengajuanPerbaikanController {
     constructor(service: PengajuanPerbaikanService);
     private getSekolahId;
     buatPengajuan(req: Request, body: any): Promise<{
-        id: string;
         sekolah_id: string;
+        id: string;
         created_at: Date;
         updated_at: Date;
         ptk_id: string | null;
@@ -41,8 +41,8 @@ export declare class PengajuanPerbaikanController {
     }>;
     dapatkanDaftar(req: Request): Promise<{
         nama: string;
-        id: string;
         sekolah_id: string;
+        id: string;
         created_at: Date;
         updated_at: Date;
         ptk_id: string | null;

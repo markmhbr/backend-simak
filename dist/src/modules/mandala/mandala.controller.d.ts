@@ -831,8 +831,8 @@ export declare class MandalaController {
                 nama: string;
             };
         } & {
-            jenis_jabatan_id: string | null;
             menu_role_id: string;
+            jenis_jabatan_id: string | null;
             menu_key: string;
             jabatan_id: number | null;
             jabatan_nama: string | null;

@@ -1038,11 +1038,11 @@ export declare class DapodikService {
         peran_nama: string;
     }[]>;
     getMenuRoles(sekolahId?: string | null): Promise<{
-        sekolah_id: string | null;
-        peran_nama: string | null;
-        peran_id: number;
         menu_role_id: string;
         menu_id: string;
+        peran_id: number;
+        peran_nama: string | null;
+        sekolah_id: string | null;
     }[]>;
     saveMenuRoles(sekolahId: string | null | undefined, peranId: number, peranNama: string, menuIds: string[]): Promise<{
         success: boolean;
@@ -1203,6 +1203,8 @@ export declare class DapodikService {
     getUniqueCustomJabatans(sekolahId: string | null, index?: number): Promise<string[]>;
     getUniqueCustomJumlahJam(sekolahId: string | null, index?: number): Promise<number[]>;
     registerGtkFace(sekolahId: string, id: string, embedding: number[]): Promise<{
+        peran_id: number | null;
+        peran_nama: string | null;
         sekolah_id: string | null;
         created_at: Date;
         updated_at: Date;
@@ -1212,8 +1214,6 @@ export declare class DapodikService {
         pengguna_id: string;
         username: string;
         nama: string;
-        peran_nama: string | null;
-        peran_id: number | null;
         face_embedding: string | null;
         no_telepon: string | null;
         no_hp: string | null;
@@ -1223,6 +1223,8 @@ export declare class DapodikService {
         remember_token: string | null;
     }>;
     registerStudentFace(sekolahId: string, id: string, embedding: number[]): Promise<{
+        peran_id: number | null;
+        peran_nama: string | null;
         sekolah_id: string | null;
         created_at: Date;
         updated_at: Date;
@@ -1232,8 +1234,6 @@ export declare class DapodikService {
         pengguna_id: string;
         username: string;
         nama: string;
-        peran_nama: string | null;
-        peran_id: number | null;
         face_embedding: string | null;
         no_telepon: string | null;
         no_hp: string | null;

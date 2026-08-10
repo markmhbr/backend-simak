@@ -76,8 +76,8 @@ export declare class AuthService {
         registeredDomain: string;
     }>;
     setupSystem(apiKey: string, domain: string): Promise<{
-        id: string;
         sekolah_id: string;
+        id: string;
         nama_app: string;
         key_api: string;
         key_webService: string | null;
@@ -110,14 +110,14 @@ export declare class AuthService {
     }>;
     getMe(penggunaId: string): Promise<{
         foto: string;
+        peran_id: number;
+        peran_nama: string;
         sekolah_id: string;
         alamat: string;
         email: string;
         pengguna_id: string;
         username: string;
         nama: string;
-        peran_nama: string;
-        peran_id: number;
         no_telepon: string;
         no_hp: string;
         ptk_id: string;
