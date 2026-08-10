@@ -96,12 +96,50 @@ export class AppKeyService {
   }
 
   /**
-   * Menampilkan semua key yang terdaftar
+   * Menampilkan semua key yang terdaftar beserta informasi nama sekolah
    */
-  async getAllKeys() {
-    return await this.prisma.appKey.findMany({
+  async getAllKeys(search?: string) {
+    const keys = await this.prisma.appKey.findMany({
       orderBy: { created_at: 'desc' },
     });
+
+    const sekolahIds = keys.map((k) => k.sekolah_id).filter(Boolean);
+    const sekolahList = await this.prisma.sekolah.findMany({
+      where: {
+        sekolah_id: { in: sekolahIds },
+      },
+      select: {
+        sekolah_id: true,
+        nama: true,
+        npsn: true,
+      },
+    });
+
+    const sekolahMap = new Map(sekolahList.map((s) => [s.sekolah_id, s]));
+
+    const result = keys.map((k) => {
+      const s = sekolahMap.get(k.sekolah_id);
+      return {
+        ...k,
+        nama_sekolah: s?.nama || null,
+        npsn: s?.npsn || null,
+      };
+    });
+
+    if (search && search.trim()) {
+      const q = search.trim().toLowerCase();
+      return result.filter(
+        (k) =>
+          (k.nama_sekolah && k.nama_sekolah.toLowerCase().includes(q)) ||
+          (k.nama_app && k.nama_app.toLowerCase().includes(q)) ||
+          (k.sekolah_id && k.sekolah_id.toLowerCase().includes(q)) ||
+          (k.npsn && k.npsn.toLowerCase().includes(q)) ||
+          (k.domain && k.domain.toLowerCase().includes(q)) ||
+          (k.id && k.id.toLowerCase().includes(q))
+      );
+    }
+
+    return result;
   }
 
   /**

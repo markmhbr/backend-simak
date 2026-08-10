@@ -63,7 +63,9 @@ export declare class AppKeyService {
         updated_at: Date;
         domain: string | null;
     }>;
-    getAllKeys(): Promise<{
+    getAllKeys(search?: string): Promise<{
+        nama_sekolah: string;
+        npsn: string;
         id: string;
         sekolah_id: string;
         nama_app: string;

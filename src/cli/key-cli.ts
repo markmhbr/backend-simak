@@ -24,7 +24,7 @@ async function bootstrap() {
     console.log('\n=====================================================');
     console.log('     🔑 SISTEM MANAJEMEN KEY SIMAK BACKEND 🔑       ');
     console.log('=====================================================');
-    console.log('1. Tampilkan Semua Key Terdaftar');
+    console.log('1. Tampilkan / Cari Key Terdaftar');
     console.log('2. Buat Key Baru (Generate Secure Key)');
     console.log('3. Regenerate / Ganti Key yang Sudah Ada');
     console.log('4. Ubah Status Aktif / Nonaktif Key');
@@ -41,7 +41,7 @@ async function bootstrap() {
     try {
       switch (choice) {
         case '1':
-          await listKeys(appKeyService);
+          await listKeys(appKeyService, question, true);
           break;
         case '2':
           await createNewKey(appKeyService, question);
@@ -79,24 +79,41 @@ async function bootstrap() {
   showMenu();
 }
 
-async function listKeys(service: AppKeyService) {
-  console.log('\n📋 DAFTAR KEY TERDAFTAR:');
-  const keys = await service.getAllKeys();
+async function listKeys(
+  service: AppKeyService,
+  question?: (q: string) => Promise<string>,
+  promptSearch: boolean = false
+) {
+  let searchKeyword = '';
+  if (promptSearch && question) {
+    const input = await question('\n🔍 Cari Nama Sekolah / Klien / ID (Kosongkan / tekan ENTER untuk tampilkan semua): ');
+    searchKeyword = input.trim();
+  }
+
+  const keys: any[] = await service.getAllKeys(searchKeyword);
+
+  if (searchKeyword) {
+    console.log(`\n📋 HASIL PENCARIAN KEY UNTUK "${searchKeyword}" (${keys.length} ditemukan):`);
+  } else {
+    console.log(`\n📋 DAFTAR SEMUA KEY TERDAFTAR (${keys.length} Key):`);
+  }
+
   if (keys.length === 0) {
-    console.log('⚠️ Belum ada key yang terdaftar di sistem.');
+    console.log(searchKeyword ? '⚠️ Tidak ada key yang cocok dengan kata kunci tersebut.' : '⚠️ Belum ada key yang terdaftar di sistem.');
     return;
   }
 
-  keys.forEach((k, index) => {
+  keys.forEach((k: any, index: number) => {
     console.log(`\n[${index + 1}] ID: ${k.id}`);
     console.log(`    Nama Klien  : ${k.nama_app}`);
     console.log(`    Sekolah ID  : ${k.sekolah_id || 'Global (Sistem)'}`);
+    console.log(`    Nama Sekolah: ${k.nama_sekolah || '-'}${k.npsn ? ` (NPSN: ${k.npsn})` : ''}`);
     console.log(`    Domain      : ${k.domain || '[Belum Terhubung / Terdaftar]'}`);
     console.log(`    Key API     : ${k.key_api}`);
-    console.log(`    Key WebSvc  : ${k.key_webService}`);
-    console.log(`    Key AdmPanel: ${k.key_adminPanel}`);
+    console.log(`    Key WebSvc  : ${k.key_webService || 'null'}`);
+    console.log(`    Key AdmPanel: ${k.key_adminPanel || 'null'}`);
     console.log(`    Status      : ${k.is_active ? '🟢 AKTIF' : '🔴 NONAKTIF'}`);
-    console.log(`    Dibuat      : ${new Date(k.created_at).toLocaleString()}`);
+    console.log(`    Dibuat      : ${new Date(k.created_at).toLocaleString('id-ID')}`);
   });
 }
 
@@ -121,7 +138,7 @@ async function createNewKey(service: AppKeyService, question: (q: string) => Pro
   }
 
   console.log('⏳ Sedang men-generate secure keys...');
-  const result = await service.createKey(namaApp.trim(), sekolahId.trim());
+  const result: any = await service.createKey(namaApp.trim(), sekolahId.trim());
   console.log('\n✅ BERHASIL DIBUAT!');
   console.log(`ID          : ${result.id}`);
   console.log(`Nama Klien  : ${result.nama_app}`);
