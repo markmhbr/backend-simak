@@ -9,9 +9,11 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  console.log('=== SIMAK MENU ROLES MIGRATION & CLEANUP SCRIPT ===\n');
+  console.log('=== SIMAK DATA CLEANUP & MIGRATION SCRIPT ===\n');
 
-  // 1. Ensure sekolah_id column exists in simak.menu_roles table
+  // ==========================================
+  // 1. MIGRATION & CLEANUP SIMAK.MENU_ROLES
+  // ==========================================
   console.log('1. Memeriksa & memperbarui struktur tabel simak.menu_roles...');
   await prisma.$executeRawUnsafe(`
     ALTER TABLE simak.menu_roles 
@@ -24,34 +26,134 @@ async function main() {
   `);
   console.log('   ✓ Struktur tabel simak.menu_roles siap.');
 
-  // 2. Count unlinked menu_roles (where sekolah_id IS NULL)
-  const unlinkedCount = await prisma.menuRole.count({
+  const unlinkedMenuRoles = await prisma.menuRole.count({
     where: { sekolah_id: null },
   });
-  console.log(`\n2. Ditemukan ${unlinkedCount} data menu_roles tanpa sekolah_id (sekolah_id IS NULL).`);
+  console.log(`   Ditemukan ${unlinkedMenuRoles} data menu_roles tanpa sekolah_id (sekolah_id IS NULL).`);
 
-  if (unlinkedCount > 0) {
-    console.log('   Membersihkan data menu_roles lama yang tidak terikat ke sekolah...');
-    const deleted = await prisma.menuRole.deleteMany({
+  if (unlinkedMenuRoles > 0) {
+    const deletedMenuRoles = await prisma.menuRole.deleteMany({
       where: { sekolah_id: null },
     });
-    console.log(`   ✓ Berhasil menghapus ${deleted.count} data menu_roles lama.`);
+    console.log(`   ✓ Berhasil menghapus ${deletedMenuRoles.count} data menu_roles lama.`);
   } else {
     console.log('   ✓ Tidak ada data menu_roles lama yang perlu dibersihkan.');
   }
 
-  // 3. Count total active menu_roles per sekolah
-  const grouped = await prisma.menuRole.groupBy({
+  // ==========================================
+  // 2. CLEANUP PERAN TAMBAHAN (TUGAS TAMBAHAN)
+  // ==========================================
+  console.log('\n2. Memeriksa & membersihkan data Tugas Tambahan / Peran Tambahan...');
+
+  // 2a. Hapus tugas tambahan yang statusnya soft_delete (> 0)
+  const softDeletedCount = await prisma.tugasTambahan.count({
+    where: {
+      soft_delete: { gt: 0 },
+    },
+  });
+  if (softDeletedCount > 0) {
+    const deletedSoft = await prisma.tugasTambahan.deleteMany({
+      where: { soft_delete: { gt: 0 } },
+    });
+    console.log(`   ✓ Berhasil menghapus ${deletedSoft.count} data tugas tambahan bersatus soft_delete.`);
+  } else {
+    console.log('   ✓ Tidak ada data tugas tambahan bersatus soft_delete.');
+  }
+
+  // 2b. Hapus tugas tambahan yatim (tanpa ptk_id dan tanpa peserta_didik_id)
+  const orphanCount = await prisma.tugasTambahan.count({
+    where: {
+      ptk_id: null,
+      peserta_didik_id: null,
+    },
+  });
+  if (orphanCount > 0) {
+    const deletedOrphans = await prisma.tugasTambahan.deleteMany({
+      where: {
+        ptk_id: null,
+        peserta_didik_id: null,
+      },
+    });
+    console.log(`   ✓ Berhasil menghapus ${deletedOrphans.count} data tugas tambahan yatim (tanpa PTK/PD).`);
+  } else {
+    console.log('   ✓ Tidak ada data tugas tambahan yatim.');
+  }
+
+  // 2c. Sinkronisasi sekolah_id pada tugas_tambahan dari data GTK atau Peserta Didik terkait jika NULL
+  const nullSekolahTasks = await prisma.tugasTambahan.findMany({
+    where: { sekolah_id: null },
+    select: {
+      ptk_tugas_tambahan_id: true,
+      ptk_id: true,
+      peserta_didik_id: true,
+    },
+  });
+
+  if (nullSekolahTasks.length > 0) {
+    console.log(`   Menyinkronkan sekolah_id untuk ${nullSekolahTasks.length} data tugas tambahan...`);
+    let updatedCount = 0;
+
+    for (const task of nullSekolahTasks) {
+      let targetSekolahId: string | null = null;
+
+      if (task.ptk_id) {
+        const gtk = await prisma.gtk.findUnique({
+          where: { ptk_id: task.ptk_id },
+          select: { sekolah_id: true },
+        });
+        if (gtk?.sekolah_id) targetSekolahId = gtk.sekolah_id;
+      }
+
+      if (!targetSekolahId && task.peserta_didik_id) {
+        const pd = await prisma.pesertaDidik.findUnique({
+          where: { peserta_didik_id: task.peserta_didik_id },
+          select: { sekolah_id: true },
+        });
+        if (pd?.sekolah_id) targetSekolahId = pd.sekolah_id;
+      }
+
+      if (targetSekolahId) {
+        await prisma.tugasTambahan.update({
+          where: { ptk_tugas_tambahan_id: task.ptk_tugas_tambahan_id },
+          data: { sekolah_id: targetSekolahId },
+        });
+        updatedCount++;
+      }
+    }
+    console.log(`   ✓ Berhasil menyinkronkan sekolah_id pada ${updatedCount} data tugas tambahan.`);
+  } else {
+    console.log('   ✓ Semua data tugas tambahan sudah memiliki sekolah_id.');
+  }
+
+  // ==========================================
+  // 3. RINGKASAN DATA HAK AKSES & PERAN
+  // ==========================================
+  console.log('\n3. Ringkasan data aktif per sekolah:');
+  const groupedMenuRoles = await prisma.menuRole.groupBy({
     by: ['sekolah_id'],
     _count: { menu_role_id: true },
   });
 
-  console.log('\n3. Ringkasan data menu_roles per sekolah:');
-  if (grouped.length === 0) {
-    console.log('   (Belum ada data menu_roles per sekolah. Silakan atur melalui menu Pengaturan Hak Akses Menu di frontend)');
+  const groupedTugas = await prisma.tugasTambahan.groupBy({
+    by: ['sekolah_id'],
+    _count: { ptk_tugas_tambahan_id: true },
+  });
+
+  console.log('   a) Menu Roles:');
+  if (groupedMenuRoles.length === 0) {
+    console.log('      - Belum ada menu roles per sekolah.');
   } else {
-    for (const item of grouped) {
-      console.log(`   - Sekolah ID [${item.sekolah_id}]: ${item._count.menu_role_id} item menu`);
+    for (const item of groupedMenuRoles) {
+      console.log(`      - Sekolah ID [${item.sekolah_id}]: ${item._count.menu_role_id} item menu`);
+    }
+  }
+
+  console.log('   b) Tugas/Peran Tambahan:');
+  if (groupedTugas.length === 0) {
+    console.log('      - Belum ada tugas tambahan.');
+  } else {
+    for (const item of groupedTugas) {
+      console.log(`      - Sekolah ID [${item.sekolah_id}]: ${item._count.ptk_tugas_tambahan_id} tugas tambahan`);
     }
   }
 
