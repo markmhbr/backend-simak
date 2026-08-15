@@ -41,19 +41,12 @@ export class AuthService {
     }
 
     // MULTI-TENANT CHECK:
-    if (sekolahId) {
-      // Mencegah Super Admin login di portal sekolah (jika sekolahId ada dari API Key)
-      if (user.peran_nama === 'Super Admin' || user.sekolah_id === null) {
-        throw new UnauthorizedException('Super Admin hanya dapat login melalui portal pusat. Silakan hapus data sekolah di browser Anda atau gunakan akun sekolah.');
-      }
-
-      if (user.sekolah_id !== sekolahId) {
+    if (user.peran_nama !== 'Super Admin' && user.sekolah_id !== null) {
+      if (sekolahId && user.sekolah_id !== sekolahId) {
         console.log(`[Login Failed] School ID mismatch for user ${username}. User School: ${user.sekolah_id}, Request School: ${sekolahId}`);
         throw new UnauthorizedException('Akun Anda tidak terdaftar di sekolah ini');
       }
-    } else {
-      // Login tanpa API Key hanya untuk Super Admin
-      if (user.peran_nama !== 'Super Admin' || user.sekolah_id !== null) {
+      if (!sekolahId) {
         throw new UnauthorizedException('Silakan login melalui portal sekolah Anda.');
       }
     }
@@ -65,15 +58,7 @@ export class AuthService {
       throw new UnauthorizedException('Kredensial tidak valid');
     }
 
-    // Bypass 2FA untuk Super Admin (hanya jika di portal pusat)
-    if (user.peran_nama === 'Super Admin') {
-      const role = 'Super Admin';
-      const tokens = await this.generateTokens(user, role);
-      return {
-        requires2FA: false,
-        ...tokens
-      };
-    }
+
 
     // Cek apakah user sudah set 2FA
     const payload = { sub: user.pengguna_id, type: '2fa_pending', sekolahId };
@@ -830,5 +815,117 @@ export class AuthService {
     }
 
     throw new NotFoundException('Foto tidak ditemukan');
+  }
+
+  /**
+   * Mengambil daftar jenjang pendidikan (bentuk_pendidikan) yang HANYA ada di data sekolah database
+   */
+  async getJenjangList() {
+    const activeSchools = await this.prisma.sekolah.findMany({
+      where: {
+        bentuk_pendidikan_id: { not: null },
+      },
+      select: {
+        bentuk_pendidikan_id: true,
+      },
+      distinct: ['bentuk_pendidikan_id'],
+    });
+
+    const activeJenjangIds = activeSchools
+      .map((s) => s.bentuk_pendidikan_id)
+      .filter((id): id is number => id !== null);
+
+    if (activeJenjangIds.length === 0) {
+      return [];
+    }
+
+    return this.prisma.bentuk_pendidikan.findMany({
+      where: {
+        bentuk_pendidikan_id: { in: activeJenjangIds },
+      },
+      orderBy: { nama: 'asc' },
+      select: {
+        bentuk_pendidikan_id: true,
+        nama: true,
+      },
+    });
+  }
+
+  /**
+   * Mengambil daftar sekolah terfilter berdasarkan jenjang
+   */
+  async getSekolahByJenjang(bentukPendidikanId?: number) {
+    const where: any = {};
+    if (bentukPendidikanId) {
+      where.bentuk_pendidikan_id = Number(bentukPendidikanId);
+    }
+
+    return this.prisma.sekolah.findMany({
+      where,
+      select: {
+        sekolah_id: true,
+        nama: true,
+        npsn: true,
+        bentuk_pendidikan_id: true,
+        alamat_jalan: true,
+      },
+      orderBy: { nama: 'asc' },
+    });
+  }
+
+  /**
+   * Mengubah konteks sekolah (Context Switch) untuk Super Admin
+   */
+  async switchSekolah(userId: string, targetSekolahId: string) {
+    const user = await this.prisma.pengguna.findUnique({
+      where: { pengguna_id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Pengguna tidak ditemukan');
+    }
+
+    if (user.peran_nama !== 'Super Admin') {
+      throw new ForbiddenException('Akses khusus Super Admin');
+    }
+
+    const sekolah = await this.prisma.sekolah.findUnique({
+      where: { sekolah_id: targetSekolahId },
+    });
+
+    if (!sekolah) {
+      throw new NotFoundException('Sekolah target tidak ditemukan');
+    }
+
+    const userWithTargetSchool = {
+      ...user,
+      sekolah_id: targetSekolahId,
+    };
+
+    const tokens = await this.generateTokens(userWithTargetSchool, 'Super Admin');
+
+    const appKey = await this.prisma.appKey.findUnique({
+      where: { sekolah_id: targetSekolahId },
+    });
+
+    return {
+      status: 'success',
+      message: `Berhasil berpindah konteks ke sekolah: ${sekolah.nama}`,
+      sekolah: {
+        sekolah_id: sekolah.sekolah_id,
+        nama: sekolah.nama,
+        npsn: sekolah.npsn,
+        bentuk_pendidikan_id: sekolah.bentuk_pendidikan_id,
+      },
+      appKey: appKey || {
+        id: 'super-admin-bypass',
+        nama_app: 'Pusat (Super Admin)',
+        sekolah_id: sekolah.sekolah_id,
+        key_api: 'super-admin-bypass-key',
+        domain: '*',
+        is_active: true,
+      },
+      ...tokens,
+    };
   }
 }

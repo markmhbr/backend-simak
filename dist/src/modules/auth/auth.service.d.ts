@@ -14,23 +14,6 @@ export declare class AuthService {
     private mailService;
     constructor(prisma: PrismaService, jwtService: JwtService, cryptoService: CryptoService, configService: ConfigService, appKeyService: AppKeyService, mailService: MailService);
     validateUser(username: string, pass: string, sekolahId?: string): Promise<{
-        accessToken: string;
-        refreshToken: string;
-        user: {
-            id: any;
-            nama: any;
-            email: any;
-            role: string;
-            ptk_id: any;
-            peserta_didik_id: any;
-            foto: string;
-        };
-        requires2FA: boolean;
-        is2FASetup?: undefined;
-        tempToken?: undefined;
-        qrCodeUrl?: undefined;
-        secret?: undefined;
-    } | {
         requires2FA: boolean;
         is2FASetup: boolean;
         tempToken: string;
@@ -164,4 +147,55 @@ export declare class AuthService {
         nisn?: undefined;
     }>;
     getPublicProfilePhoto(id: string, res: Response): Promise<void>;
+    getJenjangList(): Promise<{
+        nama: string;
+        bentuk_pendidikan_id: number;
+    }[]>;
+    getSekolahByJenjang(bentukPendidikanId?: number): Promise<{
+        sekolah_id: string;
+        nama: string;
+        npsn: string;
+        bentuk_pendidikan_id: number;
+        alamat_jalan: string;
+    }[]>;
+    switchSekolah(userId: string, targetSekolahId: string): Promise<{
+        accessToken: string;
+        refreshToken: string;
+        user: {
+            id: any;
+            nama: any;
+            email: any;
+            role: string;
+            ptk_id: any;
+            peserta_didik_id: any;
+            foto: string;
+        };
+        status: string;
+        message: string;
+        sekolah: {
+            sekolah_id: string;
+            nama: string;
+            npsn: string;
+            bentuk_pendidikan_id: number;
+        };
+        appKey: {
+            sekolah_id: string;
+            created_at: Date;
+            updated_at: Date;
+            is_active: boolean;
+            id: string;
+            nama_app: string;
+            key_api: string;
+            key_webService: string | null;
+            key_adminPanel: string | null;
+            domain: string | null;
+        } | {
+            id: string;
+            nama_app: string;
+            sekolah_id: string;
+            key_api: string;
+            domain: string;
+            is_active: true;
+        };
+    }>;
 }

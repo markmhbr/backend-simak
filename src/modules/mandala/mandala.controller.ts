@@ -556,6 +556,45 @@ export class MandalaController {
     });
   }
 
+  @Get('dapodik/rombongan-belajar')
+  @UseGuards(MandalaKeyGuard)
+  async getRombonganBelajar(
+    @Req() req: any,
+    @Query('sekolah_id') sekolahId?: string,
+    @Query('type') type?: string,
+    @Query('limit') limit?: string,
+    @Query('page') page?: string,
+    @Query('search') search?: string,
+    @Query('tingkat') tingkat?: string,
+    @Query('semester_id') semesterId?: string,
+  ) {
+    const user = req['user'];
+    const isOperator = user?.role === 'Operator Sekolah';
+    let targetSekolahId = sekolahId;
+    if (isOperator) {
+      targetSekolahId = user?.sekolahId || user?.sekolah_id;
+    }
+    let take = limit ? parseInt(limit, 10) : 10;
+    if (take > 1000) {
+      take = 1000;
+    }
+    const skipPage = page ? parseInt(page, 10) : 1;
+    return await this.mandalaService.getRombonganBelajarForMandala(targetSekolahId, {
+      type,
+      limit: take,
+      page: skipPage,
+      search,
+      tingkat,
+      semester_id: semesterId,
+    });
+  }
+
+  @Get('dapodik/rombongan-belajar/:id/anggota')
+  @UseGuards(MandalaKeyGuard)
+  async getRombelAnggota(@Param('id') rombelId: string) {
+    return await this.mandalaService.getRombelAnggotaForMandala(rombelId);
+  }
+
   @Get('presensi/peserta-didik')
   @UseGuards(MandalaKeyGuard)
   async getPesertaDidikPresence(

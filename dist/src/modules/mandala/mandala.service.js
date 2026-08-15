@@ -1086,12 +1086,24 @@ let MandalaService = MandalaService_1 = class MandalaService {
     }
     async getSchoolSummary(sekolahId) {
         const filter = { sekolah_id: sekolahId };
-        const [totalTanah, totalBangunan, totalRuang, totalSiswa, totalGtk] = await Promise.all([
+        const latestRombel = await this.prisma.rombonganBelajar.findFirst({
+            where: filter,
+            select: { semester_id: true },
+            orderBy: { semester_id: 'desc' },
+        });
+        const [totalTanah, totalBangunan, totalRuang, totalSiswa, totalGtk, totalRombel] = await Promise.all([
             this.prisma.tanah.count({ where: filter }),
             this.prisma.bangunan.count({ where: filter }),
             this.prisma.ruang.count({ where: filter }),
             this.prisma.pesertaDidik.count({ where: filter }),
             this.prisma.gtk.count({ where: filter }),
+            this.prisma.rombonganBelajar.count({
+                where: {
+                    sekolah_id: sekolahId,
+                    ...(latestRombel?.semester_id ? { semester_id: latestRombel.semester_id } : {}),
+                    jenis_rombel: 1,
+                },
+            }),
         ]);
         return {
             sekolah_id: sekolahId,
@@ -1100,6 +1112,12 @@ let MandalaService = MandalaService_1 = class MandalaService {
             total_ruang: totalRuang,
             total_siswa: totalSiswa,
             total_gtk: totalGtk,
+            total_rombel: totalRombel,
+            statistik: {
+                jumlah_siswa: totalSiswa,
+                jumlah_gtk: totalGtk,
+                jumlah_rombel: totalRombel,
+            },
         };
     }
     async getPesertaDidikForMandala(sekolahId, query) {
@@ -1424,6 +1442,152 @@ let MandalaService = MandalaService_1 = class MandalaService {
                 current_page: page,
             },
         };
+    }
+    async getRombonganBelajarForMandala(sekolahId, query) {
+        const { type = 'reguler', limit, page, search, tingkat, semester_id } = query;
+        const whereClause = {};
+        if (sekolahId) {
+            whereClause.sekolah_id = sekolahId;
+        }
+        let semId = semester_id;
+        if (!semId || semId === 'latest') {
+            const latestRombel = await this.prisma.rombonganBelajar.findFirst({
+                where: sekolahId ? { sekolah_id: sekolahId } : {},
+                select: { semester_id: true },
+                orderBy: { semester_id: 'desc' },
+            });
+            semId = latestRombel?.semester_id || undefined;
+        }
+        if (semId) {
+            whereClause.semester_id = semId;
+        }
+        if (type === 'reguler') {
+            whereClause.jenis_rombel = 1;
+        }
+        else if (type === 'praktik' || type === 'praktek') {
+            whereClause.jenis_rombel = 2;
+        }
+        else if (type === 'ekskul') {
+            whereClause.jenis_rombel = 51;
+        }
+        else if (type === 'pilihan') {
+            whereClause.jenis_rombel = 16;
+        }
+        else if (type === 'wali') {
+            whereClause.jenis_rombel = 18;
+        }
+        if (tingkat && tingkat !== 'all') {
+            whereClause.tingkat_pendidikan_id = Number(tingkat);
+        }
+        if (search) {
+            whereClause.nama = { contains: search, mode: 'insensitive' };
+        }
+        const skip = (page - 1) * limit;
+        const [total, data] = await Promise.all([
+            this.prisma.rombonganBelajar.count({ where: whereClause }),
+            this.prisma.rombonganBelajar.findMany({
+                where: whereClause,
+                take: limit,
+                skip: skip,
+                select: {
+                    rombongan_belajar_id: true,
+                    nama: true,
+                    tingkat_pendidikan_id: true,
+                    kurikulum_id: true,
+                    ptk_id: true,
+                    id_ruang: true,
+                    jenis_rombel: true,
+                    _count: {
+                        select: { anggota_rombel: true }
+                    }
+                },
+                orderBy: { nama: 'asc' },
+            })
+        ]);
+        const ptkIds = data.map(item => item.ptk_id).filter(Boolean);
+        const kurikulumIds = data.map(item => item.kurikulum_id).filter(Boolean);
+        const idRuangs = data.map(item => item.id_ruang).filter(Boolean);
+        const [gtks, kurikulums, ruangs] = await Promise.all([
+            ptkIds.length > 0 ? this.prisma.gtk.findMany({
+                where: { ptk_id: { in: ptkIds } },
+                select: { ptk_id: true, nama: true }
+            }) : [],
+            kurikulumIds.length > 0 ? this.prisma.kurikulum.findMany({
+                where: { kurikulum_id: { in: kurikulumIds } },
+                select: { kurikulum_id: true, nama_kurikulum: true }
+            }) : [],
+            idRuangs.length > 0 ? this.prisma.ruang.findMany({
+                where: { id_ruang: { in: idRuangs } },
+                select: { id_ruang: true, nm_ruang: true }
+            }) : []
+        ]);
+        const gtkMap = new Map(gtks.map(item => [item.ptk_id, item.nama]));
+        const kurikulumMap = new Map(kurikulums.map(item => [item.kurikulum_id, item.nama_kurikulum]));
+        const ruangMap = new Map(ruangs.map(item => [item.id_ruang, item.nm_ruang]));
+        const formattedData = data.map(item => ({
+            ...item,
+            jumlah_siswa: item._count.anggota_rombel,
+            ptk_id_str: item.ptk_id ? (gtkMap.get(item.ptk_id) || "") : "",
+            tingkat_pendidikan_id_str: item.tingkat_pendidikan_id ? `Tingkat ${item.tingkat_pendidikan_id}` : "",
+            kurikulum_id_str: item.kurikulum_id ? (kurikulumMap.get(item.kurikulum_id) || "") : "",
+            id_ruang_str: item.id_ruang ? (ruangMap.get(item.id_ruang) || "") : ""
+        }));
+        return {
+            status: 'success',
+            data: formattedData,
+            meta: {
+                total,
+                page,
+                limit,
+                total_pages: Math.ceil(total / limit)
+            }
+        };
+    }
+    async getRombelAnggotaForMandala(rombelId) {
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (!uuidRegex.test(rombelId)) {
+            return { status: 'success', data: [] };
+        }
+        const anggota = await this.prisma.anggotaRombel.findMany({
+            where: { rombongan_belajar_id: rombelId },
+            select: { peserta_didik_id: true },
+        });
+        let pdIds = anggota.map((a) => a.peserta_didik_id);
+        if (pdIds.length > 0) {
+            const data = await this.prisma.pesertaDidik.findMany({
+                where: {
+                    peserta_didik_id: { in: pdIds },
+                },
+                select: {
+                    peserta_didik_id: true,
+                    nama: true,
+                    nisn: true,
+                    nipd: true,
+                    jenis_kelamin: true,
+                    foto: true,
+                    qr_token: true,
+                },
+                orderBy: { nama: 'asc' },
+            });
+            return { status: 'success', data };
+        }
+        const students = await this.prisma.pesertaDidik.findMany({
+            where: {
+                rombongan_belajar_id: rombelId,
+                status: 'Aktif'
+            },
+            select: {
+                peserta_didik_id: true,
+                nama: true,
+                nisn: true,
+                nipd: true,
+                jenis_kelamin: true,
+                foto: true,
+                qr_token: true,
+            },
+            orderBy: { nama: 'asc' },
+        });
+        return { status: 'success', data: students };
     }
     async getGtkRekapForMandala(sekolahId) {
         if (!sekolahId) {

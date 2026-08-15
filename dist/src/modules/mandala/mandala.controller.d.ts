@@ -611,6 +611,12 @@ export declare class MandalaController {
             total_ruang: number;
             total_siswa: number;
             total_gtk: number;
+            total_rombel: number;
+            statistik: {
+                jumlah_siswa: number;
+                jumlah_gtk: number;
+                jumlah_rombel: number;
+            };
         };
     }>;
     getPesertaDidik(req: any, sekolahId?: string, limit?: string, page?: string, search?: string, status?: 'aktif' | 'non-aktif'): Promise<{
@@ -739,6 +745,44 @@ export declare class MandalaController {
             total_pages: number;
             current_page: number;
         };
+    }>;
+    getRombonganBelajar(req: any, sekolahId?: string, type?: string, limit?: string, page?: string, search?: string, tingkat?: string, semesterId?: string): Promise<{
+        status: string;
+        data: {
+            jumlah_siswa: number;
+            ptk_id_str: any;
+            tingkat_pendidikan_id_str: string;
+            kurikulum_id_str: any;
+            id_ruang_str: any;
+            nama: string;
+            ptk_id: string;
+            rombongan_belajar_id: string;
+            _count: {
+                anggota_rombel: number;
+            };
+            jenis_rombel: import("@prisma/client-runtime-utils").Decimal;
+            id_ruang: string;
+            tingkat_pendidikan_id: import("@prisma/client-runtime-utils").Decimal;
+            kurikulum_id: number;
+        }[];
+        meta: {
+            total: number;
+            page: number;
+            limit: number;
+            total_pages: number;
+        };
+    }>;
+    getRombelAnggota(rombelId: string): Promise<{
+        status: string;
+        data: {
+            nama: string;
+            peserta_didik_id: string;
+            nisn: string;
+            jenis_kelamin: string;
+            foto: string;
+            nipd: string;
+            qr_token: string;
+        }[];
     }>;
     getPesertaDidikPresence(req: any, sekolahId: string, tanggal?: string): Promise<{
         status: string;

@@ -91,6 +91,22 @@ let AuthController = class AuthController {
             throw new common_1.UnauthorizedException('Sesi berakhir');
         return this.authService.linkUserToGtk(user.sub, body.ptk_id);
     }
+    async getSuperadminJenjang() {
+        return this.authService.getJenjangList();
+    }
+    async getSuperadminSekolah(bentukPendidikanId) {
+        const id = bentukPendidikanId ? parseInt(bentukPendidikanId, 10) : undefined;
+        return this.authService.getSekolahByJenjang(id);
+    }
+    async switchSekolah(request, body, response) {
+        const user = request['user'];
+        if (!user || !user.sub) {
+            throw new common_1.UnauthorizedException('Sesi berakhir atau hak akses tidak valid');
+        }
+        const result = await this.authService.switchSekolah(user.sub, body.sekolah_id);
+        this.setRefreshTokenCookie(response, result.refreshToken);
+        return result;
+    }
     async getSystemInfo(request) {
         const domain = this.getRequestDomain(request);
         return this.authService.getSystemInfo(domain);
@@ -222,6 +238,31 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "linkGtk", null);
+__decorate([
+    (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
+    (0, common_1.Get)('superadmin/jenjang'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "getSuperadminJenjang", null);
+__decorate([
+    (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
+    (0, common_1.Get)('superadmin/sekolah'),
+    __param(0, (0, common_1.Query)('bentuk_pendidikan_id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "getSuperadminSekolah", null);
+__decorate([
+    (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
+    (0, common_1.Post)('switch-sekolah'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Res)({ passthrough: true })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object, Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "switchSekolah", null);
 __decorate([
     (0, common_1.Get)('system-info'),
     __param(0, (0, common_1.Req)()),

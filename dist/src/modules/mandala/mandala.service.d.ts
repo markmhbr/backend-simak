@@ -585,6 +585,12 @@ export declare class MandalaService implements OnModuleInit {
         total_ruang: number;
         total_siswa: number;
         total_gtk: number;
+        total_rombel: number;
+        statistik: {
+            jumlah_siswa: number;
+            jumlah_gtk: number;
+            jumlah_rombel: number;
+        };
     }>;
     getPesertaDidikForMandala(sekolahId: string | undefined, query: {
         limit: number;
@@ -689,6 +695,51 @@ export declare class MandalaService implements OnModuleInit {
             total_pages: number;
             current_page: number;
         };
+    }>;
+    getRombonganBelajarForMandala(sekolahId: string | undefined, query: {
+        type?: string;
+        limit: number;
+        page: number;
+        search?: string;
+        tingkat?: string;
+        semester_id?: string;
+    }): Promise<{
+        status: string;
+        data: {
+            jumlah_siswa: number;
+            ptk_id_str: any;
+            tingkat_pendidikan_id_str: string;
+            kurikulum_id_str: any;
+            id_ruang_str: any;
+            nama: string;
+            ptk_id: string;
+            rombongan_belajar_id: string;
+            _count: {
+                anggota_rombel: number;
+            };
+            jenis_rombel: import("@prisma/client-runtime-utils").Decimal;
+            id_ruang: string;
+            tingkat_pendidikan_id: import("@prisma/client-runtime-utils").Decimal;
+            kurikulum_id: number;
+        }[];
+        meta: {
+            total: number;
+            page: number;
+            limit: number;
+            total_pages: number;
+        };
+    }>;
+    getRombelAnggotaForMandala(rombelId: string): Promise<{
+        status: string;
+        data: {
+            nama: string;
+            peserta_didik_id: string;
+            nisn: string;
+            jenis_kelamin: string;
+            foto: string;
+            nipd: string;
+            qr_token: string;
+        }[];
     }>;
     getGtkRekapForMandala(sekolahId: string | undefined): Promise<{
         status: string;

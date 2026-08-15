@@ -46,11 +46,14 @@ export class ApiKeyGuard implements CanActivate {
         const decoded = jwt.verify(token, secret) as any;
         if (decoded) {
           if (decoded.role === 'Super Admin' || decoded.role === 'superadmin') {
-            // Ambil sekolah_id pertama untuk kebutuhan visualisasi data dashboard
-            const firstSekolah = await this.prisma.sekolah.findFirst({
-              select: { sekolah_id: true }
-            });
-            const resolvedSekolahId = firstSekolah?.sekolah_id || '00000000-0000-0000-0000-000000000000';
+            let resolvedSekolahId = decoded.sekolahId || decoded.sekolah_id;
+            if (!resolvedSekolahId) {
+              // Ambil sekolah_id pertama untuk kebutuhan visualisasi data dashboard jika belum memilih sekolah
+              const firstSekolah = await this.prisma.sekolah.findFirst({
+                select: { sekolah_id: true }
+              });
+              resolvedSekolahId = firstSekolah?.sekolah_id || '00000000-0000-0000-0000-000000000000';
+            }
 
             // Inject appKey dummy agar controller sekolah info / dapodik summary tidak error
             request['appKey'] = {
@@ -61,6 +64,7 @@ export class ApiKeyGuard implements CanActivate {
               domain: '*',
               is_active: true,
             };
+            request['user'] = decoded;
             return true;
           }
 

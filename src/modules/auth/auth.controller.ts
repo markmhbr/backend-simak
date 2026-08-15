@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Res, Req, UnauthorizedException, UseGuards, Get, Param } from '@nestjs/common';
+import { Controller, Post, Body, Res, Req, UnauthorizedException, UseGuards, Get, Param, Query } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto, Verify2faDto } from './dto/auth.dto';
 import type { Response, Request } from 'express';
@@ -126,6 +126,35 @@ export class AuthController {
     const user = request['user'] as any;
     if (!user || !user.sub) throw new UnauthorizedException('Sesi berakhir');
     return this.authService.linkUserToGtk(user.sub, body.ptk_id);
+  }
+
+  @UseGuards(ApiKeyGuard)
+  @Get('superadmin/jenjang')
+  async getSuperadminJenjang() {
+    return this.authService.getJenjangList();
+  }
+
+  @UseGuards(ApiKeyGuard)
+  @Get('superadmin/sekolah')
+  async getSuperadminSekolah(@Query('bentuk_pendidikan_id') bentukPendidikanId?: string) {
+    const id = bentukPendidikanId ? parseInt(bentukPendidikanId, 10) : undefined;
+    return this.authService.getSekolahByJenjang(id);
+  }
+
+  @UseGuards(ApiKeyGuard)
+  @Post('switch-sekolah')
+  async switchSekolah(
+    @Req() request: Request,
+    @Body() body: { sekolah_id: string },
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const user = request['user'] as any;
+    if (!user || !user.sub) {
+      throw new UnauthorizedException('Sesi berakhir atau hak akses tidak valid');
+    }
+    const result = await this.authService.switchSekolah(user.sub, body.sekolah_id);
+    this.setRefreshTokenCookie(response, result.refreshToken);
+    return result;
   }
 
   // Endpoint untuk mendapatkan identitas sekolah (Public)

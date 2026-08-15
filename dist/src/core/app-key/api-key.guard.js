@@ -52,10 +52,13 @@ let ApiKeyGuard = class ApiKeyGuard {
                 const decoded = jwt.verify(token, secret);
                 if (decoded) {
                     if (decoded.role === 'Super Admin' || decoded.role === 'superadmin') {
-                        const firstSekolah = await this.prisma.sekolah.findFirst({
-                            select: { sekolah_id: true }
-                        });
-                        const resolvedSekolahId = firstSekolah?.sekolah_id || '00000000-0000-0000-0000-000000000000';
+                        let resolvedSekolahId = decoded.sekolahId || decoded.sekolah_id;
+                        if (!resolvedSekolahId) {
+                            const firstSekolah = await this.prisma.sekolah.findFirst({
+                                select: { sekolah_id: true }
+                            });
+                            resolvedSekolahId = firstSekolah?.sekolah_id || '00000000-0000-0000-0000-000000000000';
+                        }
                         request['appKey'] = {
                             id: 'super-admin-bypass',
                             nama_app: 'Pusat (Super Admin)',
@@ -64,6 +67,7 @@ let ApiKeyGuard = class ApiKeyGuard {
                             domain: '*',
                             is_active: true,
                         };
+                        request['user'] = decoded;
                         return true;
                     }
                     if (decoded.role === 'Operator Sekolah' || decoded.role === 'operator_sekolah' || decoded.role?.toLowerCase()?.includes('operator')) {

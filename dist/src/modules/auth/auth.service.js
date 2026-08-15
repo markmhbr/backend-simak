@@ -82,17 +82,12 @@ let AuthService = class AuthService {
             console.log(`[Login Failed] User not found: ${username}`);
             throw new common_1.UnauthorizedException('Kredensial tidak valid');
         }
-        if (sekolahId) {
-            if (user.peran_nama === 'Super Admin' || user.sekolah_id === null) {
-                throw new common_1.UnauthorizedException('Super Admin hanya dapat login melalui portal pusat. Silakan hapus data sekolah di browser Anda atau gunakan akun sekolah.');
-            }
-            if (user.sekolah_id !== sekolahId) {
+        if (user.peran_nama !== 'Super Admin' && user.sekolah_id !== null) {
+            if (sekolahId && user.sekolah_id !== sekolahId) {
                 console.log(`[Login Failed] School ID mismatch for user ${username}. User School: ${user.sekolah_id}, Request School: ${sekolahId}`);
                 throw new common_1.UnauthorizedException('Akun Anda tidak terdaftar di sekolah ini');
             }
-        }
-        else {
-            if (user.peran_nama !== 'Super Admin' || user.sekolah_id !== null) {
+            if (!sekolahId) {
                 throw new common_1.UnauthorizedException('Silakan login melalui portal sekolah Anda.');
             }
         }
@@ -100,14 +95,6 @@ let AuthService = class AuthService {
         if (!isMatch) {
             console.log(`[Login Failed] Password mismatch for user ${username}`);
             throw new common_1.UnauthorizedException('Kredensial tidak valid');
-        }
-        if (user.peran_nama === 'Super Admin') {
-            const role = 'Super Admin';
-            const tokens = await this.generateTokens(user, role);
-            return {
-                requires2FA: false,
-                ...tokens
-            };
         }
         const payload = { sub: user.pengguna_id, type: '2fa_pending', sekolahId };
         const tempToken = this.jwtService.sign(payload, {
@@ -724,6 +711,94 @@ let AuthService = class AuthService {
             return res.sendFile(placeholderPath);
         }
         throw new common_1.NotFoundException('Foto tidak ditemukan');
+    }
+    async getJenjangList() {
+        const activeSchools = await this.prisma.sekolah.findMany({
+            where: {
+                bentuk_pendidikan_id: { not: null },
+            },
+            select: {
+                bentuk_pendidikan_id: true,
+            },
+            distinct: ['bentuk_pendidikan_id'],
+        });
+        const activeJenjangIds = activeSchools
+            .map((s) => s.bentuk_pendidikan_id)
+            .filter((id) => id !== null);
+        if (activeJenjangIds.length === 0) {
+            return [];
+        }
+        return this.prisma.bentuk_pendidikan.findMany({
+            where: {
+                bentuk_pendidikan_id: { in: activeJenjangIds },
+            },
+            orderBy: { nama: 'asc' },
+            select: {
+                bentuk_pendidikan_id: true,
+                nama: true,
+            },
+        });
+    }
+    async getSekolahByJenjang(bentukPendidikanId) {
+        const where = {};
+        if (bentukPendidikanId) {
+            where.bentuk_pendidikan_id = Number(bentukPendidikanId);
+        }
+        return this.prisma.sekolah.findMany({
+            where,
+            select: {
+                sekolah_id: true,
+                nama: true,
+                npsn: true,
+                bentuk_pendidikan_id: true,
+                alamat_jalan: true,
+            },
+            orderBy: { nama: 'asc' },
+        });
+    }
+    async switchSekolah(userId, targetSekolahId) {
+        const user = await this.prisma.pengguna.findUnique({
+            where: { pengguna_id: userId },
+        });
+        if (!user) {
+            throw new common_1.NotFoundException('Pengguna tidak ditemukan');
+        }
+        if (user.peran_nama !== 'Super Admin') {
+            throw new common_1.ForbiddenException('Akses khusus Super Admin');
+        }
+        const sekolah = await this.prisma.sekolah.findUnique({
+            where: { sekolah_id: targetSekolahId },
+        });
+        if (!sekolah) {
+            throw new common_1.NotFoundException('Sekolah target tidak ditemukan');
+        }
+        const userWithTargetSchool = {
+            ...user,
+            sekolah_id: targetSekolahId,
+        };
+        const tokens = await this.generateTokens(userWithTargetSchool, 'Super Admin');
+        const appKey = await this.prisma.appKey.findUnique({
+            where: { sekolah_id: targetSekolahId },
+        });
+        return {
+            status: 'success',
+            message: `Berhasil berpindah konteks ke sekolah: ${sekolah.nama}`,
+            sekolah: {
+                sekolah_id: sekolah.sekolah_id,
+                nama: sekolah.nama,
+                npsn: sekolah.npsn,
+                bentuk_pendidikan_id: sekolah.bentuk_pendidikan_id,
+            },
+            appKey: appKey || {
+                id: 'super-admin-bypass',
+                nama_app: 'Pusat (Super Admin)',
+                sekolah_id: sekolah.sekolah_id,
+                key_api: 'super-admin-bypass-key',
+                domain: '*',
+                is_active: true,
+            },
+            ...tokens,
+        };
     }
 };
 exports.AuthService = AuthService;

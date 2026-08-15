@@ -411,6 +411,30 @@ let MandalaController = class MandalaController {
             type
         });
     }
+    async getRombonganBelajar(req, sekolahId, type, limit, page, search, tingkat, semesterId) {
+        const user = req['user'];
+        const isOperator = user?.role === 'Operator Sekolah';
+        let targetSekolahId = sekolahId;
+        if (isOperator) {
+            targetSekolahId = user?.sekolahId || user?.sekolah_id;
+        }
+        let take = limit ? parseInt(limit, 10) : 10;
+        if (take > 1000) {
+            take = 1000;
+        }
+        const skipPage = page ? parseInt(page, 10) : 1;
+        return await this.mandalaService.getRombonganBelajarForMandala(targetSekolahId, {
+            type,
+            limit: take,
+            page: skipPage,
+            search,
+            tingkat,
+            semester_id: semesterId,
+        });
+    }
+    async getRombelAnggota(rombelId) {
+        return await this.mandalaService.getRombelAnggotaForMandala(rombelId);
+    }
     async getPesertaDidikPresence(req, sekolahId, tanggal) {
         const user = req['user'];
         const isOperator = user?.role === 'Operator Sekolah';
@@ -950,6 +974,29 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, String, String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], MandalaController.prototype, "getGtk", null);
+__decorate([
+    (0, common_1.Get)('dapodik/rombongan-belajar'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('sekolah_id')),
+    __param(2, (0, common_1.Query)('type')),
+    __param(3, (0, common_1.Query)('limit')),
+    __param(4, (0, common_1.Query)('page')),
+    __param(5, (0, common_1.Query)('search')),
+    __param(6, (0, common_1.Query)('tingkat')),
+    __param(7, (0, common_1.Query)('semester_id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String, String, String, String, String, String]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "getRombonganBelajar", null);
+__decorate([
+    (0, common_1.Get)('dapodik/rombongan-belajar/:id/anggota'),
+    (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], MandalaController.prototype, "getRombelAnggota", null);
 __decorate([
     (0, common_1.Get)('presensi/peserta-didik'),
     (0, common_1.UseGuards)(mandala_key_guard_1.MandalaKeyGuard),
