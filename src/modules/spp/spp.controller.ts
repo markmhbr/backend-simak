@@ -4,6 +4,7 @@ import { CreatePengaturanTagihanDto } from './dto/create-pengaturan-tagihan.dto'
 import { UpdatePengaturanTagihanDto } from './dto/update-pengaturan-tagihan.dto';
 import { CreatePengaturanTagihanRombelDto } from './dto/create-pengaturan-tagihan-rombel.dto';
 import { CreateTransaksiSppDto } from './dto/create-transaksi-spp.dto';
+import { UpdateTransaksiSppDto } from './dto/update-transaksi-spp.dto';
 import { IsUUID, IsNotEmpty } from 'class-validator';
 
 export class GenerateSppDto {
@@ -115,6 +116,15 @@ export class SppController {
     };
   }
 
+  @Delete('tagihan/:id')
+  async deleteSpp(@Param('id') id: string) {
+    await this.sppService.deleteSpp(id);
+    return {
+      status: 'success',
+      message: 'Tagihan SPP berhasil dihapus.',
+    };
+  }
+
   // ===================================
   // 3. TRANSAKSI SPP
   // ===================================
@@ -126,6 +136,28 @@ export class SppController {
       status: 'success',
       message: 'Transaksi SPP berhasil dicatat.',
       data,
+    };
+  }
+
+  @Patch('transaksi/:id')
+  async updateTransaksiSpp(
+    @Param('id') id: string,
+    @Body() dto: UpdateTransaksiSppDto,
+  ) {
+    const data = await this.sppService.updateTransaksiSpp(id, dto);
+    return {
+      status: 'success',
+      message: 'Transaksi SPP berhasil diperbarui.',
+      data,
+    };
+  }
+
+  @Delete('transaksi/:id')
+  async deleteTransaksiSpp(@Param('id') id: string) {
+    await this.sppService.deleteTransaksiSpp(id);
+    return {
+      status: 'success',
+      message: 'Transaksi SPP berhasil dihapus.',
     };
   }
 

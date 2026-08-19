@@ -1077,32 +1077,19 @@ let PresensiService = class PresensiService {
             dateOnly = new Date(wibDate.toISOString().split('T')[0]);
         }
         const dayOfWeek = dateOnly.getUTCDay() === 0 ? 7 : dateOnly.getUTCDay();
-        const activeSchedule = await this.prisma.jenisJadwal.findFirst({
+        const activeSchedules = await this.prisma.jenisJadwal.findMany({
             where: { sekolah_id: sekolahId, aktif: true },
+            select: { jenis_jadwal_id: true },
         });
-        const ptkIdsWithJadwal = new Set();
-        if (activeSchedule) {
-            const jadwals = await this.prisma.jadwalPelajaran.findMany({
-                where: {
-                    sekolah_id: sekolahId,
-                    jenis_jadwal_id: activeSchedule.jenis_jadwal_id,
-                    hari: dayOfWeek,
-                    aktif: true,
-                },
-                select: {
-                    pembelajaran: {
-                        select: {
-                            ptk_id: true,
-                        }
-                    }
-                }
+        let targetJenisIds = activeSchedules.map(s => s.jenis_jadwal_id);
+        if (targetJenisIds.length === 0) {
+            const allSchedules = await this.prisma.jenisJadwal.findMany({
+                where: { sekolah_id: sekolahId },
+                select: { jenis_jadwal_id: true },
             });
-            jadwals.forEach(j => {
-                if (j.pembelajaran?.ptk_id) {
-                    ptkIdsWithJadwal.add(j.pembelajaran.ptk_id);
-                }
-            });
+            targetJenisIds = allSchedules.map(s => s.jenis_jadwal_id);
         }
+        const ptkIdsWithJadwal = new Set();
         const gtks = await this.prisma.gtk.findMany({
             where: {
                 sekolah_id: sekolahId,
@@ -1110,6 +1097,7 @@ let PresensiService = class PresensiService {
             },
             select: {
                 ptk_id: true,
+                ptk_terdaftar_id: true,
                 nama: true,
                 nuptk: true,
                 foto: true,
@@ -1122,6 +1110,41 @@ let PresensiService = class PresensiService {
                 nama: 'asc',
             },
         });
+        const ptkTerdaftarMap = new Map();
+        gtks.forEach(g => {
+            if (g.ptk_terdaftar_id) {
+                ptkTerdaftarMap.set(g.ptk_terdaftar_id, g.ptk_id);
+            }
+        });
+        if (targetJenisIds.length > 0) {
+            const jadwals = await this.prisma.jadwalPelajaran.findMany({
+                where: {
+                    sekolah_id: sekolahId,
+                    jenis_jadwal_id: { in: targetJenisIds },
+                    hari: dayOfWeek,
+                    aktif: true,
+                },
+                select: {
+                    pembelajaran: {
+                        select: {
+                            ptk_id: true,
+                            ptk_terdaftar_id: true,
+                        }
+                    }
+                }
+            });
+            jadwals.forEach(j => {
+                if (j.pembelajaran?.ptk_id) {
+                    ptkIdsWithJadwal.add(j.pembelajaran.ptk_id);
+                }
+                if (j.pembelajaran?.ptk_terdaftar_id) {
+                    const mappedPtkId = ptkTerdaftarMap.get(j.pembelajaran.ptk_terdaftar_id);
+                    if (mappedPtkId) {
+                        ptkIdsWithJadwal.add(mappedPtkId);
+                    }
+                }
+            });
+        }
         const attendance = await this.prisma.presensiGtk.findMany({
             where: {
                 sekolah_id: sekolahId,
@@ -1138,12 +1161,40 @@ let PresensiService = class PresensiService {
         const izinMap = new Map(izins
             .filter(i => i.ptk_id)
             .map(i => [i.ptk_id, i]));
+        let isDinamisMode = true;
+        try {
+            const generalSetting = await this.prisma.pengaturanUmum.findUnique({
+                where: { sekolah_id: sekolahId },
+                select: { mode_presensi_guru: true },
+            });
+            if (generalSetting && generalSetting.mode_presensi_guru === 0) {
+                isDinamisMode = false;
+            }
+            else if (generalSetting && generalSetting.mode_presensi_guru === 1) {
+                isDinamisMode = true;
+            }
+        }
+        catch (e) { }
         return gtks.map(g => {
             const att = attendanceMap.get(g.ptk_id);
             const iz = izinMap.get(g.ptk_id);
-            const { jenis_ptk, ...gtkRest } = g;
-            const isGuru = (jenis_ptk?.jenis_ptk || "").toLowerCase().includes("guru");
-            const hasJadwalToday = !isGuru || ptkIdsWithJadwal.has(g.ptk_id);
+            const { jenis_ptk, ptk_terdaftar_id, ...gtkRest } = g;
+            const jenisPtkName = (jenis_ptk?.jenis_ptk || "").toLowerCase();
+            const isExplicitTendik = jenisPtkName.includes("administrasi") ||
+                jenisPtkName.includes("kebersihan") ||
+                jenisPtkName.includes("satpam") ||
+                jenisPtkName.includes("penjaga") ||
+                jenisPtkName.includes("perpustakaan") ||
+                jenisPtkName.includes("laboran") ||
+                jenisPtkName.includes("tenaga kependidikan") ||
+                jenisPtkName.includes("tendik");
+            let hasJadwalToday;
+            if (!isDinamisMode) {
+                hasJadwalToday = true;
+            }
+            else {
+                hasJadwalToday = ptkIdsWithJadwal.has(g.ptk_id) || (isExplicitTendik && !jenisPtkName.includes("guru"));
+            }
             return {
                 ...gtkRest,
                 jenis_ptk_id_str: jenis_ptk?.jenis_ptk || null,

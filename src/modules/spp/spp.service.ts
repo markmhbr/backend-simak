@@ -4,6 +4,7 @@ import { CreatePengaturanTagihanDto } from './dto/create-pengaturan-tagihan.dto'
 import { UpdatePengaturanTagihanDto } from './dto/update-pengaturan-tagihan.dto';
 import { CreatePengaturanTagihanRombelDto } from './dto/create-pengaturan-tagihan-rombel.dto';
 import { CreateTransaksiSppDto } from './dto/create-transaksi-spp.dto';
+import { UpdateTransaksiSppDto } from './dto/update-transaksi-spp.dto';
 
 @Injectable()
 export class SppService {
@@ -158,8 +159,18 @@ export class SppService {
         where: { pengaturan_tagihan_rombel_id: id },
       });
 
-      // 2. Find all students in the unlinked class
-      const siswaList = await tx.pesertaDidik.findMany({
+      // 2. Find all students in the unlinked class via anggotaRombel and pesertaDidik
+      const anggotaList = await tx.anggotaRombel.findMany({
+        where: {
+          rombongan_belajar_id: check.rombongan_belajar_id,
+          soft_delete: 0,
+        },
+        select: {
+          peserta_didik_id: true,
+        },
+      });
+
+      const directSiswaList = await tx.pesertaDidik.findMany({
         where: {
           rombongan_belajar_id: check.rombongan_belajar_id,
         },
@@ -168,7 +179,12 @@ export class SppService {
         },
       });
 
-      const siswaIds = siswaList.map((s) => s.peserta_didik_id);
+      const siswaIds = Array.from(
+        new Set([
+          ...anggotaList.map((a) => a.peserta_didik_id),
+          ...directSiswaList.map((s) => s.peserta_didik_id),
+        ]),
+      );
 
       if (siswaIds.length > 0) {
         // 3. Delete generated unpaid SPP bills (where nominal_terbayar = 0 and status = 1 and no transaction history)
@@ -183,6 +199,27 @@ export class SppService {
       }
 
       return deletedRelation;
+    });
+  }
+
+  async deleteSpp(id: string) {
+    const spp = await this.prisma.spp.findUnique({
+      where: { spp_id: id },
+      include: {
+        riwayat_transaksi: true,
+      },
+    });
+
+    if (!spp) {
+      throw new NotFoundException('Data tagihan SPP tidak ditemukan.');
+    }
+
+    if (spp.nominal_terbayar > BigInt(0) || spp.riwayat_transaksi.length > 0) {
+      throw new BadRequestException('Tagihan yang sudah memiliki riwayat pembayaran tidak dapat dihapus.');
+    }
+
+    return this.prisma.spp.delete({
+      where: { spp_id: id },
     });
   }
 
@@ -373,29 +410,70 @@ export class SppService {
       }
     }
 
-    return this.prisma.spp.findMany({
-      where: whereClause,
-      include: {
-        peserta_didik: {
-          select: {
-            nama: true,
-            nisn: true,
-            rombongan_belajar: { select: { nama: true } },
+    const [spps, rombelMap] = await Promise.all([
+      this.prisma.spp.findMany({
+        where: whereClause,
+        include: {
+          peserta_didik: {
+            select: {
+              nama: true,
+              nisn: true,
+              rombongan_belajar: { select: { rombongan_belajar_id: true, nama: true, semester_id: true } },
+            },
+          },
+          pengaturan_tagihan: {
+            select: {
+              nama_tagihan: true,
+              tipe: true,
+              pengaturan_rombel: {
+                include: {
+                  rombongan_belajar: {
+                    select: {
+                      rombongan_belajar_id: true,
+                      nama: true,
+                      semester_id: true,
+                      tingkat_pendidikan_id: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          riwayat_transaksi: {
+            orderBy: {
+              tanggal_transaksi: 'desc',
+            },
           },
         },
-        pengaturan_tagihan: {
-          select: {
-            nama_tagihan: true,
-            tipe: true,
-          },
-        },
-        riwayat_transaksi: {
-          orderBy: {
-            tanggal_transaksi: 'desc',
-          },
-        },
-      },
-      orderBy: { created_at: 'desc' },
+        orderBy: { created_at: 'desc' },
+      }),
+      this.getStudentRombelMap(sekolahId),
+    ]);
+
+    return spps.map((item) => {
+      const rombelInfo = rombelMap.get(item.peserta_didik_id);
+      const connectedRombels = item.pengaturan_tagihan?.pengaturan_rombel?.map((pr) => pr.rombongan_belajar) || [];
+      const matchingRombel = connectedRombels.find((r) => r && r.rombongan_belajar_id === rombelInfo?.id);
+      const effectiveRombel = matchingRombel || rombelInfo || item.peserta_didik?.rombongan_belajar || connectedRombels[0];
+
+      const rombelNama = effectiveRombel?.nama || '-';
+      const semesterId = effectiveRombel?.semester_id || 'unassigned';
+      const tahunAjaranId = this.getTahunAjaranId(semesterId);
+
+      return {
+        ...item,
+        semester_id: semesterId,
+        tahun_ajaran_id: tahunAjaranId,
+        tahun_ajaran: this.formatTahunAjaranLabel(tahunAjaranId),
+        peserta_didik: item.peserta_didik
+          ? {
+              ...item.peserta_didik,
+              rombongan_belajar: {
+                nama: rombelNama,
+              },
+            }
+          : null,
+      };
     });
   }
 
@@ -475,37 +553,197 @@ export class SppService {
     });
   }
 
+  async updateTransaksiSpp(id: string, dto: UpdateTransaksiSppDto) {
+    return this.prisma.$transaction(async (tx) => {
+      const existing = await tx.riwayatTransaksiSpp.findUnique({
+        where: { riwayat_transaksi_spp_id: id },
+      });
+
+      if (!existing) {
+        throw new NotFoundException('Data transaksi SPP tidak ditemukan.');
+      }
+
+      const spp = await tx.spp.findUnique({
+        where: { spp_id: existing.spp_id },
+      });
+
+      if (!spp) {
+        throw new NotFoundException('Data tagihan SPP tidak ditemukan.');
+      }
+
+      const updateData: any = {};
+      if (dto.jenis_transaksi !== undefined) updateData.jenis_transaksi = dto.jenis_transaksi;
+      if (dto.nominal !== undefined) updateData.nominal = BigInt(dto.nominal);
+      if (dto.tanggal_transaksi !== undefined) updateData.tanggal_transaksi = new Date(dto.tanggal_transaksi);
+      if (dto.metode_pembayaran !== undefined) updateData.metode_pembayaran = dto.metode_pembayaran;
+      if (dto.keterangan !== undefined) updateData.keterangan = dto.keterangan;
+
+      const updatedTx = await tx.riwayatTransaksiSpp.update({
+        where: { riwayat_transaksi_spp_id: id },
+        data: updateData,
+      });
+
+      // Recalculate SPP total
+      const allTx = await tx.riwayatTransaksiSpp.findMany({
+        where: { spp_id: existing.spp_id },
+      });
+
+      let nominalTerbayarSum = BigInt(0);
+      for (const t of allTx) {
+        if (t.jenis_transaksi === 1 || t.jenis_transaksi === 2 || t.jenis_transaksi === 4) {
+          nominalTerbayarSum += t.nominal;
+        } else if (t.jenis_transaksi === 5) {
+          nominalTerbayarSum -= t.nominal;
+        }
+      }
+
+      if (nominalTerbayarSum < BigInt(0)) {
+        nominalTerbayarSum = BigInt(0);
+      }
+
+      let status = 1; // Belum Bayar
+      if (nominalTerbayarSum > BigInt(0)) {
+        if (nominalTerbayarSum >= spp.nominal_tagihan) {
+          status = 3; // Lunas
+        } else {
+          status = 2; // Sebagian
+        }
+      }
+
+      await tx.spp.update({
+        where: { spp_id: existing.spp_id },
+        data: {
+          nominal_terbayar: nominalTerbayarSum,
+          status: status,
+        },
+      });
+
+      return updatedTx;
+    });
+  }
+
+  async deleteTransaksiSpp(id: string) {
+    return this.prisma.$transaction(async (tx) => {
+      const existing = await tx.riwayatTransaksiSpp.findUnique({
+        where: { riwayat_transaksi_spp_id: id },
+      });
+
+      if (!existing) {
+        throw new NotFoundException('Data transaksi SPP tidak ditemukan.');
+      }
+
+      const spp = await tx.spp.findUnique({
+        where: { spp_id: existing.spp_id },
+      });
+
+      await tx.riwayatTransaksiSpp.delete({
+        where: { riwayat_transaksi_spp_id: id },
+      });
+
+      if (spp) {
+        // Recalculate SPP total
+        const allTx = await tx.riwayatTransaksiSpp.findMany({
+          where: { spp_id: existing.spp_id },
+        });
+
+        let nominalTerbayarSum = BigInt(0);
+        for (const t of allTx) {
+          if (t.jenis_transaksi === 1 || t.jenis_transaksi === 2 || t.jenis_transaksi === 4) {
+            nominalTerbayarSum += t.nominal;
+          } else if (t.jenis_transaksi === 5) {
+            nominalTerbayarSum -= t.nominal;
+          }
+        }
+
+        if (nominalTerbayarSum < BigInt(0)) {
+          nominalTerbayarSum = BigInt(0);
+        }
+
+        let status = 1; // Belum Bayar
+        if (nominalTerbayarSum > BigInt(0)) {
+          if (nominalTerbayarSum >= spp.nominal_tagihan) {
+            status = 3; // Lunas
+          } else {
+            status = 2; // Sebagian
+          }
+        }
+
+        await tx.spp.update({
+          where: { spp_id: existing.spp_id },
+          data: {
+            nominal_terbayar: nominalTerbayarSum,
+            status: status,
+          },
+        });
+      }
+
+      return { success: true };
+    });
+  }
+
   // ===================================
   // 4. LAPORAN & REKAPITULASI
   // ===================================
 
   private async getStudentRombelMap(sekolahId: string) {
-    const mappings = await this.prisma.anggotaRombel.findMany({
-      where: {
-        sekolah_id: sekolahId,
-        soft_delete: 0,
-      },
-      select: {
-        peserta_didik_id: true,
-        rombongan_belajar_id: true,
-        rombongan_belajar: {
-          select: {
-            rombongan_belajar_id: true,
-            nama: true,
-            semester_id: true,
-            jenis_rombel: true,
+    const [mappings, directSiswa] = await Promise.all([
+      this.prisma.anggotaRombel.findMany({
+        where: {
+          sekolah_id: sekolahId,
+          soft_delete: 0,
+        },
+        select: {
+          peserta_didik_id: true,
+          rombongan_belajar_id: true,
+          rombongan_belajar: {
+            select: {
+              rombongan_belajar_id: true,
+              nama: true,
+              semester_id: true,
+              tingkat_pendidikan_id: true,
+              jenis_rombel: true,
+            },
           },
         },
-      },
-    });
+      }),
+      this.prisma.pesertaDidik.findMany({
+        where: {
+          sekolah_id: sekolahId,
+          rombongan_belajar_id: { not: null },
+        },
+        select: {
+          peserta_didik_id: true,
+          rombongan_belajar: {
+            select: {
+              rombongan_belajar_id: true,
+              nama: true,
+              semester_id: true,
+              tingkat_pendidikan_id: true,
+              jenis_rombel: true,
+            },
+          },
+        },
+      }),
+    ]);
 
-    const studentMap = new Map<string, { id: string; nama: string; semester_id: string }>();
-    
-    // Sort mappings so reguler (jenis_rombel = 1) is processed last to override other fallbacks
+    const studentMap = new Map<string, { id: string; nama: string; semester_id: string; tingkat: number }>();
+
+    // 1. Sort anggotaRombel mappings so that:
+    // a. Reguler (jenis_rombel = 1) is prioritized
+    // b. Lower semester_id is processed first, newest semester_id (e.g. "20261" > "20252") is processed LAST so it overrides older records
+    // c. Lower tingkat_pendidikan_id is processed first, highest tingkat (e.g. 11 > 10) is processed LAST
     const sorted = [...mappings].sort((a, b) => {
       const aIsReg = a.rombongan_belajar && Number(a.rombongan_belajar.jenis_rombel) === 1 ? 1 : 0;
       const bIsReg = b.rombongan_belajar && Number(b.rombongan_belajar.jenis_rombel) === 1 ? 1 : 0;
-      return aIsReg - bIsReg;
+      if (aIsReg !== bIsReg) return aIsReg - bIsReg;
+
+      const aSem = a.rombongan_belajar?.semester_id || '';
+      const bSem = b.rombongan_belajar?.semester_id || '';
+      if (aSem !== bSem) return aSem.localeCompare(bSem);
+
+      const aTingkat = Number(a.rombongan_belajar?.tingkat_pendidikan_id || 0);
+      const bTingkat = Number(b.rombongan_belajar?.tingkat_pendidikan_id || 0);
+      return aTingkat - bTingkat;
     });
 
     for (const m of sorted) {
@@ -514,11 +752,49 @@ export class SppService {
           id: m.rombongan_belajar.rombongan_belajar_id,
           nama: m.rombongan_belajar.nama,
           semester_id: m.rombongan_belajar.semester_id,
+          tingkat: Number(m.rombongan_belajar.tingkat_pendidikan_id || 0),
         });
       }
     }
 
+    // 2. Also check direct pesertaDidik.rombongan_belajar (the current active class in Dapodik)
+    for (const s of directSiswa) {
+      if (s.rombongan_belajar) {
+        const existing = studentMap.get(s.peserta_didik_id);
+        const directSem = s.rombongan_belajar.semester_id || '';
+        const existingSem = existing?.semester_id || '';
+        const directTingkat = Number(s.rombongan_belajar.tingkat_pendidikan_id || 0);
+        const existingTingkat = existing?.tingkat || 0;
+
+        if (!existing || directSem > existingSem || (directSem === existingSem && directTingkat >= existingTingkat)) {
+          studentMap.set(s.peserta_didik_id, {
+            id: s.rombongan_belajar.rombongan_belajar_id,
+            nama: s.rombongan_belajar.nama,
+            semester_id: s.rombongan_belajar.semester_id,
+            tingkat: directTingkat,
+          });
+        }
+      }
+    }
+
     return studentMap;
+  }
+
+  private getTahunAjaranId(semesterId: string): string {
+    if (!semesterId || semesterId === 'unassigned') return 'unassigned';
+    if (semesterId.length >= 4) {
+      return semesterId.substring(0, 4);
+    }
+    return semesterId;
+  }
+
+  private formatTahunAjaranLabel(tahunAjaranId: string): string {
+    if (!tahunAjaranId || tahunAjaranId === 'unassigned') return 'Lainnya / Tanpa Tahun Ajaran';
+    if (tahunAjaranId.length === 4 && !isNaN(Number(tahunAjaranId))) {
+      const year = parseInt(tahunAjaranId);
+      return `Tahun Ajaran ${year}/${year + 1}`;
+    }
+    return tahunAjaranId;
   }
 
   // A. Tunggakan per Siswa
@@ -534,11 +810,23 @@ export class SppService {
             select: {
               nama: true,
               nisn: true,
+              rombongan_belajar: { select: { rombongan_belajar_id: true, nama: true, semester_id: true } },
             },
           },
           pengaturan_tagihan: {
             select: {
               nama_tagihan: true,
+              pengaturan_rombel: {
+                include: {
+                  rombongan_belajar: {
+                    select: {
+                      rombongan_belajar_id: true,
+                      nama: true,
+                      semester_id: true,
+                    },
+                  },
+                },
+              },
             },
           },
         },
@@ -549,12 +837,22 @@ export class SppService {
     return listSpp.map((s) => {
       const sisaTunggakan = s.nominal_tagihan - s.nominal_terbayar;
       const rInfo = rombelMap.get(s.peserta_didik_id);
+      const connectedRombels = s.pengaturan_tagihan?.pengaturan_rombel?.map((pr) => pr.rombongan_belajar) || [];
+      const matchingRombel = connectedRombels.find((r) => r && r.rombongan_belajar_id === rInfo?.id);
+      const effectiveRombel = matchingRombel || rInfo || s.peserta_didik?.rombongan_belajar || connectedRombels[0];
+
+      const semesterId = effectiveRombel?.semester_id || 'unassigned';
+      const tahunAjaranId = this.getTahunAjaranId(semesterId);
+
       return {
         spp_id: s.spp_id,
         peserta_didik_id: s.peserta_didik_id,
         nama: s.peserta_didik?.nama || 'Unknown',
         nisn: s.peserta_didik?.nisn || '-',
-        kelas: rInfo?.nama || '-',
+        kelas: effectiveRombel?.nama || '-',
+        semester_id: semesterId,
+        tahun_ajaran_id: tahunAjaranId,
+        tahun_ajaran: this.formatTahunAjaranLabel(tahunAjaranId),
         nama_tagihan: s.pengaturan_tagihan?.nama_tagihan || 'Tagihan',
         nominal_tagihan: s.nominal_tagihan.toString(),
         nominal_terbayar: s.nominal_terbayar.toString(),
@@ -571,31 +869,75 @@ export class SppService {
           sekolah_id: sekolahId,
           status: { in: [1, 2] },
         },
+        include: {
+          pengaturan_tagihan: {
+            select: {
+              pengaturan_rombel: {
+                include: {
+                  rombongan_belajar: {
+                    select: {
+                      rombongan_belajar_id: true,
+                      nama: true,
+                      semester_id: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       }),
       this.getStudentRombelMap(sekolahId)
     ]);
 
-    const rekapMap: Record<string, { kelas: string; total_tunggakan: bigint }> = {};
+    interface KelasRekap {
+      rombel_id: string;
+      kelas: string;
+      tahun_ajaran_id: string;
+      tahun_ajaran: string;
+      total_tunggakan: bigint;
+      siswaIds: Set<string>;
+    }
+
+    const rekapMap: Record<string, KelasRekap> = {};
 
     for (const s of listSpp) {
       const rInfo = rombelMap.get(s.peserta_didik_id);
-      const rombelId = rInfo?.id || 'unassigned';
-      const rombelNama = rInfo?.nama || 'Tanpa Kelas';
+      const connectedRombels = s.pengaturan_tagihan?.pengaturan_rombel?.map((pr) => pr.rombongan_belajar) || [];
+      const matchingRombel = connectedRombels.find((r) => r && r.rombongan_belajar_id === rInfo?.id);
+      const effectiveRombel = matchingRombel || rInfo || connectedRombels[0];
+
+      const rombelId = (effectiveRombel as any)?.rombongan_belajar_id || (effectiveRombel as any)?.id || rInfo?.id || 'unassigned';
+      const rombelNama = effectiveRombel?.nama || 'Tanpa Kelas';
+      const semesterId = effectiveRombel?.semester_id || 'unassigned';
+      const tahunAjaranId = this.getTahunAjaranId(semesterId);
       const tunggakan = s.nominal_tagihan - s.nominal_terbayar;
 
-      if (!rekapMap[rombelId]) {
-        rekapMap[rombelId] = {
+      const key = `${rombelId}_${tahunAjaranId}`;
+
+      if (!rekapMap[key]) {
+        rekapMap[key] = {
+          rombel_id: rombelId,
           kelas: rombelNama,
+          tahun_ajaran_id: tahunAjaranId,
+          tahun_ajaran: this.formatTahunAjaranLabel(tahunAjaranId),
           total_tunggakan: BigInt(0),
+          siswaIds: new Set(),
         };
       }
-      rekapMap[rombelId].total_tunggakan += tunggakan;
+      rekapMap[key].total_tunggakan += tunggakan;
+      rekapMap[key].siswaIds.add(s.peserta_didik_id);
     }
 
     return Object.values(rekapMap).map((item) => ({
+      rombel_id: item.rombel_id,
       kelas: item.kelas,
+      semester_id: item.tahun_ajaran_id,
+      tahun_ajaran_id: item.tahun_ajaran_id,
+      tahun_ajaran: item.tahun_ajaran,
+      jumlah_siswa: item.siswaIds.size,
       total_tunggakan: item.total_tunggakan.toString(),
-    }));
+    })).sort((a, b) => b.tahun_ajaran_id.localeCompare(a.tahun_ajaran_id) || a.kelas.localeCompare(b.kelas));
   }
 
   // C. Total Pembayaran
@@ -634,12 +976,12 @@ export class SppService {
     };
   }
 
-  // E. Rekap Pembayaran per Bulan
+  // E. Rekapitulasi Pembayaran per Bulan (Kas Masuk)
   async getRekapBulanan(sekolahId: string) {
-    const listPembayaran = await this.prisma.riwayatTransaksiSpp.findMany({
+    const transactions = await this.prisma.riwayatTransaksiSpp.findMany({
       where: {
         sekolah_id: sekolahId,
-        jenis_transaksi: 1,
+        jenis_transaksi: 1, // Pembayaran kas masuk
       },
       select: {
         nominal: true,
@@ -647,24 +989,34 @@ export class SppService {
       },
     });
 
-    const monthMap: Record<string, { bulan_tahun: string; nominal: bigint }> = {};
+    const monthlyMap: Record<string, bigint> = {};
 
-    for (const p of listPembayaran) {
-      const date = new Date(p.tanggal_transaksi);
-      const month = date.getMonth() + 1; // 1-indexed
+    for (const tx of transactions) {
+      const date = new Date(tx.tanggal_transaksi);
       const year = date.getFullYear();
-      const key = `${year}-${month.toString().padStart(2, '0')}`;
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const key = `${year}-${month}`;
 
-      if (!monthMap[key]) {
-        monthMap[key] = {
-          bulan_tahun: key,
-          nominal: BigInt(0),
-        };
+      if (!monthlyMap[key]) {
+        monthlyMap[key] = BigInt(0);
       }
-      monthMap[key].nominal += p.nominal;
+      monthlyMap[key] += tx.nominal;
     }
 
-    return Object.values(monthMap)
+    return Object.entries(monthlyMap)
+      .map(([key, nominal]) => {
+        const [year, month] = key.split('-');
+        const monthNames = [
+          'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+          'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        ];
+        const monthName = monthNames[parseInt(month) - 1];
+
+        return {
+          bulan_tahun: `${monthName} ${year}`,
+          nominal,
+        };
+      })
       .map((item) => ({
         bulan_tahun: item.bulan_tahun,
         nominal: item.nominal.toString(),
@@ -674,45 +1026,135 @@ export class SppService {
 
   // F. Rekap Pembayaran per Tahun Pelajaran
   async getRekapTahunPelajaran(sekolahId: string) {
-    const [listPembayaran, rombelMap] = await Promise.all([
-      this.prisma.riwayatTransaksiSpp.findMany({
-        where: {
-          sekolah_id: sekolahId,
-          jenis_transaksi: 1,
+    const [allSpps, rombelMap] = await Promise.all([
+      this.prisma.spp.findMany({
+        where: { sekolah_id: sekolahId },
+        select: {
+          peserta_didik_id: true,
+          nominal_tagihan: true,
+          nominal_terbayar: true,
+          status: true,
+          pengaturan_tagihan: {
+            select: {
+              pengaturan_rombel: {
+                include: {
+                  rombongan_belajar: {
+                    select: {
+                      rombongan_belajar_id: true,
+                      nama: true,
+                      semester_id: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       }),
-      this.getStudentRombelMap(sekolahId)
+      this.getStudentRombelMap(sekolahId),
     ]);
 
-    const semesterMap: Record<string, { semester_id: string; total_nominal: bigint }> = {};
-
-    for (const p of listPembayaran) {
-      const rInfo = rombelMap.get(p.peserta_didik_id);
-      const semesterId = rInfo?.semester_id || 'unassigned';
-
-      if (!semesterMap[semesterId]) {
-        semesterMap[semesterId] = {
-          semester_id: semesterId,
-          total_nominal: BigInt(0),
-        };
-      }
-      semesterMap[semesterId].total_nominal += p.nominal;
+    interface TahunAjaranData {
+      tahun_ajaran_id: string;
+      total_target: bigint;
+      total_pembayaran: bigint;
+      total_tunggakan: bigint;
+      siswaIds: Set<string>;
+      rombelMap: Record<
+        string,
+        {
+          rombel_id: string;
+          rombel_nama: string;
+          target_tagihan: bigint;
+          total_terbayar: bigint;
+          sisa_tunggakan: bigint;
+          siswaIds: Set<string>;
+        }
+      >;
     }
 
-    return Object.values(semesterMap).map((item) => {
-      // Format semester_id (misal 20231) menjadi "Tahun Ajaran 2023/2024 Ganjil"
-      let label = item.semester_id;
-      if (item.semester_id.length === 5) {
-        const year = parseInt(item.semester_id.substring(0, 4));
-        const sem = item.semester_id.substring(4) === '1' ? 'Ganjil' : 'Genap';
-        label = `Tahun Pelajaran ${year}/${year + 1} - ${sem}`;
+    const tahunAjaranMap: Record<string, TahunAjaranData> = {};
+
+    for (const s of allSpps) {
+      const rInfo = rombelMap.get(s.peserta_didik_id);
+      const connectedRombels = s.pengaturan_tagihan?.pengaturan_rombel?.map((pr) => pr.rombongan_belajar) || [];
+      const matchingRombel = connectedRombels.find((r) => r && r.rombongan_belajar_id === rInfo?.id);
+      const effectiveRombel = matchingRombel || rInfo || connectedRombels[0];
+
+      const semesterId = effectiveRombel?.semester_id || 'unassigned';
+      const tahunAjaranId = this.getTahunAjaranId(semesterId);
+      const rombelId = (effectiveRombel as any)?.rombongan_belajar_id || (effectiveRombel as any)?.id || rInfo?.id || 'unassigned';
+      const rombelNama = effectiveRombel?.nama || 'Tanpa Kelas';
+
+      if (!tahunAjaranMap[tahunAjaranId]) {
+        tahunAjaranMap[tahunAjaranId] = {
+          tahun_ajaran_id: tahunAjaranId,
+          total_target: BigInt(0),
+          total_pembayaran: BigInt(0),
+          total_tunggakan: BigInt(0),
+          siswaIds: new Set(),
+          rombelMap: {},
+        };
       }
 
+      const semData = tahunAjaranMap[tahunAjaranId];
+      semData.total_target += s.nominal_tagihan;
+      semData.total_pembayaran += s.nominal_terbayar;
+      const tunggakan = s.nominal_tagihan > s.nominal_terbayar ? s.nominal_tagihan - s.nominal_terbayar : BigInt(0);
+      semData.total_tunggakan += tunggakan;
+      semData.siswaIds.add(s.peserta_didik_id);
+
+      if (!semData.rombelMap[rombelId]) {
+        semData.rombelMap[rombelId] = {
+          rombel_id: rombelId,
+          rombel_nama: rombelNama,
+          target_tagihan: BigInt(0),
+          total_terbayar: BigInt(0),
+          sisa_tunggakan: BigInt(0),
+          siswaIds: new Set(),
+        };
+      }
+
+      const rData = semData.rombelMap[rombelId];
+      rData.target_tagihan += s.nominal_tagihan;
+      rData.total_terbayar += s.nominal_terbayar;
+      rData.sisa_tunggakan += tunggakan;
+      rData.siswaIds.add(s.peserta_didik_id);
+    }
+
+    return Object.values(tahunAjaranMap).map((item) => {
+      const label = this.formatTahunAjaranLabel(item.tahun_ajaran_id);
+
+      const totalTargetNum = Number(item.total_target);
+      const totalBayarNum = Number(item.total_pembayaran);
+      const persentase = totalTargetNum > 0 ? Math.round((totalBayarNum / totalTargetNum) * 100) : 0;
+
+      const rombelBreakdown = Object.values(item.rombelMap).map((r) => {
+        const rTargetNum = Number(r.target_tagihan);
+        const rBayarNum = Number(r.total_terbayar);
+        const rPersen = rTargetNum > 0 ? Math.round((rBayarNum / rTargetNum) * 100) : 0;
+        return {
+          rombel_id: r.rombel_id,
+          rombel_nama: r.rombel_nama,
+          jumlah_siswa: r.siswaIds.size,
+          target_tagihan: r.target_tagihan.toString(),
+          total_terbayar: r.total_terbayar.toString(),
+          sisa_tunggakan: r.sisa_tunggakan.toString(),
+          persentase: rPersen,
+        };
+      }).sort((a, b) => a.rombel_nama.localeCompare(b.rombel_nama));
+
       return {
-        semester_id: item.semester_id,
+        semester_id: item.tahun_ajaran_id,
+        tahun_ajaran_id: item.tahun_ajaran_id,
         label: label,
-        total_pembayaran: item.total_nominal.toString(),
+        total_target: item.total_target.toString(),
+        total_pembayaran: item.total_pembayaran.toString(),
+        total_tunggakan: item.total_tunggakan.toString(),
+        jumlah_siswa: item.siswaIds.size,
+        persentase: persentase,
+        rombel_breakdown: rombelBreakdown,
       };
-    }).sort((a, b) => b.semester_id.localeCompare(a.semester_id));
+    }).sort((a, b) => b.tahun_ajaran_id.localeCompare(a.tahun_ajaran_id));
   }
 }

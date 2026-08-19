@@ -17,6 +17,16 @@ let PengaturanUmumService = class PengaturanUmumService {
     constructor(prisma) {
         this.prisma = prisma;
     }
+    async onModuleInit() {
+        try {
+            await this.prisma.$executeRawUnsafe(`
+        ALTER TABLE simak.pengaturan_umum 
+        ADD COLUMN IF NOT EXISTS mode_presensi_guru SMALLINT DEFAULT 0;
+      `);
+        }
+        catch (err) {
+        }
+    }
     async getSettings(sekolahId) {
         let settings = await this.prisma.pengaturanUmum.findUnique({
             where: { sekolah_id: sekolahId },
@@ -28,18 +38,20 @@ let PengaturanUmumService = class PengaturanUmumService {
                 background_pd: null,
                 waktu_mulai_pengajuan: null,
                 waktu_sampai_pengajuan: null,
+                mode_presensi_guru: 0,
             };
         }
         return settings;
     }
     async updateSettings(sekolahId, data) {
-        return this.prisma.pengaturanUmum.upsert({
+        const updated = await this.prisma.pengaturanUmum.upsert({
             where: { sekolah_id: sekolahId },
             update: {
                 background_gtk: data.background_gtk,
                 background_pd: data.background_pd,
                 waktu_mulai_pengajuan: data.waktu_mulai_pengajuan,
                 waktu_sampai_pengajuan: data.waktu_sampai_pengajuan,
+                mode_presensi_guru: data.mode_presensi_guru !== undefined ? data.mode_presensi_guru : undefined,
             },
             create: {
                 sekolah_id: sekolahId,
@@ -47,8 +59,16 @@ let PengaturanUmumService = class PengaturanUmumService {
                 background_pd: data.background_pd,
                 waktu_mulai_pengajuan: data.waktu_mulai_pengajuan,
                 waktu_sampai_pengajuan: data.waktu_sampai_pengajuan,
+                mode_presensi_guru: data.mode_presensi_guru ?? 0,
             },
         });
+        if (data.mode_presensi_guru !== undefined && data.mode_presensi_guru !== null) {
+            await this.prisma.gtk.updateMany({
+                where: { sekolah_id: sekolahId },
+                data: { mode_presensi: data.mode_presensi_guru },
+            });
+        }
+        return updated;
     }
 };
 exports.PengaturanUmumService = PengaturanUmumService;

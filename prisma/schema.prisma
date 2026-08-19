@@ -3501,6 +3501,7 @@ model PengaturanUmum {
   background_pd          String?
   waktu_mulai_pengajuan  String?
   waktu_sampai_pengajuan String?
+  mode_presensi_guru     Int?     @default(0) @db.SmallInt
   create_date            DateTime @default(now())
   last_update            DateTime @updatedAt
 

@@ -3,6 +3,7 @@ import { CreatePengaturanTagihanDto } from './dto/create-pengaturan-tagihan.dto'
 import { UpdatePengaturanTagihanDto } from './dto/update-pengaturan-tagihan.dto';
 import { CreatePengaturanTagihanRombelDto } from './dto/create-pengaturan-tagihan-rombel.dto';
 import { CreateTransaksiSppDto } from './dto/create-transaksi-spp.dto';
+import { UpdateTransaksiSppDto } from './dto/update-transaksi-spp.dto';
 export declare class GenerateSppDto {
     sekolah_id: string;
     pengaturan_tagihan_id: string;
@@ -97,17 +98,33 @@ export declare class SppController {
     }>;
     getTagihanSpp(sekolahId: string, pesertaDidikId?: string, status?: number): Promise<{
         status: string;
-        data: ({
-            pengaturan_tagihan: {
-                nama_tagihan: string;
-                tipe: number;
-            };
+        data: {
+            semester_id: string;
+            tahun_ajaran_id: string;
+            tahun_ajaran: string;
             peserta_didik: {
-                nama: string;
-                nisn: string;
                 rombongan_belajar: {
                     nama: string;
                 };
+                nama: string;
+                nisn: string;
+            };
+            pengaturan_tagihan: {
+                nama_tagihan: string;
+                tipe: number;
+                pengaturan_rombel: ({
+                    rombongan_belajar: {
+                        nama: string;
+                        rombongan_belajar_id: string;
+                        semester_id: string;
+                        tingkat_pendidikan_id: import("@prisma/client-runtime-utils").Decimal;
+                    };
+                } & {
+                    created_at: Date;
+                    rombongan_belajar_id: string;
+                    pengaturan_tagihan_id: string;
+                    pengaturan_tagihan_rombel_id: string;
+                })[];
             };
             riwayat_transaksi: {
                 sekolah_id: string;
@@ -121,7 +138,6 @@ export declare class SppController {
                 tanggal_transaksi: Date;
                 metode_pembayaran: number | null;
             }[];
-        } & {
             sekolah_id: string;
             created_at: Date;
             updated_at: Date;
@@ -132,7 +148,11 @@ export declare class SppController {
             nominal_tagihan: bigint;
             nominal_terbayar: bigint;
             jatuh_tempo: Date | null;
-        })[];
+        }[];
+    }>;
+    deleteSpp(id: string): Promise<{
+        status: string;
+        message: string;
     }>;
     createTransaksiSpp(dto: CreateTransaksiSppDto): Promise<{
         status: string;
@@ -150,6 +170,26 @@ export declare class SppController {
             metode_pembayaran: number | null;
         };
     }>;
+    updateTransaksiSpp(id: string, dto: UpdateTransaksiSppDto): Promise<{
+        status: string;
+        message: string;
+        data: {
+            sekolah_id: string;
+            created_at: Date;
+            keterangan: string | null;
+            peserta_didik_id: string;
+            nominal: bigint;
+            riwayat_transaksi_spp_id: string;
+            spp_id: string;
+            jenis_transaksi: number;
+            tanggal_transaksi: Date;
+            metode_pembayaran: number | null;
+        };
+    }>;
+    deleteTransaksiSpp(id: string): Promise<{
+        status: string;
+        message: string;
+    }>;
     getTunggakanPerSiswa(sekolahId: string): Promise<{
         status: string;
         data: {
@@ -158,6 +198,9 @@ export declare class SppController {
             nama: string;
             nisn: string;
             kelas: string;
+            semester_id: string;
+            tahun_ajaran_id: string;
+            tahun_ajaran: string;
             nama_tagihan: string;
             nominal_tagihan: string;
             nominal_terbayar: string;
@@ -167,7 +210,12 @@ export declare class SppController {
     getTunggakanPerKelas(sekolahId: string): Promise<{
         status: string;
         data: {
+            rombel_id: string;
             kelas: string;
+            semester_id: string;
+            tahun_ajaran_id: string;
+            tahun_ajaran: string;
+            jumlah_siswa: number;
             total_tunggakan: string;
         }[];
     }>;
@@ -196,8 +244,22 @@ export declare class SppController {
         status: string;
         data: {
             semester_id: string;
+            tahun_ajaran_id: string;
             label: string;
+            total_target: string;
             total_pembayaran: string;
+            total_tunggakan: string;
+            jumlah_siswa: number;
+            persentase: number;
+            rombel_breakdown: {
+                rombel_id: string;
+                rombel_nama: string;
+                jumlah_siswa: number;
+                target_tagihan: string;
+                total_terbayar: string;
+                sisa_tunggakan: string;
+                persentase: number;
+            }[];
         }[];
     }>;
 }

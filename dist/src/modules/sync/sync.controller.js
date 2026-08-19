@@ -16,6 +16,7 @@ exports.SyncController = void 0;
 const common_1 = require("@nestjs/common");
 const sync_service_1 = require("./sync.service");
 const api_key_guard_1 = require("../../core/app-key/api-key.guard");
+const bridge_key_guard_1 = require("../../core/app-key/bridge-key.guard");
 class Mutex {
     queue = Promise.resolve();
     async run(fn) {
@@ -187,7 +188,7 @@ __decorate([
 ], SyncController.prototype, "validateSyncKey", null);
 __decorate([
     (0, common_1.Post)('sekolah'),
-    (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
+    (0, common_1.UseGuards)(bridge_key_guard_1.BridgeKeyGuard, api_key_guard_1.ApiKeyGuard),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
@@ -197,7 +198,7 @@ __decorate([
 ], SyncController.prototype, "syncSekolah", null);
 __decorate([
     (0, common_1.Post)('jurusan-sp'),
-    (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
+    (0, common_1.UseGuards)(bridge_key_guard_1.BridgeKeyGuard, api_key_guard_1.ApiKeyGuard),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
@@ -207,7 +208,7 @@ __decorate([
 ], SyncController.prototype, "syncJurusanSp", null);
 __decorate([
     (0, common_1.Post)('rombel'),
-    (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
+    (0, common_1.UseGuards)(bridge_key_guard_1.BridgeKeyGuard, api_key_guard_1.ApiKeyGuard),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
@@ -217,7 +218,7 @@ __decorate([
 ], SyncController.prototype, "syncRombel", null);
 __decorate([
     (0, common_1.Post)(['siswa', 'pesertadidik']),
-    (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
+    (0, common_1.UseGuards)(bridge_key_guard_1.BridgeKeyGuard, api_key_guard_1.ApiKeyGuard),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
@@ -227,7 +228,7 @@ __decorate([
 ], SyncController.prototype, "syncPesertaDidik", null);
 __decorate([
     (0, common_1.Post)('gtk'),
-    (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
+    (0, common_1.UseGuards)(bridge_key_guard_1.BridgeKeyGuard, api_key_guard_1.ApiKeyGuard),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
@@ -237,7 +238,7 @@ __decorate([
 ], SyncController.prototype, "syncGtk", null);
 __decorate([
     (0, common_1.Post)('pengguna'),
-    (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
+    (0, common_1.UseGuards)(bridge_key_guard_1.BridgeKeyGuard, api_key_guard_1.ApiKeyGuard),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
@@ -247,7 +248,7 @@ __decorate([
 ], SyncController.prototype, "syncPengguna", null);
 __decorate([
     (0, common_1.Post)('sarpras'),
-    (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
+    (0, common_1.UseGuards)(bridge_key_guard_1.BridgeKeyGuard, api_key_guard_1.ApiKeyGuard),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
@@ -257,7 +258,7 @@ __decorate([
 ], SyncController.prototype, "syncSarpras", null);
 __decorate([
     (0, common_1.Post)('dudi'),
-    (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
+    (0, common_1.UseGuards)(bridge_key_guard_1.BridgeKeyGuard, api_key_guard_1.ApiKeyGuard),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
@@ -267,7 +268,7 @@ __decorate([
 ], SyncController.prototype, "syncDudi", null);
 __decorate([
     (0, common_1.Post)('rwy_sertifikat'),
-    (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
+    (0, common_1.UseGuards)(bridge_key_guard_1.BridgeKeyGuard, api_key_guard_1.ApiKeyGuard),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
@@ -277,7 +278,7 @@ __decorate([
 ], SyncController.prototype, "syncRwySertifikat", null);
 __decorate([
     (0, common_1.Post)('rwy_kepangkatan'),
-    (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
+    (0, common_1.UseGuards)(bridge_key_guard_1.BridgeKeyGuard, api_key_guard_1.ApiKeyGuard),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
@@ -287,7 +288,7 @@ __decorate([
 ], SyncController.prototype, "syncRwyKepangkatan", null);
 __decorate([
     (0, common_1.Post)('pembelajaran'),
-    (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
+    (0, common_1.UseGuards)(bridge_key_guard_1.BridgeKeyGuard, api_key_guard_1.ApiKeyGuard),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),

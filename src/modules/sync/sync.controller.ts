@@ -1,6 +1,7 @@
 import { Controller, Post, Body, UseGuards, Req, HttpCode, HttpStatus, NotFoundException } from '@nestjs/common';
 import { SyncService } from './sync.service';
 import { ApiKeyGuard } from '../../core/app-key/api-key.guard';
+import { BridgeKeyGuard } from '../../core/app-key/bridge-key.guard';
 import type { Request } from 'express';
 
 class Mutex {
@@ -45,7 +46,7 @@ export class SyncController {
   }
 
   @Post('sekolah')
-  @UseGuards(ApiKeyGuard)
+  @UseGuards(BridgeKeyGuard, ApiKeyGuard)
   @HttpCode(HttpStatus.OK)
   async syncSekolah(@Req() req: Request, @Body() data: any[]) {
     const rows = Array.isArray(data) ? data : [data];
@@ -68,7 +69,7 @@ export class SyncController {
   }
 
   @Post('jurusan-sp')
-  @UseGuards(ApiKeyGuard)
+  @UseGuards(BridgeKeyGuard, ApiKeyGuard)
   @HttpCode(HttpStatus.OK)
   async syncJurusanSp(@Req() req: Request, @Body() data: any[]) {
     const sekolahId = this.getSekolahId(req);
@@ -83,7 +84,7 @@ export class SyncController {
   }
 
   @Post('rombel')
-  @UseGuards(ApiKeyGuard)
+  @UseGuards(BridgeKeyGuard, ApiKeyGuard)
   @HttpCode(HttpStatus.OK)
   async syncRombel(@Req() req: Request, @Body() data: any[]) {
     const sekolahId = this.getSekolahId(req);
@@ -98,7 +99,7 @@ export class SyncController {
   }
 
   @Post(['siswa', 'pesertadidik'])
-  @UseGuards(ApiKeyGuard)
+  @UseGuards(BridgeKeyGuard, ApiKeyGuard)
   @HttpCode(HttpStatus.OK)
   async syncPesertaDidik(@Req() req: Request, @Body() data: any[]) {
     const sekolahId = this.getSekolahId(req);
@@ -113,7 +114,7 @@ export class SyncController {
   }
 
   @Post('gtk')
-  @UseGuards(ApiKeyGuard)
+  @UseGuards(BridgeKeyGuard, ApiKeyGuard)
   @HttpCode(HttpStatus.OK)
   async syncGtk(@Req() req: Request, @Body() data: any[]) {
     const sekolahId = this.getSekolahId(req);
@@ -128,7 +129,7 @@ export class SyncController {
   }
 
   @Post('pengguna')
-  @UseGuards(ApiKeyGuard)
+  @UseGuards(BridgeKeyGuard, ApiKeyGuard)
   @HttpCode(HttpStatus.OK)
   async syncPengguna(@Req() req: Request, @Body() data: any[]) {
     const sekolahId = this.getSekolahId(req);
@@ -143,7 +144,7 @@ export class SyncController {
   }
 
   @Post('sarpras')
-  @UseGuards(ApiKeyGuard)
+  @UseGuards(BridgeKeyGuard, ApiKeyGuard)
   @HttpCode(HttpStatus.OK)
   async syncSarpras(@Req() req: Request, @Body() data: any[]) {
     const sekolahId = this.getSekolahId(req);
@@ -158,7 +159,7 @@ export class SyncController {
   }
 
   @Post('dudi')
-  @UseGuards(ApiKeyGuard)
+  @UseGuards(BridgeKeyGuard, ApiKeyGuard)
   @HttpCode(HttpStatus.OK)
   async syncDudi(@Req() req: Request, @Body() data: any[]) {
     const sekolahId = this.getSekolahId(req);
@@ -173,7 +174,7 @@ export class SyncController {
   }
 
   @Post('rwy_sertifikat')
-  @UseGuards(ApiKeyGuard)
+  @UseGuards(BridgeKeyGuard, ApiKeyGuard)
   @HttpCode(HttpStatus.OK)
   async syncRwySertifikat(@Req() req: Request, @Body() data: any[]) {
     const sekolahId = this.getSekolahId(req);
@@ -188,7 +189,7 @@ export class SyncController {
   }
 
   @Post('rwy_kepangkatan')
-  @UseGuards(ApiKeyGuard)
+  @UseGuards(BridgeKeyGuard, ApiKeyGuard)
   @HttpCode(HttpStatus.OK)
   async syncRwyKepangkatan(@Req() req: Request, @Body() data: any[]) {
     const sekolahId = this.getSekolahId(req);
@@ -203,7 +204,7 @@ export class SyncController {
   }
 
   @Post('pembelajaran')
-  @UseGuards(ApiKeyGuard)
+  @UseGuards(BridgeKeyGuard, ApiKeyGuard)
   @HttpCode(HttpStatus.OK)
   async syncPembelajaran(@Req() req: Request, @Body() data: any[]) {
     const sekolahId = this.getSekolahId(req);

@@ -2703,6 +2703,17 @@ export class DapodikService {
   async getJurusan(sekolahId: string | null) {
     const filter = this.getSekolahFilter(sekolahId);
 
+    const jurusanSpList = await this.prisma.jurusanSp.findMany({
+      where: {
+        sekolah_id: filter.sekolah_id,
+        OR: [{ soft_delete: null }, { soft_delete: 0 }],
+      },
+      select: {
+        jurusan_id: true,
+        nama_jurusan_sp: true,
+      },
+    });
+
     const rombels = await this.prisma.rombonganBelajar.findMany({
       where: {
         sekolah_id: filter.sekolah_id,
@@ -2714,19 +2725,45 @@ export class DapodikService {
         nama: true,
         jurusan_sp: {
           select: {
+            jurusan_id: true,
             nama_jurusan_sp: true,
           },
         },
       },
     });
 
+    const cleanKode = (raw: string): string => {
+      let code = raw.trim();
+      code = code.replace(/^(X|XI|XII|10|11|12)[\s\-_]+/i, '');
+      code = code.replace(/[\s\-_]+[0-9]+$/i, '');
+      code = code.replace(/[\s\-_]+[A-Z]$/i, '');
+      return code.trim().toUpperCase();
+    };
+
     const uniqueJurusan = new Map<string, string>();
+
+    for (const j of jurusanSpList) {
+      if (!j.nama_jurusan_sp) continue;
+      let kode = j.jurusan_id ? j.jurusan_id.trim() : '';
+      if (!kode || kode.length > 10 || /^\d+$/.test(kode)) {
+        kode = cleanKode(j.nama_jurusan_sp);
+      }
+      if (kode) {
+        uniqueJurusan.set(kode, j.nama_jurusan_sp);
+      }
+    }
+
     for (const r of rombels) {
       if (!r.jurusan_sp) continue;
-      const parts = r.nama.trim().split(/\s+/);
-      const kode = parts.length > 2 ? parts[1] : (parts.length > 1 ? parts[1] : parts[0]);
-      if (kode) {
-        uniqueJurusan.set(kode, r.jurusan_sp.nama_jurusan_sp);
+      const namaJurusan = r.jurusan_sp.nama_jurusan_sp;
+      let kode = cleanKode(r.nama);
+
+      if (!kode) {
+        kode = cleanKode(namaJurusan);
+      }
+
+      if (kode && !uniqueJurusan.has(kode)) {
+        uniqueJurusan.set(kode, namaJurusan);
       }
     }
 

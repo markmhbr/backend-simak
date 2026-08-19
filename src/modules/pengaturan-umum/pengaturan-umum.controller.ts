@@ -22,6 +22,7 @@ export class PengaturanUmumController {
       background_pd?: string | null;
       waktu_mulai_pengajuan?: string | null;
       waktu_sampai_pengajuan?: string | null;
+      mode_presensi_guru?: number | null;
     },
   ) {
     const data = await this.service.updateSettings(sekolahId, body);

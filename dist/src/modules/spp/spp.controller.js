@@ -19,6 +19,7 @@ const create_pengaturan_tagihan_dto_1 = require("./dto/create-pengaturan-tagihan
 const update_pengaturan_tagihan_dto_1 = require("./dto/update-pengaturan-tagihan.dto");
 const create_pengaturan_tagihan_rombel_dto_1 = require("./dto/create-pengaturan-tagihan-rombel.dto");
 const create_transaksi_spp_dto_1 = require("./dto/create-transaksi-spp.dto");
+const update_transaksi_spp_dto_1 = require("./dto/update-transaksi-spp.dto");
 const class_validator_1 = require("class-validator");
 class GenerateSppDto {
     sekolah_id;
@@ -103,12 +104,34 @@ let SppController = class SppController {
             data,
         };
     }
+    async deleteSpp(id) {
+        await this.sppService.deleteSpp(id);
+        return {
+            status: 'success',
+            message: 'Tagihan SPP berhasil dihapus.',
+        };
+    }
     async createTransaksiSpp(dto) {
         const data = await this.sppService.createTransaksiSpp(dto);
         return {
             status: 'success',
             message: 'Transaksi SPP berhasil dicatat.',
             data,
+        };
+    }
+    async updateTransaksiSpp(id, dto) {
+        const data = await this.sppService.updateTransaksiSpp(id, dto);
+        return {
+            status: 'success',
+            message: 'Transaksi SPP berhasil diperbarui.',
+            data,
+        };
+    }
+    async deleteTransaksiSpp(id) {
+        await this.sppService.deleteTransaksiSpp(id);
+        return {
+            status: 'success',
+            message: 'Transaksi SPP berhasil dihapus.',
         };
     }
     async getTunggakanPerSiswa(sekolahId) {
@@ -216,12 +239,34 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], SppController.prototype, "getTagihanSpp", null);
 __decorate([
+    (0, common_1.Delete)('tagihan/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], SppController.prototype, "deleteSpp", null);
+__decorate([
     (0, common_1.Post)('transaksi'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_transaksi_spp_dto_1.CreateTransaksiSppDto]),
     __metadata("design:returntype", Promise)
 ], SppController.prototype, "createTransaksiSpp", null);
+__decorate([
+    (0, common_1.Patch)('transaksi/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_transaksi_spp_dto_1.UpdateTransaksiSppDto]),
+    __metadata("design:returntype", Promise)
+], SppController.prototype, "updateTransaksiSpp", null);
+__decorate([
+    (0, common_1.Delete)('transaksi/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], SppController.prototype, "deleteTransaksiSpp", null);
 __decorate([
     (0, common_1.Get)('laporan/tunggakan-siswa/:sekolah_id'),
     __param(0, (0, common_1.Param)('sekolah_id')),
