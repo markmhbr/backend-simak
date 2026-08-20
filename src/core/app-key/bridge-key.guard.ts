@@ -17,16 +17,11 @@ export class BridgeKeyGuard implements CanActivate {
     const bridgeKey = request.headers['x-bridge-key'] as string;
     const expectedKey = this.configService.get<string>('BRIDGE_SYNC_KEY');
 
-    if (!expectedKey) {
-      throw new ForbiddenException('BRIDGE_SYNC_KEY belum dikonfigurasi di server.');
-    }
-
-    if (!bridgeKey) {
-      throw new ForbiddenException('Akses ditolak. Header x-bridge-key tidak ditemukan.');
-    }
-
-    if (bridgeKey !== expectedKey) {
-      throw new ForbiddenException('Akses ditolak. Bridge key tidak valid.');
+    // Jika server mengonfigurasi BRIDGE_SYNC_KEY khusus, lakukan validasi key
+    if (expectedKey) {
+      if (!bridgeKey || bridgeKey !== expectedKey) {
+        throw new ForbiddenException('Akses ditolak. Bridge key tidak valid.');
+      }
     }
 
     return true;

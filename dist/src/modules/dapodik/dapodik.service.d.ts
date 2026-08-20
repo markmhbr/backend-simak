@@ -1049,7 +1049,7 @@ export declare class DapodikService {
     }>;
     getMyMenus(peranId: number): Promise<string[]>;
     getMyMenusByUserId(penggunaId: string): Promise<any[]>;
-    getUpdateGtk(sekolahId: string): Promise<{
+    getUpdateGtk(sekolahId: string, since?: string): Promise<{
         alamat_jalan: string;
         rt: Prisma.Decimal;
         rw: Prisma.Decimal;
@@ -1061,7 +1061,11 @@ export declare class DapodikService {
         bujur: Prisma.Decimal;
         npwp: string;
         nm_wp: string;
+        create_date: Date;
+        last_update: Date;
+        last_sync: Date;
         ptk_id: string;
+        status: string;
         anak: {
             nama: string;
             soft_delete: Prisma.Decimal;
@@ -1085,7 +1089,7 @@ export declare class DapodikService {
         nama_suami_istri: string;
         pekerjaan_suami_istri: number;
     }[]>;
-    getUpdatePesertaDidik(sekolahId: string): Promise<{
+    getUpdatePesertaDidik(sekolahId: string, since?: string): Promise<{
         alamat_jalan: string;
         rt: Prisma.Decimal;
         rw: Prisma.Decimal;
@@ -1096,7 +1100,10 @@ export declare class DapodikService {
         lintang: Prisma.Decimal;
         bujur: Prisma.Decimal;
         kebutuhan_khusus_id: number;
+        created_at: Date;
+        updated_at: Date;
         peserta_didik_id: string;
+        status: string;
         no_kk: string;
         agama_id: number;
         jenis_tinggal_id: Prisma.Decimal;

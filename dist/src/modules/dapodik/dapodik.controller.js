@@ -39,17 +39,17 @@ let DapodikController = class DapodikController {
             namaApp: appKey?.nama_app || '',
         };
     }
-    async dapatkanUpdateGtk(req) {
+    async dapatkanUpdateGtk(req, since) {
         const { sekolahId } = this.getSekolahInfo(req);
         if (!sekolahId)
             throw new common_1.BadRequestException('Sekolah ID tidak ditemukan.');
-        return this.dapodikService.getUpdateGtk(sekolahId);
+        return this.dapodikService.getUpdateGtk(sekolahId, since);
     }
-    async dapatkanUpdatePesertaDidik(req) {
+    async dapatkanUpdatePesertaDidik(req, since) {
         const { sekolahId } = this.getSekolahInfo(req);
         if (!sekolahId)
             throw new common_1.BadRequestException('Sekolah ID tidak ditemukan.');
-        return this.dapodikService.getUpdatePesertaDidik(sekolahId);
+        return this.dapodikService.getUpdatePesertaDidik(sekolahId, since);
     }
     async getCadisdikList() {
         const data = await this.dapodikService.getCadisdiks();
@@ -635,15 +635,17 @@ exports.DapodikController = DapodikController;
 __decorate([
     (0, common_1.Get)('updategtk'),
     __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('since')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], DapodikController.prototype, "dapatkanUpdateGtk", null);
 __decorate([
     (0, common_1.Get)('updatepesertadidik'),
     __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)('since')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], DapodikController.prototype, "dapatkanUpdatePesertaDidik", null);
 __decorate([

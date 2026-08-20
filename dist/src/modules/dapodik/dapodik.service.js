@@ -3997,13 +3997,29 @@ let DapodikService = class DapodikService {
         }
         return Array.from(new Set(mappings.map(m => m.menu_id)));
     }
-    async getUpdateGtk(sekolahId) {
+    async getUpdateGtk(sekolahId, since) {
+        const where = {
+            sekolah_id: sekolahId,
+            jenis_keluar_id: null,
+            OR: [
+                { soft_delete: null },
+                { soft_delete: 0 }
+            ]
+        };
+        if (since) {
+            const sinceDate = new Date(since);
+            if (!isNaN(sinceDate.getTime())) {
+                where.last_update = { gt: sinceDate };
+            }
+        }
         return this.prisma.gtk.findMany({
-            where: {
-                sekolah_id: sekolahId,
-            },
+            where,
             select: {
                 ptk_id: true,
+                last_update: true,
+                create_date: true,
+                last_sync: true,
+                status: true,
                 no_kk: true,
                 agama_id: true,
                 status_perkawinan: true,
@@ -4042,13 +4058,29 @@ let DapodikService = class DapodikService {
             },
         });
     }
-    async getUpdatePesertaDidik(sekolahId) {
+    async getUpdatePesertaDidik(sekolahId, since) {
+        const where = {
+            sekolah_id: sekolahId,
+            status: 'Aktif',
+            jenis_keluar_id: null,
+            OR: [
+                { soft_delete: null },
+                { soft_delete: 0 }
+            ]
+        };
+        if (since) {
+            const sinceDate = new Date(since);
+            if (!isNaN(sinceDate.getTime())) {
+                where.updated_at = { gt: sinceDate };
+            }
+        }
         return this.prisma.pesertaDidik.findMany({
-            where: {
-                sekolah_id: sekolahId,
-            },
+            where,
             select: {
                 peserta_didik_id: true,
+                updated_at: true,
+                created_at: true,
+                status: true,
                 no_kk: true,
                 reg_akta_lahir: true,
                 agama_id: true,

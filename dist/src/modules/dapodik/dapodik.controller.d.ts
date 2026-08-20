@@ -4,7 +4,7 @@ export declare class DapodikController {
     private readonly dapodikService;
     constructor(dapodikService: DapodikService);
     private getSekolahInfo;
-    dapatkanUpdateGtk(req: Request): Promise<{
+    dapatkanUpdateGtk(req: Request, since?: string): Promise<{
         alamat_jalan: string;
         rt: import("@prisma/client-runtime-utils").Decimal;
         rw: import("@prisma/client-runtime-utils").Decimal;
@@ -16,7 +16,11 @@ export declare class DapodikController {
         bujur: import("@prisma/client-runtime-utils").Decimal;
         npwp: string;
         nm_wp: string;
+        create_date: Date;
+        last_update: Date;
+        last_sync: Date;
         ptk_id: string;
+        status: string;
         anak: {
             nama: string;
             soft_delete: import("@prisma/client-runtime-utils").Decimal;
@@ -40,7 +44,7 @@ export declare class DapodikController {
         nama_suami_istri: string;
         pekerjaan_suami_istri: number;
     }[]>;
-    dapatkanUpdatePesertaDidik(req: Request): Promise<{
+    dapatkanUpdatePesertaDidik(req: Request, since?: string): Promise<{
         alamat_jalan: string;
         rt: import("@prisma/client-runtime-utils").Decimal;
         rw: import("@prisma/client-runtime-utils").Decimal;
@@ -51,7 +55,10 @@ export declare class DapodikController {
         lintang: import("@prisma/client-runtime-utils").Decimal;
         bujur: import("@prisma/client-runtime-utils").Decimal;
         kebutuhan_khusus_id: number;
+        created_at: Date;
+        updated_at: Date;
         peserta_didik_id: string;
+        status: string;
         no_kk: string;
         agama_id: number;
         jenis_tinggal_id: import("@prisma/client-runtime-utils").Decimal;

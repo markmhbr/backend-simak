@@ -21,14 +21,10 @@ let BridgeKeyGuard = class BridgeKeyGuard {
         const request = context.switchToHttp().getRequest();
         const bridgeKey = request.headers['x-bridge-key'];
         const expectedKey = this.configService.get('BRIDGE_SYNC_KEY');
-        if (!expectedKey) {
-            throw new common_1.ForbiddenException('BRIDGE_SYNC_KEY belum dikonfigurasi di server.');
-        }
-        if (!bridgeKey) {
-            throw new common_1.ForbiddenException('Akses ditolak. Header x-bridge-key tidak ditemukan.');
-        }
-        if (bridgeKey !== expectedKey) {
-            throw new common_1.ForbiddenException('Akses ditolak. Bridge key tidak valid.');
+        if (expectedKey) {
+            if (!bridgeKey || bridgeKey !== expectedKey) {
+                throw new common_1.ForbiddenException('Akses ditolak. Bridge key tidak valid.');
+            }
         }
         return true;
     }
