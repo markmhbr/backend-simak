@@ -84,6 +84,11 @@ model Sekolah {
   anak                   Anak[]
   mutasi_pd              MutasiPd[]
   jadwal_monitoring      JadwalMonitoring[]
+  kategori_buku          KategoriBuku[]
+  buku                   Buku[]
+  peminjaman             Peminjaman[]
+  kunjungan_perpustakaan KunjunganPerpustakaan[]
+  literasi_perpustakaan  LiterasiPerpustakaan[]
 
   @@map("sekolah")
   @@schema("dapodik")
@@ -347,6 +352,9 @@ model PesertaDidik {
   agama                 agama?                 @relation(fields: [agama_id], references: [agama_id], onDelete: NoAction, onUpdate: NoAction)
   tugas_tambahan        TugasTambahan[]
   mutasi_pd             MutasiPd[]
+  peminjaman             Peminjaman[]
+  kunjungan_perpustakaan KunjunganPerpustakaan[]
+  literasi_perpustakaan  LiterasiPerpustakaan[]
 
   @@index([sekolah_id])
   @@index([rombongan_belajar_id])
@@ -466,6 +474,8 @@ model Gtk {
   bimbing_pd                BimbingPd[]
   anak                      Anak[]
   mutasi_pd                 MutasiPd[]
+  peminjaman                Peminjaman[]
+  kunjungan_perpustakaan    KunjunganPerpustakaan[]
 
   @@index([sekolah_id])
   @@index([qr_token])
@@ -3570,3 +3580,153 @@ model MutasiPd {
   @@map("mutasi_pd")
   @@schema("simak")
 }
+
+model KategoriBuku {
+  kategori_buku_id String   @id @default(uuid()) @db.Uuid
+  sekolah_id       String   @db.Uuid
+  nama             String
+  deskripsi        String?  @db.Text
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  sekolah Sekolah @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
+  buku    Buku[]
+
+  @@unique([sekolah_id, nama])
+  @@index([sekolah_id])
+  @@map("kategori_buku")
+  @@schema("simak")
+}
+
+model Buku {
+  buku_id          String   @id @default(uuid()) @db.Uuid
+  sekolah_id       String   @db.Uuid
+  kategori_buku_id String   @db.Uuid
+  kode             String
+  isbn             String?
+  judul            String
+  penulis          String?
+  penerbit         String?
+  tahun_terbit     Int?
+  jumlah           Int      @default(0)
+  tersedia         Int      @default(0)
+  kondisi          Int      @default(1) @db.SmallInt
+  lokasi_rak       String?
+  sampul           String?
+  deskripsi        String?  @db.Text
+  status           Int      @default(1) @db.SmallInt
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  sekolah           Sekolah            @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
+  kategori          KategoriBuku       @relation(fields: [kategori_buku_id], references: [kategori_buku_id], onDelete: Cascade)
+  detail_peminjaman DetailPeminjaman[]
+
+  @@unique([sekolah_id, kode])
+  @@index([sekolah_id])
+  @@index([kategori_buku_id])
+  @@index([sekolah_id, judul])
+  @@index([sekolah_id, status])
+  @@map("buku")
+  @@schema("simak")
+}
+
+model Peminjaman {
+  peminjaman_id        String    @id @default(uuid()) @db.Uuid
+  sekolah_id           String    @db.Uuid
+  peserta_didik_id     String?   @db.Uuid
+  ptk_id               String?   @db.Uuid
+  nomor_peminjaman     String
+  tanggal_pinjam       DateTime  @db.Date
+  tanggal_jatuh_tempo  DateTime  @db.Date
+  tanggal_kembali      DateTime? @db.Date
+  status               Int       @default(1) @db.SmallInt
+  denda                Decimal   @default(0) @db.Decimal(12, 2)
+  keterangan           String?   @db.Text
+  created_at           DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+
+  sekolah           Sekolah            @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
+  peserta_didik     PesertaDidik?      @relation(fields: [peserta_didik_id], references: [peserta_didik_id], onDelete: SetNull)
+  ptk               Gtk?               @relation(fields: [ptk_id], references: [ptk_id], onDelete: SetNull)
+  detail_peminjaman DetailPeminjaman[]
+
+  @@unique([sekolah_id, nomor_peminjaman])
+  @@index([sekolah_id])
+  @@index([peserta_didik_id])
+  @@index([ptk_id])
+  @@index([sekolah_id, status])
+  @@index([sekolah_id, tanggal_pinjam])
+  @@map("peminjaman")
+  @@schema("simak")
+}
+
+model DetailPeminjaman {
+  detail_peminjaman_id String   @id @default(uuid()) @db.Uuid
+  peminjaman_id        String   @db.Uuid
+  buku_id              String   @db.Uuid
+  jumlah               Int      @default(1)
+  jumlah_kembali       Int      @default(0)
+  kondisi_kembali      Int?     @db.SmallInt
+  keterangan           String?  @db.Text
+  created_at           DateTime @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  peminjaman Peminjaman @relation(fields: [peminjaman_id], references: [peminjaman_id], onDelete: Cascade)
+  buku       Buku       @relation(fields: [buku_id], references: [buku_id], onDelete: Cascade)
+
+  @@index([peminjaman_id])
+  @@index([buku_id])
+  @@map("detail_peminjaman")
+  @@schema("simak")
+}
+
+model KunjunganPerpustakaan {
+  kunjungan_perpustakaan_id String    @id @default(uuid()) @db.Uuid
+  sekolah_id                String    @db.Uuid
+  peserta_didik_id          String?   @db.Uuid
+  ptk_id                    String?   @db.Uuid
+  tanggal                   DateTime  @db.Date
+  jam_masuk                 String
+  jam_keluar                String?
+  keperluan                 String?
+  keterangan                String?   @db.Text
+  created_at                DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+
+  sekolah       Sekolah       @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
+  peserta_didik PesertaDidik? @relation(fields: [peserta_didik_id], references: [peserta_didik_id], onDelete: SetNull)
+  ptk           Gtk?          @relation(fields: [ptk_id], references: [ptk_id], onDelete: SetNull)
+
+  @@index([sekolah_id])
+  @@index([peserta_didik_id])
+  @@index([ptk_id])
+  @@index([sekolah_id, tanggal])
+  @@index([sekolah_id, jam_masuk])
+  @@map("kunjungan_perpustakaan")
+  @@schema("simak")
+}
+
+model LiterasiPerpustakaan {
+  literasi_id      String   @id @default(uuid()) @db.Uuid
+  sekolah_id       String   @db.Uuid
+  peserta_didik_id String   @db.Uuid
+  nama_buku        String
+  halaman_dari     Int
+  halaman_sampai   Int
+  kesimpulan       String?  @db.Text
+  tanggal          DateTime @db.Date
+  created_at       DateTime @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  sekolah       Sekolah      @relation(fields: [sekolah_id], references: [sekolah_id], onDelete: Cascade)
+  peserta_didik PesertaDidik @relation(fields: [peserta_didik_id], references: [peserta_didik_id], onDelete: Cascade)
+
+  @@index([sekolah_id])
+  @@index([peserta_didik_id])
+  @@index([sekolah_id, tanggal])
+  @@index([sekolah_id, peserta_didik_id])
+  @@map("literasi_perpustakaan")
+  @@schema("simak")
+}
+

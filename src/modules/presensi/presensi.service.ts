@@ -801,14 +801,17 @@ export class PresensiService {
     const wibDate = new Date(new Date().getTime() + 7 * 60 * 60 * 1000);
     const dateOnly = new Date(wibDate.toISOString().split('T')[0]);
 
-    // 1. Cari di Peserta Didik
+    // 1. Cari di Peserta Didik (QR Token, NISN, NIK)
     const pd = await this.prisma.pesertaDidik.findFirst({
-      where: { sekolah_id: sekolahId, qr_token: token },
-      select: {
-        peserta_didik_id: true,
-        nama: true,
-        nisn: true,
-        rombongan_belajar_id: true,
+      where: {
+        sekolah_id: sekolahId,
+        OR: [
+          { qr_token: token },
+          { nisn: token },
+          { nik: token },
+        ],
+      },
+      include: {
         rombongan_belajar: {
           select: {
             nama: true,
@@ -835,7 +838,6 @@ export class PresensiService {
             }
           }
         },
-        foto: true,
       },
     });
 
@@ -856,9 +858,17 @@ export class PresensiService {
       return { type: 'pd', data: pdMapped, activeIzinKeluar };
     }
 
-    // 2. Cari di GTK
+    // 2. Cari di GTK (QR Token, NUPTK, NIK, NIP)
     const rawGtk = await this.prisma.gtk.findFirst({
-      where: { sekolah_id: sekolahId, qr_token: token },
+      where: {
+        sekolah_id: sekolahId,
+        OR: [
+          { qr_token: token },
+          { nuptk: token },
+          { nik: token },
+          { nip: token },
+        ],
+      },
       select: {
         ptk_id: true,
         nama: true,
@@ -889,7 +899,7 @@ export class PresensiService {
       return { type: 'gtk', data: gtk, activeIzinKeluar };
     }
 
-    throw new NotFoundException('Data QR Token tidak ditemukan');
+    throw new NotFoundException('Data Barcode / QR Token tidak ditemukan');
   }
 
   async scanQr(sekolahId: string, token: string, latitude?: number, longitude?: number) {
@@ -922,9 +932,16 @@ export class PresensiService {
     const wibDate = new Date(new Date().getTime() + 7 * 60 * 60 * 1000);
     const dateOnly = new Date(wibDate.toISOString().split('T')[0]);
 
-    // 1. Cari di Peserta Didik
+    // 1. Cari di Peserta Didik (QR Token, NISN, NIK)
     const pd = await this.prisma.pesertaDidik.findFirst({
-      where: { sekolah_id: sekolahId, qr_token: token },
+      where: {
+        sekolah_id: sekolahId,
+        OR: [
+          { qr_token: token },
+          { nisn: token },
+          { nik: token },
+        ],
+      },
       include: {
         rombongan_belajar: { select: { nama: true } },
         anggota_rombel: {
@@ -1018,9 +1035,17 @@ export class PresensiService {
       };
     }
 
-    // 2. Cari di GTK
+    // 2. Cari di GTK (QR Token, NUPTK, NIK, NIP)
     const gtk = await this.prisma.gtk.findFirst({
-      where: { sekolah_id: sekolahId, qr_token: token },
+      where: {
+        sekolah_id: sekolahId,
+        OR: [
+          { qr_token: token },
+          { nuptk: token },
+          { nik: token },
+          { nip: token },
+        ],
+      },
       include: {
         jenis_ptk: true,
       }

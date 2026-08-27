@@ -529,31 +529,6 @@ let DapodikController = class DapodikController {
         const data = await this.dapodikService.updatePesertaDidik(sekolahId, id, body);
         return { status: 'success', data };
     }
-    async registerGtkFace(req, id, body) {
-        const { sekolahId } = this.getSekolahInfo(req);
-        const data = await this.dapodikService.registerGtkFace(sekolahId, id, body.embedding);
-        return { status: 'success', data };
-    }
-    async getGtkFace(req, id) {
-        const { sekolahId } = this.getSekolahInfo(req);
-        const data = await this.dapodikService.getGtkFace(sekolahId, id);
-        return { status: 'success', data };
-    }
-    async registerStudentFace(req, id, body) {
-        const { sekolahId } = this.getSekolahInfo(req);
-        const data = await this.dapodikService.registerStudentFace(sekolahId, id, body.embedding);
-        return { status: 'success', data };
-    }
-    async getStudentFace(req, id) {
-        const { sekolahId } = this.getSekolahInfo(req);
-        const data = await this.dapodikService.getStudentFace(sekolahId, id);
-        return { status: 'success', data };
-    }
-    async identifyFace(req, body) {
-        const { sekolahId } = this.getSekolahInfo(req);
-        const data = await this.dapodikService.identifyFace(sekolahId, body.embedding);
-        return { status: 'success', data };
-    }
     async getDudi(req) {
         const { sekolahId } = this.getSekolahInfo(req);
         const data = await this.dapodikService.getDudi(sekolahId);
@@ -1043,48 +1018,6 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Promise)
 ], DapodikController.prototype, "updatePesertaDidikDetail", null);
-__decorate([
-    (0, common_1.Post)('gtk/:id/face-id'),
-    __param(0, (0, common_1.Req)()),
-    __param(1, (0, common_1.Param)('id')),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, Object]),
-    __metadata("design:returntype", Promise)
-], DapodikController.prototype, "registerGtkFace", null);
-__decorate([
-    (0, common_1.Get)('gtk/:id/face-id'),
-    __param(0, (0, common_1.Req)()),
-    __param(1, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
-    __metadata("design:returntype", Promise)
-], DapodikController.prototype, "getGtkFace", null);
-__decorate([
-    (0, common_1.Post)('peserta-didik/:id/face-id'),
-    __param(0, (0, common_1.Req)()),
-    __param(1, (0, common_1.Param)('id')),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, Object]),
-    __metadata("design:returntype", Promise)
-], DapodikController.prototype, "registerStudentFace", null);
-__decorate([
-    (0, common_1.Get)('peserta-didik/:id/face-id'),
-    __param(0, (0, common_1.Req)()),
-    __param(1, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
-    __metadata("design:returntype", Promise)
-], DapodikController.prototype, "getStudentFace", null);
-__decorate([
-    (0, common_1.Post)('face-id/identify'),
-    __param(0, (0, common_1.Req)()),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
-    __metadata("design:returntype", Promise)
-], DapodikController.prototype, "identifyFace", null);
 __decorate([
     (0, common_1.Get)('dudi'),
     __param(0, (0, common_1.Req)()),

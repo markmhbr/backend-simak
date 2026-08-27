@@ -35,6 +35,7 @@ const pengaturan_umum_module_1 = require("./modules/pengaturan-umum/pengaturan-u
 const mutasi_pd_module_1 = require("./modules/mutasi-pd/mutasi-pd.module");
 const mail_module_1 = require("./core/mail/mail.module");
 const pengaturan_va_module_1 = require("./modules/pengaturan-va/pengaturan-va.module");
+const perpustakaan_module_1 = require("./modules/perpustakaan/perpustakaan.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -66,6 +67,7 @@ exports.AppModule = AppModule = __decorate([
             pengaturan_umum_module_1.PengaturanUmumModule,
             mutasi_pd_module_1.MutasiPdModule,
             pengaturan_va_module_1.PengaturanVaModule,
+            perpustakaan_module_1.PerpustakaanModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [

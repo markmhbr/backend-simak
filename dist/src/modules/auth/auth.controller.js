@@ -28,20 +28,6 @@ let AuthController = class AuthController {
         const sekolahId = appKey ? appKey.sekolah_id : undefined;
         return this.authService.validateUser(loginDto.username, loginDto.password, sekolahId);
     }
-    async loginFaceId(embedding, request, response) {
-        const appKey = request['appKey'];
-        const sekolahId = appKey ? appKey.sekolah_id : undefined;
-        if (!sekolahId) {
-            throw new common_1.UnauthorizedException('Koneksi sekolah tidak terdeteksi');
-        }
-        const result = await this.authService.loginWithFaceId(embedding, sekolahId);
-        this.setRefreshTokenCookie(response, result.refreshToken);
-        return {
-            status: 'success',
-            accessToken: result.accessToken,
-            user: result.user,
-        };
-    }
     async verify2fa(verifyDto, response) {
         const result = await this.authService.verify2FA(verifyDto.tempToken, verifyDto.code, verifyDto.secret);
         this.setRefreshTokenCookie(response, result.refreshToken);
@@ -163,16 +149,6 @@ __decorate([
     __metadata("design:paramtypes", [auth_dto_1.LoginDto, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
-__decorate([
-    (0, common_1.UseGuards)(throttler_1.ThrottlerGuard, api_key_guard_1.ApiKeyGuard),
-    (0, common_1.Post)('login-face-id'),
-    __param(0, (0, common_1.Body)('embedding')),
-    __param(1, (0, common_1.Req)()),
-    __param(2, (0, common_1.Res)({ passthrough: true })),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Array, Object, Object]),
-    __metadata("design:returntype", Promise)
-], AuthController.prototype, "loginFaceId", null);
 __decorate([
     (0, common_1.UseGuards)(throttler_1.ThrottlerGuard),
     (0, common_1.Post)('verify-2fa'),

@@ -183,6 +183,7 @@ export declare class MandalaService implements OnModuleInit {
         updated_at: Date;
         tanggal: Date;
         status: number;
+        keperluan: string | null;
         antrian_id: string;
         kategori_keperluan_id: string;
         nomor_antrian: number;
@@ -190,7 +191,6 @@ export declare class MandalaService implements OnModuleInit {
         jabatan: string | null;
         unit_instansi: string | null;
         nomor_hp: string | null;
-        keperluan: string | null;
     })[]>;
     createAntrian(data: {
         cadisdik_id: string;
@@ -206,6 +206,7 @@ export declare class MandalaService implements OnModuleInit {
         updated_at: Date;
         tanggal: Date;
         status: number;
+        keperluan: string | null;
         antrian_id: string;
         kategori_keperluan_id: string;
         nomor_antrian: number;
@@ -213,7 +214,6 @@ export declare class MandalaService implements OnModuleInit {
         jabatan: string | null;
         unit_instansi: string | null;
         nomor_hp: string | null;
-        keperluan: string | null;
     }>;
     updateAntrianStatus(id: string, status: number): Promise<{
         cadisdik_id: string;
@@ -221,6 +221,7 @@ export declare class MandalaService implements OnModuleInit {
         updated_at: Date;
         tanggal: Date;
         status: number;
+        keperluan: string | null;
         antrian_id: string;
         kategori_keperluan_id: string;
         nomor_antrian: number;
@@ -228,7 +229,6 @@ export declare class MandalaService implements OnModuleInit {
         jabatan: string | null;
         unit_instansi: string | null;
         nomor_hp: string | null;
-        keperluan: string | null;
     }>;
     getAntrianSummary(cadisdikId?: string): Promise<{
         hari_ini: string;

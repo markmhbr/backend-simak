@@ -17,19 +17,6 @@ export declare class AuthController {
         qrCodeUrl?: undefined;
         secret?: undefined;
     }>;
-    loginFaceId(embedding: number[], request: Request, response: Response): Promise<{
-        status: string;
-        accessToken: string;
-        user: {
-            id: any;
-            nama: any;
-            email: any;
-            role: string;
-            ptk_id: any;
-            peserta_didik_id: any;
-            foto: string;
-        };
-    }>;
     verify2fa(verifyDto: Verify2faDto, response: Response): Promise<{
         status: string;
         accessToken: string;

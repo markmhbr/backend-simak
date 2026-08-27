@@ -122,53 +122,6 @@ let AuthService = class AuthService {
             tempToken
         };
     }
-    async loginWithFaceId(embedding, sekolahId) {
-        if (!sekolahId) {
-            throw new common_1.BadRequestException('Sekolah ID diperlukan');
-        }
-        const users = await this.prisma.pengguna.findMany({
-            where: {
-                sekolah_id: sekolahId,
-                face_embedding: { not: null },
-            },
-        });
-        let bestMatch = null;
-        let highestSimilarity = 0;
-        for (const user of users) {
-            if (!user.face_embedding)
-                continue;
-            try {
-                const registeredEmbedding = JSON.parse(user.face_embedding);
-                let dotProduct = 0;
-                let normV1 = 0;
-                let normV2 = 0;
-                for (let i = 0; i < embedding.length; i++) {
-                    dotProduct += embedding[i] * registeredEmbedding[i];
-                    normV1 += embedding[i] * embedding[i];
-                    normV2 += registeredEmbedding[i] * registeredEmbedding[i];
-                }
-                const similarity = (normV1 === 0 || normV2 === 0) ? 0 : dotProduct / (Math.sqrt(normV1) * Math.sqrt(normV2));
-                if (similarity > highestSimilarity) {
-                    highestSimilarity = similarity;
-                    bestMatch = user;
-                }
-            }
-            catch (e) {
-                console.error('Failed to parse embedding for user:', user.pengguna_id, e);
-            }
-        }
-        const threshold = 0.80;
-        if (bestMatch && highestSimilarity >= threshold) {
-            const role = await this.determineRole(bestMatch);
-            const tokens = await this.generateTokens(bestMatch, role);
-            return {
-                accessToken: tokens.accessToken,
-                refreshToken: tokens.refreshToken,
-                user: tokens.user,
-            };
-        }
-        throw new common_1.UnauthorizedException('Identifikasi wajah gagal atau wajah tidak terdaftar');
-    }
     async verify2FA(tempToken, code, secretToSave) {
         try {
             const payload = this.jwtService.verify(tempToken, {

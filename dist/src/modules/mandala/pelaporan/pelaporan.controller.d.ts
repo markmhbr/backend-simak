@@ -15,9 +15,9 @@ export declare class PelaporanController {
             tanggal_mulai: Date | null;
             tanggal_selesai: Date | null;
             aktif: boolean;
-            pelaporan_id: string;
-            judul: string;
             deskripsi: string | null;
+            judul: string;
+            pelaporan_id: string;
             template_konten: string | null;
         };
     }>;
@@ -82,9 +82,9 @@ export declare class PelaporanController {
             tanggal_mulai: Date | null;
             tanggal_selesai: Date | null;
             aktif: boolean;
-            pelaporan_id: string;
-            judul: string;
             deskripsi: string | null;
+            judul: string;
+            pelaporan_id: string;
             template_konten: string | null;
         };
     }>;

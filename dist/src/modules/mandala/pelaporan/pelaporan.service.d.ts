@@ -10,9 +10,9 @@ export declare class PelaporanService {
         tanggal_mulai: Date | null;
         tanggal_selesai: Date | null;
         aktif: boolean;
-        pelaporan_id: string;
-        judul: string;
         deskripsi: string | null;
+        judul: string;
+        pelaporan_id: string;
         template_konten: string | null;
     }>;
     getListPelaporan(cadisdikId: string, page?: number, limit?: number): Promise<{
@@ -99,9 +99,9 @@ export declare class PelaporanService {
         tanggal_mulai: Date | null;
         tanggal_selesai: Date | null;
         aktif: boolean;
-        pelaporan_id: string;
-        judul: string;
         deskripsi: string | null;
+        judul: string;
+        pelaporan_id: string;
         template_konten: string | null;
     }>;
 }

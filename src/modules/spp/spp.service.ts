@@ -309,12 +309,13 @@ export class SppService {
     // 3. Generate tagihan SPP untuk masing-masing siswa yang belum memiliki tagihan
     await this.prisma.$transaction(async (tx) => {
       for (const siswa of siswaBelumAdaTagihan) {
+        const totalNominalTagihan = tagihan.tipe === 1 ? (tagihan.nominal * BigInt(12)) : tagihan.nominal;
         const newSpp = await tx.spp.create({
           data: {
             sekolah_id: sekolahId,
             peserta_didik_id: siswa.peserta_didik_id,
             pengaturan_tagihan_id: pengaturanTagihanId,
-            nominal_tagihan: tagihan.nominal,
+            nominal_tagihan: totalNominalTagihan,
             nominal_terbayar: BigInt(0),
             status: 1, // Belum Bayar
           },

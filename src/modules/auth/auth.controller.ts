@@ -19,29 +19,6 @@ export class AuthController {
     return this.authService.validateUser(loginDto.username, loginDto.password, sekolahId);
   }
 
-  @UseGuards(ThrottlerGuard, ApiKeyGuard)
-  @Post('login-face-id')
-  async loginFaceId(
-    @Body('embedding') embedding: number[],
-    @Req() request: Request,
-    @Res({ passthrough: true }) response: Response,
-  ) {
-    const appKey = request['appKey'];
-    const sekolahId = appKey ? appKey.sekolah_id : undefined;
-    if (!sekolahId) {
-      throw new UnauthorizedException('Koneksi sekolah tidak terdeteksi');
-    }
-
-    const result = await this.authService.loginWithFaceId(embedding, sekolahId);
-    
-    this.setRefreshTokenCookie(response, result.refreshToken);
-
-    return {
-      status: 'success',
-      accessToken: result.accessToken,
-      user: result.user,
-    };
-  }
 
   @UseGuards(ThrottlerGuard)
   @Post('verify-2fa')

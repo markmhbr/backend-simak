@@ -26,6 +26,7 @@ import { PengaturanUmumModule } from './modules/pengaturan-umum/pengaturan-umum.
 import { MutasiPdModule } from './modules/mutasi-pd/mutasi-pd.module';
 import { MailModule } from './core/mail/mail.module';
 import { PengaturanVaModule } from './modules/pengaturan-va/pengaturan-va.module';
+import { PerpustakaanModule } from './modules/perpustakaan/perpustakaan.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { PengaturanVaModule } from './modules/pengaturan-va/pengaturan-va.module
     PengaturanUmumModule,
     MutasiPdModule,
     PengaturanVaModule,
+    PerpustakaanModule,
   ],
 
 

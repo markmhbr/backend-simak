@@ -26,19 +26,6 @@ export declare class AuthService {
         qrCodeUrl?: undefined;
         secret?: undefined;
     }>;
-    loginWithFaceId(embedding: number[], sekolahId: string): Promise<{
-        accessToken: string;
-        refreshToken: string;
-        user: {
-            id: any;
-            nama: any;
-            email: any;
-            role: string;
-            ptk_id: any;
-            peserta_didik_id: any;
-            foto: string;
-        };
-    }>;
     verify2FA(tempToken: string, code: string, secretToSave?: string): Promise<{
         accessToken: string;
         refreshToken: string;

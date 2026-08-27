@@ -717,12 +717,15 @@ let PresensiService = class PresensiService {
         const wibDate = new Date(new Date().getTime() + 7 * 60 * 60 * 1000);
         const dateOnly = new Date(wibDate.toISOString().split('T')[0]);
         const pd = await this.prisma.pesertaDidik.findFirst({
-            where: { sekolah_id: sekolahId, qr_token: token },
-            select: {
-                peserta_didik_id: true,
-                nama: true,
-                nisn: true,
-                rombongan_belajar_id: true,
+            where: {
+                sekolah_id: sekolahId,
+                OR: [
+                    { qr_token: token },
+                    { nisn: token },
+                    { nik: token },
+                ],
+            },
+            include: {
                 rombongan_belajar: {
                     select: {
                         nama: true,
@@ -749,7 +752,6 @@ let PresensiService = class PresensiService {
                         }
                     }
                 },
-                foto: true,
             },
         });
         if (pd) {
@@ -769,7 +771,15 @@ let PresensiService = class PresensiService {
             return { type: 'pd', data: pdMapped, activeIzinKeluar };
         }
         const rawGtk = await this.prisma.gtk.findFirst({
-            where: { sekolah_id: sekolahId, qr_token: token },
+            where: {
+                sekolah_id: sekolahId,
+                OR: [
+                    { qr_token: token },
+                    { nuptk: token },
+                    { nik: token },
+                    { nip: token },
+                ],
+            },
             select: {
                 ptk_id: true,
                 nama: true,
@@ -797,7 +807,7 @@ let PresensiService = class PresensiService {
             });
             return { type: 'gtk', data: gtk, activeIzinKeluar };
         }
-        throw new common_1.NotFoundException('Data QR Token tidak ditemukan');
+        throw new common_1.NotFoundException('Data Barcode / QR Token tidak ditemukan');
     }
     async scanQr(sekolahId, token, latitude, longitude) {
         const sekolah = await this.prisma.sekolah.findUnique({
@@ -816,7 +826,14 @@ let PresensiService = class PresensiService {
         const wibDate = new Date(new Date().getTime() + 7 * 60 * 60 * 1000);
         const dateOnly = new Date(wibDate.toISOString().split('T')[0]);
         const pd = await this.prisma.pesertaDidik.findFirst({
-            where: { sekolah_id: sekolahId, qr_token: token },
+            where: {
+                sekolah_id: sekolahId,
+                OR: [
+                    { qr_token: token },
+                    { nisn: token },
+                    { nik: token },
+                ],
+            },
             include: {
                 rombongan_belajar: { select: { nama: true } },
                 anggota_rombel: {
@@ -903,7 +920,15 @@ let PresensiService = class PresensiService {
             };
         }
         const gtk = await this.prisma.gtk.findFirst({
-            where: { sekolah_id: sekolahId, qr_token: token },
+            where: {
+                sekolah_id: sekolahId,
+                OR: [
+                    { qr_token: token },
+                    { nuptk: token },
+                    { nik: token },
+                    { nip: token },
+                ],
+            },
             include: {
                 jenis_ptk: true,
             }
