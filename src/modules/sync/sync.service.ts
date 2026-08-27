@@ -434,8 +434,18 @@ export class SyncService {
         penghasilan_id_wali: p.penghasilan_id_wali ? Number(p.penghasilan_id_wali) : null,
         kewarganegaraan: p.kewarganegaraan || 'Indonesia',
         pekerjaan_id: p.pekerjaan_id ? Number(p.pekerjaan_id) : null,
-        status_hidup_ayah: p.status_hidup_ayah !== undefined ? this.parseNumber(p.status_hidup_ayah) : null,
-        status_hidup_ibu: p.status_hidup_ibu !== undefined ? this.parseNumber(p.status_hidup_ibu) : null,
+        status_hidup_ayah: (
+          Number(p.status_hidup_ayah) === 1 ||
+          Number(p.pekerjaan_id_ayah) === 98 ||
+          (typeof p.pekerjaan_id_ayah_str === 'string' && (p.pekerjaan_id_ayah_str.toLowerCase().includes('meninggal') || p.pekerjaan_id_ayah_str.toLowerCase().includes('wafat') || p.pekerjaan_id_ayah_str.toLowerCase().includes('alm'))) ||
+          (typeof p.nama_ayah === 'string' && (p.nama_ayah.toLowerCase().includes('alm') || p.nama_ayah.toLowerCase().includes('meninggal') || p.nama_ayah.toLowerCase().includes('wafat') || p.nama_ayah.toLowerCase().includes('almarhum')))
+        ) ? 1 : 0,
+        status_hidup_ibu: (
+          Number(p.status_hidup_ibu) === 1 ||
+          Number(p.pekerjaan_id_ibu) === 98 ||
+          (typeof p.pekerjaan_id_ibu_str === 'string' && (p.pekerjaan_id_ibu_str.toLowerCase().includes('meninggal') || p.pekerjaan_id_ibu_str.toLowerCase().includes('wafat') || p.pekerjaan_id_ibu_str.toLowerCase().includes('alm'))) ||
+          (typeof p.nama_ibu_kandung === 'string' && (p.nama_ibu_kandung.toLowerCase().includes('alm') || p.nama_ibu_kandung.toLowerCase().includes('meninggal') || p.nama_ibu_kandung.toLowerCase().includes('wafat') || p.nama_ibu_kandung.toLowerCase().includes('almarhum')))
+        ) ? 1 : 0,
         soft_delete: this.parseNumber(p.soft_delete),
 
         // --- Kolom dari registrasi_peserta_didik ---

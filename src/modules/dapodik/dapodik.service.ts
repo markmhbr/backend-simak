@@ -342,6 +342,8 @@ export class DapodikService {
         jenjang_pendidikan_wali: true,
         pekerjaan_id_wali: true,
         penghasilan_id_wali: true,
+        status_hidup_ayah: true,
+        status_hidup_ibu: true,
       }
     });
 
@@ -1456,6 +1458,8 @@ export class DapodikService {
       jenjang_pendidikan_wali: true,
       pekerjaan_id_wali: true,
       penghasilan_id_wali: true,
+      status_hidup_ayah: true,
+      status_hidup_ibu: true,
     };
 
     const refJenisPendaftaran = await this.prisma.jenis_pendaftaran.findMany({
