@@ -398,6 +398,28 @@ let PerpustakaanService = class PerpustakaanService {
                             nama: true,
                             nisn: true,
                             nipd: true,
+                            foto: true,
+                            rombongan_belajar: {
+                                select: { nama: true, jenis_rombel: true, semester_id: true },
+                            },
+                            anggota_rombel: {
+                                where: {
+                                    rombongan_belajar: {
+                                        jenis_rombel: 1,
+                                    },
+                                },
+                                orderBy: {
+                                    rombongan_belajar: {
+                                        semester_id: 'desc',
+                                    },
+                                },
+                                select: {
+                                    rombongan_belajar: {
+                                        select: { nama: true, jenis_rombel: true, semester_id: true },
+                                    },
+                                },
+                                take: 1,
+                            },
                         },
                     },
                     ptk: {
@@ -406,6 +428,8 @@ let PerpustakaanService = class PerpustakaanService {
                             nama: true,
                             nip: true,
                             nuptk: true,
+                            foto: true,
+                            jenis_ptk: { select: { jenis_ptk: true } },
                         },
                     },
                     detail_peminjaman: {
@@ -749,8 +773,27 @@ let PerpustakaanService = class PerpustakaanService {
                             nama: true,
                             nisn: true,
                             nipd: true,
+                            foto: true,
                             rombongan_belajar: {
-                                select: { nama: true },
+                                select: { nama: true, jenis_rombel: true, semester_id: true },
+                            },
+                            anggota_rombel: {
+                                where: {
+                                    rombongan_belajar: {
+                                        jenis_rombel: 1,
+                                    },
+                                },
+                                orderBy: {
+                                    rombongan_belajar: {
+                                        semester_id: 'desc',
+                                    },
+                                },
+                                select: {
+                                    rombongan_belajar: {
+                                        select: { nama: true, jenis_rombel: true, semester_id: true },
+                                    },
+                                },
+                                take: 1,
                             },
                         },
                     },
@@ -760,6 +803,8 @@ let PerpustakaanService = class PerpustakaanService {
                             nama: true,
                             nip: true,
                             nuptk: true,
+                            foto: true,
+                            jenis_ptk: { select: { jenis_ptk: true } },
                         },
                     },
                 },
@@ -840,10 +885,90 @@ let PerpustakaanService = class PerpustakaanService {
                 keterangan: dto.keterangan?.trim() || null,
             },
             include: {
-                peserta_didik: { select: { nama: true, nisn: true } },
-                ptk: { select: { nama: true, nip: true } },
+                peserta_didik: {
+                    select: {
+                        nama: true,
+                        nisn: true,
+                        foto: true,
+                        rombongan_belajar: { select: { nama: true } },
+                        anggota_rombel: { select: { rombongan_belajar: { select: { nama: true } } }, take: 1 },
+                    },
+                },
+                ptk: { select: { nama: true, nip: true, foto: true, jenis_ptk: { select: { jenis_ptk: true } } } },
             },
         });
+    }
+    async smartScanKunjungan(sekolahId, dto) {
+        const hasPd = Boolean(dto.peserta_didik_id);
+        const hasPtk = Boolean(dto.ptk_id);
+        if ((hasPd && hasPtk) || (!hasPd && !hasPtk)) {
+            throw new common_1.BadRequestException('Pengunjung harus ditentukan tepat salah satu: peserta_didik_id atau ptk_id.');
+        }
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const activeVisit = await this.prisma.kunjunganPerpustakaan.findFirst({
+            where: {
+                sekolah_id: sekolahId,
+                ...(dto.peserta_didik_id ? { peserta_didik_id: dto.peserta_didik_id } : { ptk_id: dto.ptk_id }),
+                tanggal: { gte: today, lt: tomorrow },
+                jam_keluar: null,
+            },
+            orderBy: { jam_masuk: 'desc' },
+            include: {
+                peserta_didik: {
+                    select: {
+                        nama: true,
+                        nisn: true,
+                        foto: true,
+                        rombongan_belajar: { select: { nama: true, jenis_rombel: true, semester_id: true } },
+                        anggota_rombel: {
+                            where: { rombongan_belajar: { jenis_rombel: 1 } },
+                            orderBy: { rombongan_belajar: { semester_id: 'desc' } },
+                            select: { rombongan_belajar: { select: { nama: true, jenis_rombel: true, semester_id: true } } },
+                            take: 1,
+                        },
+                    },
+                },
+                ptk: { select: { nama: true, nip: true, foto: true, jenis_ptk: { select: { jenis_ptk: true } } } },
+            },
+        });
+        const now = new Date();
+        const currentHourMin = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        if (activeVisit) {
+            const updated = await this.prisma.kunjunganPerpustakaan.update({
+                where: { kunjungan_perpustakaan_id: activeVisit.kunjungan_perpustakaan_id },
+                data: { jam_keluar: currentHourMin },
+                include: {
+                    peserta_didik: {
+                        select: {
+                            nama: true,
+                            nisn: true,
+                            foto: true,
+                            rombongan_belajar: { select: { nama: true } },
+                            anggota_rombel: { select: { rombongan_belajar: { select: { nama: true } } }, take: 1 },
+                        },
+                    },
+                    ptk: { select: { nama: true, nip: true, foto: true, jenis_ptk: { select: { jenis_ptk: true } } } },
+                },
+            });
+            const memberName = updated.peserta_didik?.nama || updated.ptk?.nama || 'Pengunjung';
+            return {
+                action: 'check_out',
+                data: updated,
+                message: `${memberName} berhasil Check-Out (Keluar) pada pukul ${currentHourMin}`,
+            };
+        }
+        else {
+            const created = await this.checkInKunjungan(sekolahId, dto);
+            const memberName = created.peserta_didik?.nama || created.ptk?.nama || 'Pengunjung';
+            return {
+                action: 'check_in',
+                data: created,
+                message: `${memberName} berhasil Check-In (Masuk) pada pukul ${created.jam_masuk}`,
+            };
+        }
     }
     async checkOutKunjungan(sekolahId, id, dto) {
         const existing = await this.getKunjunganById(sekolahId, id);
@@ -919,8 +1044,27 @@ let PerpustakaanService = class PerpustakaanService {
                             nama: true,
                             nisn: true,
                             nipd: true,
+                            foto: true,
                             rombongan_belajar: {
-                                select: { nama: true },
+                                select: { nama: true, jenis_rombel: true, semester_id: true },
+                            },
+                            anggota_rombel: {
+                                where: {
+                                    rombongan_belajar: {
+                                        jenis_rombel: 1,
+                                    },
+                                },
+                                orderBy: {
+                                    rombongan_belajar: {
+                                        semester_id: 'desc',
+                                    },
+                                },
+                                select: {
+                                    rombongan_belajar: {
+                                        select: { nama: true, jenis_rombel: true, semester_id: true },
+                                    },
+                                },
+                                take: 1,
                             },
                         },
                     },

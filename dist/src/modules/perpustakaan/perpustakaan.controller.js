@@ -158,6 +158,11 @@ let PerpustakaanController = class PerpustakaanController {
         const data = await this.perpustakaanService.checkInKunjungan(sekolahId, dto);
         return { status: 'success', message: 'Check-in kunjungan perpustakaan berhasil.', data };
     }
+    async smartScanKunjungan(req, dto) {
+        const sekolahId = this.getSekolahId(req);
+        const result = await this.perpustakaanService.smartScanKunjungan(sekolahId, dto);
+        return { status: 'success', ...result };
+    }
     async checkOutKunjungan(req, id, dto) {
         const sekolahId = this.getSekolahId(req);
         const data = await this.perpustakaanService.checkOutKunjungan(sekolahId, id, dto);
@@ -383,6 +388,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, kunjungan_dto_1.CreateKunjunganDto]),
     __metadata("design:returntype", Promise)
 ], PerpustakaanController.prototype, "checkInKunjungan", null);
+__decorate([
+    (0, common_1.Post)('kunjungan/smart-scan'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, kunjungan_dto_1.CreateKunjunganDto]),
+    __metadata("design:returntype", Promise)
+], PerpustakaanController.prototype, "smartScanKunjungan", null);
 __decorate([
     (0, common_1.Patch)('kunjungan/:id/check-out'),
     __param(0, (0, common_1.Req)()),

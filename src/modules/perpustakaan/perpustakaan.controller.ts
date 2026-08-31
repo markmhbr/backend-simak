@@ -256,6 +256,13 @@ export class PerpustakaanController {
     return { status: 'success', message: 'Check-in kunjungan perpustakaan berhasil.', data };
   }
 
+  @Post('kunjungan/smart-scan')
+  async smartScanKunjungan(@Req() req: Request, @Body() dto: CreateKunjunganDto) {
+    const sekolahId = this.getSekolahId(req);
+    const result = await this.perpustakaanService.smartScanKunjungan(sekolahId, dto);
+    return { status: 'success', ...result };
+  }
+
   @Patch('kunjungan/:id/check-out')
   async checkOutKunjungan(
     @Req() req: Request,

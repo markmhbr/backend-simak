@@ -252,12 +252,29 @@ export declare class PerpustakaanController {
                 nama: string;
                 peserta_didik_id: string;
                 nisn: string;
+                foto: string;
                 nipd: string;
+                rombongan_belajar: {
+                    nama: string;
+                    jenis_rombel: import("@prisma/client-runtime-utils").Decimal;
+                    semester_id: string;
+                };
+                anggota_rombel: {
+                    rombongan_belajar: {
+                        nama: string;
+                        jenis_rombel: import("@prisma/client-runtime-utils").Decimal;
+                        semester_id: string;
+                    };
+                }[];
             };
             ptk: {
                 nama: string;
                 ptk_id: string;
                 nip: string;
+                foto: string;
+                jenis_ptk: {
+                    jenis_ptk: string;
+                };
                 nuptk: string;
             };
             detail_peminjaman: ({
@@ -489,15 +506,29 @@ export declare class PerpustakaanController {
                 nama: string;
                 peserta_didik_id: string;
                 nisn: string;
+                foto: string;
                 nipd: string;
                 rombongan_belajar: {
                     nama: string;
+                    jenis_rombel: import("@prisma/client-runtime-utils").Decimal;
+                    semester_id: string;
                 };
+                anggota_rombel: {
+                    rombongan_belajar: {
+                        nama: string;
+                        jenis_rombel: import("@prisma/client-runtime-utils").Decimal;
+                        semester_id: string;
+                    };
+                }[];
             };
             ptk: {
                 nama: string;
                 ptk_id: string;
                 nip: string;
+                foto: string;
+                jenis_ptk: {
+                    jenis_ptk: string;
+                };
                 nuptk: string;
             };
         } & {
@@ -555,10 +586,23 @@ export declare class PerpustakaanController {
             peserta_didik: {
                 nama: string;
                 nisn: string;
+                foto: string;
+                rombongan_belajar: {
+                    nama: string;
+                };
+                anggota_rombel: {
+                    rombongan_belajar: {
+                        nama: string;
+                    };
+                }[];
             };
             ptk: {
                 nama: string;
                 nip: string;
+                foto: string;
+                jenis_ptk: {
+                    jenis_ptk: string;
+                };
             };
         } & {
             sekolah_id: string;
@@ -573,6 +617,46 @@ export declare class PerpustakaanController {
             kunjungan_perpustakaan_id: string;
             keperluan: string | null;
         };
+    }>;
+    smartScanKunjungan(req: Request, dto: CreateKunjunganDto): Promise<{
+        action: string;
+        data: {
+            peserta_didik: {
+                nama: string;
+                nisn: string;
+                foto: string;
+                rombongan_belajar: {
+                    nama: string;
+                };
+                anggota_rombel: {
+                    rombongan_belajar: {
+                        nama: string;
+                    };
+                }[];
+            };
+            ptk: {
+                nama: string;
+                nip: string;
+                foto: string;
+                jenis_ptk: {
+                    jenis_ptk: string;
+                };
+            };
+        } & {
+            sekolah_id: string;
+            created_at: Date;
+            updated_at: Date;
+            keterangan: string | null;
+            peserta_didik_id: string | null;
+            ptk_id: string | null;
+            tanggal: Date;
+            jam_keluar: string | null;
+            jam_masuk: string;
+            kunjungan_perpustakaan_id: string;
+            keperluan: string | null;
+        };
+        message: string;
+        status: string;
     }>;
     checkOutKunjungan(req: Request, id: string, dto: CheckOutKunjunganDto): Promise<{
         status: string;
@@ -654,10 +738,20 @@ export declare class PerpustakaanController {
                 nama: string;
                 peserta_didik_id: string;
                 nisn: string;
+                foto: string;
                 nipd: string;
                 rombongan_belajar: {
                     nama: string;
+                    jenis_rombel: import("@prisma/client-runtime-utils").Decimal;
+                    semester_id: string;
                 };
+                anggota_rombel: {
+                    rombongan_belajar: {
+                        nama: string;
+                        jenis_rombel: import("@prisma/client-runtime-utils").Decimal;
+                        semester_id: string;
+                    };
+                }[];
             };
         } & {
             sekolah_id: string;
