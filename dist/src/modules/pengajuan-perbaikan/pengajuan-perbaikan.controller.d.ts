@@ -5,13 +5,13 @@ export declare class PengajuanPerbaikanController {
     constructor(service: PengajuanPerbaikanService);
     private getSekolahId;
     buatPengajuan(req: Request, body: any): Promise<{
+        peserta_didik_id: string | null;
         sekolah_id: string;
+        status: string;
         created_at: Date;
         updated_at: Date;
-        peserta_didik_id: string | null;
         ptk_id: string | null;
         tipe: string;
-        status: string;
         alasan_tolak: string | null;
         id: string;
         perubahan: import("@prisma/client/runtime/client").JsonValue;
@@ -41,13 +41,13 @@ export declare class PengajuanPerbaikanController {
     }>;
     dapatkanDaftar(req: Request): Promise<{
         nama: string;
+        peserta_didik_id: string | null;
         sekolah_id: string;
+        status: string;
         created_at: Date;
         updated_at: Date;
-        peserta_didik_id: string | null;
         ptk_id: string | null;
         tipe: string;
-        status: string;
         alasan_tolak: string | null;
         id: string;
         perubahan: import("@prisma/client/runtime/client").JsonValue;

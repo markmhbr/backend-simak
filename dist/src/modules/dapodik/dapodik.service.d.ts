@@ -39,12 +39,8 @@ export declare class DapodikService {
         nip_kepala_sekolah: any;
         tanda_tangan_kepala_sekolah: any;
         nama_operator: string;
-        sekolah_id: string;
         nama: string;
-        nama_nomenklatur: string | null;
-        nss: string | null;
-        npsn: string | null;
-        bentuk_pendidikan_id: number | null;
+        kebutuhan_khusus_id: number | null;
         alamat_jalan: string | null;
         rt: string | null;
         rw: string | null;
@@ -54,11 +50,17 @@ export declare class DapodikService {
         kode_pos: string | null;
         lintang: Prisma.Decimal | null;
         bujur: Prisma.Decimal | null;
+        email: string | null;
+        rekening_atas_nama: string | null;
+        soft_delete: string | null;
+        sekolah_id: string;
+        nama_nomenklatur: string | null;
+        nss: string | null;
+        npsn: string | null;
+        bentuk_pendidikan_id: number | null;
         nomor_telepon: string | null;
         nomor_fax: string | null;
-        email: string | null;
         website: string | null;
-        kebutuhan_khusus_id: number | null;
         status_sekolah: string | null;
         sk_pendirian_sekolah: string | null;
         tanggal_sk_pendirian: string | null;
@@ -69,7 +71,6 @@ export declare class DapodikService {
         no_rekening: string | null;
         nama_bank: string | null;
         cabang_kcp_unit: string | null;
-        rekening_atas_nama: string | null;
         mbs: string | null;
         luas_tanah_milik: string | null;
         luas_tanah_bukan_milik: string | null;
@@ -80,7 +81,6 @@ export declare class DapodikService {
         flag: string | null;
         create_date: Date;
         last_update: Date;
-        soft_delete: string | null;
         last_sync: Date | null;
         updater_id: string | null;
         cadisdik_id: string | null;
@@ -88,12 +88,8 @@ export declare class DapodikService {
         radius: number | null;
     }>;
     updateSekolah(sekolahId: string, data: any): Promise<{
-        sekolah_id: string;
         nama: string;
-        nama_nomenklatur: string | null;
-        nss: string | null;
-        npsn: string | null;
-        bentuk_pendidikan_id: number | null;
+        kebutuhan_khusus_id: number | null;
         alamat_jalan: string | null;
         rt: string | null;
         rw: string | null;
@@ -103,11 +99,17 @@ export declare class DapodikService {
         kode_pos: string | null;
         lintang: Prisma.Decimal | null;
         bujur: Prisma.Decimal | null;
+        email: string | null;
+        rekening_atas_nama: string | null;
+        soft_delete: string | null;
+        sekolah_id: string;
+        nama_nomenklatur: string | null;
+        nss: string | null;
+        npsn: string | null;
+        bentuk_pendidikan_id: number | null;
         nomor_telepon: string | null;
         nomor_fax: string | null;
-        email: string | null;
         website: string | null;
-        kebutuhan_khusus_id: number | null;
         status_sekolah: string | null;
         sk_pendirian_sekolah: string | null;
         tanggal_sk_pendirian: string | null;
@@ -118,7 +120,6 @@ export declare class DapodikService {
         no_rekening: string | null;
         nama_bank: string | null;
         cabang_kcp_unit: string | null;
-        rekening_atas_nama: string | null;
         mbs: string | null;
         luas_tanah_milik: string | null;
         luas_tanah_bukan_milik: string | null;
@@ -129,7 +130,6 @@ export declare class DapodikService {
         flag: string | null;
         create_date: Date;
         last_update: Date;
-        soft_delete: string | null;
         last_sync: Date | null;
         updater_id: string | null;
         logo: string | null;
@@ -138,12 +138,8 @@ export declare class DapodikService {
         radius: number | null;
     }>;
     uploadLogo(sekolahId: string, file: Express.Multer.File): Promise<{
-        sekolah_id: string;
         nama: string;
-        nama_nomenklatur: string | null;
-        nss: string | null;
-        npsn: string | null;
-        bentuk_pendidikan_id: number | null;
+        kebutuhan_khusus_id: number | null;
         alamat_jalan: string | null;
         rt: string | null;
         rw: string | null;
@@ -153,11 +149,17 @@ export declare class DapodikService {
         kode_pos: string | null;
         lintang: Prisma.Decimal | null;
         bujur: Prisma.Decimal | null;
+        email: string | null;
+        rekening_atas_nama: string | null;
+        soft_delete: string | null;
+        sekolah_id: string;
+        nama_nomenklatur: string | null;
+        nss: string | null;
+        npsn: string | null;
+        bentuk_pendidikan_id: number | null;
         nomor_telepon: string | null;
         nomor_fax: string | null;
-        email: string | null;
         website: string | null;
-        kebutuhan_khusus_id: number | null;
         status_sekolah: string | null;
         sk_pendirian_sekolah: string | null;
         tanggal_sk_pendirian: string | null;
@@ -168,7 +170,6 @@ export declare class DapodikService {
         no_rekening: string | null;
         nama_bank: string | null;
         cabang_kcp_unit: string | null;
-        rekening_atas_nama: string | null;
         mbs: string | null;
         luas_tanah_milik: string | null;
         luas_tanah_bukan_milik: string | null;
@@ -179,7 +180,6 @@ export declare class DapodikService {
         flag: string | null;
         create_date: Date;
         last_update: Date;
-        soft_delete: string | null;
         last_sync: Date | null;
         updater_id: string | null;
         logo: string | null;
@@ -225,7 +225,6 @@ export declare class DapodikService {
     getTanah(sekolahId: string | null, limit?: number, search?: string, page?: number): Promise<{
         total: number;
         data: {
-            sekolah_id: string;
             nama: string;
             alamat_jalan: string;
             rt: string | null;
@@ -236,9 +235,10 @@ export declare class DapodikService {
             kode_pos: string | null;
             lintang: Prisma.Decimal | null;
             bujur: Prisma.Decimal | null;
+            soft_delete: string | null;
+            sekolah_id: string;
             create_date: Date;
             last_update: Date;
-            soft_delete: string | null;
             last_sync: Date | null;
             updater_id: string | null;
             asal_data: string | null;
@@ -278,11 +278,11 @@ export declare class DapodikService {
     getBangunan(sekolahId: string | null, limit?: number, search?: string, page?: number): Promise<{
         total: number;
         data: {
-            sekolah_id: string;
             nama: string;
+            soft_delete: string | null;
+            sekolah_id: string;
             create_date: Date;
             last_update: Date;
-            soft_delete: string | null;
             last_sync: Date | null;
             updater_id: string | null;
             ptk_id: string | null;
@@ -332,10 +332,10 @@ export declare class DapodikService {
     getRuang(sekolahId: string | null, limit?: number, search?: string, page?: number): Promise<{
         total: number;
         data: {
+            soft_delete: string | null;
             sekolah_id: string;
             create_date: Date;
             last_update: Date;
-            soft_delete: string | null;
             last_sync: Date | null;
             updater_id: string | null;
             id_ruang: string;
@@ -428,12 +428,12 @@ export declare class DapodikService {
         pindahan: any;
     }[]>;
     getCadisdiks(): Promise<{
-        nomor_telepon: string | null;
         email: string | null;
-        website: string | null;
-        cadisdik_id: string;
         created_at: Date;
         updated_at: Date;
+        nomor_telepon: string | null;
+        website: string | null;
+        cadisdik_id: string;
         aktif: boolean;
         nama_instansi: string;
         alamat: string | null;
@@ -452,9 +452,9 @@ export declare class DapodikService {
             wajib: boolean;
         }[];
     } & {
-        cadisdik_id: string | null;
         created_at: Date;
         updated_at: Date;
+        cadisdik_id: string | null;
         aktif: boolean;
         kategori: number;
         layanan_id: string;
@@ -479,9 +479,9 @@ export declare class DapodikService {
                 wajib: boolean;
             }[];
         } & {
-            cadisdik_id: string | null;
             created_at: Date;
             updated_at: Date;
+            cadisdik_id: string | null;
             aktif: boolean;
             kategori: number;
             layanan_id: string;
@@ -492,9 +492,9 @@ export declare class DapodikService {
                 nama_lengkap: string;
             };
         } & {
-            pegawai_id: string;
-            created_at: Date;
             status: number;
+            created_at: Date;
+            pegawai_id: string;
             permohonan_layanan_id: string;
             permohonan_layanan_log_id: string;
             catatan: string | null;
@@ -511,9 +511,9 @@ export declare class DapodikService {
                 wajib: boolean;
             };
         } & {
+            status: number;
             created_at: Date;
             updated_at: Date;
-            status: number;
             file_url: string | null;
             permohonan_layanan_id: string;
             nama_file: string | null;
@@ -522,30 +522,30 @@ export declare class DapodikService {
             permohonan_layanan_file_id: string;
             jenis_file: number;
         })[];
+        peserta_didik_id: string | null;
         sekolah_id: string;
-        cadisdik_id: string | null;
+        keterangan: string | null;
+        status: number;
         created_at: Date;
         updated_at: Date;
-        keterangan: string | null;
-        peserta_didik_id: string | null;
+        cadisdik_id: string | null;
         ptk_id: string | null;
         kategori: number;
-        status: number;
         layanan_id: string;
         permohonan_layanan_id: string;
         nomor_permohonan: string | null;
         tanggal_pengajuan: Date | null;
     }[]>;
     createPermohonanLayanan(dto: any): Promise<{
+        peserta_didik_id: string | null;
         sekolah_id: string;
-        cadisdik_id: string | null;
+        keterangan: string | null;
+        status: number;
         created_at: Date;
         updated_at: Date;
-        keterangan: string | null;
-        peserta_didik_id: string | null;
+        cadisdik_id: string | null;
         ptk_id: string | null;
         kategori: number;
-        status: number;
         layanan_id: string;
         permohonan_layanan_id: string;
         nomor_permohonan: string | null;
@@ -576,26 +576,18 @@ export declare class DapodikService {
             kurikulum_id_str: any;
             id_ruang_str: any;
             nama: string;
-            ptk_id: string;
             rombongan_belajar_id: string;
             _count: {
                 anggota_rombel: number;
             };
+            ptk_id: string;
             jenis_rombel: Prisma.Decimal;
             id_ruang: string;
             tingkat_pendidikan_id: Prisma.Decimal;
             kurikulum_id: number;
         }[];
     }>;
-    getRombelAnggota(rombelId: string): Promise<{
-        nama: string;
-        peserta_didik_id: string;
-        nisn: string;
-        jenis_kelamin: string;
-        foto: string;
-        nipd: string;
-        qr_token: string;
-    }[]>;
+    getRombelAnggota(rombelId: string): Promise<any[]>;
     getRombelPembelajaran(rombelId: string): Promise<{
         gtk: any;
         jurusan_id: string;
@@ -612,11 +604,11 @@ export declare class DapodikService {
         ptk_id_str: any;
         id_ruang_str: any;
         nama: string;
-        ptk_id: string;
         rombongan_belajar_id: string;
         _count: {
             anggota_rombel: number;
         };
+        ptk_id: string;
         id_ruang: string;
     }[]>;
     getJurusan(sekolahId: string | null): Promise<{
@@ -632,18 +624,18 @@ export declare class DapodikService {
     }>;
     getAllPembelajaran(sekolahId: string | null): Promise<{
         gtk: any;
-        ptk_id: string;
         rombongan_belajar_id: string;
-        pembelajaran_id: string;
-        semester_id: string;
-        ptk_terdaftar_id: string;
-        jam_mengajar_per_minggu: Prisma.Decimal;
-        nama_mata_pelajaran: string;
         rombongan_belajar: {
             nama: string;
             rombongan_belajar_id: string;
             semester_id: string;
         };
+        ptk_id: string;
+        pembelajaran_id: string;
+        semester_id: string;
+        ptk_terdaftar_id: string;
+        jam_mengajar_per_minggu: Prisma.Decimal;
+        nama_mata_pelajaran: string;
     }[]>;
     getGtk(sekolahId: string | null, limit?: number, search?: string, page?: number, type?: 'guru' | 'tendik', status?: 'aktif' | 'non-aktif', completeness?: string): Promise<{
         total: number;
@@ -710,65 +702,71 @@ export declare class DapodikService {
     }>;
     getGtkById(sekolahId: string, id: string): Promise<any>;
     createGtkAnak(sekolahId: string, ptkId: string, body: any): Promise<{
-        sekolah_id: string;
         nama: string;
+        jenis_kelamin: string;
+        nisn: string | null;
+        nik: string | null;
+        tempat_lahir: string | null;
+        tanggal_lahir: Date;
+        soft_delete: Prisma.Decimal;
+        sekolah_id: string;
         create_date: Date;
         last_update: Date;
-        soft_delete: Prisma.Decimal;
         last_sync: Date;
         updater_id: string;
         ptk_id: string;
         anak_id: string;
         status_anak_id: Prisma.Decimal;
         jenjang_pendidikan_id: Prisma.Decimal;
-        nik: string | null;
-        nisn: string | null;
-        jenis_kelamin: string;
-        tempat_lahir: string | null;
-        tanggal_lahir: Date;
         tahun_masuk: number | null;
     }>;
     updateGtkAnak(sekolahId: string, ptkId: string, anakId: string, body: any): Promise<{
-        sekolah_id: string;
         nama: string;
+        jenis_kelamin: string;
+        nisn: string | null;
+        nik: string | null;
+        tempat_lahir: string | null;
+        tanggal_lahir: Date;
+        soft_delete: Prisma.Decimal;
+        sekolah_id: string;
         create_date: Date;
         last_update: Date;
-        soft_delete: Prisma.Decimal;
         last_sync: Date;
         updater_id: string;
         ptk_id: string;
         anak_id: string;
         status_anak_id: Prisma.Decimal;
         jenjang_pendidikan_id: Prisma.Decimal;
-        nik: string | null;
-        nisn: string | null;
-        jenis_kelamin: string;
-        tempat_lahir: string | null;
-        tanggal_lahir: Date;
         tahun_masuk: number | null;
     }>;
     deleteGtkAnak(sekolahId: string, ptkId: string, anakId: string): Promise<{
-        sekolah_id: string;
         nama: string;
+        jenis_kelamin: string;
+        nisn: string | null;
+        nik: string | null;
+        tempat_lahir: string | null;
+        tanggal_lahir: Date;
+        soft_delete: Prisma.Decimal;
+        sekolah_id: string;
         create_date: Date;
         last_update: Date;
-        soft_delete: Prisma.Decimal;
         last_sync: Date;
         updater_id: string;
         ptk_id: string;
         anak_id: string;
         status_anak_id: Prisma.Decimal;
         jenjang_pendidikan_id: Prisma.Decimal;
-        nik: string | null;
-        nisn: string | null;
-        jenis_kelamin: string;
-        tempat_lahir: string | null;
-        tanggal_lahir: Date;
         tahun_masuk: number | null;
     }>;
     updateGtk(sekolahId: string, id: string, data: any): Promise<{
-        sekolah_id: string | null;
         nama: string;
+        jenis_kelamin: string | null;
+        nik: string | null;
+        no_kk: string | null;
+        tempat_lahir: string | null;
+        tanggal_lahir: Date | null;
+        agama_id: number | null;
+        kebutuhan_khusus_id: number | null;
         alamat_jalan: string | null;
         rt: Prisma.Decimal | null;
         rw: Prisma.Decimal | null;
@@ -779,35 +777,29 @@ export declare class DapodikService {
         lintang: Prisma.Decimal | null;
         bujur: Prisma.Decimal | null;
         email: string | null;
-        kebutuhan_khusus_id: number | null;
+        id_bank: string | null;
+        rekening_bank: string | null;
+        nama_kcp: string | null;
         rekening_atas_nama: string | null;
+        status_data: number | null;
+        nama_ibu_kandung: string | null;
+        kewarganegaraan: string | null;
+        soft_delete: Prisma.Decimal | null;
+        sekolah_id: string | null;
+        jenis_keluar_id: string | null;
+        qr_token: string | null;
+        foto: string | null;
+        status: string;
+        no_whatsapp: string | null;
         npwp: string | null;
         nm_wp: string | null;
         create_date: Date;
         last_update: Date;
-        soft_delete: Prisma.Decimal | null;
         last_sync: Date | null;
         updater_id: string | null;
         ptk_id: string;
-        status: string;
-        nik: string | null;
-        jenis_kelamin: string | null;
-        tempat_lahir: string | null;
-        tanggal_lahir: Date | null;
-        jenis_keluar_id: string | null;
         nip: string | null;
-        foto: string | null;
         ptk_terdaftar_id: string | null;
-        no_kk: string | null;
-        agama_id: number | null;
-        id_bank: string | null;
-        rekening_bank: string | null;
-        nama_kcp: string | null;
-        status_data: number | null;
-        nama_ibu_kandung: string | null;
-        kewarganegaraan: string | null;
-        qr_token: string | null;
-        no_whatsapp: string | null;
         no_hp: string | null;
         jabatan_ptk_id: Prisma.Decimal | null;
         niy_nigk: string | null;
@@ -853,8 +845,16 @@ export declare class DapodikService {
     }>;
     getPesertaDidikById(sekolahId: string, id: string): Promise<any>;
     updatePesertaDidik(sekolahId: string, id: string, data: any): Promise<{
-        sekolah_id: string | null;
+        peserta_didik_id: string;
         nama: string;
+        jenis_kelamin: string | null;
+        nisn: string | null;
+        nik: string | null;
+        no_kk: string | null;
+        tempat_lahir: string | null;
+        tanggal_lahir: Date | null;
+        agama_id: number | null;
+        kebutuhan_khusus_id: number | null;
         alamat_jalan: string | null;
         rt: Prisma.Decimal | null;
         rw: Prisma.Decimal | null;
@@ -864,27 +864,6 @@ export declare class DapodikService {
         kode_pos: string | null;
         lintang: Prisma.Decimal | null;
         bujur: Prisma.Decimal | null;
-        email: string | null;
-        kebutuhan_khusus_id: number | null;
-        rekening_atas_nama: string | null;
-        soft_delete: Prisma.Decimal | null;
-        created_at: Date;
-        updated_at: Date;
-        keterangan: string | null;
-        peserta_didik_id: string;
-        rombongan_belajar_id: string | null;
-        status: string;
-        nik: string | null;
-        nisn: string | null;
-        jenis_kelamin: string | null;
-        tempat_lahir: string | null;
-        tanggal_lahir: Date | null;
-        jenis_keluar_id: string | null;
-        foto: string | null;
-        jurusan_sp_id: string | null;
-        jenis_pendaftaran_id: Prisma.Decimal | null;
-        no_kk: string | null;
-        agama_id: number | null;
         jenis_tinggal_id: Prisma.Decimal | null;
         alat_transportasi_id: Prisma.Decimal | null;
         nik_ayah: string | null;
@@ -893,6 +872,7 @@ export declare class DapodikService {
         nik_wali: string | null;
         nomor_telepon_rumah: string | null;
         nomor_telepon_seluler: string | null;
+        email: string | null;
         penerima_kps: Prisma.Decimal | null;
         no_kps: string | null;
         layak_pip: Prisma.Decimal | null;
@@ -905,6 +885,7 @@ export declare class DapodikService {
         id_bank: string | null;
         rekening_bank: string | null;
         nama_kcp: string | null;
+        rekening_atas_nama: string | null;
         status_data: number | null;
         nama_ayah: string | null;
         tahun_lahir_ayah: Prisma.Decimal | null;
@@ -927,10 +908,16 @@ export declare class DapodikService {
         pekerjaan_id: number | null;
         status_hidup_ayah: number | null;
         status_hidup_ibu: number | null;
+        soft_delete: Prisma.Decimal | null;
         registrasi_id: string | null;
+        jurusan_sp_id: string | null;
+        sekolah_id: string | null;
+        jenis_pendaftaran_id: Prisma.Decimal | null;
         nipd: string | null;
         tanggal_masuk_sekolah: Date | null;
+        jenis_keluar_id: string | null;
         tanggal_keluar: Date | null;
+        keterangan: string | null;
         no_skhun: string | null;
         no_peserta_ujian: string | null;
         no_seri_ijazah: string | null;
@@ -948,11 +935,16 @@ export declare class DapodikService {
         menit_tempuh_ke_sekolah: Prisma.Decimal | null;
         jumlah_saudara_kandung: Prisma.Decimal | null;
         qr_token: string | null;
+        foto: string | null;
+        status: string;
         telegram_chat_id: string | null;
         telegram_token: string | null;
         no_whatsapp: string | null;
         email_aktif: string | null;
         is_wali: boolean | null;
+        created_at: Date;
+        updated_at: Date;
+        rombongan_belajar_id: string | null;
     }>;
     getGtkRekapKategori(sekolahId: string | null): Promise<{
         id: number;
@@ -987,23 +979,22 @@ export declare class DapodikService {
     getDudi(sekolahId: string): Promise<{
         jumlah_mou: number;
         mou: {
-            sekolah_id: string | null;
-            create_date: Date | null;
-            last_update: Date | null;
             soft_delete: Prisma.Decimal | null;
-            last_sync: Date | null;
-            updater_id: string | null;
+            sekolah_id: string | null;
+            keterangan: string | null;
             created_at: Date;
             updated_at: Date;
+            create_date: Date | null;
+            last_update: Date | null;
+            last_sync: Date | null;
+            updater_id: string | null;
             tanggal_mulai: Date | null;
             tanggal_selesai: Date | null;
-            keterangan: string | null;
             dudi_id: string;
             mou_id: string;
             nomor_mou: string | null;
             judul_mou: string | null;
         }[];
-        sekolah_id: string | null;
         nama: string;
         alamat_jalan: string | null;
         rt: string | null;
@@ -1014,18 +1005,19 @@ export declare class DapodikService {
         kode_pos: string | null;
         lintang: Prisma.Decimal | null;
         bujur: Prisma.Decimal | null;
+        email: string | null;
+        soft_delete: Prisma.Decimal | null;
+        sekolah_id: string | null;
+        created_at: Date;
+        updated_at: Date;
         nomor_telepon: string | null;
         nomor_fax: string | null;
-        email: string | null;
         website: string | null;
         npwp: string | null;
         create_date: Date | null;
         last_update: Date | null;
-        soft_delete: Prisma.Decimal | null;
         last_sync: Date | null;
         updater_id: string | null;
-        created_at: Date;
-        updated_at: Date;
         dudi_id: string;
         bidang_usaha_id: string | null;
         nama_bidang_usaha: string | null;
@@ -1050,6 +1042,8 @@ export declare class DapodikService {
     getMyMenus(peranId: number): Promise<string[]>;
     getMyMenusByUserId(penggunaId: string): Promise<any[]>;
     getUpdateGtk(sekolahId: string, since?: string): Promise<{
+        no_kk: string;
+        agama_id: number;
         alamat_jalan: string;
         rt: Prisma.Decimal;
         rw: Prisma.Decimal;
@@ -1059,30 +1053,28 @@ export declare class DapodikService {
         kode_pos: string;
         lintang: Prisma.Decimal;
         bujur: Prisma.Decimal;
+        status: string;
         npwp: string;
         nm_wp: string;
         create_date: Date;
         last_update: Date;
         last_sync: Date;
         ptk_id: string;
-        status: string;
         anak: {
             nama: string;
+            jenis_kelamin: string;
+            nisn: string;
+            nik: string;
+            tempat_lahir: string;
+            tanggal_lahir: Date;
             soft_delete: Prisma.Decimal;
             updater_id: string;
             ptk_id: string;
             anak_id: string;
             status_anak_id: Prisma.Decimal;
             jenjang_pendidikan_id: Prisma.Decimal;
-            nik: string;
-            nisn: string;
-            jenis_kelamin: string;
-            tempat_lahir: string;
-            tanggal_lahir: Date;
             tahun_masuk: number;
         }[];
-        no_kk: string;
-        agama_id: number;
         no_hp: string;
         no_telepon_rumah: string;
         status_perkawinan: Prisma.Decimal;
@@ -1090,6 +1082,10 @@ export declare class DapodikService {
         pekerjaan_suami_istri: number;
     }[]>;
     getUpdatePesertaDidik(sekolahId: string, since?: string): Promise<{
+        peserta_didik_id: string;
+        no_kk: string;
+        agama_id: number;
+        kebutuhan_khusus_id: number;
         alamat_jalan: string;
         rt: Prisma.Decimal;
         rw: Prisma.Decimal;
@@ -1099,13 +1095,6 @@ export declare class DapodikService {
         kode_pos: string;
         lintang: Prisma.Decimal;
         bujur: Prisma.Decimal;
-        kebutuhan_khusus_id: number;
-        created_at: Date;
-        updated_at: Date;
-        peserta_didik_id: string;
-        status: string;
-        no_kk: string;
-        agama_id: number;
         jenis_tinggal_id: Prisma.Decimal;
         alat_transportasi_id: Prisma.Decimal;
         nik_ayah: string;
@@ -1143,6 +1132,9 @@ export declare class DapodikService {
         waktu_tempuh_ke_sekolah: Prisma.Decimal;
         menit_tempuh_ke_sekolah: Prisma.Decimal;
         jumlah_saudara_kandung: Prisma.Decimal;
+        status: string;
+        created_at: Date;
+        updated_at: Date;
     }[]>;
     private formatSqlValue;
     generateBackupSql(sekolahId: string): Promise<string>;
@@ -1154,13 +1146,13 @@ export declare class DapodikService {
         totalPages: number;
     }>;
     createTugasTambahan(sekolahId: string | null, data: any): Promise<{
+        peserta_didik_id: string | null;
+        soft_delete: Prisma.Decimal | null;
         sekolah_id: string | null;
         create_date: Date;
         last_update: Date;
-        soft_delete: Prisma.Decimal | null;
         last_sync: Date | null;
         updater_id: string | null;
-        peserta_didik_id: string | null;
         ptk_id: string | null;
         jabatan: string | null;
         ptk_tugas_tambahan_id: string;
@@ -1172,13 +1164,13 @@ export declare class DapodikService {
         index: number;
     }>;
     updateTugasTambahan(id: string, data: any): Promise<{
+        peserta_didik_id: string | null;
+        soft_delete: Prisma.Decimal | null;
         sekolah_id: string | null;
         create_date: Date;
         last_update: Date;
-        soft_delete: Prisma.Decimal | null;
         last_sync: Date | null;
         updater_id: string | null;
-        peserta_didik_id: string | null;
         ptk_id: string | null;
         jabatan: string | null;
         ptk_tugas_tambahan_id: string;
@@ -1190,13 +1182,13 @@ export declare class DapodikService {
         index: number;
     }>;
     deleteTugasTambahan(id: string): Promise<{
+        peserta_didik_id: string | null;
+        soft_delete: Prisma.Decimal | null;
         sekolah_id: string | null;
         create_date: Date;
         last_update: Date;
-        soft_delete: Prisma.Decimal | null;
         last_sync: Date | null;
         updater_id: string | null;
-        peserta_didik_id: string | null;
         ptk_id: string | null;
         jabatan: string | null;
         ptk_tugas_tambahan_id: string;

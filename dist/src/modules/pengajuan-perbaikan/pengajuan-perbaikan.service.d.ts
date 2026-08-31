@@ -8,26 +8,26 @@ export declare class PengajuanPerbaikanService {
         tipe: 'GTK' | 'SISWA';
         perubahan: any;
     }): Promise<{
+        peserta_didik_id: string | null;
         sekolah_id: string;
+        status: string;
         created_at: Date;
         updated_at: Date;
-        peserta_didik_id: string | null;
         ptk_id: string | null;
         tipe: string;
-        status: string;
         alasan_tolak: string | null;
         id: string;
         perubahan: import("@prisma/client/runtime/client").JsonValue;
     }>;
     dapatkanDaftar(sekolahId: string): Promise<{
         nama: string;
+        peserta_didik_id: string | null;
         sekolah_id: string;
+        status: string;
         created_at: Date;
         updated_at: Date;
-        peserta_didik_id: string | null;
         ptk_id: string | null;
         tipe: string;
-        status: string;
         alasan_tolak: string | null;
         id: string;
         perubahan: import("@prisma/client/runtime/client").JsonValue;

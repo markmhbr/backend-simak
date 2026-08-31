@@ -78,12 +78,12 @@ export declare class SppService {
         pengaturan_tagihan_rombel_id: string;
     }>;
     deleteSpp(id: string): Promise<{
+        peserta_didik_id: string;
         sekolah_id: string;
+        status: number;
         created_at: Date;
         updated_at: Date;
-        peserta_didik_id: string;
         pengaturan_tagihan_id: string;
-        status: number;
         spp_id: string;
         nominal_tagihan: bigint;
         nominal_terbayar: bigint;
@@ -125,10 +125,10 @@ export declare class SppService {
             })[];
         };
         riwayat_transaksi: {
-            sekolah_id: string;
-            created_at: Date;
-            keterangan: string | null;
             peserta_didik_id: string;
+            sekolah_id: string;
+            keterangan: string | null;
+            created_at: Date;
             nominal: bigint;
             riwayat_transaksi_spp_id: string;
             spp_id: string;
@@ -136,22 +136,22 @@ export declare class SppService {
             tanggal_transaksi: Date;
             metode_pembayaran: number | null;
         }[];
+        peserta_didik_id: string;
         sekolah_id: string;
+        status: number;
         created_at: Date;
         updated_at: Date;
-        peserta_didik_id: string;
         pengaturan_tagihan_id: string;
-        status: number;
         spp_id: string;
         nominal_tagihan: bigint;
         nominal_terbayar: bigint;
         jatuh_tempo: Date | null;
     }[]>;
     createTransaksiSpp(dto: CreateTransaksiSppDto): Promise<{
-        sekolah_id: string;
-        created_at: Date;
-        keterangan: string | null;
         peserta_didik_id: string;
+        sekolah_id: string;
+        keterangan: string | null;
+        created_at: Date;
         nominal: bigint;
         riwayat_transaksi_spp_id: string;
         spp_id: string;
@@ -160,10 +160,10 @@ export declare class SppService {
         metode_pembayaran: number | null;
     }>;
     updateTransaksiSpp(id: string, dto: UpdateTransaksiSppDto): Promise<{
-        sekolah_id: string;
-        created_at: Date;
-        keterangan: string | null;
         peserta_didik_id: string;
+        sekolah_id: string;
+        keterangan: string | null;
+        created_at: Date;
         nominal: bigint;
         riwayat_transaksi_spp_id: string;
         spp_id: string;

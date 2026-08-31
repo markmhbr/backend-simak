@@ -20,10 +20,10 @@ export declare class PresensiController {
             rombongan_belajar_id: string;
             nama_rombel: string;
         };
+        peserta_didik_id: string;
         sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        peserta_didik_id: string;
         tanggal: Date;
         jam_masuk: Date | null;
         jam_pulang: Date | null;
@@ -60,8 +60,16 @@ export declare class PresensiController {
                     nama: string;
                 };
             }[];
-            sekolah_id: string | null;
+            peserta_didik_id: string;
             nama: string;
+            jenis_kelamin: string | null;
+            nisn: string | null;
+            nik: string | null;
+            no_kk: string | null;
+            tempat_lahir: string | null;
+            tanggal_lahir: Date | null;
+            agama_id: number | null;
+            kebutuhan_khusus_id: number | null;
             alamat_jalan: string | null;
             rt: import("@prisma/client-runtime-utils").Decimal | null;
             rw: import("@prisma/client-runtime-utils").Decimal | null;
@@ -71,27 +79,6 @@ export declare class PresensiController {
             kode_pos: string | null;
             lintang: import("@prisma/client-runtime-utils").Decimal | null;
             bujur: import("@prisma/client-runtime-utils").Decimal | null;
-            email: string | null;
-            kebutuhan_khusus_id: number | null;
-            rekening_atas_nama: string | null;
-            soft_delete: import("@prisma/client-runtime-utils").Decimal | null;
-            created_at: Date;
-            updated_at: Date;
-            keterangan: string | null;
-            peserta_didik_id: string;
-            rombongan_belajar_id: string | null;
-            status: string;
-            nik: string | null;
-            nisn: string | null;
-            jenis_kelamin: string | null;
-            tempat_lahir: string | null;
-            tanggal_lahir: Date | null;
-            jenis_keluar_id: string | null;
-            foto: string | null;
-            jurusan_sp_id: string | null;
-            jenis_pendaftaran_id: import("@prisma/client-runtime-utils").Decimal | null;
-            no_kk: string | null;
-            agama_id: number | null;
             jenis_tinggal_id: import("@prisma/client-runtime-utils").Decimal | null;
             alat_transportasi_id: import("@prisma/client-runtime-utils").Decimal | null;
             nik_ayah: string | null;
@@ -100,6 +87,7 @@ export declare class PresensiController {
             nik_wali: string | null;
             nomor_telepon_rumah: string | null;
             nomor_telepon_seluler: string | null;
+            email: string | null;
             penerima_kps: import("@prisma/client-runtime-utils").Decimal | null;
             no_kps: string | null;
             layak_pip: import("@prisma/client-runtime-utils").Decimal | null;
@@ -112,6 +100,7 @@ export declare class PresensiController {
             id_bank: string | null;
             rekening_bank: string | null;
             nama_kcp: string | null;
+            rekening_atas_nama: string | null;
             status_data: number | null;
             nama_ayah: string | null;
             tahun_lahir_ayah: import("@prisma/client-runtime-utils").Decimal | null;
@@ -134,10 +123,16 @@ export declare class PresensiController {
             pekerjaan_id: number | null;
             status_hidup_ayah: number | null;
             status_hidup_ibu: number | null;
+            soft_delete: import("@prisma/client-runtime-utils").Decimal | null;
             registrasi_id: string | null;
+            jurusan_sp_id: string | null;
+            sekolah_id: string | null;
+            jenis_pendaftaran_id: import("@prisma/client-runtime-utils").Decimal | null;
             nipd: string | null;
             tanggal_masuk_sekolah: Date | null;
+            jenis_keluar_id: string | null;
             tanggal_keluar: Date | null;
+            keterangan: string | null;
             no_skhun: string | null;
             no_peserta_ujian: string | null;
             no_seri_ijazah: string | null;
@@ -155,19 +150,24 @@ export declare class PresensiController {
             menit_tempuh_ke_sekolah: import("@prisma/client-runtime-utils").Decimal | null;
             jumlah_saudara_kandung: import("@prisma/client-runtime-utils").Decimal | null;
             qr_token: string | null;
+            foto: string | null;
+            status: string;
             telegram_chat_id: string | null;
             telegram_token: string | null;
             no_whatsapp: string | null;
             email_aktif: string | null;
             is_wali: boolean | null;
-        };
-        activeIzinKeluar: {
-            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
-            keterangan: string;
-            izin_id: string;
+            rombongan_belajar_id: string | null;
+        };
+        activeIzinKeluar: {
             peserta_didik_id: string | null;
+            sekolah_id: string;
+            keterangan: string;
+            created_at: Date;
+            updated_at: Date;
+            izin_id: string;
             ptk_id: string | null;
             jenis: number;
             tanggal: Date;
@@ -181,17 +181,17 @@ export declare class PresensiController {
         data: {
             jenis_ptk_id_str: string;
             nama: string;
-            ptk_id: string;
             foto: string;
+            ptk_id: string;
             nuptk: string;
         };
         activeIzinKeluar: {
+            peserta_didik_id: string | null;
             sekolah_id: string;
+            keterangan: string;
             created_at: Date;
             updated_at: Date;
-            keterangan: string;
             izin_id: string;
-            peserta_didik_id: string | null;
             ptk_id: string | null;
             jenis: number;
             tanggal: Date;
@@ -202,14 +202,14 @@ export declare class PresensiController {
         };
     }>;
     getHariLibur(sekolahId: string): Promise<{
-        sekolah_id: string;
         nama: string;
+        sekolah_id: string;
+        keterangan: string | null;
         created_at: Date;
         updated_at: Date;
         hari_libur_id: string;
         tanggal_mulai: Date;
         tanggal_selesai: Date;
-        keterangan: string | null;
         aktif: boolean;
     }[]>;
     createHariLibur(sekolahId: string, data: {
@@ -218,14 +218,14 @@ export declare class PresensiController {
         tanggal_selesai: string;
         keterangan?: string;
     }): Promise<{
-        sekolah_id: string;
         nama: string;
+        sekolah_id: string;
+        keterangan: string | null;
         created_at: Date;
         updated_at: Date;
         hari_libur_id: string;
         tanggal_mulai: Date;
         tanggal_selesai: Date;
-        keterangan: string | null;
         aktif: boolean;
     }>;
     updateHariLibur(sekolahId: string, id: string, data: {
@@ -234,14 +234,14 @@ export declare class PresensiController {
         tanggal_selesai?: string;
         keterangan?: string;
     }): Promise<{
-        sekolah_id: string;
         nama: string;
+        sekolah_id: string;
+        keterangan: string | null;
         created_at: Date;
         updated_at: Date;
         hari_libur_id: string;
         tanggal_mulai: Date;
         tanggal_selesai: Date;
-        keterangan: string | null;
         aktif: boolean;
     }>;
     deleteHariLibur(sekolahId: string, id: string): Promise<import("@prisma/client").Prisma.BatchPayload>;
@@ -250,10 +250,10 @@ export declare class PresensiController {
         waktu: string;
         tipe: 'masuk' | 'pulang';
     }): Promise<{
+        peserta_didik_id: string;
         sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        peserta_didik_id: string;
         tanggal: Date;
         jam_masuk: Date | null;
         jam_pulang: Date | null;
@@ -281,12 +281,12 @@ export declare class PresensiController {
         tanggal: string;
         status: number;
     }): Promise<{
-        sekolah_id: string;
-        created_at: Date;
         peserta_didik_id: string;
+        sekolah_id: string;
+        status: number;
+        created_at: Date;
         tanggal: Date;
         jadwal_pelajaran_id: string;
-        status: number;
         waktu_absen: Date;
     }>;
     createIzin(sekolahId: string, data: {
@@ -300,12 +300,12 @@ export declare class PresensiController {
     }): Promise<any>;
     getIzinKeluar(sekolahId: string, tanggal?: string): Promise<any[]>;
     catatKembali(sekolahId: string, izinId: string): Promise<{
+        peserta_didik_id: string | null;
         sekolah_id: string;
+        keterangan: string;
         created_at: Date;
         updated_at: Date;
-        keterangan: string;
         izin_id: string;
-        peserta_didik_id: string | null;
         ptk_id: string | null;
         jenis: number;
         tanggal: Date;
@@ -315,12 +315,12 @@ export declare class PresensiController {
         jam_kembali_estimasi: Date | null;
     }>;
     setujuiIzin(sekolahId: string, izinId: string): Promise<{
+        peserta_didik_id: string | null;
         sekolah_id: string;
+        keterangan: string;
         created_at: Date;
         updated_at: Date;
-        keterangan: string;
         izin_id: string;
-        peserta_didik_id: string | null;
         ptk_id: string | null;
         jenis: number;
         tanggal: Date;
@@ -347,12 +347,12 @@ export declare class PresensiController {
             status_pulang: number | null;
         };
         izin: {
+            peserta_didik_id: string | null;
             sekolah_id: string;
+            keterangan: string;
             created_at: Date;
             updated_at: Date;
-            keterangan: string;
             izin_id: string;
-            peserta_didik_id: string | null;
             ptk_id: string | null;
             jenis: number;
             tanggal: Date;
@@ -363,8 +363,8 @@ export declare class PresensiController {
         };
         hasJadwalToday: boolean;
         nama: string;
-        ptk_id: string;
         foto: string;
+        ptk_id: string;
         nuptk: string;
         mode_presensi: number;
     }[]>;
@@ -383,8 +383,14 @@ export declare class PresensiController {
         status: string;
         message: string;
         data: {
-            sekolah_id: string | null;
             nama: string;
+            jenis_kelamin: string | null;
+            nik: string | null;
+            no_kk: string | null;
+            tempat_lahir: string | null;
+            tanggal_lahir: Date | null;
+            agama_id: number | null;
+            kebutuhan_khusus_id: number | null;
             alamat_jalan: string | null;
             rt: import("@prisma/client-runtime-utils").Decimal | null;
             rw: import("@prisma/client-runtime-utils").Decimal | null;
@@ -395,35 +401,29 @@ export declare class PresensiController {
             lintang: import("@prisma/client-runtime-utils").Decimal | null;
             bujur: import("@prisma/client-runtime-utils").Decimal | null;
             email: string | null;
-            kebutuhan_khusus_id: number | null;
+            id_bank: string | null;
+            rekening_bank: string | null;
+            nama_kcp: string | null;
             rekening_atas_nama: string | null;
+            status_data: number | null;
+            nama_ibu_kandung: string | null;
+            kewarganegaraan: string | null;
+            soft_delete: import("@prisma/client-runtime-utils").Decimal | null;
+            sekolah_id: string | null;
+            jenis_keluar_id: string | null;
+            qr_token: string | null;
+            foto: string | null;
+            status: string;
+            no_whatsapp: string | null;
             npwp: string | null;
             nm_wp: string | null;
             create_date: Date;
             last_update: Date;
-            soft_delete: import("@prisma/client-runtime-utils").Decimal | null;
             last_sync: Date | null;
             updater_id: string | null;
             ptk_id: string;
-            status: string;
-            nik: string | null;
-            jenis_kelamin: string | null;
-            tempat_lahir: string | null;
-            tanggal_lahir: Date | null;
-            jenis_keluar_id: string | null;
             nip: string | null;
-            foto: string | null;
             ptk_terdaftar_id: string | null;
-            no_kk: string | null;
-            agama_id: number | null;
-            id_bank: string | null;
-            rekening_bank: string | null;
-            nama_kcp: string | null;
-            status_data: number | null;
-            nama_ibu_kandung: string | null;
-            kewarganegaraan: string | null;
-            qr_token: string | null;
-            no_whatsapp: string | null;
             no_hp: string | null;
             jabatan_ptk_id: import("@prisma/client-runtime-utils").Decimal | null;
             niy_nigk: string | null;

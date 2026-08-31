@@ -54,8 +54,8 @@ export declare class ReferenceController {
                 nm_hobby: string;
             }[];
             alasan_layak_pip: {
-                alasan_layak_pip: string;
                 id_layak_pip: import("@prisma/client-runtime-utils").Decimal;
+                alasan_layak_pip: string;
             }[];
             jenis_pendaftaran: {
                 nama: string;
@@ -189,8 +189,8 @@ export declare class ReferenceController {
     getAlasanLayakPip(): Promise<{
         status: string;
         data: {
-            alasan_layak_pip: string;
             id_layak_pip: import("@prisma/client-runtime-utils").Decimal;
+            alasan_layak_pip: string;
         }[];
     }>;
     getJenisPendaftaran(): Promise<{

@@ -31,8 +31,8 @@ export declare class PerpustakaanController {
                 buku: number;
             };
         } & {
-            sekolah_id: string;
             nama: string;
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
             kategori_buku_id: string;
@@ -46,8 +46,8 @@ export declare class PerpustakaanController {
                 buku: number;
             };
         } & {
-            sekolah_id: string;
             nama: string;
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
             kategori_buku_id: string;
@@ -58,8 +58,8 @@ export declare class PerpustakaanController {
         status: string;
         message: string;
         data: {
-            sekolah_id: string;
             nama: string;
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
             kategori_buku_id: string;
@@ -70,8 +70,8 @@ export declare class PerpustakaanController {
         status: string;
         message: string;
         data: {
-            sekolah_id: string;
             nama: string;
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
             kategori_buku_id: string;
@@ -82,8 +82,8 @@ export declare class PerpustakaanController {
         status: string;
         message: string;
         data: {
-            sekolah_id: string;
             nama: string;
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
             kategori_buku_id: string;
@@ -98,9 +98,9 @@ export declare class PerpustakaanController {
             };
         } & {
             sekolah_id: string;
+            status: number;
             created_at: Date;
             updated_at: Date;
-            status: number;
             kategori_buku_id: string;
             deskripsi: string | null;
             buku_id: string;
@@ -128,8 +128,8 @@ export declare class PerpustakaanController {
         status: string;
         data: {
             kategori: {
-                sekolah_id: string;
                 nama: string;
+                sekolah_id: string;
                 created_at: Date;
                 updated_at: Date;
                 kategori_buku_id: string;
@@ -137,9 +137,9 @@ export declare class PerpustakaanController {
             };
         } & {
             sekolah_id: string;
+            status: number;
             created_at: Date;
             updated_at: Date;
-            status: number;
             kategori_buku_id: string;
             deskripsi: string | null;
             buku_id: string;
@@ -161,8 +161,8 @@ export declare class PerpustakaanController {
         message: string;
         data: {
             kategori: {
-                sekolah_id: string;
                 nama: string;
+                sekolah_id: string;
                 created_at: Date;
                 updated_at: Date;
                 kategori_buku_id: string;
@@ -170,9 +170,9 @@ export declare class PerpustakaanController {
             };
         } & {
             sekolah_id: string;
+            status: number;
             created_at: Date;
             updated_at: Date;
-            status: number;
             kategori_buku_id: string;
             deskripsi: string | null;
             buku_id: string;
@@ -194,8 +194,8 @@ export declare class PerpustakaanController {
         message: string;
         data: {
             kategori: {
-                sekolah_id: string;
                 nama: string;
+                sekolah_id: string;
                 created_at: Date;
                 updated_at: Date;
                 kategori_buku_id: string;
@@ -203,9 +203,9 @@ export declare class PerpustakaanController {
             };
         } & {
             sekolah_id: string;
+            status: number;
             created_at: Date;
             updated_at: Date;
-            status: number;
             kategori_buku_id: string;
             deskripsi: string | null;
             buku_id: string;
@@ -227,9 +227,9 @@ export declare class PerpustakaanController {
         message: string;
         data: {
             sekolah_id: string;
+            status: number;
             created_at: Date;
             updated_at: Date;
-            status: number;
             kategori_buku_id: string;
             deskripsi: string | null;
             buku_id: string;
@@ -249,11 +249,11 @@ export declare class PerpustakaanController {
     getPeminjamanList(req: Request, search?: string, status?: number, peserta_didik_id?: string, ptk_id?: string, tanggal_mulai?: string, tanggal_selesai?: string, page?: number, limit?: number): Promise<{
         data: ({
             peserta_didik: {
-                nama: string;
                 peserta_didik_id: string;
+                nama: string;
                 nisn: string;
-                foto: string;
                 nipd: string;
+                foto: string;
                 rombongan_belajar: {
                     nama: string;
                     jenis_rombel: import("@prisma/client-runtime-utils").Decimal;
@@ -269,9 +269,9 @@ export declare class PerpustakaanController {
             };
             ptk: {
                 nama: string;
+                foto: string;
                 ptk_id: string;
                 nip: string;
-                foto: string;
                 jenis_ptk: {
                     jenis_ptk: string;
                 };
@@ -285,9 +285,9 @@ export declare class PerpustakaanController {
                     sampul: string;
                 };
             } & {
+                keterangan: string | null;
                 created_at: Date;
                 updated_at: Date;
-                keterangan: string | null;
                 buku_id: string;
                 jumlah: number;
                 peminjaman_id: string;
@@ -296,13 +296,13 @@ export declare class PerpustakaanController {
                 kondisi_kembali: number | null;
             })[];
         } & {
+            peserta_didik_id: string | null;
             sekolah_id: string;
+            keterangan: string | null;
+            status: number;
             created_at: Date;
             updated_at: Date;
-            keterangan: string | null;
-            peserta_didik_id: string | null;
             ptk_id: string | null;
-            status: number;
             peminjaman_id: string;
             nomor_peminjaman: string;
             tanggal_pinjam: Date;
@@ -322,8 +322,8 @@ export declare class PerpustakaanController {
         status: string;
         data: {
             peserta_didik: {
-                nama: string;
                 peserta_didik_id: string;
+                nama: string;
                 nisn: string;
                 nipd: string;
                 rombongan_belajar: {
@@ -348,9 +348,9 @@ export declare class PerpustakaanController {
                     sampul: string;
                 };
             } & {
+                keterangan: string | null;
                 created_at: Date;
                 updated_at: Date;
-                keterangan: string | null;
                 buku_id: string;
                 jumlah: number;
                 peminjaman_id: string;
@@ -359,13 +359,13 @@ export declare class PerpustakaanController {
                 kondisi_kembali: number | null;
             })[];
         } & {
+            peserta_didik_id: string | null;
             sekolah_id: string;
+            keterangan: string | null;
+            status: number;
             created_at: Date;
             updated_at: Date;
-            keterangan: string | null;
-            peserta_didik_id: string | null;
             ptk_id: string | null;
-            status: number;
             peminjaman_id: string;
             nomor_peminjaman: string;
             tanggal_pinjam: Date;
@@ -392,9 +392,9 @@ export declare class PerpustakaanController {
                     judul: string;
                 };
             } & {
+                keterangan: string | null;
                 created_at: Date;
                 updated_at: Date;
-                keterangan: string | null;
                 buku_id: string;
                 jumlah: number;
                 peminjaman_id: string;
@@ -403,13 +403,13 @@ export declare class PerpustakaanController {
                 kondisi_kembali: number | null;
             })[];
         } & {
+            peserta_didik_id: string | null;
             sekolah_id: string;
+            keterangan: string | null;
+            status: number;
             created_at: Date;
             updated_at: Date;
-            keterangan: string | null;
-            peserta_didik_id: string | null;
             ptk_id: string | null;
-            status: number;
             peminjaman_id: string;
             nomor_peminjaman: string;
             tanggal_pinjam: Date;
@@ -436,9 +436,9 @@ export declare class PerpustakaanController {
                     judul: string;
                 };
             } & {
+                keterangan: string | null;
                 created_at: Date;
                 updated_at: Date;
-                keterangan: string | null;
                 buku_id: string;
                 jumlah: number;
                 peminjaman_id: string;
@@ -447,13 +447,13 @@ export declare class PerpustakaanController {
                 kondisi_kembali: number | null;
             })[];
         } & {
+            peserta_didik_id: string | null;
             sekolah_id: string;
+            keterangan: string | null;
+            status: number;
             created_at: Date;
             updated_at: Date;
-            keterangan: string | null;
-            peserta_didik_id: string | null;
             ptk_id: string | null;
-            status: number;
             peminjaman_id: string;
             nomor_peminjaman: string;
             tanggal_pinjam: Date;
@@ -466,13 +466,13 @@ export declare class PerpustakaanController {
         status: string;
         message: string;
         data: {
+            peserta_didik_id: string | null;
             sekolah_id: string;
+            keterangan: string | null;
+            status: number;
             created_at: Date;
             updated_at: Date;
-            keterangan: string | null;
-            peserta_didik_id: string | null;
             ptk_id: string | null;
-            status: number;
             peminjaman_id: string;
             nomor_peminjaman: string;
             tanggal_pinjam: Date;
@@ -485,13 +485,13 @@ export declare class PerpustakaanController {
         status: string;
         message: string;
         data: {
+            peserta_didik_id: string | null;
             sekolah_id: string;
+            keterangan: string | null;
+            status: number;
             created_at: Date;
             updated_at: Date;
-            keterangan: string | null;
-            peserta_didik_id: string | null;
             ptk_id: string | null;
-            status: number;
             peminjaman_id: string;
             nomor_peminjaman: string;
             tanggal_pinjam: Date;
@@ -503,11 +503,11 @@ export declare class PerpustakaanController {
     getKunjunganList(req: Request, tanggal?: string, sedang_berada_di_perpus?: string, peserta_didik_id?: string, ptk_id?: string, page?: number, limit?: number): Promise<{
         data: ({
             peserta_didik: {
-                nama: string;
                 peserta_didik_id: string;
+                nama: string;
                 nisn: string;
-                foto: string;
                 nipd: string;
+                foto: string;
                 rombongan_belajar: {
                     nama: string;
                     jenis_rombel: import("@prisma/client-runtime-utils").Decimal;
@@ -523,20 +523,20 @@ export declare class PerpustakaanController {
             };
             ptk: {
                 nama: string;
+                foto: string;
                 ptk_id: string;
                 nip: string;
-                foto: string;
                 jenis_ptk: {
                     jenis_ptk: string;
                 };
                 nuptk: string;
             };
         } & {
+            peserta_didik_id: string | null;
             sekolah_id: string;
+            keterangan: string | null;
             created_at: Date;
             updated_at: Date;
-            keterangan: string | null;
-            peserta_didik_id: string | null;
             ptk_id: string | null;
             tanggal: Date;
             jam_keluar: string | null;
@@ -556,8 +556,8 @@ export declare class PerpustakaanController {
         status: string;
         data: {
             peserta_didik: {
-                nama: string;
                 peserta_didik_id: string;
+                nama: string;
                 nisn: string;
             };
             ptk: {
@@ -566,11 +566,11 @@ export declare class PerpustakaanController {
                 nip: string;
             };
         } & {
+            peserta_didik_id: string | null;
             sekolah_id: string;
+            keterangan: string | null;
             created_at: Date;
             updated_at: Date;
-            keterangan: string | null;
-            peserta_didik_id: string | null;
             ptk_id: string | null;
             tanggal: Date;
             jam_keluar: string | null;
@@ -598,18 +598,18 @@ export declare class PerpustakaanController {
             };
             ptk: {
                 nama: string;
-                nip: string;
                 foto: string;
+                nip: string;
                 jenis_ptk: {
                     jenis_ptk: string;
                 };
             };
         } & {
+            peserta_didik_id: string | null;
             sekolah_id: string;
+            keterangan: string | null;
             created_at: Date;
             updated_at: Date;
-            keterangan: string | null;
-            peserta_didik_id: string | null;
             ptk_id: string | null;
             tanggal: Date;
             jam_keluar: string | null;
@@ -636,18 +636,18 @@ export declare class PerpustakaanController {
             };
             ptk: {
                 nama: string;
-                nip: string;
                 foto: string;
+                nip: string;
                 jenis_ptk: {
                     jenis_ptk: string;
                 };
             };
         } & {
+            peserta_didik_id: string | null;
             sekolah_id: string;
+            keterangan: string | null;
             created_at: Date;
             updated_at: Date;
-            keterangan: string | null;
-            peserta_didik_id: string | null;
             ptk_id: string | null;
             tanggal: Date;
             jam_keluar: string | null;
@@ -671,11 +671,11 @@ export declare class PerpustakaanController {
                 nip: string;
             };
         } & {
+            peserta_didik_id: string | null;
             sekolah_id: string;
+            keterangan: string | null;
             created_at: Date;
             updated_at: Date;
-            keterangan: string | null;
-            peserta_didik_id: string | null;
             ptk_id: string | null;
             tanggal: Date;
             jam_keluar: string | null;
@@ -702,11 +702,11 @@ export declare class PerpustakaanController {
                 nip: string;
             };
         } & {
+            peserta_didik_id: string | null;
             sekolah_id: string;
+            keterangan: string | null;
             created_at: Date;
             updated_at: Date;
-            keterangan: string | null;
-            peserta_didik_id: string | null;
             ptk_id: string | null;
             tanggal: Date;
             jam_keluar: string | null;
@@ -719,11 +719,11 @@ export declare class PerpustakaanController {
         status: string;
         message: string;
         data: {
+            peserta_didik_id: string | null;
             sekolah_id: string;
+            keterangan: string | null;
             created_at: Date;
             updated_at: Date;
-            keterangan: string | null;
-            peserta_didik_id: string | null;
             ptk_id: string | null;
             tanggal: Date;
             jam_keluar: string | null;
@@ -735,11 +735,11 @@ export declare class PerpustakaanController {
     getLiterasiList(req: Request, peserta_didik_id?: string, tanggal?: string, search?: string, page?: number, limit?: number): Promise<{
         data: ({
             peserta_didik: {
-                nama: string;
                 peserta_didik_id: string;
+                nama: string;
                 nisn: string;
-                foto: string;
                 nipd: string;
+                foto: string;
                 rombongan_belajar: {
                     nama: string;
                     jenis_rombel: import("@prisma/client-runtime-utils").Decimal;
@@ -754,10 +754,10 @@ export declare class PerpustakaanController {
                 }[];
             };
         } & {
+            peserta_didik_id: string;
             sekolah_id: string;
             created_at: Date;
             updated_at: Date;
-            peserta_didik_id: string;
             tanggal: Date;
             literasi_id: string;
             nama_buku: string;
@@ -777,15 +777,15 @@ export declare class PerpustakaanController {
         status: string;
         data: {
             peserta_didik: {
-                nama: string;
                 peserta_didik_id: string;
+                nama: string;
                 nisn: string;
             };
         } & {
+            peserta_didik_id: string;
             sekolah_id: string;
             created_at: Date;
             updated_at: Date;
-            peserta_didik_id: string;
             tanggal: Date;
             literasi_id: string;
             nama_buku: string;
@@ -799,15 +799,15 @@ export declare class PerpustakaanController {
         message: string;
         data: {
             peserta_didik: {
-                nama: string;
                 peserta_didik_id: string;
+                nama: string;
                 nisn: string;
             };
         } & {
+            peserta_didik_id: string;
             sekolah_id: string;
             created_at: Date;
             updated_at: Date;
-            peserta_didik_id: string;
             tanggal: Date;
             literasi_id: string;
             nama_buku: string;
@@ -821,15 +821,15 @@ export declare class PerpustakaanController {
         message: string;
         data: {
             peserta_didik: {
-                nama: string;
                 peserta_didik_id: string;
+                nama: string;
                 nisn: string;
             };
         } & {
+            peserta_didik_id: string;
             sekolah_id: string;
             created_at: Date;
             updated_at: Date;
-            peserta_didik_id: string;
             tanggal: Date;
             literasi_id: string;
             nama_buku: string;
@@ -842,10 +842,10 @@ export declare class PerpustakaanController {
         status: string;
         message: string;
         data: {
+            peserta_didik_id: string;
             sekolah_id: string;
             created_at: Date;
             updated_at: Date;
-            peserta_didik_id: string;
             tanggal: Date;
             literasi_id: string;
             nama_buku: string;

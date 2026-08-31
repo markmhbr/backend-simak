@@ -71,9 +71,9 @@ export declare class AuthController {
         ptk_id: string;
         peserta_didik_id: string;
         foto: string;
-        sekolah_id: string;
         nama: string;
         email: string;
+        sekolah_id: string;
         alamat: string;
         pengguna_id: string;
         username: string;
@@ -94,11 +94,11 @@ export declare class AuthController {
         bentuk_pendidikan_id: number;
     }[]>;
     getSuperadminSekolah(bentukPendidikanId?: string): Promise<{
-        sekolah_id: string;
         nama: string;
+        alamat_jalan: string;
+        sekolah_id: string;
         npsn: string;
         bentuk_pendidikan_id: number;
-        alamat_jalan: string;
     }[]>;
     switchSekolah(request: Request, body: {
         sekolah_id: string;

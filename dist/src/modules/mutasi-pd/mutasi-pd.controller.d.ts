@@ -26,14 +26,14 @@ export declare class MutasiPdController {
                 nama: string;
             };
         } & {
+            peserta_didik_id: string;
             sekolah_id: string;
+            jenis_keluar_id: string;
+            status: number;
             created_at: Date;
             updated_at: Date;
-            peserta_didik_id: string;
             ptk_id: string | null;
-            status: number;
             mutasi_id: string;
-            jenis_keluar_id: string;
             alasan: string | null;
             bukti: string | null;
             alasan_tolak: string | null;
@@ -47,14 +47,14 @@ export declare class MutasiPdController {
         status: string;
         message: string;
         data: {
+            peserta_didik_id: string;
             sekolah_id: string;
+            jenis_keluar_id: string;
+            status: number;
             created_at: Date;
             updated_at: Date;
-            peserta_didik_id: string;
             ptk_id: string | null;
-            status: number;
             mutasi_id: string;
-            jenis_keluar_id: string;
             alasan: string | null;
             bukti: string | null;
             alasan_tolak: string | null;
@@ -64,14 +64,14 @@ export declare class MutasiPdController {
         status: string;
         message: string;
         data: {
+            peserta_didik_id: string;
             sekolah_id: string;
+            jenis_keluar_id: string;
+            status: number;
             created_at: Date;
             updated_at: Date;
-            peserta_didik_id: string;
             ptk_id: string | null;
-            status: number;
             mutasi_id: string;
-            jenis_keluar_id: string;
             alasan: string | null;
             bukti: string | null;
             alasan_tolak: string | null;
@@ -83,14 +83,14 @@ export declare class MutasiPdController {
         status: string;
         message: string;
         data: {
+            peserta_didik_id: string;
             sekolah_id: string;
+            jenis_keluar_id: string;
+            status: number;
             created_at: Date;
             updated_at: Date;
-            peserta_didik_id: string;
             ptk_id: string | null;
-            status: number;
             mutasi_id: string;
-            jenis_keluar_id: string;
             alasan: string | null;
             bukti: string | null;
             alasan_tolak: string | null;

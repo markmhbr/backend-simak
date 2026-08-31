@@ -1552,14 +1552,17 @@ let MandalaService = MandalaService_1 = class MandalaService {
             where: { rombongan_belajar_id: rombelId },
             select: { peserta_didik_id: true },
         });
+        const appUrl = (process.env.APP_URL || 'http://localhost:3000').replace(/\/+$/, '');
         let pdIds = anggota.map((a) => a.peserta_didik_id);
+        let rawList = [];
         if (pdIds.length > 0) {
-            const data = await this.prisma.pesertaDidik.findMany({
+            rawList = await this.prisma.pesertaDidik.findMany({
                 where: {
                     peserta_didik_id: { in: pdIds },
                 },
                 select: {
                     peserta_didik_id: true,
+                    sekolah_id: true,
                     nama: true,
                     nisn: true,
                     nipd: true,
@@ -1569,25 +1572,33 @@ let MandalaService = MandalaService_1 = class MandalaService {
                 },
                 orderBy: { nama: 'asc' },
             });
-            return { status: 'success', data };
         }
-        const students = await this.prisma.pesertaDidik.findMany({
-            where: {
-                rombongan_belajar_id: rombelId,
-                status: 'Aktif'
-            },
-            select: {
-                peserta_didik_id: true,
-                nama: true,
-                nisn: true,
-                nipd: true,
-                jenis_kelamin: true,
-                foto: true,
-                qr_token: true,
-            },
-            orderBy: { nama: 'asc' },
-        });
-        return { status: 'success', data: students };
+        else {
+            rawList = await this.prisma.pesertaDidik.findMany({
+                where: {
+                    rombongan_belajar_id: rombelId,
+                    status: 'Aktif',
+                },
+                select: {
+                    peserta_didik_id: true,
+                    sekolah_id: true,
+                    nama: true,
+                    nisn: true,
+                    nipd: true,
+                    jenis_kelamin: true,
+                    foto: true,
+                    qr_token: true,
+                },
+                orderBy: { nama: 'asc' },
+            });
+        }
+        const data = rawList.map((item) => ({
+            ...item,
+            qr_url: item.qr_token
+                ? (item.qr_token.startsWith('http') ? item.qr_token : `${appUrl}/p/${item.qr_token}`)
+                : (item.sekolah_id && item.peserta_didik_id ? `${appUrl}/p/${item.sekolah_id}/${item.peserta_didik_id}` : null),
+        }));
+        return { status: 'success', data };
     }
     async getGtkRekapForMandala(sekolahId) {
         if (!sekolahId) {

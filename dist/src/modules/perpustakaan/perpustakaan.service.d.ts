@@ -24,8 +24,8 @@ export declare class PerpustakaanService {
             buku: number;
         };
     } & {
-        sekolah_id: string;
         nama: string;
+        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
         kategori_buku_id: string;
@@ -36,32 +36,32 @@ export declare class PerpustakaanService {
             buku: number;
         };
     } & {
-        sekolah_id: string;
         nama: string;
+        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
         kategori_buku_id: string;
         deskripsi: string | null;
     }>;
     createKategori(sekolahId: string, dto: CreateKategoriBukuDto): Promise<{
-        sekolah_id: string;
         nama: string;
+        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
         kategori_buku_id: string;
         deskripsi: string | null;
     }>;
     updateKategori(sekolahId: string, id: string, dto: UpdateKategoriBukuDto): Promise<{
-        sekolah_id: string;
         nama: string;
+        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
         kategori_buku_id: string;
         deskripsi: string | null;
     }>;
     deleteKategori(sekolahId: string, id: string): Promise<{
-        sekolah_id: string;
         nama: string;
+        sekolah_id: string;
         created_at: Date;
         updated_at: Date;
         kategori_buku_id: string;
@@ -81,9 +81,9 @@ export declare class PerpustakaanService {
             };
         } & {
             sekolah_id: string;
+            status: number;
             created_at: Date;
             updated_at: Date;
-            status: number;
             kategori_buku_id: string;
             deskripsi: string | null;
             buku_id: string;
@@ -108,8 +108,8 @@ export declare class PerpustakaanService {
     }>;
     getBukuById(sekolahId: string, id: string): Promise<{
         kategori: {
-            sekolah_id: string;
             nama: string;
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
             kategori_buku_id: string;
@@ -117,9 +117,9 @@ export declare class PerpustakaanService {
         };
     } & {
         sekolah_id: string;
+        status: number;
         created_at: Date;
         updated_at: Date;
-        status: number;
         kategori_buku_id: string;
         deskripsi: string | null;
         buku_id: string;
@@ -137,8 +137,8 @@ export declare class PerpustakaanService {
     }>;
     createBuku(sekolahId: string, dto: CreateBukuDto): Promise<{
         kategori: {
-            sekolah_id: string;
             nama: string;
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
             kategori_buku_id: string;
@@ -146,9 +146,9 @@ export declare class PerpustakaanService {
         };
     } & {
         sekolah_id: string;
+        status: number;
         created_at: Date;
         updated_at: Date;
-        status: number;
         kategori_buku_id: string;
         deskripsi: string | null;
         buku_id: string;
@@ -166,8 +166,8 @@ export declare class PerpustakaanService {
     }>;
     updateBuku(sekolahId: string, id: string, dto: UpdateBukuDto): Promise<{
         kategori: {
-            sekolah_id: string;
             nama: string;
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
             kategori_buku_id: string;
@@ -175,9 +175,9 @@ export declare class PerpustakaanService {
         };
     } & {
         sekolah_id: string;
+        status: number;
         created_at: Date;
         updated_at: Date;
-        status: number;
         kategori_buku_id: string;
         deskripsi: string | null;
         buku_id: string;
@@ -195,9 +195,9 @@ export declare class PerpustakaanService {
     }>;
     deleteBuku(sekolahId: string, id: string): Promise<{
         sekolah_id: string;
+        status: number;
         created_at: Date;
         updated_at: Date;
-        status: number;
         kategori_buku_id: string;
         deskripsi: string | null;
         buku_id: string;
@@ -225,11 +225,11 @@ export declare class PerpustakaanService {
     }): Promise<{
         data: ({
             peserta_didik: {
-                nama: string;
                 peserta_didik_id: string;
+                nama: string;
                 nisn: string;
-                foto: string;
                 nipd: string;
+                foto: string;
                 rombongan_belajar: {
                     nama: string;
                     jenis_rombel: import("@prisma/client-runtime-utils").Decimal;
@@ -245,9 +245,9 @@ export declare class PerpustakaanService {
             };
             ptk: {
                 nama: string;
+                foto: string;
                 ptk_id: string;
                 nip: string;
-                foto: string;
                 jenis_ptk: {
                     jenis_ptk: string;
                 };
@@ -261,9 +261,9 @@ export declare class PerpustakaanService {
                     sampul: string;
                 };
             } & {
+                keterangan: string | null;
                 created_at: Date;
                 updated_at: Date;
-                keterangan: string | null;
                 buku_id: string;
                 jumlah: number;
                 peminjaman_id: string;
@@ -272,13 +272,13 @@ export declare class PerpustakaanService {
                 kondisi_kembali: number | null;
             })[];
         } & {
+            peserta_didik_id: string | null;
             sekolah_id: string;
+            keterangan: string | null;
+            status: number;
             created_at: Date;
             updated_at: Date;
-            keterangan: string | null;
-            peserta_didik_id: string | null;
             ptk_id: string | null;
-            status: number;
             peminjaman_id: string;
             nomor_peminjaman: string;
             tanggal_pinjam: Date;
@@ -295,8 +295,8 @@ export declare class PerpustakaanService {
     }>;
     getPeminjamanById(sekolahId: string, id: string): Promise<{
         peserta_didik: {
-            nama: string;
             peserta_didik_id: string;
+            nama: string;
             nisn: string;
             nipd: string;
             rombongan_belajar: {
@@ -321,9 +321,9 @@ export declare class PerpustakaanService {
                 sampul: string;
             };
         } & {
+            keterangan: string | null;
             created_at: Date;
             updated_at: Date;
-            keterangan: string | null;
             buku_id: string;
             jumlah: number;
             peminjaman_id: string;
@@ -332,13 +332,13 @@ export declare class PerpustakaanService {
             kondisi_kembali: number | null;
         })[];
     } & {
+        peserta_didik_id: string | null;
         sekolah_id: string;
+        keterangan: string | null;
+        status: number;
         created_at: Date;
         updated_at: Date;
-        keterangan: string | null;
-        peserta_didik_id: string | null;
         ptk_id: string | null;
-        status: number;
         peminjaman_id: string;
         nomor_peminjaman: string;
         tanggal_pinjam: Date;
@@ -361,9 +361,9 @@ export declare class PerpustakaanService {
                 judul: string;
             };
         } & {
+            keterangan: string | null;
             created_at: Date;
             updated_at: Date;
-            keterangan: string | null;
             buku_id: string;
             jumlah: number;
             peminjaman_id: string;
@@ -372,13 +372,13 @@ export declare class PerpustakaanService {
             kondisi_kembali: number | null;
         })[];
     } & {
+        peserta_didik_id: string | null;
         sekolah_id: string;
+        keterangan: string | null;
+        status: number;
         created_at: Date;
         updated_at: Date;
-        keterangan: string | null;
-        peserta_didik_id: string | null;
         ptk_id: string | null;
-        status: number;
         peminjaman_id: string;
         nomor_peminjaman: string;
         tanggal_pinjam: Date;
@@ -401,9 +401,9 @@ export declare class PerpustakaanService {
                 judul: string;
             };
         } & {
+            keterangan: string | null;
             created_at: Date;
             updated_at: Date;
-            keterangan: string | null;
             buku_id: string;
             jumlah: number;
             peminjaman_id: string;
@@ -412,13 +412,13 @@ export declare class PerpustakaanService {
             kondisi_kembali: number | null;
         })[];
     } & {
+        peserta_didik_id: string | null;
         sekolah_id: string;
+        keterangan: string | null;
+        status: number;
         created_at: Date;
         updated_at: Date;
-        keterangan: string | null;
-        peserta_didik_id: string | null;
         ptk_id: string | null;
-        status: number;
         peminjaman_id: string;
         nomor_peminjaman: string;
         tanggal_pinjam: Date;
@@ -427,13 +427,13 @@ export declare class PerpustakaanService {
         denda: import("@prisma/client-runtime-utils").Decimal;
     }>;
     batalkanPeminjaman(sekolahId: string, id: string): Promise<{
+        peserta_didik_id: string | null;
         sekolah_id: string;
+        keterangan: string | null;
+        status: number;
         created_at: Date;
         updated_at: Date;
-        keterangan: string | null;
-        peserta_didik_id: string | null;
         ptk_id: string | null;
-        status: number;
         peminjaman_id: string;
         nomor_peminjaman: string;
         tanggal_pinjam: Date;
@@ -442,13 +442,13 @@ export declare class PerpustakaanService {
         denda: import("@prisma/client-runtime-utils").Decimal;
     }>;
     deletePeminjaman(sekolahId: string, id: string): Promise<{
+        peserta_didik_id: string | null;
         sekolah_id: string;
+        keterangan: string | null;
+        status: number;
         created_at: Date;
         updated_at: Date;
-        keterangan: string | null;
-        peserta_didik_id: string | null;
         ptk_id: string | null;
-        status: number;
         peminjaman_id: string;
         nomor_peminjaman: string;
         tanggal_pinjam: Date;
@@ -466,11 +466,11 @@ export declare class PerpustakaanService {
     }): Promise<{
         data: ({
             peserta_didik: {
-                nama: string;
                 peserta_didik_id: string;
+                nama: string;
                 nisn: string;
-                foto: string;
                 nipd: string;
+                foto: string;
                 rombongan_belajar: {
                     nama: string;
                     jenis_rombel: import("@prisma/client-runtime-utils").Decimal;
@@ -486,20 +486,20 @@ export declare class PerpustakaanService {
             };
             ptk: {
                 nama: string;
+                foto: string;
                 ptk_id: string;
                 nip: string;
-                foto: string;
                 jenis_ptk: {
                     jenis_ptk: string;
                 };
                 nuptk: string;
             };
         } & {
+            peserta_didik_id: string | null;
             sekolah_id: string;
+            keterangan: string | null;
             created_at: Date;
             updated_at: Date;
-            keterangan: string | null;
-            peserta_didik_id: string | null;
             ptk_id: string | null;
             tanggal: Date;
             jam_keluar: string | null;
@@ -516,8 +516,8 @@ export declare class PerpustakaanService {
     }>;
     getKunjunganById(sekolahId: string, id: string): Promise<{
         peserta_didik: {
-            nama: string;
             peserta_didik_id: string;
+            nama: string;
             nisn: string;
         };
         ptk: {
@@ -526,11 +526,11 @@ export declare class PerpustakaanService {
             nip: string;
         };
     } & {
+        peserta_didik_id: string | null;
         sekolah_id: string;
+        keterangan: string | null;
         created_at: Date;
         updated_at: Date;
-        keterangan: string | null;
-        peserta_didik_id: string | null;
         ptk_id: string | null;
         tanggal: Date;
         jam_keluar: string | null;
@@ -554,18 +554,18 @@ export declare class PerpustakaanService {
         };
         ptk: {
             nama: string;
-            nip: string;
             foto: string;
+            nip: string;
             jenis_ptk: {
                 jenis_ptk: string;
             };
         };
     } & {
+        peserta_didik_id: string | null;
         sekolah_id: string;
+        keterangan: string | null;
         created_at: Date;
         updated_at: Date;
-        keterangan: string | null;
-        peserta_didik_id: string | null;
         ptk_id: string | null;
         tanggal: Date;
         jam_keluar: string | null;
@@ -591,18 +591,18 @@ export declare class PerpustakaanService {
             };
             ptk: {
                 nama: string;
-                nip: string;
                 foto: string;
+                nip: string;
                 jenis_ptk: {
                     jenis_ptk: string;
                 };
             };
         } & {
+            peserta_didik_id: string | null;
             sekolah_id: string;
+            keterangan: string | null;
             created_at: Date;
             updated_at: Date;
-            keterangan: string | null;
-            peserta_didik_id: string | null;
             ptk_id: string | null;
             tanggal: Date;
             jam_keluar: string | null;
@@ -622,11 +622,11 @@ export declare class PerpustakaanService {
             nip: string;
         };
     } & {
+        peserta_didik_id: string | null;
         sekolah_id: string;
+        keterangan: string | null;
         created_at: Date;
         updated_at: Date;
-        keterangan: string | null;
-        peserta_didik_id: string | null;
         ptk_id: string | null;
         tanggal: Date;
         jam_keluar: string | null;
@@ -649,11 +649,11 @@ export declare class PerpustakaanService {
             nip: string;
         };
     } & {
+        peserta_didik_id: string | null;
         sekolah_id: string;
+        keterangan: string | null;
         created_at: Date;
         updated_at: Date;
-        keterangan: string | null;
-        peserta_didik_id: string | null;
         ptk_id: string | null;
         tanggal: Date;
         jam_keluar: string | null;
@@ -662,11 +662,11 @@ export declare class PerpustakaanService {
         keperluan: string | null;
     }>;
     deleteKunjungan(sekolahId: string, id: string): Promise<{
+        peserta_didik_id: string | null;
         sekolah_id: string;
+        keterangan: string | null;
         created_at: Date;
         updated_at: Date;
-        keterangan: string | null;
-        peserta_didik_id: string | null;
         ptk_id: string | null;
         tanggal: Date;
         jam_keluar: string | null;
@@ -683,11 +683,11 @@ export declare class PerpustakaanService {
     }): Promise<{
         data: ({
             peserta_didik: {
-                nama: string;
                 peserta_didik_id: string;
+                nama: string;
                 nisn: string;
-                foto: string;
                 nipd: string;
+                foto: string;
                 rombongan_belajar: {
                     nama: string;
                     jenis_rombel: import("@prisma/client-runtime-utils").Decimal;
@@ -702,10 +702,10 @@ export declare class PerpustakaanService {
                 }[];
             };
         } & {
+            peserta_didik_id: string;
             sekolah_id: string;
             created_at: Date;
             updated_at: Date;
-            peserta_didik_id: string;
             tanggal: Date;
             literasi_id: string;
             nama_buku: string;
@@ -722,15 +722,15 @@ export declare class PerpustakaanService {
     }>;
     getLiterasiById(sekolahId: string, id: string): Promise<{
         peserta_didik: {
-            nama: string;
             peserta_didik_id: string;
+            nama: string;
             nisn: string;
         };
     } & {
+        peserta_didik_id: string;
         sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        peserta_didik_id: string;
         tanggal: Date;
         literasi_id: string;
         nama_buku: string;
@@ -740,15 +740,15 @@ export declare class PerpustakaanService {
     }>;
     createLiterasi(sekolahId: string, dto: CreateLiterasiDto): Promise<{
         peserta_didik: {
-            nama: string;
             peserta_didik_id: string;
+            nama: string;
             nisn: string;
         };
     } & {
+        peserta_didik_id: string;
         sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        peserta_didik_id: string;
         tanggal: Date;
         literasi_id: string;
         nama_buku: string;
@@ -758,15 +758,15 @@ export declare class PerpustakaanService {
     }>;
     updateLiterasi(sekolahId: string, id: string, dto: UpdateLiterasiDto): Promise<{
         peserta_didik: {
-            nama: string;
             peserta_didik_id: string;
+            nama: string;
             nisn: string;
         };
     } & {
+        peserta_didik_id: string;
         sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        peserta_didik_id: string;
         tanggal: Date;
         literasi_id: string;
         nama_buku: string;
@@ -775,10 +775,10 @@ export declare class PerpustakaanService {
         kesimpulan: string | null;
     }>;
     deleteLiterasi(sekolahId: string, id: string): Promise<{
+        peserta_didik_id: string;
         sekolah_id: string;
         created_at: Date;
         updated_at: Date;
-        peserta_didik_id: string;
         tanggal: Date;
         literasi_id: string;
         nama_buku: string;

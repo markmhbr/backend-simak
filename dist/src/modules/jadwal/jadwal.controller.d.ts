@@ -32,8 +32,8 @@ export declare class JadwalController {
                 pengaturan_hari_id: string;
             }[];
         } & {
-            sekolah_id: string;
             nama: string;
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
@@ -50,8 +50,8 @@ export declare class JadwalController {
         status: string;
         klien: any;
         data: {
-            sekolah_id: string;
             nama: string;
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
@@ -69,8 +69,8 @@ export declare class JadwalController {
         status: string;
         klien: any;
         data: {
-            sekolah_id: string;
             nama: string;
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
@@ -82,8 +82,8 @@ export declare class JadwalController {
         status: string;
         klien: any;
         data: {
-            sekolah_id: string;
             nama: string;
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
@@ -97,8 +97,8 @@ export declare class JadwalController {
         status: string;
         klien: any;
         data: {
-            sekolah_id: string;
             nama: string;
+            sekolah_id: string;
             created_at: Date;
             updated_at: Date;
             aktif: boolean;
@@ -186,15 +186,20 @@ export declare class JadwalController {
         status: string;
         klien: any;
         data: (({
+            rombongan_belajar: {
+                nama: string;
+                rombongan_belajar_id: string;
+                tingkat_pendidikan_id: import("@prisma/client-runtime-utils").Decimal;
+            };
             pembelajaran: {
+                soft_delete: import("@prisma/client-runtime-utils").Decimal | null;
                 sekolah_id: string | null;
+                rombongan_belajar_id: string;
                 create_date: Date;
                 last_update: Date;
-                soft_delete: import("@prisma/client-runtime-utils").Decimal | null;
                 last_sync: Date | null;
                 updater_id: string | null;
                 ptk_id: string | null;
-                rombongan_belajar_id: string;
                 pembelajaran_id: string;
                 status_di_kurikulum: import("@prisma/client-runtime-utils").Decimal | null;
                 semester_id: string | null;
@@ -206,18 +211,13 @@ export declare class JadwalController {
                 nama_mata_pelajaran: string | null;
                 induk_pembelajaran_id: string | null;
             };
-            rombongan_belajar: {
-                nama: string;
-                rombongan_belajar_id: string;
-                tingkat_pendidikan_id: import("@prisma/client-runtime-utils").Decimal;
-            };
         } & {
             sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            rombongan_belajar_id: string;
             aktif: boolean;
             jadwal_pelajaran_id: string;
-            rombongan_belajar_id: string;
             pembelajaran_id: string;
             hari: number;
             urutan: number;
@@ -225,14 +225,14 @@ export declare class JadwalController {
         }) | {
             pembelajaran: {
                 gtk: any;
+                soft_delete: import("@prisma/client-runtime-utils").Decimal | null;
                 sekolah_id: string | null;
+                rombongan_belajar_id: string;
                 create_date: Date;
                 last_update: Date;
-                soft_delete: import("@prisma/client-runtime-utils").Decimal | null;
                 last_sync: Date | null;
                 updater_id: string | null;
                 ptk_id: string | null;
-                rombongan_belajar_id: string;
                 pembelajaran_id: string;
                 status_di_kurikulum: import("@prisma/client-runtime-utils").Decimal | null;
                 semester_id: string | null;
@@ -252,9 +252,9 @@ export declare class JadwalController {
             sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            rombongan_belajar_id: string;
             aktif: boolean;
             jadwal_pelajaran_id: string;
-            rombongan_belajar_id: string;
             pembelajaran_id: string;
             hari: number;
             urutan: number;
@@ -274,9 +274,9 @@ export declare class JadwalController {
             sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            rombongan_belajar_id: string;
             aktif: boolean;
             jadwal_pelajaran_id: string;
-            rombongan_belajar_id: string;
             pembelajaran_id: string;
             hari: number;
             urutan: number;
@@ -290,9 +290,9 @@ export declare class JadwalController {
             sekolah_id: string;
             created_at: Date;
             updated_at: Date;
+            rombongan_belajar_id: string;
             aktif: boolean;
             jadwal_pelajaran_id: string;
-            rombongan_belajar_id: string;
             pembelajaran_id: string;
             hari: number;
             urutan: number;

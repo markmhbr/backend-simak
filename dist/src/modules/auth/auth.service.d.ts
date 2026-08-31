@@ -82,9 +82,9 @@ export declare class AuthService {
         ptk_id: string;
         peserta_didik_id: string;
         foto: string;
-        sekolah_id: string;
         nama: string;
         email: string;
+        sekolah_id: string;
         alamat: string;
         pengguna_id: string;
         username: string;
@@ -139,11 +139,11 @@ export declare class AuthService {
         bentuk_pendidikan_id: number;
     }[]>;
     getSekolahByJenjang(bentukPendidikanId?: number): Promise<{
-        sekolah_id: string;
         nama: string;
+        alamat_jalan: string;
+        sekolah_id: string;
         npsn: string;
         bentuk_pendidikan_id: number;
-        alamat_jalan: string;
     }[]>;
     switchSekolah(userId: string, targetSekolahId: string): Promise<{
         accessToken: string;
