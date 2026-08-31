@@ -1,47 +1,53 @@
-import { Pool } from 'pg';
-import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
 
-// Saya akan pakai cara manual untuk ambil DB URL dari .env
-const fs = require('fs');
-const path = require('path');
-const envPath = path.join(__dirname, '../.env');
-const envContent = fs.readFileSync(envPath, 'utf8');
-const dbUrl = envContent.match(/^DATABASE_URL="?([^"\n\r]*)"?/m)?.[1];
-
-if (!dbUrl) {
-  console.error('DATABASE_URL tidak ditemukan di .env');
-  process.exit(1);
-}
-
-const pool = new Pool({ connectionString: dbUrl });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient();
 
 async function main() {
-  console.log('--- Memulai migrasi QR Token ke format sekolah_id/uuid ---');
+  console.log('🔄 Memulai migrasi format qr_token ke: ${sekolah_id}/${id}...');
 
-  // Update Peserta Didik
-  const pdCount = await prisma.$executeRaw`
-    UPDATE dapodik.peserta_didik 
-    SET qr_token = sekolah_id::text || '/' || peserta_didik_id::text
-    WHERE sekolah_id IS NOT NULL AND peserta_didik_id IS NOT NULL;
-  `;
+  // 1. Migrasi Peserta Didik
+  const students = await prisma.pesertaDidik.findMany({
+    select: { peserta_didik_id: true, sekolah_id: true, qr_token: true },
+  });
 
-  // Update GTK
-  const gtkCount = await prisma.$executeRaw`
-    UPDATE dapodik.gtks 
-    SET qr_token = sekolah_id::text || '/' || ptk_id::text
-    WHERE sekolah_id IS NOT NULL AND ptk_id IS NOT NULL;
-  `;
+  let pdUpdated = 0;
+  for (const s of students) {
+    if (!s.sekolah_id) continue;
+    const expectedToken = `${s.sekolah_id}/${s.peserta_didik_id}`;
+    if (s.qr_token !== expectedToken) {
+      await prisma.pesertaDidik.update({
+        where: { peserta_didik_id: s.peserta_didik_id },
+        data: { qr_token: expectedToken },
+      });
+      pdUpdated++;
+    }
+  }
+  console.log(`✅ Peserta Didik dimigrasi: ${pdUpdated} dari total ${students.length}`);
 
-  console.log(`Berhasil update ${pdCount} Siswa dan ${gtkCount} GTK ke format [sekolah_id/uuid].`);
-  console.log('--- Migrasi selesai ---');
+  // 2. Migrasi GTK
+  const gtks = await prisma.gtk.findMany({
+    select: { ptk_id: true, sekolah_id: true, qr_token: true },
+  });
+
+  let gtkUpdated = 0;
+  for (const g of gtks) {
+    if (!g.sekolah_id) continue;
+    const expectedToken = `${g.sekolah_id}/${g.ptk_id}`;
+    if (g.qr_token !== expectedToken) {
+      await prisma.gtk.update({
+        where: { ptk_id: g.ptk_id },
+        data: { qr_token: expectedToken },
+      });
+      gtkUpdated++;
+    }
+  }
+  console.log(`✅ GTK dimigrasi: ${gtkUpdated} dari total ${gtks.length}`);
+  console.log('🎉 Migrasi qr_token selesai dengan sukses!');
 }
 
 main()
   .catch((e) => {
-    console.error(e);
+    console.error('❌ Error migrasi:', e);
     process.exit(1);
   })
   .finally(async () => {
