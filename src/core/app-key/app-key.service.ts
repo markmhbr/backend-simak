@@ -168,9 +168,16 @@ export class AppKeyService {
   async updateSchoolDomain(sekolahId: string, domain: string) {
     let cleanDomain = domain.replace(/\/+$/, ''); // Hapus trailing slash
     
-    // Pastikan ada protokol http:// atau https://
-    if (!cleanDomain.startsWith('http://') && !cleanDomain.startsWith('https://')) {
-      cleanDomain = `https://${cleanDomain}`;
+    // Pastikan ada protokol http:// atau https:// (localhost menggunakan http://)
+    if (cleanDomain.includes('localhost') || cleanDomain.includes('127.0.0.1')) {
+      cleanDomain = cleanDomain.replace(/^https:\/\//, 'http://');
+      if (!cleanDomain.startsWith('http://')) {
+        cleanDomain = `http://${cleanDomain}`;
+      }
+    } else {
+      if (!cleanDomain.startsWith('http://') && !cleanDomain.startsWith('https://')) {
+        cleanDomain = `https://${cleanDomain}`;
+      }
     }
 
     return await this.prisma.$transaction(async (tx) => {
@@ -180,17 +187,17 @@ export class AppKeyService {
         data: { domain: cleanDomain },
       });
 
-      // 2. Update massal qr_token di PesertaDidik (Menggunakan Raw SQL untuk performa dan concat UUID)
+      // 2. Update massal qr_token di PesertaDidik (format: sekolah_id/uuid)
       await tx.$executeRaw`
         UPDATE dapodik.peserta_didik 
-        SET qr_token = ${cleanDomain} || '/' || peserta_didik_id::text
+        SET qr_token = ${sekolahId} || '/' || peserta_didik_id::text
         WHERE sekolah_id = ${sekolahId}::uuid
       `;
 
-      // 3. Update massal qr_token di Gtk
+      // 3. Update massal qr_token di Gtk (format: sekolah_id/uuid)
       await tx.$executeRaw`
         UPDATE dapodik.gtks 
-        SET qr_token = ${cleanDomain} || '/' || ptk_id::text
+        SET qr_token = ${sekolahId} || '/' || ptk_id::text
         WHERE sekolah_id = ${sekolahId}::uuid
       `;
 

@@ -34,8 +34,10 @@ async function bootstrap() {
     }),
   );
   
-  // Best practice: Add API prefix
-  app.setGlobalPrefix('api');
+  // Best practice: Add API prefix with exclusion for universal redirect routes
+  app.setGlobalPrefix('api', {
+    exclude: ['p/(.*)', 'p/:sekolahId/:id', 'p/:id'],
+  });
   
   app.enableCors({
     origin: true, // Sesuaikan dengan URL frontend di produksi

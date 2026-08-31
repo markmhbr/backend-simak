@@ -66,7 +66,9 @@ async function bootstrap() {
         },
         crossOriginResourcePolicy: { policy: 'cross-origin' },
     }));
-    app.setGlobalPrefix('api');
+    app.setGlobalPrefix('api', {
+        exclude: ['p/(.*)', 'p/:sekolahId/:id', 'p/:id'],
+    });
     app.enableCors({
         origin: true,
         credentials: true,

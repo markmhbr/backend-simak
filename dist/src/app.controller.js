@@ -16,13 +16,75 @@ exports.AppController = void 0;
 const common_1 = require("@nestjs/common");
 const app_service_1 = require("./app.service");
 const api_key_guard_1 = require("./core/app-key/api-key.guard");
+const prisma_service_1 = require("./core/prisma/prisma.service");
 let AppController = class AppController {
     appService;
-    constructor(appService) {
+    prisma;
+    constructor(appService, prisma) {
         this.appService = appService;
+        this.prisma = prisma;
     }
     getHello() {
         return this.appService.getHello();
+    }
+    async redirectProfile(sekolahId, id, res) {
+        try {
+            const appKey = await this.prisma.appKey.findUnique({
+                where: { sekolah_id: sekolahId },
+            });
+            if (appKey?.domain) {
+                let cleanDomain = appKey.domain.replace(/\/+$/, '');
+                if (cleanDomain.includes('localhost') || cleanDomain.includes('127.0.0.1')) {
+                    cleanDomain = cleanDomain.replace(/^https:\/\//, 'http://');
+                    if (!cleanDomain.startsWith('http://')) {
+                        cleanDomain = `http://${cleanDomain}`;
+                    }
+                }
+                else {
+                    if (!cleanDomain.startsWith('http://') && !cleanDomain.startsWith('https://')) {
+                        cleanDomain = `https://${cleanDomain}`;
+                    }
+                }
+                return res.redirect(302, `${cleanDomain}/public-profile/${id}`);
+            }
+        }
+        catch (e) { }
+        let fallbackUrl = (process.env.APP_URL || '').replace(/\/+$/, '');
+        if (fallbackUrl.includes('localhost') || fallbackUrl.includes('127.0.0.1')) {
+            fallbackUrl = fallbackUrl.replace(/^https:\/\//, 'http://');
+            if (!fallbackUrl.startsWith('http://')) {
+                fallbackUrl = `http://${fallbackUrl}`;
+            }
+        }
+        else if (!fallbackUrl.startsWith('http://') && !fallbackUrl.startsWith('https://')) {
+            fallbackUrl = `https://${fallbackUrl}`;
+        }
+        return res.redirect(302, `${fallbackUrl}/public-profile/${id}`);
+    }
+    async redirectProfileById(id, res) {
+        if (id.includes('/')) {
+            const [sekolahId, userId] = id.split('/');
+            return this.redirectProfile(sekolahId, userId, res);
+        }
+        try {
+            const student = await this.prisma.pesertaDidik.findUnique({
+                where: { peserta_didik_id: id },
+                select: { sekolah_id: true },
+            });
+            const gtk = !student
+                ? await this.prisma.gtk.findUnique({
+                    where: { ptk_id: id },
+                    select: { sekolah_id: true },
+                })
+                : null;
+            const sekolahId = student?.sekolah_id || gtk?.sekolah_id;
+            if (sekolahId) {
+                return this.redirectProfile(sekolahId, id, res);
+            }
+        }
+        catch (e) { }
+        const fallbackUrl = (process.env.APP_URL || '').replace(/\/+$/, '');
+        return res.redirect(302, `${fallbackUrl}/public-profile/${id}`);
     }
     getProtectedData(req) {
         const appKey = req['appKey'];
@@ -45,6 +107,23 @@ __decorate([
     __metadata("design:returntype", String)
 ], AppController.prototype, "getHello", null);
 __decorate([
+    (0, common_1.Get)('p/:sekolahId/:id'),
+    __param(0, (0, common_1.Param)('sekolahId')),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, Object]),
+    __metadata("design:returntype", Promise)
+], AppController.prototype, "redirectProfile", null);
+__decorate([
+    (0, common_1.Get)('p/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], AppController.prototype, "redirectProfileById", null);
+__decorate([
     (0, common_1.Get)('test-protected'),
     (0, common_1.UseGuards)(api_key_guard_1.ApiKeyGuard),
     __param(0, (0, common_1.Req)()),
@@ -54,6 +133,7 @@ __decorate([
 ], AppController.prototype, "getProtectedData", null);
 exports.AppController = AppController = __decorate([
     (0, common_1.Controller)(),
-    __metadata("design:paramtypes", [app_service_1.AppService])
+    __metadata("design:paramtypes", [app_service_1.AppService,
+        prisma_service_1.PrismaService])
 ], AppController);
 //# sourceMappingURL=app.controller.js.map

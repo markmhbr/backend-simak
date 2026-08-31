@@ -716,11 +716,21 @@ let PresensiService = class PresensiService {
     async findUserByQr(sekolahId, token) {
         const wibDate = new Date(new Date().getTime() + 7 * 60 * 60 * 1000);
         const dateOnly = new Date(wibDate.toISOString().split('T')[0]);
+        let cleanToken = token ? token.trim() : '';
+        if (cleanToken.includes('/p/')) {
+            cleanToken = cleanToken.split('/p/')[1];
+        }
+        else if (cleanToken.includes('/public-profile/')) {
+            cleanToken = cleanToken.split('/public-profile/')[1];
+        }
+        const tokenUuid = cleanToken.includes('/') ? cleanToken.split('/').pop() : cleanToken;
         const pd = await this.prisma.pesertaDidik.findFirst({
             where: {
                 sekolah_id: sekolahId,
                 OR: [
                     { qr_token: token },
+                    { qr_token: cleanToken },
+                    ...(tokenUuid ? [{ qr_token: { endsWith: tokenUuid } }, { peserta_didik_id: tokenUuid }] : []),
                     { nisn: token },
                     { nik: token },
                 ],
@@ -775,6 +785,8 @@ let PresensiService = class PresensiService {
                 sekolah_id: sekolahId,
                 OR: [
                     { qr_token: token },
+                    { qr_token: cleanToken },
+                    ...(tokenUuid ? [{ qr_token: { endsWith: tokenUuid } }, { ptk_id: tokenUuid }] : []),
                     { nuptk: token },
                     { nik: token },
                     { nip: token },
@@ -825,11 +837,21 @@ let PresensiService = class PresensiService {
         }
         const wibDate = new Date(new Date().getTime() + 7 * 60 * 60 * 1000);
         const dateOnly = new Date(wibDate.toISOString().split('T')[0]);
+        let cleanToken = token ? token.trim() : '';
+        if (cleanToken.includes('/p/')) {
+            cleanToken = cleanToken.split('/p/')[1];
+        }
+        else if (cleanToken.includes('/public-profile/')) {
+            cleanToken = cleanToken.split('/public-profile/')[1];
+        }
+        const tokenUuid = cleanToken.includes('/') ? cleanToken.split('/').pop() : cleanToken;
         const pd = await this.prisma.pesertaDidik.findFirst({
             where: {
                 sekolah_id: sekolahId,
                 OR: [
                     { qr_token: token },
+                    { qr_token: cleanToken },
+                    ...(tokenUuid ? [{ qr_token: { endsWith: tokenUuid } }, { peserta_didik_id: tokenUuid }] : []),
                     { nisn: token },
                     { nik: token },
                 ],
@@ -924,6 +946,8 @@ let PresensiService = class PresensiService {
                 sekolah_id: sekolahId,
                 OR: [
                     { qr_token: token },
+                    { qr_token: cleanToken },
+                    ...(tokenUuid ? [{ qr_token: { endsWith: tokenUuid } }, { ptk_id: tokenUuid }] : []),
                     { nuptk: token },
                     { nik: token },
                     { nip: token },

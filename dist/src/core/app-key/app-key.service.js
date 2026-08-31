@@ -168,8 +168,16 @@ let AppKeyService = class AppKeyService {
     }
     async updateSchoolDomain(sekolahId, domain) {
         let cleanDomain = domain.replace(/\/+$/, '');
-        if (!cleanDomain.startsWith('http://') && !cleanDomain.startsWith('https://')) {
-            cleanDomain = `https://${cleanDomain}`;
+        if (cleanDomain.includes('localhost') || cleanDomain.includes('127.0.0.1')) {
+            cleanDomain = cleanDomain.replace(/^https:\/\//, 'http://');
+            if (!cleanDomain.startsWith('http://')) {
+                cleanDomain = `http://${cleanDomain}`;
+            }
+        }
+        else {
+            if (!cleanDomain.startsWith('http://') && !cleanDomain.startsWith('https://')) {
+                cleanDomain = `https://${cleanDomain}`;
+            }
         }
         return await this.prisma.$transaction(async (tx) => {
             const updatedKey = await tx.appKey.update({
@@ -178,12 +186,12 @@ let AppKeyService = class AppKeyService {
             });
             await tx.$executeRaw `
         UPDATE dapodik.peserta_didik 
-        SET qr_token = ${cleanDomain} || '/' || peserta_didik_id::text
+        SET qr_token = ${sekolahId} || '/' || peserta_didik_id::text
         WHERE sekolah_id = ${sekolahId}::uuid
       `;
             await tx.$executeRaw `
         UPDATE dapodik.gtks 
-        SET qr_token = ${cleanDomain} || '/' || ptk_id::text
+        SET qr_token = ${sekolahId} || '/' || ptk_id::text
         WHERE sekolah_id = ${sekolahId}::uuid
       `;
             return updatedKey;

@@ -350,10 +350,6 @@ export class SyncService {
   async syncPesertaDidik(sekolahId: string, dataRows: any[]) {
     let successCount = 0;
     
-    // Ambil domain sekolah untuk auto-generate qr_token
-    const appKey = await this.prisma.appKey.findUnique({ where: { sekolah_id: sekolahId } });
-    const domain = appKey?.domain?.replace(/\/+$/, '') || '';
-
     // Pre-fetch valid agama IDs to avoid FK constraint violations
     const validAgamaRows = await this.prisma.agama.findMany({ select: { agama_id: true } });
     const validAgamaIds = new Set(validAgamaRows.map(a => a.agama_id));
@@ -362,8 +358,8 @@ export class SyncService {
       if (!p.peserta_didik_id) continue;
 
       let qr_token = p.qr_token || null;
-      if (!qr_token && domain) {
-        qr_token = `${domain}/${p.peserta_didik_id}`;
+      if (!qr_token || qr_token.startsWith('http://') || qr_token.startsWith('https://')) {
+        qr_token = `${sekolahId}/${p.peserta_didik_id}`;
       }
 
       const rpd = p.registrasi_peserta_didik || {};
@@ -517,10 +513,6 @@ export class SyncService {
   async syncGtk(sekolahId: string, dataRows: any[]) {
     let successCount = 0;
 
-    // Ambil domain sekolah untuk auto-generate qr_token
-    const appKey = await this.prisma.appKey.findUnique({ where: { sekolah_id: sekolahId } });
-    const domain = appKey?.domain?.replace(/\/+$/, '') || '';
-
     // Pre-fetch valid FK IDs to avoid FK constraint violations (sama seperti pola syncPesertaDidik)
     const [validAgamaRows, validJenisPtkRows, validJabatanPtkRows, validStatusKepegawaianRows, validSumberGajiRows] = await Promise.all([
       this.prisma.agama.findMany({ select: { agama_id: true } }),
@@ -540,10 +532,10 @@ export class SyncService {
     for (const g of dataRows) {
       if (!g.ptk_id) continue;
 
-      // Preserve existing qr_token or generate from domain
+      // Preserve existing qr_token or generate with sekolah_id/uuid format
       let qr_token = g.qr_token || null;
-      if (!qr_token && domain) {
-        qr_token = `${domain}/${g.ptk_id}`;
+      if (!qr_token || qr_token.startsWith('http://') || qr_token.startsWith('https://')) {
+        qr_token = `${sekolahId}/${g.ptk_id}`;
       }
 
       // ptk_terdaftar data (nested dari main.js)

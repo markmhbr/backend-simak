@@ -368,16 +368,14 @@ let SyncService = SyncService_1 = class SyncService {
     }
     async syncPesertaDidik(sekolahId, dataRows) {
         let successCount = 0;
-        const appKey = await this.prisma.appKey.findUnique({ where: { sekolah_id: sekolahId } });
-        const domain = appKey?.domain?.replace(/\/+$/, '') || '';
         const validAgamaRows = await this.prisma.agama.findMany({ select: { agama_id: true } });
         const validAgamaIds = new Set(validAgamaRows.map(a => a.agama_id));
         for (const p of dataRows) {
             if (!p.peserta_didik_id)
                 continue;
             let qr_token = p.qr_token || null;
-            if (!qr_token && domain) {
-                qr_token = `${domain}/${p.peserta_didik_id}`;
+            if (!qr_token || qr_token.startsWith('http://') || qr_token.startsWith('https://')) {
+                qr_token = `${sekolahId}/${p.peserta_didik_id}`;
             }
             const rpd = p.registrasi_peserta_didik || {};
             const rawAgamaId = p.agama_id ? Number(p.agama_id) : null;
@@ -510,8 +508,6 @@ let SyncService = SyncService_1 = class SyncService {
     }
     async syncGtk(sekolahId, dataRows) {
         let successCount = 0;
-        const appKey = await this.prisma.appKey.findUnique({ where: { sekolah_id: sekolahId } });
-        const domain = appKey?.domain?.replace(/\/+$/, '') || '';
         const [validAgamaRows, validJenisPtkRows, validJabatanPtkRows, validStatusKepegawaianRows, validSumberGajiRows] = await Promise.all([
             this.prisma.agama.findMany({ select: { agama_id: true } }),
             this.prisma.jenis_ptk.findMany({ select: { jenis_ptk_id: true } }),
@@ -529,8 +525,8 @@ let SyncService = SyncService_1 = class SyncService {
             if (!g.ptk_id)
                 continue;
             let qr_token = g.qr_token || null;
-            if (!qr_token && domain) {
-                qr_token = `${domain}/${g.ptk_id}`;
+            if (!qr_token || qr_token.startsWith('http://') || qr_token.startsWith('https://')) {
+                qr_token = `${sekolahId}/${g.ptk_id}`;
             }
             const pt = g.ptk_terdaftar || {};
             const rawAgamaId = this.parseNumber(g.agama_id);

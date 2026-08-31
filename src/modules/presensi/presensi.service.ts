@@ -801,12 +801,22 @@ export class PresensiService {
     const wibDate = new Date(new Date().getTime() + 7 * 60 * 60 * 1000);
     const dateOnly = new Date(wibDate.toISOString().split('T')[0]);
 
-    // 1. Cari di Peserta Didik (QR Token, NISN, NIK)
+    let cleanToken = token ? token.trim() : '';
+    if (cleanToken.includes('/p/')) {
+      cleanToken = cleanToken.split('/p/')[1];
+    } else if (cleanToken.includes('/public-profile/')) {
+      cleanToken = cleanToken.split('/public-profile/')[1];
+    }
+    const tokenUuid = cleanToken.includes('/') ? cleanToken.split('/').pop() : cleanToken;
+
+    // 1. Cari di Peserta Didik (QR Token, NISN, NIK, ID)
     const pd = await this.prisma.pesertaDidik.findFirst({
       where: {
         sekolah_id: sekolahId,
         OR: [
           { qr_token: token },
+          { qr_token: cleanToken },
+          ...(tokenUuid ? [{ qr_token: { endsWith: tokenUuid } }, { peserta_didik_id: tokenUuid }] : []),
           { nisn: token },
           { nik: token },
         ],
@@ -858,12 +868,14 @@ export class PresensiService {
       return { type: 'pd', data: pdMapped, activeIzinKeluar };
     }
 
-    // 2. Cari di GTK (QR Token, NUPTK, NIK, NIP)
+    // 2. Cari di GTK (QR Token, NUPTK, NIK, NIP, ID)
     const rawGtk = await this.prisma.gtk.findFirst({
       where: {
         sekolah_id: sekolahId,
         OR: [
           { qr_token: token },
+          { qr_token: cleanToken },
+          ...(tokenUuid ? [{ qr_token: { endsWith: tokenUuid } }, { ptk_id: tokenUuid }] : []),
           { nuptk: token },
           { nik: token },
           { nip: token },
@@ -932,12 +944,22 @@ export class PresensiService {
     const wibDate = new Date(new Date().getTime() + 7 * 60 * 60 * 1000);
     const dateOnly = new Date(wibDate.toISOString().split('T')[0]);
 
-    // 1. Cari di Peserta Didik (QR Token, NISN, NIK)
+    let cleanToken = token ? token.trim() : '';
+    if (cleanToken.includes('/p/')) {
+      cleanToken = cleanToken.split('/p/')[1];
+    } else if (cleanToken.includes('/public-profile/')) {
+      cleanToken = cleanToken.split('/public-profile/')[1];
+    }
+    const tokenUuid = cleanToken.includes('/') ? cleanToken.split('/').pop() : cleanToken;
+
+    // 1. Cari di Peserta Didik (QR Token, NISN, NIK, ID)
     const pd = await this.prisma.pesertaDidik.findFirst({
       where: {
         sekolah_id: sekolahId,
         OR: [
           { qr_token: token },
+          { qr_token: cleanToken },
+          ...(tokenUuid ? [{ qr_token: { endsWith: tokenUuid } }, { peserta_didik_id: tokenUuid }] : []),
           { nisn: token },
           { nik: token },
         ],
@@ -1035,12 +1057,14 @@ export class PresensiService {
       };
     }
 
-    // 2. Cari di GTK (QR Token, NUPTK, NIK, NIP)
+    // 2. Cari di GTK (QR Token, NUPTK, NIK, NIP, ID)
     const gtk = await this.prisma.gtk.findFirst({
       where: {
         sekolah_id: sekolahId,
         OR: [
           { qr_token: token },
+          { qr_token: cleanToken },
+          ...(tokenUuid ? [{ qr_token: { endsWith: tokenUuid } }, { ptk_id: tokenUuid }] : []),
           { nuptk: token },
           { nik: token },
           { nip: token },
