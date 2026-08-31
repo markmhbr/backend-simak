@@ -2953,6 +2953,7 @@ export class DapodikService {
 
     const querySelect = {
       ptk_id: true,
+      sekolah_id: true,
       nama: true,
       nuptk: true,
       nik: true,
@@ -3217,6 +3218,9 @@ export class DapodikService {
           nip: item.nip,
           foto: item.foto ? (item.foto.startsWith('http') ? `${item.foto}${item.foto.includes('?') ? '&' : '?'}t=${Date.now()}` : `${appUrl}${item.foto}?t=${Date.now()}`) : null,
           qr_token: item.qr_token,
+          qr_url: item.qr_token
+            ? (item.qr_token.startsWith('http') ? item.qr_token : `${appUrl.replace(/\/+$/, '')}/p/${item.qr_token}`)
+            : (item.sekolah_id && item.ptk_id ? `${appUrl.replace(/\/+$/, '')}/p/${item.sekolah_id}/${item.ptk_id}` : null),
           ptk_induk: item.ptk_induk,
           jenis_kelamin: item.jenis_kelamin,
           tempat_lahir: item.tempat_lahir,
@@ -3429,6 +3433,9 @@ export class DapodikService {
       const resolved = await this.referenceService.resolveGtk(gtk);
       return {
         ...resolved,
+        qr_url: gtk.qr_token
+          ? (gtk.qr_token.startsWith('http') ? gtk.qr_token : `${appUrl.replace(/\/+$/, '')}/p/${gtk.qr_token}`)
+          : (gtk.sekolah_id && gtk.ptk_id ? `${appUrl.replace(/\/+$/, '')}/p/${gtk.sekolah_id}/${gtk.ptk_id}` : null),
         riwayat_pendidikan_formal: mappedRiwayat,
         pembelajaran: mappedPembelajaran,
         tugas_tambahan: mappedTugasTambahan,
