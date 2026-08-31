@@ -20,7 +20,7 @@ export class AppController {
    * Universal Public Profile Redirect:
    * /p/:sekolahId/:id -> Cari domain sekolah di AppKey -> Redirect (302) ke ${domainSekolah}/public-profile/:id
    */
-  @Get('p/:sekolahId/:id')
+  @Get(['p/:sekolahId/:id', 'api/p/:sekolahId/:id'])
   async redirectProfile(
     @Param('sekolahId') sekolahId: string,
     @Param('id') id: string,
@@ -60,7 +60,7 @@ export class AppController {
     return res.redirect(302, `${fallbackUrl}/public-profile/${id}`);
   }
 
-  @Get('p/:id')
+  @Get(['p/:id', 'api/p/:id'])
   async redirectProfileById(
     @Param('id') id: string,
     @Res() res: Response,

@@ -107,7 +107,7 @@ __decorate([
     __metadata("design:returntype", String)
 ], AppController.prototype, "getHello", null);
 __decorate([
-    (0, common_1.Get)('p/:sekolahId/:id'),
+    (0, common_1.Get)(['p/:sekolahId/:id', 'api/p/:sekolahId/:id']),
     __param(0, (0, common_1.Param)('sekolahId')),
     __param(1, (0, common_1.Param)('id')),
     __param(2, (0, common_1.Res)()),
@@ -116,7 +116,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppController.prototype, "redirectProfile", null);
 __decorate([
-    (0, common_1.Get)('p/:id'),
+    (0, common_1.Get)(['p/:id', 'api/p/:id']),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Res)()),
     __metadata("design:type", Function),

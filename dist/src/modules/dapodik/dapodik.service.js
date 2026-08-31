@@ -1404,6 +1404,7 @@ let DapodikService = class DapodikService {
                 return {
                     ...item,
                     foto: item.foto ? (item.foto.startsWith('http') ? `${item.foto}${item.foto.includes('?') ? '&' : '?'}t=${Date.now()}` : `${appUrl}${item.foto}?t=${Date.now()}`) : null,
+                    qr_url: item.qr_token ? (item.qr_token.startsWith('http') ? item.qr_token : `${appUrl.replace(/\/+$/, '')}/p/${item.qr_token}`) : (item.sekolah_id && item.peserta_didik_id ? `${appUrl.replace(/\/+$/, '')}/p/${item.sekolah_id}/${item.peserta_didik_id}` : null),
                     nama_rombel: rombel?.nama || null,
                     tingkat_pendidikan_id: rombel?.tingkat_pendidikan_id ? String(rombel.tingkat_pendidikan_id) : null,
                     agama_id_str: item.agama?.nama || null,
@@ -1490,6 +1491,7 @@ let DapodikService = class DapodikService {
                 return {
                     ...item,
                     foto: item.foto ? (item.foto.startsWith('http') ? `${item.foto}${item.foto.includes('?') ? '&' : '?'}t=${Date.now()}` : `${appUrl}${item.foto}?t=${Date.now()}`) : null,
+                    qr_url: item.qr_token ? (item.qr_token.startsWith('http') ? item.qr_token : `${appUrl.replace(/\/+$/, '')}/p/${item.qr_token}`) : (item.sekolah_id && item.peserta_didik_id ? `${appUrl.replace(/\/+$/, '')}/p/${item.sekolah_id}/${item.peserta_didik_id}` : null),
                     nama_rombel: rombel?.nama || null,
                     tingkat_pendidikan_id: rombel?.tingkat_pendidikan_id ? String(rombel.tingkat_pendidikan_id) : null,
                     agama_id_str: item.agama?.nama || null,
@@ -2791,6 +2793,7 @@ let DapodikService = class DapodikService {
                     nip: item.nip,
                     foto: item.foto ? (item.foto.startsWith('http') ? `${item.foto}${item.foto.includes('?') ? '&' : '?'}t=${Date.now()}` : `${appUrl}${item.foto}?t=${Date.now()}`) : null,
                     qr_token: item.qr_token,
+                    qr_url: item.qr_token ? (item.qr_token.startsWith('http') ? item.qr_token : `${appUrl.replace(/\/+$/, '')}/p/${item.qr_token}`) : (item.sekolah_id && item.ptk_id ? `${appUrl.replace(/\/+$/, '')}/p/${item.sekolah_id}/${item.ptk_id}` : null),
                     ptk_induk: item.ptk_induk,
                     jenis_kelamin: item.jenis_kelamin,
                     tempat_lahir: item.tempat_lahir,
@@ -3295,6 +3298,7 @@ let DapodikService = class DapodikService {
             return {
                 ...resolved,
                 foto: formattedFoto,
+                qr_url: student.qr_token ? (student.qr_token.startsWith('http') ? student.qr_token : `${appUrl.replace(/\/+$/, '')}/p/${student.qr_token}`) : (student.sekolah_id && student.peserta_didik_id ? `${appUrl.replace(/\/+$/, '')}/p/${student.sekolah_id}/${student.peserta_didik_id}` : null),
                 uploaded_docs: uploadedDocs,
                 desa_kelurahan: resolved.desa_kelurahan || wilayahHierarchy.desa,
                 kecamatan: wilayahHierarchy.kecamatan,
